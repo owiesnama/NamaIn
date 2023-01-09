@@ -14,6 +14,6 @@ class BaseModel extends Model
     {
         $columns = Schema::getColumnListing($this->getTable());
         $columns = array_merge($columns, $this->searchableRelationsAttributes);
-        return $query->whereLike($columns, $searchTerm);
+        return $query->when($searchTerm,fn($query) => $query->whereLike($columns, $searchTerm));
     }
 }

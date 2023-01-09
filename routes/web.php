@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CustomersController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -32,4 +33,23 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
+    Route::get('/items', function () {
+        return Inertia::render('Items');
+    })->name('items');
+
+    Route::get('/customers', [CustomersController::class, 'index'])->name('customers');
+    Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');
+
+    Route::get('/purchases', function () {
+        return Inertia::render('Purchases');
+    })->name('purchases');
+
+    Route::get('/storages', function () {
+        return Inertia::render('Storages');
+    })->name('storages');
+
+    Route::get('/sales', function () {
+        return Inertia::render('Sales');
+    })->name('sales');
 });
