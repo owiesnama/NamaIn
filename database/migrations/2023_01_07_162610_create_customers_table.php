@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCustomersTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -17,7 +17,7 @@ class CreateCustomersTable extends Migration
             $table->id();
             $table->string('name', 200);
             $table->longText('address')->nullable();
-            $table->string('phone_number', 200);
+            $table->string('phone', 200);
             $table->timestamps();
         });
     }
@@ -31,4 +31,4 @@ class CreateCustomersTable extends Migration
     {
         Schema::dropIfExists('customers');
     }
-}
+};

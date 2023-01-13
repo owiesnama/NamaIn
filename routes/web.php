@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\ItemsController;
+use App\Http\Controllers\PurchasesController;
+use App\Http\Controllers\SalesController;
+use App\Http\Controllers\StoragesController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -33,23 +37,9 @@ Route::middleware([
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
-
-    Route::get('/items', function () {
-        return Inertia::render('Items');
-    })->name('items');
-
-    Route::get('/customers', [CustomersController::class, 'index'])->name('customers');
-    Route::post('/customers', [CustomersController::class, 'store'])->name('customers.store');
-
-    Route::get('/purchases', function () {
-        return Inertia::render('Purchases');
-    })->name('purchases');
-
-    Route::get('/storages', function () {
-        return Inertia::render('Storages');
-    })->name('storages');
-
-    Route::get('/sales', function () {
-        return Inertia::render('Sales');
-    })->name('sales');
+    Route::resource('/customers', CustomersController::class);
+    Route::resource('/storages', StoragesController::class);
+    Route::resource('/items', ItemsController::class);
+    Route::resource('/purchases', PurchasesController::class);
+    Route::resource('/sales', SalesController::class);
 });

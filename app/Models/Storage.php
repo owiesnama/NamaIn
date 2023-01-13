@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Warehouse extends BaseModel
+class Stroage extends BaseModel
 {
     use HasFactory;
     /**
@@ -19,7 +19,7 @@ class Warehouse extends BaseModel
 
     public function stock()
     {
-        return $this->hasMany(ItemsWarehouse::class);
+        return $this->hasMany(ItemsStorage::class);
     }
 
     public function addStock($stock)

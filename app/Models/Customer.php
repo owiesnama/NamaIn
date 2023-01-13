@@ -10,7 +10,7 @@ class Customer extends BaseModel
 {
     use HasFactory;
    
-    protected $fillable = ['name','address','phone_number'];
+    protected $fillable = ['name','address','phone'];
 
 
 }

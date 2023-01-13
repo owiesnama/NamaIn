@@ -8,8 +8,8 @@ class ItemPurchasement extends BaseModel
 {
     use HasFactory;
 
-    public function warehouse()
+    public function stroage()
     {
-        return $this->belongsTo(Warehouse::class);
+        return $this->belongsTo(Stroage::class);
     }
 }

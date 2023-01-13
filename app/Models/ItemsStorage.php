@@ -19,11 +19,11 @@ class ItemsWarehouse extends BaseModel
 
     public function item()
     {
-        return $this->belongsTo(\App\Models\Item::class);
+        return $this->belongsTo(Item::class);
     }
 
-    public function warehouse()
+    public function storage()
     {
-        return $this->belongsTo(\App\Models\Warehouse::class);
+        return $this->belongsTo(Stroage::class);
     }
 }

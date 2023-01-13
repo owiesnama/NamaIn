@@ -4,12 +4,13 @@
     import { Inertia } from "@inertiajs/inertia";
     import { debounce } from "lodash";
     import NewCustomer from "@/Components/Customers/NewCustomer.vue";
+    import Pagination from "@/Shared/Pagination.vue";
     defineProps({
         customers: Object,
     });
 
     let search = ref("");
-
+    let isCreatingCutsomer = ref(false);
     watch(
         search,
         debounce(function (value) {
@@ -30,28 +31,33 @@
                     v-model="search"
                     type="text"
                     placeholder="Search ..."
-                    class="mb-4 rounded p-2"
+                    class="mb-4 rounded-lg p-2 border border-gray-200 w-64"
                 />
                 <div
                     class="relative w-full px-4 max-w-full flex-grow flex-1 text-right"
                 >
                     <button
-                        class="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-4 py-3 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                        class="text-xs font-bold uppercase px-4 py-3 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                         type="button"
-                    >
-                        New Customer
-                    </button>
+                        :class="[
+                            isCreatingCutsomer
+                                ? 'border border-gray-200 text-gray-400'
+                                : 'text-white bg-indigo-500 active:bg-indigo-600',
+                        ]"
+                        @click="isCreatingCutsomer = !isCreatingCutsomer"
+                        v-text="isCreatingCutsomer ? 'Cancel' : 'New Customer'"
+                    ></button>
                 </div>
             </div>
-            <NewCustomer></NewCustomer>
+            <NewCustomer v-if="isCreatingCutsomer"></NewCustomer>
             <div class="w-full mb-12 xl:mb-0 mx-auto">
                 <div
-                    class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-sm rounded-lg"
+                    class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-sm rounded-lg p-4"
                 >
-                    <div class="rounded-t mb-0 px-4 py-3 border-0">
+                    <div class="rounded-t mb-0 py-3 border-0">
                         <div class="flex flex-wrap items-center">
                             <div
-                                class="relative w-full px-4 max-w-full flex-grow flex-1"
+                                class="relative w-full max-w-full flex-grow flex-1"
                             >
                                 <h3
                                     class="font-semibold text-base text-gray-700"
@@ -63,40 +69,53 @@
                     </div>
                     <div class="block w-full overflow-x-auto">
                         <table
-                            class="items-center bg-transparent w-full border-collapse"
+                            class="items-center bg-transparent w-full border-separate"
                         >
-                            <thead>
+                            <thead >
                                 <tr>
                                     <th
-                                        class="px-6 bg-gray-100 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
+                                        class="px-6 rounded-tl-md text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-1 border-r-0 whitespace-nowrap font-semibold text-left"
                                     >
                                         Name
                                     </th>
                                     <th
-                                        class="px-6 bg-gray-100 text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left"
+                                        class="px-6 rounded-tr-md text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-1 whitespace-nowrap font-semibold text-left"
                                     >
                                         Phone
                                     </th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr
-                                    v-for="customer in customers"
-                                    :key="customer.id"
-                                >
-                                    <th
-                                        class="px-6 align-middle text-xs whitespace-nowrap p-4 text-left text-gray-700"
-                                        v-text="customer.name"
-                                    ></th>
-                                    <td
-                                        class="px-6 align-middle text-xs whitespace-nowrap p-4"
-                                        v-text="customer.phone_number"
-                                    ></td>
-                                </tr>
+                                <template v-if="customers.data">
+                                    <tr
+                                        v-for="customer in customers.data"
+                                        :key="customer.id"
+                                    >
+                                        <th
+                                            class="px-6 text-xs border-gray-100 py-3 text-left border border-l-1 border-r-0"
+                                            v-text="customer.name"
+                                        ></th>
+                                        <td
+                                            class="px-6 text-xs border-gray-100 py-3 text-left border  border-l-0 border-r-1"
+                                            v-text="customer.phone"
+                                        ></td>
+                                    </tr>
+                                </template>
+                                <template v-else>
+                                    <tr>
+                                        <td
+                                            colspan="2"
+                                            class="text-center text-sm leading-7 p-4 text-gray-600"
+                                        >
+                                            No Customers available
+                                        </td>
+                                    </tr>
+                                </template>
                             </tbody>
                         </table>
                     </div>
                 </div>
+                <Pagination :links="customers.links"></Pagination>
             </div>
         </div>
     </AppLayout>

@@ -9,22 +9,25 @@ class CustomersController extends Controller
     public function index()
     {
         return inertia('Customers', [
-            'customers' => Customer::search(request('search'))->latest()->get(),
+            'customers' => Customer::search(request('search'))
+                ->latest()
+                ->paginate(10)
+                ->withQueryString(),
         ]);
     }
 
     public function store()
     {
-        $attributes = request()->validate([
-            'name' => 'required',
-            'phone' => 'required|numeric|min:10',
-        ]);
-        
-        $customer = Customer::create([
-            'name' => $attributes['name'],
-            'phone_number' => $attributes['phone'],
-        ]);
+        Customer::create(
+            request()->validate([
+                'name' => 'required',
+                'phone' => 'required|numeric|min:10',
+            ])
+        );
 
-        return inertia('Customers')->with('success','Customer has been added successfully');
+        return back()->with('notification', [
+            'title' => 'Customer Created 🎉',
+            'message' => 'Customer created successfully'
+        ]);
     }
 }

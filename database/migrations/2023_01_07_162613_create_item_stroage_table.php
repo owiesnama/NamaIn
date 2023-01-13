@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateItemsWarehousesTable extends Migration
+return new class extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateItemsWarehousesTable extends Migration
      */
     public function up()
     {
-        Schema::disableForeignKeyConstraints();
-
-        Schema::create('items_warehouses', function (Blueprint $table) {
+        Schema::create('item_storage', function (Blueprint $table) {
             $table->id();
             $table->foreignId('item_id')->constrained();
-            $table->foreignId('warehouse_id')->constrained()->onDelete("cascade");
+            $table->foreignId('storage_id')->constrained()->onDelete("cascade");
             $table->string('quantity');
             $table->timestamps();
         });
@@ -33,6 +31,6 @@ class CreateItemsWarehousesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('items_warehouses');
+        Schema::dropIfExists('item_storage');
     }
-}
+};
