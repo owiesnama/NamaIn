@@ -13,14 +13,15 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('items', function (Blueprint $table) {
+        Schema::create('product_storage', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 200);
-            $table->unsignedInteger('price');
-            $table->unsignedInteger('cost')->default(0);
-            $table->timestamp('expire_date')->nullable();
+            $table->foreignId('product_id')->constrained();
+            $table->foreignId('storage_id')->constrained()->onDelete("cascade");
+            $table->string('quantity');
             $table->timestamps();
         });
+
+        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('items');
+        Schema::dropIfExists('product_storage');
     }
 };

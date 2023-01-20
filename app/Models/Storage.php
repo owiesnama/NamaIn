@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Stroage extends BaseModel
+class Storage extends BaseModel
 {
     use HasFactory;
     /**
@@ -13,20 +13,20 @@ class Stroage extends BaseModel
      * @var array
      */
     protected $fillable = [
-        'title',
-        'Address',
+        'name',
+        'address',
     ];
 
     public function stock()
     {
-        return $this->hasMany(ItemsStorage::class);
+        return $this->hasMany(ProductStorage::class);
     }
 
     public function addStock($stock)
     {
-        $stockItem = $this->stock()->firstOrNew(['item_id' => $stock->item_id]);
-        $stockItem->quantity += $stock->quantity;
-        $stockItem->save();
+        $product = $this->stock()->firstOrNew(['product_id' => $stock->product_id]);
+        $product->quantity += $stock->quantity;
+        $product->save();
         return $this;
     }
     public function toSearchableArray()

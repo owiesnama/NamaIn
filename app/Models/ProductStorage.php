@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 
-class ItemsWarehouse extends BaseModel
+class ProductStorage extends BaseModel
 {
     use HasFactory;
 
@@ -14,12 +14,12 @@ class ItemsWarehouse extends BaseModel
 
     public function getTotalCostAttribute()
     {
-        return  $this->item ? $this->quantity * $this->item->cost : 0 ;
+        return  $this->product ? $this->quantity * $this->product->cost : 0 ;
     }
 
-    public function item()
+    public function product()
     {
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Product::class);
     }
 
     public function storage()

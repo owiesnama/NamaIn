@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('storages', function (Blueprint $table) {
             $table->id();
-            $table->string('title', 400);
+            $table->string('name', 400);
             $table->longText('Address');
             $table->timestamps();
         });

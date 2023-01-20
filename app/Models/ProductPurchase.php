@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class ItemPurchasement extends BaseModel
+class ProductPurchase extends BaseModel
 {
     use HasFactory;
 

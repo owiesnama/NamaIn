@@ -11,19 +11,19 @@ class Purchasement extends BaseModel
     use HasFactory;
 
     protected $searchableRelationsAttributes = [
-        'items.name',
+        'products.name',
         'vendor.name'
     ];
     
     protected $casts = [
-        'items' => AsCollection::class
+        'products' => AsCollection::class
     ];
 
-    public function items()
+    public function products()
     {
-        return $this->belongsToMany(Item::class,'item_purchasements')->withPivot([
+        return $this->belongsToMany(Product::class,'product_purchase')->withPivot([
             'quantity',
-            'warehouse_id',
+            'storage_id',
         ]);
     }
 
