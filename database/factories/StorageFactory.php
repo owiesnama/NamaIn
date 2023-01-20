@@ -3,8 +3,7 @@
 namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use App\Models\Storages;
+use App\Models\Storage;
 
 class StorageFactory extends Factory
 {
@@ -13,7 +12,7 @@ class StorageFactory extends Factory
      *
      * @var string
      */
-    protected $model = Storages::class;
+    protected $model = Storage::class;
 
     /**
      * Define the model's default state.
@@ -23,8 +22,8 @@ class StorageFactory extends Factory
     public function definition()
     {
         return [
-            'title' => $this->faker->sentence(4),
-            'Address' => $this->faker->text,
+            'name' => $this->faker->sentence(4),
+            'address' => $this->faker->text,
         ];
     }
 }

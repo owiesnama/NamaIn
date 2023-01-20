@@ -13,15 +13,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('item_storage', function (Blueprint $table) {
+        Schema::create('product_purchase', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_id')->constrained();
-            $table->foreignId('storage_id')->constrained()->onDelete("cascade");
-            $table->string('quantity');
+            $table->unsignedBigInteger('purchase_id');
+            $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('stroage_id');
+            $table->bigInteger('quantity');
             $table->timestamps();
         });
-
-        Schema::enableForeignKeyConstraints();
     }
 
     /**
@@ -31,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('item_storage');
+        Schema::dropIfExists('product_purchase');
     }
 };
