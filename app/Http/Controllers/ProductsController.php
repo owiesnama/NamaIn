@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-class ItemsController extends Controller
+class ProductsController extends Controller
 {
     public function index()
     {
-        return inertia('Items');
+        return inertia('Products');
     }
 }

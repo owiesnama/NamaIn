@@ -20,7 +20,7 @@ class Product extends BaseModel
 
     public function purchasements()
     {
-        return $this->belongsToMany(Purchasement::class);
+        return $this->belongsToMany(Purchase::class);
     }
 
 }

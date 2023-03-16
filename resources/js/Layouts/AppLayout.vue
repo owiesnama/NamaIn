@@ -63,10 +63,10 @@
                                     Dashboard
                                 </NavLink>
                                 <NavLink
-                                    :href="route('items.index')"
-                                    :active="route().current('items.index')"
+                                    :href="route('products.index')"
+                                    :active="route().current('products.index')"
                                 >
-                                    Items
+                                    Products
                                 </NavLink>
                                 <NavLink
                                     :href="route('customers.index')"
