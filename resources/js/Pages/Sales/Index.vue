@@ -14,10 +14,10 @@
 </script>
 
 <template>
-    <AppLayout title="Purchases">
+    <AppLayout title="Sales">
         <template #header>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                Purchases
+                Sales
             </h2>
         </template>
 
@@ -25,9 +25,9 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <Link
                     as="button"
-                    :href="route('purchases.create')"
+                    :href="route('sales.create')"
                     class="border py-3 px-6 rounded-lg bg-gray-50 font-semibold hover:bg-gray-100"
-                    >New Purchase Invoice</Link
+                    >New Sale</Link
                 >
                 <div
                     class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
@@ -50,7 +50,7 @@
                     class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
                 >
                     <p class="text-gray-700">
-                        <strong>Opps</strong>, Seems like there no purchases for
+                        <strong>Opps</strong>, Seems like there no sales for
                         now
                     </p>
                 </div>

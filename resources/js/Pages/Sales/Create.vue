@@ -23,11 +23,11 @@
             total: totalCost,
             products: purchases,
         });
-        useForm(form).post(route("purchases.store"));
+        useForm(form).post(route("sales.store"));
     };
 </script>
 <template>
-    <AppLayout title="New Purchase">
+    <AppLayout title="New Sales">
         <div class="container mx-auto">
             <form @submit.prevent="submit">
                 <Panel class="mt-4">
@@ -105,7 +105,7 @@
                         type="submit"
                         class="text-xs font-bold uppercase px-4 py-3 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 text-white bg-indigo-500 active:bg-indigo-600"
                     >
-                        Purchase
+                        Sale
                     </button>
                 </div>
             </form>

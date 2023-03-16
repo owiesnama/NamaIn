@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateInvoiceRequest;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Storage;
@@ -11,29 +13,22 @@ class PurchasesController extends Controller
 {
     public function index()
     {
+        return inertia('Purchases/Index', [
+            'invoices' => Invoice::where('invoicable_type', Vendor::class)->with('details')->paginate(10)->withQueryString()
+        ]);
+    }
+    public function create()
+    {
         return inertia('Purchases/Create', [
-            'storages' => Storage::all(),
             'products' => Product::all(),
         ]);
     }
 
-    public function store()
+    public function store(CreateInvoiceRequest $request)
     {
-        $attributes = request()->validate([
-            'total' => 'required|integer',
-            'products.*.product' => 'integer|required',
-            'products.*.quantity' => 'integer|required',
-            'products.*.price' => 'integer|required',
-            'products.*.storage' => 'integer|required',
-        ]);
-        $vendor = Vendor::firstOrCreate([
-            'name' => 'Random',
-            'address' => 'no-address',
-        ]);
-        $purchase = Purchase::create([
-            'vendor_id' => $vendor->id,
-            'total_cost' => $attributes['total']
-        ]);
-        $purchase->addStock($attributes['products']);
+        Invoice::purchase(collect($request->all()))
+            ->save();
+
+        return redirect()->route('purchases.index');
     }
 }
