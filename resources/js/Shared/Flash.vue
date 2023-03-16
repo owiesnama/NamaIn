@@ -1,5 +1,5 @@
 <script setup>
-    import { usePage } from "@inertiajs/inertia-vue3";
+    import { usePage } from "@inertiajs/vue3";
     import { ref, watch,computed } from "vue";
     const show = ref(true);
     const props = computed(() => usePage().props)

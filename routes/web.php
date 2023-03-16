@@ -36,6 +36,7 @@ Route::middleware([
     Route::resource('/customers', CustomersController::class);
     Route::resource('/storages', StoragesController::class);
     Route::resource('/products', ProductsController::class);
+    Route::post('/products/import', [ProductsController::class, 'import'])->name('products.import');
     Route::resource('/purchases', PurchasesController::class);
     Route::resource('/sales', SalesController::class);
 });

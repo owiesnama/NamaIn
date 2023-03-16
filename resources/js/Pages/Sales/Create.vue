@@ -3,7 +3,7 @@
     import Panel from "@/Shared/Panel.vue";
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { reactive, computed } from "vue";
-    import { useForm } from "@inertiajs/inertia-vue3";
+    import { useForm } from "@inertiajs/vue3";
     defineProps(["storages", "products"]);
     let purchases = reactive([new PurchaseProduct()]);
     const newRow = () => {

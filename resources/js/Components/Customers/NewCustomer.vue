@@ -1,6 +1,6 @@
 <script setup>
     import Panel from "@/Shared/Panel.vue";
-    import { useForm } from "@inertiajs/inertia-vue3";
+    import { useForm } from "@inertiajs/vue3";
     import ValidationError from "../../Shared/ValidationError.vue";
     const emit = defineEmits(["customer:saved"]);
 

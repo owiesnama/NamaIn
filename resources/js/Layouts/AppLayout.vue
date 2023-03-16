@@ -1,7 +1,6 @@
 <script setup>
     import { ref } from "vue";
-    import { Inertia } from "@inertiajs/inertia";
-    import { Head, Link } from "@inertiajs/inertia-vue3";
+    import { router, Head, Link } from "@inertiajs/vue3";
     import ApplicationMark from "@/Components/ApplicationMark.vue";
     import Banner from "@/Components/Banner.vue";
     import Dropdown from "@/Components/Dropdown.vue";
@@ -17,7 +16,7 @@
     const showingNavigationDropdown = ref(false);
 
     const switchToTeam = (team) => {
-        Inertia.put(
+        router.put(
             route("current-team.update"),
             {
                 team_id: team.id,
@@ -307,7 +306,9 @@
                                                 $page.props.jetstream
                                                     .hasApiFeatures
                                             "
-                                            :href="route('api.index-tokens.index')"
+                                            :href="
+                                                route('api.index-tokens.index')
+                                            "
                                         >
                                             API Tokens
                                         </DropdownLink>
@@ -530,7 +531,7 @@
 
             <!-- Page Content -->
             <main>
-                <Flash/>
+                <Flash />
                 <slot />
             </main>
         </div>

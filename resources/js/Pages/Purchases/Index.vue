@@ -2,7 +2,7 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import Pagination from "@/Shared/Pagination.vue";
     import InvoiceDetails from "@/Shared/InvoiceDetails.vue";
-    import { Link } from "@inertiajs/inertia-vue3";
+    import { Link } from "@inertiajs/vue3";
     import { computed } from "vue";
     const props = defineProps({
         invoices: Object,

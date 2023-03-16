@@ -4,7 +4,7 @@
     import Pagination from "@/Shared/Pagination.vue";
     import { ref, watch } from "vue";
     import { debounce } from "lodash";
-    import { Inertia } from "@inertiajs/inertia";
+    import { router } from "@inertiajs/vue3";
 
     defineProps({
         storages: Object,
@@ -14,7 +14,7 @@
     watch(
         search,
         debounce(function (value) {
-            Inertia.get(
+            router.get(
                 route('storages.index'),
                 { search: value },
                 { preserveState: true }

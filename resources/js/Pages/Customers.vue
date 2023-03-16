@@ -1,7 +1,7 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { ref, watch } from "vue";
-    import { Inertia } from "@inertiajs/inertia";
+    import { router } from "@inertiajs/vue3";
     import { debounce } from "lodash";
     import NewCustomer from "@/Components/Customers/NewCustomer.vue";
     import Panel from "@/Shared/Panel.vue";
@@ -16,7 +16,7 @@
     watch(
         search,
         debounce(function (value) {
-            Inertia.get(
+            router.get(
                 "/customers",
                 { search: value },
                 { preserveState: true }
