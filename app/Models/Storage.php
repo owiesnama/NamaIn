@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Storage extends BaseModel
 {
     use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -20,18 +21,20 @@ class Storage extends BaseModel
     public function stock()
     {
         return $this->belongsToMany(Product::class)->withPivot([
-            'quantity'
+            'quantity',
         ])->withTimestamps();
     }
 
     public function addStock($attributes)
     {
-        $stock = $this->stock()->find($attributes["product"]);
+        $stock = $this->stock()->find($attributes['product']);
         if ($stock) {
-            return $stock->pivot->increment('quantity', $attributes["quantity"]);
+            return $stock->pivot->increment('quantity', $attributes['quantity']);
         }
-        return $this->stock()->attach([$attributes["product"] => ["quantity" => $attributes["quantity"]]]);
+
+        return $this->stock()->attach([$attributes['product'] => ['quantity' => $attributes['quantity']]]);
     }
+
     public function toSearchableArray()
     {
         return [

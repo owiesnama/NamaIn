@@ -12,7 +12,7 @@ class SalesController extends Controller
     public function index()
     {
         return inertia('Sales/Index', [
-            'invoices' => Invoice::where('invoicable_type', Customer::class)->with('details')->paginate(10)->withQueryString()
+            'invoices' => Invoice::where('invoicable_type', Customer::class)->with('details')->paginate(10)->withQueryString(),
         ]);
     }
 

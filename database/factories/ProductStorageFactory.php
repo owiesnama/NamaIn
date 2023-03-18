@@ -2,11 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 use App\Models\Product;
 use App\Models\ProductStorage;
 use App\Models\Storage;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductStorageFactory extends Factory
 {

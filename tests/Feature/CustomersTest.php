@@ -29,6 +29,6 @@ test('auth_users_can_create_a_new_customers', function () {
         ->assertRedirect()
         ->assertSessionHas('flash', [
             'title' => 'Customer Created 🎉',
-            'message' => 'Customer created successfully'
+            'message' => 'Customer created successfully',
         ]);
 });

@@ -24,7 +24,7 @@ test('auth_users_can_create_a_new_stroages', function () {
         'address' => 'wad madni',
     ];
     $this->post('/storages', $storageAttributes)->assertRedirect();
-    $this->assertDatabaseMissing('storages',[
+    $this->assertDatabaseMissing('storages', [
         'name' => 'Fake Storage',
         'address' => 'wad madni',
     ]);
@@ -32,19 +32,18 @@ test('auth_users_can_create_a_new_stroages', function () {
     $this->be($user)
         ->post('/storages', $storageAttributes)
         ->assertRedirect();
-        $this->assertDatabaseHas('storages',[
-            'name' => 'Fake Storage',
-            'address' => 'wad madni',
-        ]);
+    $this->assertDatabaseHas('storages', [
+        'name' => 'Fake Storage',
+        'address' => 'wad madni',
+    ]);
 });
-
 
 test('auth_users_can_update_a_storage', function () {
     /** @var TestCase $this */
     $storage = Storage::factory()->create();
     $storageAttributes = [
         'name' => 'Updated Storage',
-        'address' => 'New Address'
+        'address' => 'New Address',
     ];
     $this->put("/storages/{$storage->id}", $storageAttributes)->assertRedirect();
     $user = User::factory()->create();
@@ -53,11 +52,10 @@ test('auth_users_can_update_a_storage', function () {
         ->assertRedirect()
         ->assertSessionHas('flash', [
             'title' => 'Storage updated 🎉',
-            'message' => 'Storage updated successfully'
+            'message' => 'Storage updated successfully',
         ]);
 });
 
-test("auth_user_can_delete_a_stroge", function () {
-/** @var TestCase this */
-
+test('auth_user_can_delete_a_stroge', function () {
+    /** @var TestCase this */
 });

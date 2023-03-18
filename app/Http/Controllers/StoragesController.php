@@ -12,9 +12,10 @@ class StoragesController extends Controller
             'storages' => Storage::search(request('search'))
                 ->latest()
                 ->paginate(10)
-                ->withQueryString()
+                ->withQueryString(),
         ]);
     }
+
     public function store()
     {
         Storage::create(request()->validate([
@@ -24,9 +25,10 @@ class StoragesController extends Controller
 
         return back()->with('flash', [
             'title' => 'Storage Created 🎉',
-            'message' => 'Storage created successfully'
+            'message' => 'Storage created successfully',
         ]);
     }
+
     public function update(Storage $storage)
     {
         $attributes = request()->validate([
@@ -35,17 +37,20 @@ class StoragesController extends Controller
         ]);
 
         $storage->update($attributes);
+
         return back()->with('flash', [
             'title' => 'Storage updated 🎉',
-            'message' => 'Storage updated successfully'
+            'message' => 'Storage updated successfully',
         ]);
     }
+
     public function destory(Storage $storage)
     {
         $storage->delete();
+
         return back()->with('flash', [
             'title' => 'Storage Created 🎉',
-            'message' => 'Storage created successfully'
+            'message' => 'Storage created successfully',
         ]);
     }
 }

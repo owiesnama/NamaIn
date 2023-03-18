@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
 class Purchase extends BaseModel
 {
@@ -12,11 +11,11 @@ class Purchase extends BaseModel
 
     protected $searchableRelationsAttributes = [
         'products.name',
-        'vendor.name'
+        'vendor.name',
     ];
 
     protected $casts = [
-        'products' => AsCollection::class
+        'products' => AsCollection::class,
     ];
 
     public function products()
@@ -37,9 +36,10 @@ class Purchase extends BaseModel
         foreach ($products as $product) {
             $this->products()->attach($product['product'], [
                 'storage_id' => $product['storage'],
-                'quantity' => $product['quantity']
+                'quantity' => $product['quantity'],
             ]);
         }
+
         return $this;
     }
 }
