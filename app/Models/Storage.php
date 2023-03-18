@@ -19,15 +19,18 @@ class Storage extends BaseModel
 
     public function stock()
     {
-        return $this->hasMany(ProductStorage::class);
+        return $this->belongsToMany(Product::class)->withPivot([
+            'quantity'
+        ])->withTimestamps();
     }
 
-    public function addStock($stock)
+    public function addStock($attributes)
     {
-        $product = $this->stock()->firstOrNew(['product_id' => $stock->product_id]);
-        $product->quantity += $stock->quantity;
-        $product->save();
-        return $this;
+        $stock = $this->stock()->find($attributes["product"]);
+        if ($stock) {
+            return $stock->pivot->increment('quantity', $attributes["quantity"]);
+        }
+        return $this->stock()->attach([$attributes["product"] => ["quantity" => $attributes["quantity"]]]);
     }
     public function toSearchableArray()
     {

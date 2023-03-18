@@ -55,4 +55,10 @@ class Invoice extends Model
             ->details()
             ->createMany($products);
     }
+    public function markAsUsed($used = true)
+    {
+        $this->has_used = $used;
+        $this->save();
+        return $this;
+    }
 }

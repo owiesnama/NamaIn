@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('invoicable_id');
             $table->string('invoicable_type');
             $table->double('total');
+            $table->boolean('has_used');
             $table->timestamps();
         });
     }

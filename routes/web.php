@@ -4,6 +4,7 @@ use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoragesController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -39,4 +40,6 @@ Route::middleware([
     Route::post('/products/import', [ProductsController::class, 'import'])->name('products.import');
     Route::resource('/purchases', PurchasesController::class);
     Route::resource('/sales', SalesController::class);
+    Route::post('/stock/{storage}/add', [StockController::class, 'add']);
+    Route::delete('/stock/{storage}/deduct', [StockController::class, 'deduct']);
 });

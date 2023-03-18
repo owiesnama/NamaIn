@@ -14,7 +14,7 @@ class ProductsController extends Controller
 
     public function import()
     {
-        dd(request()->file());
-        Excel::import(new ProductImport, request()->files());
+        Excel::import(new ProductImport, request()->file('file'));
+        return back()->with('success', 'Imported successfully');
     }
 }

@@ -9,17 +9,17 @@ use Maatwebsite\Excel\Concerns\ToModel;
 class ProductImport implements ToModel
 {
     /**
-    * @param array $row
-    *
-    * @return \Illuminate\Database\Eloquent\Model|null
-    */
-    public function model(array $prodcut)
+     * @param array $row
+     *
+     * @return \Illuminate\Database\Eloquent\Model|null
+     */
+    public function model(array $row)
     {
         return new Product([
-            'name' => $prodcut['name'],
-            'price' => $prodcut['price'],
-            'cost' => $prodcut['cost'],
-            'expire_date' => Carbon::parse($prodcut['expire_date']),
+            'name' => $row[0],
+            'price' => $row[1],
+            'cost' => $row[2],
+            'expire_date' => Carbon::parse($row[3]),
         ]);
     }
 }
