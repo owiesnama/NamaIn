@@ -1,10 +1,16 @@
 <script setup>
-    defineProps({
-        cheque:{
+    import { computed } from "vue";
+
+    const props = defineProps({
+        cheque: {
             type: Object,
-            required: true
-        }
-    })
+            required: true,
+        },
+    });
+
+    let isBeyondDue = computed(() => {
+        return new Date(props.cheque.due) <= new Date();
+    });
 </script>
 <template>
     <div
@@ -20,10 +26,10 @@
                 ></i>
             </div>
             <div>
-                Due:
                 <span
-                    class="font-semibold"
-                    v-text="cheque.due"
+                    class="border rounded py-1 px-2  font-light"
+                    :class="[isBeyondDue ? 'text-red-500 border-red-400' : 'text-gray-900 border-gray-100']"
+                    v-text="cheque.due_for_humans"
                 ></span>
             </div>
         </div>

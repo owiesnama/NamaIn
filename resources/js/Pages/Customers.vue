@@ -7,6 +7,7 @@
     import Panel from "@/Shared/Panel.vue";
     import Pagination from "@/Shared/Pagination.vue";
     import { useQueryString } from "@/Composables/useQueryString";
+import TextInput from "@/Components/TextInput.vue";
 
     defineProps({
         customers: Object,
@@ -29,12 +30,11 @@
     <AppLayout title="Customers">
         <div class="container mx-auto">
             <div class="flex justify-between mt-4">
-                <input
+                <TextInput
                     v-model="search"
                     type="text"
-                    placeholder="Search ..."
-                    class="mb-4 rounded-lg p-2 border border-gray-200 w-64"
-                />
+                    placeholder="Search here ..."
+                ></TextInput>
                 <div
                     class="relative w-full px-4 max-w-full flex-grow flex-1 text-right"
                 >
@@ -53,7 +53,7 @@
             </div>
             <NewCustomer v-if="isCreatingCutsomer"></NewCustomer>
 
-            <Panel>
+            <Panel class="mt-2">
                 <div class="flex flex-wrap items-center">
                     <div class="relative w-full max-w-full flex-grow flex-1">
                         <h3 class="font-semibold text-base text-gray-700">
