@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('cheques', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('chequable_id');
-            $table->string('chequable_type');
+            $table->foreignId('chequeable_id');
+            $table->string('chequeable_type');
             $table->double('amount');
             $table->tinyInteger('type');
             $table->timestamp('due');

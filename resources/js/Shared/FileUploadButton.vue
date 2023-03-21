@@ -13,7 +13,7 @@
 <template>
     <label
         :for="id"
-        class="cursor-pointer border py-3 px-6 rounded-lg bg-gray-50 font-semibold hover:bg-gray-100"
+        class="cursor-pointer inline-flex items-center px-4 py-3 bg-gray-100 border border-gray-200  rounded font-semibold text-sm text-gray-900 uppercase tracking-widest hover:bg-gray-50 active:bg-gray-200 focus:outline-none focus:border-gray-200 focus:ring focus:ring-gray-300 disabled:opacity-25 transition"
         :class="{ 'outline-none border-blue-300 shadow-outline-blue': focused }"
         ><slot> Import </slot></label
     >

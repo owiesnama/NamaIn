@@ -91,6 +91,12 @@
                                 >
                                     Sales
                                 </NavLink>
+                                <NavLink
+                                    :href="route('cheques.index')"
+                                    :active="route().current('cheques.index')"
+                                >
+                                    Cheques
+                                </NavLink>
                             </div>
                         </div>
 
