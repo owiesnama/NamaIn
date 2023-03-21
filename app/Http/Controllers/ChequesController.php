@@ -12,7 +12,7 @@ class ChequesController extends Controller
     {
         return inertia('Cheques/Index', ['cheques' => Cheque::with('payee')
             ->search(request('search'))
-            ->when(in_array(request('chequeType'), [0, 1]), fn ($query) => $query->where('type', request('chequeType')))
+            ->when(in_array(request('chequeType'), ['0', '1'], strict: true), fn ($query) => $query->where('type', request('chequeType')))
             ->orderBy('type')->oldest('due')->get()]);
     }
 

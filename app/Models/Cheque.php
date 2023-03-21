@@ -11,8 +11,9 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 class Cheque extends BaseModel
 {
     use HasFactory;
-    public $appends = ['is_credit', 'amount_formated'];
+    public $appends = ['is_credit', 'amount_formated', 'due_for_humans'];
 
+    public $dates = ['due'];
     protected $searchableRelationsAttributes = [
         'payee.name',
     ];
@@ -28,6 +29,13 @@ class Cheque extends BaseModel
     {
         return Attribute::make(
             get: fn () => number_format($this->amount, '2') . " SDG"
+        );
+    }
+
+    public function dueForHumans(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->due->diffForHumans()
         );
     }
 
