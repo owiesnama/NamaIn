@@ -1,5 +1,6 @@
 <script setup>
-    import { useForm } from "@inertiajs/inertia-vue3";
+    import Panel from "@/Shared/Panel.vue";
+    import { useForm } from "@inertiajs/vue3";
     import ValidationError from "../../Shared/ValidationError.vue";
     const emit = defineEmits(["customer:saved"]);
 
@@ -8,10 +9,11 @@
         phone: "",
     });
 
-    const save = () => customer.post("/customers",{
-        preserveScroll: true,
-        onSuccess: () =>  customer.reset()
-    });
+    const save = () =>
+        customer.post("/customers", {
+            preserveScroll: true,
+            onSuccess: () => customer.reset(),
+        });
 </script>
 <template>
     <Transition
@@ -23,9 +25,7 @@
         leave-class="opacity-100"
         leave-to-class="opacity-0"
     >
-        <div
-            class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-sm rounded-lg p-4"
-        >
+        <Panel>
             <form
                 @submit.prevent="save"
                 class="w-full flex items-center"
@@ -75,6 +75,6 @@
                     </button>
                 </div>
             </form>
-        </div>
+        </Panel>    
     </Transition>
 </template>

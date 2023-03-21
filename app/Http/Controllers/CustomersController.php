@@ -25,9 +25,9 @@ class CustomersController extends Controller
             ])
         );
 
-        return back()->with('notification', [
+        return back()->with('flash', [
             'title' => 'Customer Created 🎉',
-            'message' => 'Customer created successfully'
+            'message' => 'Customer created successfully',
         ]);
     }
 }

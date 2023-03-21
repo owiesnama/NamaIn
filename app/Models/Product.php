@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-
 class Product extends BaseModel
 {
     use HasFactory;
@@ -20,7 +19,6 @@ class Product extends BaseModel
 
     public function purchasements()
     {
-        return $this->belongsToMany(Purchasement::class);
+        return $this->belongsToMany(Purchase::class);
     }
-
 }

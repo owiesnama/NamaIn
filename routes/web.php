@@ -1,9 +1,11 @@
 <?php
 
+use App\Http\Controllers\ChequesController;
 use App\Http\Controllers\CustomersController;
-use App\Http\Controllers\ItemsController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoragesController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -20,26 +22,24 @@ use Inertia\Inertia;
 |
 */
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
-
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    Route::get('/', function () {
+        return Inertia::render('Dashboard');
+    });
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
     Route::resource('/customers', CustomersController::class);
     Route::resource('/storages', StoragesController::class);
-    Route::resource('/items', ItemsController::class);
+    Route::resource('/products', ProductsController::class);
+    Route::post('/products/import', [ProductsController::class, 'import'])->name('products.import');
     Route::resource('/purchases', PurchasesController::class);
     Route::resource('/sales', SalesController::class);
+    Route::resource('/cheques', ChequesController::class);
+    Route::post('/stock/{storage}/add', [StockController::class, 'add']);
+    Route::delete('/stock/{storage}/deduct', [StockController::class, 'deduct']);
 });

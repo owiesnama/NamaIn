@@ -3,10 +3,9 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-
-class ProductStorage extends BaseModel
+class ProductStorage extends Pivot
 {
     use HasFactory;
 
@@ -14,7 +13,7 @@ class ProductStorage extends BaseModel
 
     public function getTotalCostAttribute()
     {
-        return  $this->product ? $this->quantity * $this->product->cost : 0 ;
+        return  $this->product ? $this->quantity * $this->product->cost : 0;
     }
 
     public function product()

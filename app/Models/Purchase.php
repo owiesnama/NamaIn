@@ -4,24 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Casts\AsCollection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Purchasement extends BaseModel
+class Purchase extends BaseModel
 {
     use HasFactory;
 
     protected $searchableRelationsAttributes = [
         'products.name',
-        'vendor.name'
+        'vendor.name',
     ];
-    
+
     protected $casts = [
-        'products' => AsCollection::class
+        'products' => AsCollection::class,
     ];
 
     public function products()
     {
-        return $this->belongsToMany(Product::class,'product_purchase')->withPivot([
+        return $this->belongsToMany(Product::class, 'product_purchase')->withPivot([
             'quantity',
             'storage_id',
         ]);
@@ -30,5 +29,17 @@ class Purchasement extends BaseModel
     public function vendor()
     {
         return $this->belongsTo(Vendor::class);
+    }
+
+    public function addStock($products)
+    {
+        foreach ($products as $product) {
+            $this->products()->attach($product['product'], [
+                'storage_id' => $product['storage'],
+                'quantity' => $product['quantity'],
+            ]);
+        }
+
+        return $this;
     }
 }

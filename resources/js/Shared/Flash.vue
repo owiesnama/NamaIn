@@ -1,5 +1,5 @@
 <script setup>
-    import { usePage } from "@inertiajs/inertia-vue3";
+    import { usePage } from "@inertiajs/vue3";
     import { ref, watch,computed } from "vue";
     const show = ref(true);
     const props = computed(() => usePage().props)
@@ -21,7 +21,7 @@
             leave-to-class="opacity-0"
         >
             <div
-                v-show="$page.props.flash.notification && show"
+                v-show="$page.props.flash && show"
                 class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
                 @mouseleave="show = false"
                 :key="new Date().getTime()"
@@ -30,32 +30,32 @@
                     <div class="flex items-start">
                         <div class="flex-shrink-0">
                             <!-- <Icon
-                                :class="'text-' + $page.props.flash.notification?.color + '-400'"
+                                :class="'text-' + $page.props.flash?.color + '-400'"
                                 :icon="icon"
                             /> -->
                         </div>
                         <div class="ml-3 w-0 flex-1 pt-0.5">
                             <template
                                 v-if="
-                                    $page.props.flash.notification?.title &&
-                                    $page.props.flash.notification?.message
+                                    $page.props.flash?.title &&
+                                    $page.props.flash?.message
                                 "
                             >
                                 <p class="text-sm font-medium text-gray-900">
-                                    {{ $page.props.flash.notification?.title }}
+                                    {{ $page.props.flash?.title }}
                                 </p>
                                 <p class="mt-1 text-sm text-gray-500">
                                     {{
-                                        $page.props.flash.notification?.message
+                                        $page.props.flash?.message
                                     }}
                                 </p>
                             </template>
                             <template v-else>
                                 <p class="text-sm font-medium text-gray-900">
                                     {{
-                                        $page.props.flash.notification
+                                        $page.props.flash
                                             ?.message ||
-                                        $page.props.flash.notification?.title
+                                        $page.props.flash?.title
                                     }}
                                 </p>
                             </template>
