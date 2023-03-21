@@ -8,11 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class Cheque extends Model
+class Cheque extends BaseModel
 {
     use HasFactory;
+    public $appends = ['is_credit', 'amount_formated'];
 
-    public $appends = ['is_credit','amount_formated'];
+    protected $searchableRelationsAttributes = [
+        'payee.name',
+    ];
 
     public function isCredit(): Attribute
     {
@@ -24,7 +27,7 @@ class Cheque extends Model
     public function amountFormated(): Attribute
     {
         return Attribute::make(
-            get: fn () => number_format($this->amount,'2'). " SDG"
+            get: fn () => number_format($this->amount, '2') . " SDG"
         );
     }
 
