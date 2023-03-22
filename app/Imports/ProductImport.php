@@ -15,10 +15,10 @@ class ProductImport implements ToModel, WithHeadingRow
     public function model(array $row)
     {
         return new Product([
-            'name' => $row["name"],
-            'price' => $row["price"] ?? null,
-            'cost' => $row["cost"] ?? null,
-            'expire_date' => Carbon::parse($row["expire_date"]),
+            'name' => $row['name'],
+            'price' => $row['price'] ?? null,
+            'cost' => $row['cost'] ?? null,
+            'expire_date' => Carbon::parse($row['expire_date']),
         ]);
     }
 }

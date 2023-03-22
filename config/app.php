@@ -213,5 +213,14 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
-
+    /*
+    / List of system admins emails
+    /
+    /
+    /
+    */
+    'admins' => [
+        'owiesnama@gmail.com',
+    ],
+    'cheques_notify_before_days' => 1,
 ];
