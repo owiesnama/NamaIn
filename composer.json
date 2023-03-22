@@ -6,14 +6,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
-        "guzzlehttp/guzzle": "^7.5",
         "inertiajs/inertia-laravel": "^0.6.3",
         "itsgoingd/clockwork": "^5.1",
+        "laravel-notification-channels/twilio": "^3.3",
         "laravel/framework": "^9.19",
         "laravel/jetstream": "^2.14",
         "laravel/sanctum": "^3.0",
         "laravel/tinker": "^2.7",
-        "laravel/vonage-notification-channel": "^3.2",
         "maatwebsite/excel": "^3.1",
         "tightenco/ziggy": "^1.0"
     },
