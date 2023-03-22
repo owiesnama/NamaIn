@@ -13,7 +13,7 @@ class Cheque extends BaseModel
 
     public $appends = ['is_credit', 'amount_formated', 'due_for_humans'];
 
-    public $dates = ['due'];
+    public $casts = ['due' => 'datetime'];
 
     protected $searchableRelationsAttributes = [
         'payee.name',
