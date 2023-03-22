@@ -220,7 +220,7 @@ return [
     /
     */
     'admins' => [
-        'owiesnama@gmail.com'
+        'owiesnama@gmail.com',
     ],
-    'cheques_notify_before_days' => 1
+    'cheques_notify_before_days' => 1,
 ];
