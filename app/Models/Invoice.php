@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Invoice extends Model
 {
@@ -46,7 +46,7 @@ class Invoice extends Model
     {
         $invoice = new static();
         $invoice->invoicable_type = $invoicable;
-        $invoice->invoicable_id = (new $invoicable)->firstOrCreate([
+        $invoice->invoicable_id = (new $invoicable())->firstOrCreate([
             'name' => 'Random',
             'address' => 'no-address',
         ])->id;

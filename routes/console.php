@@ -1,10 +1,10 @@
 <?php
 
-use App\Models\Cheque;
 use App\Models\User;
-use App\Notifications\ChequeDueNotification;
+use App\Models\Cheque;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use App\Notifications\ChequeDueNotification;
 
 /*
 |--------------------------------------------------------------------------

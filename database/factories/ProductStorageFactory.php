@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Product;
-use App\Models\ProductStorage;
 use App\Models\Storage;
+use App\Models\ProductStorage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductStorageFactory extends Factory

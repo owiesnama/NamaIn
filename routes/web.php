@@ -1,15 +1,14 @@
 <?php
 
-use App\Http\Controllers\ChequesController;
-use App\Http\Controllers\CustomersController;
-use App\Http\Controllers\ProductsController;
-use App\Http\Controllers\PurchasesController;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StockController;
+use App\Http\Controllers\ChequesController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\StoragesController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\PurchasesController;
 
 /*
 |--------------------------------------------------------------------------

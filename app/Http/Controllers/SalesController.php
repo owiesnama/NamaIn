@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateInvoiceRequest;
-use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\Customer;
+use App\Http\Requests\CreateInvoiceRequest;
 
 class SalesController extends Controller
 {

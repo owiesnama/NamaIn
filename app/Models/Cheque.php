@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Cheque extends BaseModel
 {
@@ -47,7 +47,7 @@ class Cheque extends BaseModel
 
     public static function forPayee($attributes)
     {
-        $cheque = new static;
+        $cheque = new static();
         $cheque->chequeable_id = $attributes['id'];
         $cheque->chequeable_type = $attributes['type'];
 

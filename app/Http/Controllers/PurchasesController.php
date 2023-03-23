@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateInvoiceRequest;
+use App\Models\Vendor;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
-use App\Models\Vendor;
+use App\Http\Requests\CreateInvoiceRequest;
 
 class PurchasesController extends Controller
 {

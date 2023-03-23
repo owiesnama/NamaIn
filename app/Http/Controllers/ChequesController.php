@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cheque;
-use App\Models\Customer;
 use App\Models\Vendor;
+use App\Models\Customer;
 
 class ChequesController extends Controller
 {

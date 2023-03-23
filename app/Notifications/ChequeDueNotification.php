@@ -4,10 +4,10 @@ namespace App\Notifications;
 
 use App\Models\Cheque;
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use NotificationChannels\Twilio\TwilioChannel;
 use NotificationChannels\Twilio\TwilioSmsMessage;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class ChequeDueNotification extends Notification
 {
