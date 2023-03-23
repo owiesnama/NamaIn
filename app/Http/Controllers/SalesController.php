@@ -19,7 +19,7 @@ class SalesController extends Controller
     public function create()
     {
         return inertia('Sales/Create', [
-            'products' => Product::all(),
+            'products' => Product::with('units')->get(),
         ]);
     }
 
@@ -28,6 +28,6 @@ class SalesController extends Controller
         Invoice::sale(collect($request->all()))
             ->save();
 
-        return redirect()->route('salse.index');
+        return redirect()->route('sales.index');
     }
 }

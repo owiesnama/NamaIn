@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('invoice_id');
             $table->foreignId('product_id');
+            $table->foreignId('unit_id')->nullable();
             $table->integer('quantity');
             $table->double('price');
             $table->text('description')->nullable();

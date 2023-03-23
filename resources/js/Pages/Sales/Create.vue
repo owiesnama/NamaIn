@@ -4,8 +4,18 @@
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { reactive, computed } from "vue";
     import { useForm } from "@inertiajs/vue3";
-    defineProps(["storages", "products"]);
+    let props = defineProps({
+        storages: Object,
+        products: Object,
+    });
     let purchases = reactive([new PurchaseProduct()]);
+    let productUnits = (id) => {
+        let product = props.products.filter(
+            (product) => product.id == id
+        )[0];
+        if (!product) return;
+        return product.units;
+    };
     const newRow = () => {
         purchases.push(new PurchaseProduct());
     };
@@ -48,9 +58,9 @@
                             />
                         </div>
                         <div
-                            class="flex items-start space-x-2 mb-4"
                             v-for="(purchase, index) in purchases"
                             :key="index"
+                            class="flex items-start space-x-2 mb-4"
                         >
                             <select
                                 v-model="purchase.product"
@@ -65,9 +75,29 @@
                                 </option>
                                 <option
                                     v-for="product in products"
-                                    :value="product.id"
                                     :key="'product-' + product.id"
+                                    :value="product.id"
                                     v-text="product.name"
+                                ></option>
+                            </select>
+                            <select
+                                v-model="purchase.unit"
+                                class="rounded border-gray-100 outline-blue-300 flex-1"
+                                name="units[]"
+                            >
+                                <option
+                                    value=""
+                                    selected
+                                >
+                                    Unit
+                                </option>
+                                <option
+                                    v-for="unit in productUnits(
+                                        purchase.product
+                                    )"
+                                    :key="'unit-' + unit.id"
+                                    :value="unit.id"
+                                    v-text="unit.name"
                                 ></option>
                             </select>
                             <input
@@ -91,9 +121,9 @@
                             ></textarea>
                         </div>
                         <button
-                            @click="newRow"
                             type="button"
                             class="text-xs font-bold uppercase px-4 py-3 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 text-white bg-indigo-500 active:bg-indigo-600"
+                            @click="newRow"
                         >
                             New Row
                         </button>

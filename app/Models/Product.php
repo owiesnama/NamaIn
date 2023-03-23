@@ -17,8 +17,8 @@ class Product extends BaseModel
         'expire_date' => 'date',
     ];
 
-    public function purchasements()
+    public function units()
     {
-        return $this->belongsToMany(Purchase::class);
+        return $this->hasMany(Unit::class);
     }
 }

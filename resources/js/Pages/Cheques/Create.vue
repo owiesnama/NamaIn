@@ -1,6 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { Link, useForm } from "@inertiajs/vue3";
+    import { useForm } from "@inertiajs/vue3";
     import TextInput from "@/Components/TextInput.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     defineProps({
@@ -37,10 +37,10 @@
                                     >Cheque Type</label
                                 >
                                 <select
+                                    id="type"
                                     v-model="cheque.type"
                                     class="w-32 border border-gray-200 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded p-1"
                                     name="type"
-                                    id="type"
                                 >
                                     <option value="0">Debit</option>
                                     <option value="1">Credit</option>
@@ -53,19 +53,20 @@
                                     >Payee</label
                                 >
                                 <select
+                                    id="payee"
                                     v-model="cheque.payee"
                                     name="payee"
-                                    id="payee"
                                 >
                                     <option
                                         v-for="payee in payees"
+                                        :key="payee.id"
+                                        :value="payee"
                                         v-text="
                                             payee.name +
                                             '(' +
                                             payee.type_string +
                                             ')'
                                         "
-                                        :value="payee"
                                     ></option>
                                 </select>
                             </div>
@@ -76,8 +77,8 @@
                                     >Amount</label
                                 >
                                 <TextInput
-                                    v-model="cheque.amount"
                                     id="amount"
+                                    v-model="cheque.amount"
                                     type="number"
                                     min="0"
                                     placeholder="Amount in SDG"
@@ -91,8 +92,8 @@
                                 >Due</label
                             >
                             <TextInput
-                                v-model="cheque.due"
                                 id="due"
+                                v-model="cheque.due"
                                 type="date"
                                 min="0"
                                 placeholder="Due date"
