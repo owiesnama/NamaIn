@@ -27,12 +27,12 @@ Route::middleware([
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Dashboard');
-    });
+    Route::redirect('/', '/dashboard');
+
     Route::get('/dashboard', function () {
         return Inertia::render('Dashboard');
     })->name('dashboard');
+
     Route::resource('/customers', CustomersController::class);
     Route::resource('/storages', StoragesController::class);
     Route::resource('/products', ProductsController::class);

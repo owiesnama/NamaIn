@@ -55,7 +55,7 @@ class ChequeDueNotification extends Notification
      */
     public function toMail($notifiable)
     {
-        return (new MailMessage)
+        return (new MailMessage())
             ->line($this->messageContent($notifiable))
             ->action('Notification Action', url('/'))
             ->line('Thank you for using our application!');
