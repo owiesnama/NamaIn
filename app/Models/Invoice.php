@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class Invoice extends Model
+class Invoice extends BaseModel
 {
     use HasFactory;
 
@@ -34,7 +33,9 @@ class Invoice extends Model
         $invoice = static::createInvoiceFor(Customer::class, $attributes);
         $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
+            $prodcut['unit_id'] = $prodcut['unit'];
             unset($prodcut['product']);
+            unset($prodcut['unit']);
 
             return $prodcut;
         }));

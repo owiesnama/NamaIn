@@ -5,7 +5,7 @@
     import { Link, useForm } from "@inertiajs/vue3";
     import { computed } from "vue";
     import DialogModal from "@/Components/DialogModal.vue";
-    import { reactive, ref } from "vue";
+    import { ref } from "vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
     const props = defineProps({
@@ -52,8 +52,9 @@
                     >New Purchase Invoice</Link
                 >
                 <div
-                    class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
                     v-for="invoice in invoices.data"
+                    :key="invoice.id"
+                    class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
                 >
                     <div class="flex space-x-2 items-center justify-between">
                         <div>
@@ -98,13 +99,14 @@
             <template #title></template>
             <template #content>
                 <select
-                    class="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
-                    name="storage"
                     id="storage"
                     v-model="form.storage"
+                    class="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                    name="storage"
                 >
                     <option
                         v-for="storage in storages"
+                        :key="storage.id"
                         :value="storage.id"
                         v-text="storage.name"
                     ></option>

@@ -18,11 +18,11 @@
         ><slot> Import </slot></label
     >
     <input
-        @focus="focused = true"
-        @blur="focused = false"
-        @input="$emit('input', $event.target.files)"
         :id="id"
         type="file"
         class="sr-only"
+        @focus="focused = true"
+        @blur="focused = false"
+        @input="$emit('input', $event.target.files)"
     />
 </template>

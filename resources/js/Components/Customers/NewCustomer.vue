@@ -2,7 +2,7 @@
     import Panel from "@/Shared/Panel.vue";
     import { useForm } from "@inertiajs/vue3";
     import ValidationError from "../../Shared/ValidationError.vue";
-    const emit = defineEmits(["customer:saved"]);
+    defineEmits(["customer:saved"]);
 
     const customer = useForm({
         name: "",
@@ -27,8 +27,8 @@
     >
         <Panel>
             <form
-                @submit.prevent="save"
                 class="w-full flex items-center"
+                @submit.prevent="save"
             >
                 <div class="mb-6 w-1/4 mr-8">
                     <label
@@ -37,9 +37,9 @@
                         >Customer Name</label
                     >
                     <input
+                        id="name"
                         v-model="customer.name"
                         type="text"
-                        id="name"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         placeholder="Abubakr Elashik"
                         required
@@ -52,9 +52,9 @@
                         >Customer phone</label
                     >
                     <input
+                        id="phone"
                         v-model="customer.phone"
                         type="text"
-                        id="phone"
                         class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                         :class="{
                             'border-red-400': customer.errors.phone,

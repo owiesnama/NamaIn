@@ -3,7 +3,7 @@
     import { ref, watch,computed } from "vue";
     const show = ref(true);
     const props = computed(() => usePage().props)
-    watch(props, () => show.true, {
+    watch(props, () => show.value.true, {
         deep: true,
     });
 </script>
@@ -22,9 +22,9 @@
         >
             <div
                 v-show="$page.props.flash && show"
+                :key="new Date().getTime()"
                 class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
                 @mouseleave="show = false"
-                :key="new Date().getTime()"
             >
                 <div class="p-4">
                     <div class="flex items-start">

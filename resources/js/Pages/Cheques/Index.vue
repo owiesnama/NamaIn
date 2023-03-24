@@ -1,6 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { Link, useForm } from "@inertiajs/vue3";
+    import { Link } from "@inertiajs/vue3";
     import { router } from "@inertiajs/vue3";
     import TextInput from "@/Components/TextInput.vue";
     import Cheque from "@/Shared/Cheque.vue";
@@ -12,10 +12,6 @@
     defineProps({
         cheques: Object,
     });
-    let form = useForm({
-        file: null,
-    });
-
     let search = useQueryString("search");
     let chequeType = useQueryString("chequeType");
     watch(
@@ -49,8 +45,8 @@
                                 placeholder="Search here ..."
                             ></TextInput>
                             <SelectBox
-                                class="w-52"
                                 v-model="chequeType"
+                                class="w-52"
                             >
                                 <option value="">All</option>
                                 <option value="1">Credit</option>
@@ -70,6 +66,7 @@
 
                 <Cheque
                     v-for="cheque in cheques"
+                    :key="cheque.id"
                     :cheque="cheque"
                 ></Cheque>
             </div>

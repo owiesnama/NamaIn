@@ -30,8 +30,9 @@
                     >New Sale</Link
                 >
                 <div
-                    class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
                     v-for="invoice in invoices.data"
+                    :key="invoice.id"
+                    class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
                 >
                     <div class="flex space-x-2 items-center">
                         <span
@@ -43,15 +44,17 @@
                             v-text="invoice.total"
                         ></span>
                     </div>
-                    <InvoiceDetails :invoice="invoice" class="w-full mt-3" />
+                    <InvoiceDetails
+                        :invoice="invoice"
+                        class="w-full mt-3"
+                    />
                 </div>
                 <div
                     v-if="hasNoInvoices"
                     class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
                 >
                     <p class="text-gray-700">
-                        <strong>Opps</strong>, Seems like there no sales for
-                        now
+                        <strong>Opps</strong>, Seems like there no sales for now
                     </p>
                 </div>
             </div>

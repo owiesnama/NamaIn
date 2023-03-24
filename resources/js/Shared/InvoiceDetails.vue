@@ -18,9 +18,14 @@
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="record in invoice.details">
+                <tr
+                    v-for="record in invoice.details"
+                    :key="record.id"
+                >
                     <td v-text="record.product.name"></td>
-                    <td v-text="record.quantity"></td>
+                    <td
+                        v-text="record.quantity + ' (' + record.unit.name + ') '"
+                    ></td>
                     <td v-text="record.price"></td>
                     <td v-text="totalPrice(record)"></td>
                 </tr>

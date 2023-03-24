@@ -4,7 +4,10 @@
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { reactive, computed } from "vue";
     import { useForm } from "@inertiajs/vue3";
-    defineProps(["storages", "products"]);
+    defineProps({
+        storages: Object,
+        products: Object,
+    });
     let purchases = reactive([new PurchaseProduct()]);
     const newRow = () => {
         purchases.push(new PurchaseProduct());
@@ -48,9 +51,9 @@
                             />
                         </div>
                         <div
-                            class="flex items-start space-x-2 mb-4"
                             v-for="(purchase, index) in purchases"
                             :key="index"
+                            class="flex items-start space-x-2 mb-4"
                         >
                             <select
                                 v-model="purchase.product"
@@ -65,8 +68,8 @@
                                 </option>
                                 <option
                                     v-for="product in products"
-                                    :value="product.id"
                                     :key="'product-' + product.id"
+                                    :value="product.id"
                                     v-text="product.name"
                                 ></option>
                             </select>
@@ -91,9 +94,9 @@
                             ></textarea>
                         </div>
                         <button
-                            @click="newRow"
                             type="button"
                             class="text-xs font-bold uppercase px-4 py-3 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150 text-white bg-indigo-500 active:bg-indigo-600"
+                            @click="newRow"
                         >
                             New Row
                         </button>

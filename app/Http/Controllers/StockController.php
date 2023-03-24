@@ -13,7 +13,7 @@ class StockController extends Controller
         $invoice->details->each(function ($record) use ($storage) {
             $storage->addStock([
                 'product' => $record->product_id,
-                'quantity' => $record->quantity,
+                'quantity' => $record->getBaseQuantity(),
             ]);
         });
         $invoice->markAsUsed();
