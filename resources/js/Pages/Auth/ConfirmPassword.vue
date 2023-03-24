@@ -31,6 +31,8 @@ const submit = () => {
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
+
+            <h2 class="mt-6 text-xl font-bold text-center text-gray-800">Confirm Password</h2>
         </template>
 
         <div class="mb-4 text-sm text-gray-600">
