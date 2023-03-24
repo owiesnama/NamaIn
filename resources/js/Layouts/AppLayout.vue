@@ -39,9 +39,9 @@
         <Banner />
 
         <div class="flex h-screen">
-            <div x-cloak :class="showingSidebar ? 'block' : 'hidden'" @click="showingSidebar = false" class="fixed inset-0 z-20 transition-opacity bg-gray-200/50 lg:hidden"></div>
+            <div x-cloak :class="showingSidebar ? 'block' : 'hidden'" @click="showingSidebar = false" class="fixed inset-0 z-20 transition-opacity bg-gray-200/50 xl:hidden"></div>
             
-            <aside :class="showingSidebar ? 'translate-x-0 ease-in' : '-translate-x-full ease-out'" class="fixed inset-y-0 left-0 z-30 w-64 px-5 py-8 overflow-y-auto transition duration-200 transform bg-white border-r border-gray-200 lg:translate-x-0 lg:relative lg:inset-0 rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-700">
+            <aside :class="showingSidebar ? 'translate-x-0 ease-in' : '-translate-x-full ease-out'" class="fixed inset-y-0 left-0 z-30 w-64 px-5 py-8 overflow-y-auto transition duration-200 transform bg-white border-r border-gray-200 xl:translate-x-0 xl:relative xl:inset-0 rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-700">
                 <Link :href="route('dashboard')">
                     <ApplicationMark class="block w-auto h-9" />
                 </Link>
@@ -145,7 +145,7 @@
                     <!-- Primary Navigation Menu -->
                     <div class="px-4 mx-auto sm:px-6 lg:px-8 2xl:container">
                         <div class="flex items-center justify-between h-16">
-                            <form class="relative flex-1 hidden lg:flex" action="#" method="GET">
+                            <form class="relative flex-1 hidden xl:flex" action="#" method="GET">
                                 <label for="search-field" class="sr-only">Search</label>
                                 <svg class="absolute inset-y-0 left-0 w-5 h-full text-gray-400 pointer-events-none" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                                     <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
@@ -153,7 +153,7 @@
                                 <input id="search-field" class="block w-full h-full py-0 pl-8 pr-0 text-gray-900 border-0 placeholder:text-gray-400 focus:ring-0 sm:text-sm" placeholder="Search..." type="search" name="search">
                             </form>
 
-                            <Link class="lg:hidden" :href="route('dashboard')">
+                            <Link class="xl:hidden" :href="route('dashboard')">
                                 <ApplicationMark class="block w-auto h-9" />
                             </Link>
                             
@@ -392,7 +392,7 @@
                                 </div>
         
                                 <!-- Hamburger -->
-                                <div class="flex items-center lg:hidden">
+                                <div class="flex items-center xl:hidden">
                                     <button
                                         class="inline-flex items-center justify-center p-2 text-gray-400 transition rounded-md hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500"
                                         @click="
@@ -436,7 +436,7 @@
                     </div>
                 </nav>
     
-                <main class="px-4 py-10 mx-auto sm:px-6 lg:px-8 2xl:container">
+                <main class="px-4 py-10 2xl:mx-auto sm:px-6 lg:px-8 2xl:container">
                     <Flash />
                     <slot />
                 </main>
