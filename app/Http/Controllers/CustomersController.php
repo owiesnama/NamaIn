@@ -19,14 +19,15 @@ class CustomersController extends Controller
 
     public function store()
     {
-        Customer::create(
-            request()->validate([
-                'name' => 'required',
-                'phone' => 'required|numeric|min:10',
-            ])
-        );
+        $data = request()->validate([
+            'name' => 'required',
+            'address' => 'required|string|min:10',
+            'phone_number' => 'required|numeric|min:10',
+        ]);
 
-        return back()->with('flash', [
+        Customer::create($data);
+
+        return redirect()->route('customers.index')->with('flash', [
             'title' => 'Customer Created 🎉',
             'message' => 'Customer created successfully',
         ]);

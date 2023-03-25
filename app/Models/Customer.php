@@ -10,13 +10,13 @@ class Customer extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'address', 'phone'];
+    protected $fillable = ['name', 'address', 'phone_number'];
 
     public function cheques(): MorphMany
     {
         return $this->morphMany(Cheque::class, 'chequeable');
     }
-   
+
     public function getCreatedAtAttribute()
     {
         return Carbon::parse($this->attributes['created_at'])->diffForHumans();

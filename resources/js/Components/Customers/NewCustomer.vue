@@ -1,80 +1,99 @@
 <script setup>
-    import Panel from "@/Shared/Panel.vue";
     import { useForm } from "@inertiajs/vue3";
-    import ValidationError from "../../Shared/ValidationError.vue";
-    defineEmits(["customer:saved"]);
+    import { ref } from "vue";
+    import InputError from '@/Components/InputError.vue';
+    import InputLabel from '@/Components/InputLabel.vue';
+    import PrimaryButton from '@/Components/PrimaryButton.vue';
+    import TextInput from '@/Components/TextInput.vue';
 
     const customer = useForm({
         name: "",
-        phone: "",
+        address: "",
+        phone_number: "",
     });
 
-    const save = () =>
-        customer.post("/customers", {
-            preserveScroll: true,
-            onSuccess: () => customer.reset(),
-        });
-</script>
-<template>
-    <Transition
-        appear
-        enter-active-class="transform ease-out duration-300 transition"
-        enter-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-        leave-active-class="transition ease-in duration-100"
-        leave-class="opacity-100"
-        leave-to-class="opacity-0"
-    >
-        <Panel>
-            <form
-                class="w-full flex items-center"
-                @submit.prevent="save"
-            >
-                <div class="mb-6 w-1/4 mr-8">
-                    <label
-                        for="name"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >Customer Name</label
-                    >
-                    <input
-                        id="name"
-                        v-model="customer.name"
-                        type="text"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        placeholder="Abubakr Elashik"
-                        required
-                    />
-                </div>
-                <div class="mb-6 w-1/4">
-                    <label
-                        for="phone"
-                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
-                        >Customer phone</label
-                    >
-                    <input
-                        id="phone"
-                        v-model="customer.phone"
-                        type="text"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        :class="{
-                            'border-red-400': customer.errors.phone,
-                            'border-gray-300': !customer.errors.phone,
-                        }"
-                        placeholder="Abubakr Elashik"
-                        required
-                    />
-                    <ValidationError :error="customer.errors.phone" />
-                </div>
+    let show = ref(false);
 
-                <div class="mt-2 ml-auto">
-                    <button
-                        class="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-4 py-3 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
-                        type="submit"
-                    >
-                        Save
-                    </button>
+    const save = () => {
+            customer.post("/customers", {
+                preserveState: true,
+                onSuccess: () => {
+                    customer.reset();
+
+                    show = ref(false);
+                }
+            });
+        }
+</script>
+
+<template>
+    <div>
+        <button @click="show = true" class="w-full px-5 py-2 mt-3 text-sm tracking-wide text-white transition-colors duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600">
+            + Add New Customer
+        </button>
+    
+        <div v-show="show" class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+            <div class="fixed inset-0 transition-opacity bg-gray-500/20 backdrop-blur-sm"></div>
+    
+            <div class="fixed inset-0 z-50 overflow-y-auto">
+                <div class="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0">
+                    <div class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+                        <h1 class="font-semibold text-gray-800">Add New Customer</h1>
+                        <p class="mt-1 text-sm text-gray-500 ">Lorem ipsum dolor sit, amet consectetur adipisicing elit.</p>
+
+                        <form class="mt-4" @submit.prevent="save">
+                            <div>
+                                <InputLabel for="name" value="Name" />
+                                <TextInput
+                                    id="name"
+                                    v-model="customer.name"
+                                    type="text"
+                                    class="block w-full mt-1"
+                                    required
+                                    autofocus
+                                />
+                                <InputError class="mt-2" :message="customer.errors.name" />
+                            </div>
+
+                            <div class="mt-4">
+                                <InputLabel for="address" value="Address" />
+                                <TextInput
+                                    id="address"
+                                    v-model="customer.address"
+                                    type="text"
+                                    class="block w-full mt-1"
+                                    required
+                                    autofocus
+                                />
+                                <InputError class="mt-2" :message="customer.errors.address" />
+                            </div>
+
+                            <div class="mt-4">
+                                <InputLabel for="phone" value="Phone" />
+                                <TextInput
+                                    id="phone"
+                                    v-model="customer.phone_number"
+                                    type="text"
+                                    class="block w-full mt-1"
+                                    required
+                                    autofocus
+                                />
+                                <InputError class="mt-2" :message="customer.errors.phone_number" />
+                            </div>
+
+                            <div class="flex items-center mt-6 gap-x-4">
+                                <button type="button" @click="show = false" class="px-6 w-1/2 py-2.5 text-sm font-semibold tracking-wide focus:outline-none border rounded-lg">
+                                    Cancel
+                                </button>
+
+                                <PrimaryButton class="w-1/2 font-semibold" :class="{ 'opacity-25': customer.processing }" :disabled="customer.processing">
+                                    Add
+                                </PrimaryButton>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
-        </Panel>    
-    </Transition>
+            </div>
+        </div>
+    </div>
 </template>

@@ -21,17 +21,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        /**
-         * create cutomers
-         *
-         * create vendors
-         * create cheques
-         * create products
-         * create storage
-         * create invocies for sales and purchases
-         */
         $faker = app()->make(Generator::class);
-        $customers = Customer::factory(10)->create();
+
+        $customers = Customer::factory(32)->create();
         $vendors = Vendor::factory(10)->create();
         $products = Product::factory(10)->create();
         $storages = Storage::factory(10)->create();

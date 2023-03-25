@@ -1,6 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { ref, watch } from "vue";
+    import { watch } from "vue";
     import { router } from "@inertiajs/vue3";
     import { debounce } from "lodash";
     import NewCustomer from "@/Components/Customers/NewCustomer.vue";
@@ -14,7 +14,6 @@
     });
 
     let search = useQueryString("search");
-    let isCreatingCutsomer = ref(false);
 
     watch(
         search,
@@ -54,13 +53,9 @@
                         >
                     </div>
                 </div>
-
-                <button @click="isCreatingCutsomer = !isCreatingCutsomer" class="w-full px-5 py-2 mt-3 text-sm tracking-wide text-white transition-colors duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600">
-                    + Add New Customer
-                </button>
+                
+                <NewCustomer></NewCustomer>
             </div>
-
-            <NewCustomer v-if="isCreatingCutsomer"></NewCustomer>
 
             <div class="flex flex-col mt-6">
                 <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -104,7 +99,7 @@
                                             </td>
 
                                             <th
-                                                class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                                class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
                                                 v-text="customer.address"
                                             ></th>
 
