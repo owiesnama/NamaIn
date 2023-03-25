@@ -30,7 +30,7 @@ class Cheque extends BaseModel
     public function amountFormated(): Attribute
     {
         return Attribute::make(
-            get: fn () => number_format($this->amount, '2') . ' SDG'
+            get: fn () => number_format($this->amount, '2').' SDG'
         );
     }
 
