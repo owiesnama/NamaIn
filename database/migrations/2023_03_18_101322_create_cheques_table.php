@@ -19,8 +19,10 @@ return new class extends Migration
             $table->string('chequeable_type');
             $table->double('amount');
             $table->tinyInteger('type');
+            $table->string('status')->nullable();
             $table->timestamp('due');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
