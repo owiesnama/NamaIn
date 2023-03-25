@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ChequeStatus;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,10 @@ class Cheque extends BaseModel
 
     public $appends = ['is_credit', 'amount_formated', 'due_for_humans'];
 
-    public $casts = ['due' => 'datetime'];
+    public $casts = [
+        'due' => 'datetime',
+        'status' => ChequeStatus::class,
+    ];
 
     protected $searchableRelationsAttributes = [
         'payee.name',
