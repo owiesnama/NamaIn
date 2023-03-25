@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('status')->nullable();
             $table->timestamp('due');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

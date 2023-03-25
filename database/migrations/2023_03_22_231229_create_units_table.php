@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name');
             $table->unsignedFloat('conversion_factor');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

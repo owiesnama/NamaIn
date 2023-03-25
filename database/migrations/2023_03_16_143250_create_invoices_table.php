@@ -20,6 +20,7 @@ return new class extends Migration
             $table->double('total');
             $table->boolean('has_used')->default(false);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
