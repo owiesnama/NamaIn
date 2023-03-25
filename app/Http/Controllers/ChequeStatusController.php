@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\ChequeStatus;
 use App\Models\Cheque;
-use Illuminate\Http\Request;
 use Illuminate\Validation\Rules\Enum;
 
 class ChequeStatusController extends Controller

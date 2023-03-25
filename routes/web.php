@@ -43,5 +43,5 @@ Route::middleware([
     Route::resource('/cheques', ChequesController::class);
     Route::post('/stock/{storage}/add', [StockController::class, 'add']);
     Route::delete('/stock/{storage}/deduct', [StockController::class, 'deduct']);
-    Route::put('/cheques/{cheque}/status',[ChequeStatusController::class,'update'])->name('cheques.updateStatus');
+    Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.updateStatus');
 });

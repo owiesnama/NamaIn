@@ -16,7 +16,7 @@ class ChequesController extends Controller
                 ->search(request('search'))
                 ->when(in_array(request('chequeType'), ['0', '1'], strict: true), fn ($query) => $query->where('type', request('chequeType')))
                 ->orderBy('type')->oldest('due')->get(),
-            'status' => ChequeStatus::casesWithLabels()
+            'status' => ChequeStatus::casesWithLabels(),
         ]);
     }
 
