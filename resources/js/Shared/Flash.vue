@@ -13,45 +13,37 @@
     >
         <Transition
             appear
-            enter-active-class="transform ease-out duration-300 transition"
+            enter-active-class="transition duration-300 ease-out transform"
             enter-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
             enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-            leave-active-class="transition ease-in duration-100"
+            leave-active-class="transition duration-100 ease-in"
             leave-class="opacity-100"
             leave-to-class="opacity-0"
         >
             <div
                 v-show="$page.props.flash && show"
                 :key="new Date().getTime()"
-                class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
+                class="w-full max-w-sm overflow-hidden bg-white rounded-lg shadow-lg pointer-events-auto ring-1 ring-black ring-opacity-5"
                 @mouseleave="show = false"
             >
-                <div class="p-4">
+                <div class="px-5 py-3">
                     <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <!-- <Icon
-                                :class="'text-' + $page.props.flash?.color + '-400'"
-                                :icon="icon"
-                            /> -->
-                        </div>
-                        <div class="ml-3 w-0 flex-1 pt-0.5">
+                        <div class="flex-1 w-0">
                             <template
                                 v-if="
                                     $page.props.flash?.title &&
                                     $page.props.flash?.message
                                 "
                             >
-                                <p class="text-sm font-medium text-gray-900">
+                                <p class="font-bold text-emerald-500">
                                     {{ $page.props.flash?.title }}
                                 </p>
                                 <p class="mt-1 text-sm text-gray-500">
-                                    {{
-                                        $page.props.flash?.message
-                                    }}
+                                    {{ $page.props.flash?.message }}
                                 </p>
                             </template>
                             <template v-else>
-                                <p class="text-sm font-medium text-gray-900">
+                                <p class="text-sm font-semibold tracking-wide text-gray-800 capitalize ">
                                     {{
                                         $page.props.flash
                                             ?.message ||
@@ -59,18 +51,6 @@
                                     }}
                                 </p>
                             </template>
-                        </div>
-                        <div class="ml-4 flex-shrink-0 flex">
-                            <button
-                                class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                @click="show = false"
-                            >
-                                <span class="sr-only">Close</span>
-                                <!-- <icon
-                                    icon="x"
-                                    class="h-5 w-5"
-                                /> -->
-                            </button>
                         </div>
                     </div>
                 </div>

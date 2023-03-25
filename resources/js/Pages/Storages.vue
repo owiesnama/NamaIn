@@ -31,13 +31,13 @@
                     v-model="search"
                     type="text"
                     placeholder="Search ..."
-                    class="mb-4 rounded-lg p-2 border border-gray-200 w-64"
+                    class="w-64 p-2 mb-4 border border-gray-200 rounded-lg"
                 />
                 <div
-                    class="relative w-full px-4 max-w-full flex-grow flex-1 text-right"
+                    class="relative flex-1 flex-grow w-full max-w-full px-4 text-right"
                 >
                     <button
-                        class="text-xs font-bold uppercase px-4 py-3 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                        class="px-4 py-3 mb-1 mr-1 text-xs font-bold uppercase transition-all duration-150 ease-linear rounded outline-none focus:outline-none"
                         type="button"
                         :class="[
                             isCreatingStorage
@@ -50,17 +50,17 @@
                 </div>
             </div>
             <NewStorage v-if="isCreatingStorage"></NewStorage>
-            <div class="w-full mb-12 xl:mb-0 mx-auto">
+            <div class="w-full mx-auto mb-12 xl:mb-0">
                 <div
-                    class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-sm rounded-lg p-4"
+                    class="relative flex flex-col w-full min-w-0 p-4 mb-6 break-words bg-white rounded-lg shadow-sm"
                 >
-                    <div class="rounded-t mb-0 py-3 border-0">
+                    <div class="py-3 mb-0 border-0 rounded-t">
                         <div class="flex flex-wrap items-center">
                             <div
-                                class="relative w-full max-w-full flex-grow flex-1"
+                                class="relative flex-1 flex-grow w-full max-w-full"
                             >
                                 <h3
-                                    class="font-semibold text-base text-gray-700"
+                                    class="text-base font-semibold text-gray-700"
                                 >
                                     Storages
                                 </h3>
@@ -69,17 +69,17 @@
                     </div>
                     <div class="block w-full overflow-x-auto">
                         <table
-                            class="items-center bg-transparent w-full border-separate"
+                            class="items-center w-full bg-transparent border-separate"
                         >
                             <thead>
                                 <tr>
                                     <th
-                                        class="px-6 rounded-tl-md text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-1 border-r-0 whitespace-nowrap font-semibold text-left"
+                                        class="px-6 py-3 text-xs font-semibold text-left text-gray-500 uppercase align-middle border border-r-0 border-gray-100 border-solid rounded-tl-md border-l-1 whitespace-nowrap"
                                     >
                                         Name
                                     </th>
                                     <th
-                                        class="px-6 rounded-tr-md text-gray-500 align-middle border border-solid border-gray-100 py-3 text-xs uppercase border-l-0 border-r-1 whitespace-nowrap font-semibold text-left"
+                                        class="px-6 py-3 text-xs font-semibold text-left text-gray-500 uppercase align-middle border border-l-0 border-gray-100 border-solid rounded-tr-md border-r-1 whitespace-nowrap"
                                     >
                                         Address
                                     </th>
@@ -92,11 +92,11 @@
                                         :key="storage.id"
                                     >
                                         <th
-                                            class="px-6 text-xs border-gray-100 py-3 text-left border border-l-1 border-r-0"
+                                            class="px-6 py-3 text-xs text-left border border-r-0 border-gray-100 border-l-1"
                                             v-text="storage.name"
                                         ></th>
                                         <td
-                                            class="px-6 text-xs border-gray-100 py-3 text-left border border-l-0 border-r-1"
+                                            class="px-6 py-3 text-xs text-left border border-l-0 border-gray-100 border-r-1"
                                             v-text="storage.address"
                                         ></td>
                                     </tr>
@@ -105,7 +105,7 @@
                                     <tr>
                                         <td
                                             colspan="2"
-                                            class="text-center text-sm leading-7 p-4 text-gray-600"
+                                            class="p-4 text-sm leading-7 text-center text-gray-600"
                                         >
                                             No Storage added
                                         </td>

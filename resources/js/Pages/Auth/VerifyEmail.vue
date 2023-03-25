@@ -24,18 +24,20 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
+
+            <h2 class="mt-6 text-xl font-bold text-center text-gray-800">Email Verification</h2>
         </template>
 
         <div class="mb-4 text-sm text-gray-600">
             Before continuing, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.
         </div>
 
-        <div v-if="verificationLinkSent" class="mb-4 font-medium text-sm text-green-600">
+        <div v-if="verificationLinkSent" class="mb-4 text-sm font-medium text-green-600">
             A new verification link has been sent to the email address you provided in your profile settings.
         </div>
 
         <form @submit.prevent="submit">
-            <div class="mt-4 flex items-center justify-between">
+            <div class="flex items-center justify-between mt-4">
                 <PrimaryButton :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
                     Resend Verification Email
                 </PrimaryButton>
@@ -43,7 +45,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
                 <div>
                     <Link
                         :href="route('profile.show')"
-                        class="underline text-sm text-gray-600 hover:text-gray-900"
+                        class="text-sm text-gray-600 underline hover:text-gray-900"
                     >
                         Edit Profile</Link>
 
@@ -51,7 +53,7 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
                         :href="route('logout')"
                         method="post"
                         as="button"
-                        class="underline text-sm text-gray-600 hover:text-gray-900 ml-2"
+                        class="ml-2 text-sm text-gray-600 underline hover:text-gray-900"
                     >
                         Log Out
                     </Link>

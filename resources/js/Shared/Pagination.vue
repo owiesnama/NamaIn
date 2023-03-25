@@ -7,13 +7,13 @@
             >
                 <div
                     v-if="link.url === null"
-                    class="mr-1 mb-1 px-4 py-3 text-sm leading-4 text-gray-400 border rounded"
+                    class="px-4 py-2.5 cursor-not-allowed mb-1 mr-1 text-sm leading-4 text-gray-400 border rounded-md"
                     v-html="link.label"
                 ></div>
 
                 <Link
                     v-else
-                    class="mr-1 mb-1 px-4 py-3 text-sm leading-4 border rounded hover:bg-white focus:border-primary focus:text-primary"
+                    class="px-4 py-2.5 hover:bg-gray-100 mb-1 mr-1 text-sm leading-4 border rounded-md focus:border-primary focus:text-primary"
                     :class="{ 'bg-white': link.active }"
                     :href="link.url"
                     :preserve-state="true"
