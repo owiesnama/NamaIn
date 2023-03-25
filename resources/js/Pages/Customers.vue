@@ -30,8 +30,8 @@
 
 <template>
     <AppLayout title="Customers">
-        <section class="container px-4 mx-auto">
-            <div class="sm:flex sm:items-center sm:justify-between">
+        <section>
+            <div class="w-full sm:flex sm:items-center sm:justify-between">
                 <div>
                     <div class="flex items-center gap-x-3">
                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Customers</h2>
@@ -78,6 +78,10 @@
                                         </th>
 
                                         <th scope="col" class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            Address
+                                        </th>
+
+                                        <th scope="col" class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             Added Time
                                         </th>
                                     </tr>
@@ -95,9 +99,14 @@
 
                                             <td class="px-8 py-3 text-sm text-left whitespace-nowrap">
                                                 <a class="font-semibold text-emerald-500 hover:underline" 
-                                                    :href="'tel:' + customer.phone" v-text="customer.phone"
+                                                    :href="'tel:' + customer.phone_number" v-text="customer.phone_number"
                                                 ></a>
                                             </td>
+
+                                            <th
+                                                class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                                v-text="customer.address"
+                                            ></th>
 
                                             <td
                                                 class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"

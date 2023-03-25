@@ -12,7 +12,7 @@ class CustomersController extends Controller
             'customers_count' => Customer::count(),
             'customers' => Customer::search(request('search'))
                 ->latest()
-                ->paginate(10)
+                ->paginate(16)
                 ->withQueryString(),
         ]);
     }
