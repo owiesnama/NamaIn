@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ChequesController;
+use App\Http\Controllers\ChequeStatusController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchasesController;
@@ -42,4 +43,5 @@ Route::middleware([
     Route::resource('/cheques', ChequesController::class);
     Route::post('/stock/{storage}/add', [StockController::class, 'add']);
     Route::delete('/stock/{storage}/deduct', [StockController::class, 'deduct']);
+    Route::put('/cheques/{cheque}/status',[ChequeStatusController::class,'update'])->name('cheques.updateStatus');
 });

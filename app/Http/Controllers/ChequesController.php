@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ChequeStatus;
 use App\Models\Cheque;
 use App\Models\Customer;
 use App\Models\Vendor;
@@ -10,10 +11,13 @@ class ChequesController extends Controller
 {
     public function index()
     {
-        return inertia('Cheques/Index', ['cheques' => Cheque::with('payee')
-            ->search(request('search'))
-            ->when(in_array(request('chequeType'), ['0', '1'], strict: true), fn ($query) => $query->where('type', request('chequeType')))
-            ->orderBy('type')->oldest('due')->get()]);
+        return inertia('Cheques/Index', [
+            'cheques' => Cheque::with('payee')
+                ->search(request('search'))
+                ->when(in_array(request('chequeType'), ['0', '1'], strict: true), fn ($query) => $query->where('type', request('chequeType')))
+                ->orderBy('type')->oldest('due')->get(),
+            'status' => ChequeStatus::casesWithLabels()
+        ]);
     }
 
     public function create()

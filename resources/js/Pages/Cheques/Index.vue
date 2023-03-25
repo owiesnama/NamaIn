@@ -11,6 +11,7 @@
 
     defineProps({
         cheques: Object,
+        status: Object,
     });
     let search = useQueryString("search");
     let chequeType = useQueryString("chequeType");
@@ -18,7 +19,7 @@
         [search, chequeType],
         debounce(function ([newSearch, newChequeType]) {
             router.get(
-                "/cheques",
+                route('cheques.index'),
                 { chequeType: newChequeType, search: newSearch },
                 { preserveState: true }
             );
@@ -68,6 +69,7 @@
                     v-for="cheque in cheques"
                     :key="cheque.id"
                     :cheque="cheque"
+                    :cheque-status="status"
                 ></Cheque>
             </div>
         </div>
