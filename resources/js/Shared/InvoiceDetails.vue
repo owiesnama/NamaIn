@@ -5,6 +5,13 @@
     let totalPrice = (record) => {
         return record.price * record.quantity;
     };
+
+    let recordQuantity = (record) => {
+        if (!record.unit) {
+            return `${record.quantity} <strong>(Base unit)</strong>`;
+        }
+        return `${record.quantity} <storng>(${record.unit?.name})</storng>`;
+    };
 </script>
 <template>
     <div>
@@ -23,9 +30,7 @@
                     :key="record.id"
                 >
                     <td v-text="record.product.name"></td>
-                    <td
-                        v-text="record.quantity + ' (' + record.unit.name + ') '"
-                    ></td>
+                    <td v-html="recordQuantity(record)"></td>
                     <td v-text="record.price"></td>
                     <td v-text="totalPrice(record)"></td>
                 </tr>
