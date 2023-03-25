@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignId('storage_id')->constrained()->onDelete('cascade');
             $table->string('quantity');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::enableForeignKeyConstraints();

@@ -21,6 +21,7 @@ return new class extends Migration
             $table->tinyInteger('type');
             $table->timestamp('due');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
