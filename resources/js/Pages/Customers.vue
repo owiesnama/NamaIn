@@ -65,6 +65,10 @@
                                 <thead>
                                     <tr>
                                         <th scope="col" class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            #
+                                        </th>
+
+                                        <th scope="col" class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             Name
                                         </th>
 
@@ -87,6 +91,11 @@
                                             v-for="customer in customers.data"
                                             :key="customer.id"
                                         >
+                                            <th
+                                                class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                                v-text="customer.id"
+                                            ></th>
+
                                             <th
                                                 class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
                                                 v-text="customer.name"
