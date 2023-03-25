@@ -33,9 +33,8 @@ class Invoice extends BaseModel
         $invoice = static::createInvoiceFor(Customer::class, $attributes);
         $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
-            $prodcut['unit_id'] = $prodcut['unit'];
+            $prodcut['unit_id'] = $prodcut['unit'] ?? null;
             unset($prodcut['product']);
-            unset($prodcut['unit']);
 
             return $prodcut;
         }));
