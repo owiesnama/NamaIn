@@ -2,15 +2,39 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import Pagination from "@/Shared/Pagination.vue";
     import InvoiceDetails from "@/Shared/InvoiceDetails.vue";
-    import { Link } from "@inertiajs/vue3";
-    import { computed } from "vue";
+    import { Link, useForm } from "@inertiajs/vue3";
+    import { computed, ref } from "vue";
+    import PrimaryButton from "@/Components/PrimaryButton.vue";
+    import SecondaryButton from "@/Components/SecondaryButton.vue";
+    import DialogModal from "@/Components/DialogModal.vue";
+
     const props = defineProps({
         invoices: Object,
+        storages: Object,
     });
 
+    let deductingFromStorage = ref(false);
     let hasNoInvoices = computed(() => {
         return !props.invoices.data.length;
     });
+    let form = useForm({
+        invoice: null,
+        storage: null,
+    });
+    let deductFromStorage = (invoice) => {
+        deductingFromStorage.value = true;
+        form.invoice = invoice.id;
+    };
+
+    let closeModal = () => {
+        deductingFromStorage.value = null;
+    };
+
+    let confirmDeduct = () => {
+        form.put(route("stock.deduct", form.storage), {
+            onFinish: () => closeModal(),
+        }).then();
+    };
 </script>
 
 <template>
@@ -34,15 +58,24 @@
                     :key="invoice.id"
                     class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
                 >
-                    <div class="flex space-x-2 items-center">
-                        <span
-                            class="text-white bg-green-500 px-5 py-1 rounded-xl"
-                            >In-stock</span
+                    <div class="flex justify-between">
+                        <div class="flex space-x-2">
+                            <span
+                                class="text-white bg-green-500 px-5 py-1 rounded-xl"
+                                >In-stock</span
+                            >
+                            <span
+                                class="font-bold"
+                                v-text="invoice.total"
+                            ></span>
+                        </div>
+
+                        <PrimaryButton
+                            v-if="!invoice.has_used"
+                            @click="deductFromStorage(invoice)"
                         >
-                        <span
-                            class="font-bold"
-                            v-text="invoice.total"
-                        ></span>
+                            Deduct From Storage
+                        </PrimaryButton>
                     </div>
                     <InvoiceDetails
                         :invoice="invoice"
@@ -60,5 +93,38 @@
             </div>
             <Pagination :links="invoices.links"></Pagination>
         </div>
+        <DialogModal
+            :show="deductingFromStorage"
+            @close="closeModal"
+        >
+            <template #title></template>
+            <template #content>
+                <select
+                    id="storage"
+                    v-model="form.storage"
+                    class="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                    name="storage"
+                >
+                    <option
+                        v-for="storage in storages"
+                        :key="storage.id"
+                        :value="storage.id"
+                        v-text="storage.name"
+                    ></option>
+                </select>
+            </template>
+            <template #footer>
+                <SecondaryButton @click="closeModal"> Cancel </SecondaryButton>
+
+                <PrimaryButton
+                    class="ml-3"
+                    :class="{ 'opacity-25': form.processing }"
+                    :disabled="form.processing"
+                    @click="confirmDeduct"
+                >
+                    Confirm
+                </PrimaryButton>
+            </template>
+        </DialogModal>
     </AppLayout>
 </template>

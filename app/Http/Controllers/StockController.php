@@ -23,6 +23,20 @@ class StockController extends Controller
 
     public function deduct(Storage $storage)
     {
-        dd(request());
+        $invoice = Invoice::find(request('invoice'));
+        $unDelevirableProductsDetails = collect();
+        $invoice->details->each(function ($record) use ($storage, $unDelevirableProductsDetails) {
+            if ($storage->hasStockFor($record->product_id, $record->getBaseQuantity())) {
+                $storage->deductStock([
+                    'product' => $record->product_id,
+                    'quantity' => $record->getBaseQuantity(),
+                ]);
+            } else {
+                $unDelevirableProductsDetails->push($record);
+            }
+        });
+        $invoice->markAsUsed();
+
+        return back()->with('flash', ['message' => "Invoice items has being deducted from storage: {$storage->name} "]);
     }
 }

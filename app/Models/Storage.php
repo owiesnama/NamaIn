@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Storage extends BaseModel
@@ -19,28 +20,54 @@ class Storage extends BaseModel
         'address',
     ];
 
-    public function stock()
+    public function stock(): BelongsToMany
     {
         return $this->belongsToMany(Product::class)->withPivot([
             'quantity',
         ])->withTimestamps();
     }
 
+    public function qunatityOf($product)
+    {
+        $productId = is_int($product) ?: $product->id;
+        return (int) $this->stock()->find($productId)?->pivot?->quantity ?: 0;
+    }
+
+    public function hasStockFor($productId): bool
+    {
+        return $this->stock()->where('product_id', $productId)->exists();
+    }
+
+    public function hasNoStockFor($productId): bool
+    {
+        return !$this->hasStockFor($productId);
+    }
+
+    public function hasEnoughStockFor($productId, $quantity): bool
+    {
+        if ($this->hasNoStockFor($productId)) {
+            return false;
+        }
+
+        return $this->stock()->find($productId)->pivot->quantity >= $quantity;
+    }
+
     public function addStock($attributes)
     {
-        $stock = $this->stock()->find($attributes['product']);
-        if ($stock) {
-            return $stock->pivot->increment('quantity', $attributes['quantity']);
+        if ($this->hasStockFor($attributes['product'])) {
+            return $this->stock()->find($attributes['product'])->pivot->increment('quantity', $attributes['quantity']);
         }
 
         return $this->stock()->attach([$attributes['product'] => ['quantity' => $attributes['quantity']]]);
     }
 
-    public function toSearchableArray()
+    public function deductStock($attributes)
     {
-        return [
-            'title' => $this->name,
-            'address' => $this->address,
-        ];
+        if ($this->hasNoStockFor($attributes['product'])) {
+            return;
+        }
+        $stock = $this->stock()->find($attributes['product']);
+
+        return $stock->pivot->decrement('quantity', $attributes['quantity']);
     }
 }

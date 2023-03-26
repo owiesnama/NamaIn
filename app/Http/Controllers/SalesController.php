@@ -6,6 +6,7 @@ use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\Storage;
 
 class SalesController extends Controller
 {
@@ -13,6 +14,7 @@ class SalesController extends Controller
     {
         return inertia('Sales/Index', [
             'invoices' => Invoice::where('invoicable_type', Customer::class)->with('details')->paginate(10)->withQueryString(),
+            'storages' => Storage::all(),
         ]);
     }
 

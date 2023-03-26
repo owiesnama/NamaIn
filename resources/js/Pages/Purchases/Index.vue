@@ -29,7 +29,7 @@
     });
 
     let confirmMoving = () => {
-        form.post(`/stock/${form.storage}/add`, {
+        form.put(route("stock.add", form.storage), {
             onFinish: () => closeModal(),
         }).then();
     };
@@ -67,13 +67,12 @@
                                 v-text="invoice.total"
                             ></span>
                         </div>
-                        <button
+                        <PrimaryButton
                             v-if="!invoice.has_used"
-                            class="border py-3 px-6 rounded-lg bg-gray-50 font-semibold hover:bg-gray-100"
                             @click="moveToStorage(invoice)"
                         >
-                            Move to storage
-                        </button>
+                            Deliver to storage
+                        </PrimaryButton>
                     </div>
                     <InvoiceDetails
                         :invoice="invoice"
