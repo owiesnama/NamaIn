@@ -12,7 +12,7 @@ class CustomersController extends Controller
             'customers_count' => Customer::count(),
             'customers' => Customer::search(request('search'))
                 ->latest()
-                ->paginate(16)
+                ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
     }
@@ -28,6 +28,6 @@ class CustomersController extends Controller
         Customer::create($data);
 
         return redirect()->route('customers.index')
-            ->with('success', 'Customer created successfully', );
+            ->with('success', 'Customer Created Successfully', );
     }
 }

@@ -17,9 +17,4 @@ class Customer extends BaseModel
     {
         return $this->morphMany(Cheque::class, 'chequeable');
     }
-
-    public function getCreatedAtAttribute()
-    {
-        return Carbon::parse($this->attributes['created_at'])->diffForHumans();
-    }
 }

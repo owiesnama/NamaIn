@@ -30,12 +30,13 @@ class Storage extends BaseModel
     public function qunatityOf($product)
     {
         $productId = is_int($product) ?: $product->id;
+
         return (int) $this->stock()->find($productId)?->pivot?->quantity ?: 0;
     }
 
     public function hasStockFor($productId): bool
     {
-        return $this->stock()->where('product_id', $productId)->exists();
+        return $this->stock()->where('product_id', $productId)->where('quantity', '>', 0)->exists();
     }
 
     public function hasNoStockFor($productId): bool
@@ -52,6 +53,11 @@ class Storage extends BaseModel
         return $this->stock()->find($productId)->pivot->quantity >= $quantity;
     }
 
+    public function hasNoEnoughStockFor($productId, $quantity)
+    {
+       return ! $this->hasEnoughStockFor($productId,$quantity);
+    }
+
     public function addStock($attributes)
     {
         if ($this->hasStockFor($attributes['product'])) {
@@ -64,10 +70,10 @@ class Storage extends BaseModel
     public function deductStock($attributes)
     {
         if ($this->hasNoStockFor($attributes['product'])) {
-            return;
+            return false;
         }
         $stock = $this->stock()->find($attributes['product']);
 
-        return $stock->pivot->decrement('quantity', $attributes['quantity']);
+        return (bool) $stock->pivot->decrement('quantity', $attributes['quantity']);
     }
 }

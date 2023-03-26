@@ -7,6 +7,7 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
     import DialogModal from "@/Components/DialogModal.vue";
+    import InputError from "@/Components/InputError.vue";
 
     const props = defineProps({
         invoices: Object,
@@ -32,7 +33,7 @@
 
     let confirmDeduct = () => {
         form.put(route("stock.deduct", form.storage), {
-            onFinish: () => closeModal(),
+            onSuccess: () => closeModal(),
         }).then();
     };
 </script>
@@ -99,6 +100,15 @@
         >
             <template #title></template>
             <template #content>
+                <div
+                    v-if="form.errors.storage"
+                    class="p-4 border border-red-500 rounded mb-4 flex items-center"
+                >
+                    <InputError
+                        class="mt-2"
+                        :message="form.errors.storage"
+                    />
+                </div>
                 <select
                     id="storage"
                     v-model="form.storage"

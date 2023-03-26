@@ -6,19 +6,18 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
 
-    const customer = useForm({
-        name: "",
-        address: "",
-        phone_number: "",
-    });
-
     let show = ref(false);
 
+    let storage = useForm({
+        name: "",
+        address: "",
+    });
+
     const save = () => {
-        customer.post("/customers", {
+        storage.post(route("storages.store"), {
             preserveState: true,
             onSuccess: () => {
-                customer.reset();
+                storage.reset();
 
                 show.value = false;
             },
@@ -26,7 +25,7 @@
     };
 
     let cancel = () => {
-        customer.reset();
+        storage.reset();
         show.value = false;
     };
 </script>
@@ -34,10 +33,10 @@
 <template>
     <div>
         <button
-            class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
+            class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors duration-200 font-bold rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
             @click="show = true"
         >
-            + Add New Customer
+            + Add New Storage
         </button>
 
         <div
@@ -79,17 +78,15 @@
                             class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
                         >
                             <h1 class="font-semibold text-gray-800">
-                                Add New Customer
+                                Add New storage
                             </h1>
+
                             <p class="mt-1 text-sm text-gray-500">
                                 Lorem ipsum dolor sit, amet consectetur
                                 adipisicing elit.
                             </p>
 
-                            <form
-                                class="mt-4"
-                                @submit.prevent="save"
-                            >
+                            <form class="mt-4" @submit.prevent="save">
                                 <div>
                                     <InputLabel
                                         for="name"
@@ -97,7 +94,7 @@
                                     />
                                     <TextInput
                                         id="name"
-                                        v-model="customer.name"
+                                        v-model="storage.name"
                                         type="text"
                                         class="block w-full mt-1"
                                         required
@@ -105,45 +102,25 @@
                                     />
                                     <InputError
                                         class="mt-2"
-                                        :message="customer.errors.name"
+                                        :message="storage.errors.name"
                                     />
                                 </div>
 
                                 <div class="mt-4">
                                     <InputLabel
                                         for="address"
-                                        value="Address"
+                                        value="address"
                                     />
                                     <TextInput
                                         id="address"
-                                        v-model="customer.address"
+                                        v-model="storage.address"
                                         type="text"
                                         class="block w-full mt-1"
                                         required
-                                        autofocus
                                     />
                                     <InputError
                                         class="mt-2"
-                                        :message="customer.errors.address"
-                                    />
-                                </div>
-
-                                <div class="mt-4">
-                                    <InputLabel
-                                        for="phone"
-                                        value="Phone"
-                                    />
-                                    <TextInput
-                                        id="phone"
-                                        v-model="customer.phone_number"
-                                        type="text"
-                                        class="block w-full mt-1"
-                                        required
-                                        autofocus
-                                    />
-                                    <InputError
-                                        class="mt-2"
-                                        :message="customer.errors.phone_number"
+                                        :message="storage.errors.address"
                                     />
                                 </div>
 
@@ -159,9 +136,9 @@
                                     <PrimaryButton
                                         class="w-1/2 font-semibold"
                                         :class="{
-                                            'opacity-25': customer.processing,
+                                            'opacity-25': storage.processing,
                                         }"
-                                        :disabled="customer.processing"
+                                        :disabled="storage.processing"
                                     >
                                         Add
                                     </PrimaryButton>

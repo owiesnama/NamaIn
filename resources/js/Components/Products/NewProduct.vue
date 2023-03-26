@@ -6,19 +6,24 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
 
-    const customer = useForm({
-        name: "",
-        address: "",
-        phone_number: "",
-    });
-
     let show = ref(false);
 
+    let product = useForm({
+        name: "",
+        cost: 50,
+        expire_date: "",
+        units: [{ name: "", conversionFactor: "" }],
+    });
+
+    const addUnit = () => {
+        product.units.push({ name: "", conversionFactor: "" });
+    };
+
     const save = () => {
-        customer.post("/customers", {
+        product.post(route("products.store"), {
             preserveState: true,
             onSuccess: () => {
-                customer.reset();
+                product.reset();
 
                 show.value = false;
             },
@@ -26,7 +31,7 @@
     };
 
     let cancel = () => {
-        customer.reset();
+        product.reset();
         show.value = false;
     };
 </script>
@@ -34,10 +39,10 @@
 <template>
     <div>
         <button
-            class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
+            class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors duration-200 font-bold rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
             @click="show = true"
         >
-            + Add New Customer
+            + Add New Product
         </button>
 
         <div
@@ -79,17 +84,14 @@
                             class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
                         >
                             <h1 class="font-semibold text-gray-800">
-                                Add New Customer
+                                Add New Product
                             </h1>
                             <p class="mt-1 text-sm text-gray-500">
                                 Lorem ipsum dolor sit, amet consectetur
                                 adipisicing elit.
                             </p>
 
-                            <form
-                                class="mt-4"
-                                @submit.prevent="save"
-                            >
+                            <form class="mt-4" @submit.prevent="save">
                                 <div>
                                     <InputLabel
                                         for="name"
@@ -97,7 +99,7 @@
                                     />
                                     <TextInput
                                         id="name"
-                                        v-model="customer.name"
+                                        v-model="product.name"
                                         type="text"
                                         class="block w-full mt-1"
                                         required
@@ -105,46 +107,81 @@
                                     />
                                     <InputError
                                         class="mt-2"
-                                        :message="customer.errors.name"
+                                        :message="product.errors.name"
                                     />
                                 </div>
 
                                 <div class="mt-4">
                                     <InputLabel
-                                        for="address"
-                                        value="Address"
+                                        for="cost"
+                                        value="cost"
                                     />
                                     <TextInput
-                                        id="address"
-                                        v-model="customer.address"
+                                        id="cost"
+                                        v-model="product.cost"
                                         type="text"
                                         class="block w-full mt-1"
                                         required
-                                        autofocus
                                     />
                                     <InputError
                                         class="mt-2"
-                                        :message="customer.errors.address"
+                                        :message="product.errors.cost"
                                     />
                                 </div>
 
                                 <div class="mt-4">
                                     <InputLabel
-                                        for="phone"
-                                        value="Phone"
+                                        for="expire_date"
+                                        value="Expire Date"
                                     />
                                     <TextInput
-                                        id="phone"
-                                        v-model="customer.phone_number"
-                                        type="text"
+                                        id="expire_date"
+                                        v-model="product.expire_date"
+                                        type="date"
                                         class="block w-full mt-1"
                                         required
-                                        autofocus
                                     />
                                     <InputError
                                         class="mt-2"
-                                        :message="customer.errors.phone_number"
+                                        :message="product.errors.expire_date"
                                     />
+                                </div>
+
+                                <div class="mt-4">
+                                    <InputLabel
+                                        for="unit"
+                                        value="Unit"
+                                    />
+
+                                    <div
+                                        v-for="(unit, index) in product.units"
+                                        :key="`unit-` + index"
+                                        class="mt-1 space-y-4"
+                                    >
+                                        <TextInput
+                                            v-model="unit.name"
+                                            class="w-full focus:outline-none"
+                                            placeholder="Unit eg: box"
+                                        />
+
+                                        <TextInput
+                                            v-model="unit.conversionFactor"
+                                            class="w-full focus:outline-none"
+                                            type="number"
+                                            min="1"
+                                            placeholder="Unit conversion factor"
+                                        />
+
+                                        <button
+                                            type="button"
+                                            v-if="index == product.units.length - 1"
+                                            @click="addUnit"
+                                            class="px-4 py-2.5 bg-gray-100 rounded-lg w-full text-sm font-semibold"
+                                        >
+                                            Add Unit
+                                        </button
+                                        >
+                                    </div>
                                 </div>
 
                                 <div class="flex items-center mt-6 gap-x-4">
@@ -159,9 +196,9 @@
                                     <PrimaryButton
                                         class="w-1/2 font-semibold"
                                         :class="{
-                                            'opacity-25': customer.processing,
+                                            'opacity-25': product.processing,
                                         }"
-                                        :disabled="customer.processing"
+                                        :disabled="product.processing"
                                     >
                                         Add
                                     </PrimaryButton>

@@ -9,6 +9,7 @@ class StoragesController extends Controller
     public function index()
     {
         return inertia('Storages', [
+            'storages_count' => Storage::count(),
             'storages' => Storage::search(request('search'))
                 ->latest()
                 ->paginate(10)
@@ -18,27 +19,29 @@ class StoragesController extends Controller
 
     public function store()
     {
-        Storage::create(request()->validate([
+        $data = request()->validate([
             'name' => 'required',
             'address' => 'required',
-        ]));
+        ]);
+
+        Storage::create($data);
 
         return back()->with('success', 'Storage created successfully');
     }
 
     public function update(Storage $storage)
     {
-        $attributes = request()->validate([
+        $data = request()->validate([
             'name' => 'required',
             'address' => 'required',
         ]);
 
-        $storage->update($attributes);
+        $storage->update($data);
 
         return back()->with('success', 'Storage updated successfully');
     }
 
-    public function destory(Storage $storage)
+    public function destroy(Storage $storage)
     {
         $storage->delete();
 

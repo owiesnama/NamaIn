@@ -22,8 +22,8 @@ class StorageFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->sentence(4),
-            'address' => $this->faker->text,
+            'name' => $this->faker->streetAddress,
+            'address' => $this->faker->address,
         ];
     }
 }

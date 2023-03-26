@@ -30,7 +30,7 @@
 <template>
     <AppLayout title="Customers">
         <section>
-            <div class="w-full sm:flex sm:items-center sm:justify-between">
+            <div class="w-full lg:flex lg:items-end lg:justify-between">
                 <div>
                     <div class="flex items-center gap-x-3">
                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Customers</h2>
@@ -49,15 +49,31 @@
                             v-model="search"
                             type="text"
                             placeholder="Search here ..." 
-                            class="block w-full py-1.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                            class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         >
                     </div>
                 </div>
                 
-                <NewCustomer></NewCustomer>
+                <div class="mt-4 sm:flex sm:items-center sm:justify-between sm:gap-x-4 lg:mt-0">
+                    <div class="flex overflow-hidden bg-white border divide-x rounded-lg md:w-auto sm:w-1/2 dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700">
+                        <button class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">
+                            View all
+                        </button>
+
+                        <button class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
+                            Untrash
+                        </button>
+
+                        <button class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">
+                            Trash
+                        </button>
+                    </div>
+
+                    <NewCustomer></NewCustomer>
+                </div>
             </div>
 
-            <div class="flex flex-col mt-6">
+            <div class="flex flex-col mt-8">
                 <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
                     <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
                         <div class="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700">
@@ -82,6 +98,10 @@
 
                                         <th scope="col" class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
                                             Added Time
+                                        </th>
+
+                                        <th scope="col" class="relative py-3.5 px-8">
+                                            <span class="sr-only">actions</span>
                                         </th>
                                     </tr>
                                 </thead>
@@ -116,6 +136,28 @@
                                                 class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
                                                 v-text="customer.created_at"
                                             ></td>
+
+                                            <td class="relative px-8 py-3 text-sm font-medium text-right whitespace-nowrap">
+                                                <div class="flex items-center justify-end gap-x-6">
+                                                    <a href="#" class="inline-flex items-center text-gray-600 gap-x-1 hover:text-yellow-500">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                        </svg>
+
+                                                        <span>Edit</span>
+                                                    </a>
+                                                    
+                                                    <form method="POST" action="#">
+                                                        <button class="inline-flex items-center text-gray-600 gap-x-1 hover:text-red-500 focus:outline-none">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                            </svg>
+
+                                                            <span>Delete</span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
                                         </tr>
                                     </template>
                                 </tbody>
