@@ -6,7 +6,7 @@ use App\Enums\ChequeStatus;
 use App\Filters\ChequeFilter;
 use App\Models\Cheque;
 use App\Models\Customer;
-use App\Models\Vendor;
+use App\Models\Supplier;
 
 class ChequesController extends Controller
 {
@@ -23,7 +23,7 @@ class ChequesController extends Controller
 
     public function create()
     {
-        $payees = Customer::all()->concat(Vendor::all())->map(function ($payee) {
+        $payees = Customer::all()->concat(Supplier::all())->map(function ($payee) {
             $payee->type = get_class($payee);
             $payee->type_string = class_basename($payee);
 

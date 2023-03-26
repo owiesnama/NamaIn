@@ -6,14 +6,14 @@ use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
-use App\Models\Vendor;
+use App\Models\Supplier;
 
 class PurchasesController extends Controller
 {
     public function index()
     {
         return inertia('Purchases/Index', [
-            'invoices' => Invoice::where('invoicable_type', Vendor::class)->with('details')->paginate(10)->withQueryString(),
+            'invoices' => Invoice::where('invoicable_type', Supplier::class)->with('details')->paginate(10)->withQueryString(),
             'storages' => Storage::all(),
         ]);
     }

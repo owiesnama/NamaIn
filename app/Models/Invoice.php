@@ -18,7 +18,7 @@ class Invoice extends BaseModel
 
     public static function purchase($attributes)
     {
-        $invoice = static::createInvoiceFor(Vendor::class, $attributes);
+        $invoice = static::createInvoiceFor(Supplier::class, $attributes);
         $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
             unset($prodcut['product']);

@@ -8,7 +8,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
-use App\Models\Vendor;
+use App\Models\Supplier;
 use Faker\Generator;
 use Illuminate\Database\Seeder;
 
@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
         $faker = app()->make(Generator::class);
 
         $customers = Customer::factory(32)->create();
-        $vendors = Vendor::factory(10)->create();
+        $vendors = Supplier::factory(10)->create();
         $products = Product::factory(10)->create();
 
         $customers->concat($vendors)->each(function ($customer) use ($faker) {
