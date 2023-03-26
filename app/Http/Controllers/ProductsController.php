@@ -24,7 +24,7 @@ class ProductsController extends Controller
         $data = request()->validate([
             'name' => 'required',
             'cost' => 'required|numeric|gt:0',
-            'expire_date' => 'required|strtotime',
+            'expire_date' => 'required',
             'units' => 'array|min:1',
             'units.*.name' => 'required',
             'units.*.conversionFactor' => 'required|numeric|gt:0',
@@ -45,7 +45,7 @@ class ProductsController extends Controller
 
         $product->units()->createMany($units->toArray());
 
-        return redirect()->route('products.index')->with('success', 'A Product has been Created');
+        return redirect()->route('products.index')->with('success', 'Product has been Created Successfully');
     }
 
     public function import()

@@ -60,7 +60,7 @@ export default {
 
         setTimeout(() => {
             this.show = false;
-        }, 2000);
+        }, 3000);
       },
       deep: true,
     },

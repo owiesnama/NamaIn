@@ -8,22 +8,16 @@
 
     let show = ref(false);
 
-    let product = useForm({
+    let storage = useForm({
         name: "",
-        cost: 50,
-        expire_date: "",
-        units: [{ name: "", conversionFactor: "" }],
+        address: "",
     });
 
-    const addUnit = () => {
-        product.units.push({ name: "", conversionFactor: "" });
-    };
-
     const save = () => {
-        product.post(route("products.store"), {
+        storage.post(route("storages.store"), {
             preserveState: true,
             onSuccess: () => {
-                product.reset();
+                storage.reset();
 
                 show.value = false;
             },
@@ -31,7 +25,7 @@
     };
 
     let cancel = () => {
-        product.reset();
+        storage.reset();
         show.value = false;
     };
 </script>
@@ -42,7 +36,7 @@
             class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors duration-200 font-bold rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
             @click="show = true"
         >
-            + Add New Product
+            + Add New Storage
         </button>
 
         <div
@@ -84,8 +78,9 @@
                             class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
                         >
                             <h1 class="font-semibold text-gray-800">
-                                Add New Product
+                                Add New storage
                             </h1>
+
                             <p class="mt-1 text-sm text-gray-500">
                                 Lorem ipsum dolor sit, amet consectetur
                                 adipisicing elit.
@@ -99,7 +94,7 @@
                                     />
                                     <TextInput
                                         id="name"
-                                        v-model="product.name"
+                                        v-model="storage.name"
                                         type="text"
                                         class="block w-full mt-1"
                                         required
@@ -107,81 +102,26 @@
                                     />
                                     <InputError
                                         class="mt-2"
-                                        :message="product.errors.name"
+                                        :message="storage.errors.name"
                                     />
                                 </div>
 
                                 <div class="mt-4">
                                     <InputLabel
-                                        for="cost"
-                                        value="cost"
+                                        for="address"
+                                        value="address"
                                     />
                                     <TextInput
-                                        id="cost"
-                                        v-model="product.cost"
+                                        id="address"
+                                        v-model="storage.address"
                                         type="text"
                                         class="block w-full mt-1"
                                         required
                                     />
                                     <InputError
                                         class="mt-2"
-                                        :message="product.errors.cost"
+                                        :message="storage.errors.address"
                                     />
-                                </div>
-
-                                <div class="mt-4">
-                                    <InputLabel
-                                        for="expire_date"
-                                        value="Expire Date"
-                                    />
-                                    <TextInput
-                                        id="expire_date"
-                                        v-model="product.expire_date"
-                                        type="date"
-                                        class="block w-full mt-1"
-                                        required
-                                    />
-                                    <InputError
-                                        class="mt-2"
-                                        :message="product.errors.expire_date"
-                                    />
-                                </div>
-
-                                <div class="mt-4">
-                                    <InputLabel
-                                        for="unit"
-                                        value="Unit"
-                                    />
-
-                                    <div
-                                        v-for="(unit, index) in product.units"
-                                        :key="`unit-` + index"
-                                        class="mt-1 space-y-4"
-                                    >
-                                        <TextInput
-                                            v-model="unit.name"
-                                            class="w-full focus:outline-none"
-                                            placeholder="Unit eg: box"
-                                        />
-
-                                        <TextInput
-                                            v-model="unit.conversionFactor"
-                                            class="w-full focus:outline-none"
-                                            type="number"
-                                            min="1"
-                                            placeholder="Unit conversion factor"
-                                        />
-
-                                        <button
-                                            type="button"
-                                            v-if="index == product.units.length - 1"
-                                            @click="addUnit"
-                                            class="px-4 py-2.5 bg-gray-100 rounded-lg w-full text-sm font-semibold"
-                                        >
-                                            Add Unit
-                                        </button
-                                        >
-                                    </div>
                                 </div>
 
                                 <div class="flex items-center mt-6 gap-x-4">
@@ -196,9 +136,9 @@
                                     <PrimaryButton
                                         class="w-1/2 font-semibold"
                                         :class="{
-                                            'opacity-25': product.processing,
+                                            'opacity-25': storage.processing,
                                         }"
-                                        :disabled="product.processing"
+                                        :disabled="storage.processing"
                                     >
                                         Add
                                     </PrimaryButton>

@@ -13,7 +13,7 @@
 <template>
     <label
         :for="id"
-        class="inline-flex items-center px-4 py-2.5 text-sm font-semibold tracking-widest text-gray-700 capitalize transition border border-gray-200 rounded-lg cursor-pointer gap-x-3 hover:bg-gray-50 active:bg-gray-200 focus:outline-none focus:border-gray-200 focus:ring focus:ring-gray-300 disabled:opacity-25"
+        class="inline-flex mt-4 w-full sm:w-auto sm:mt-0 justify-center items-center px-4 py-2.5 text-sm font-semibold tracking-widest text-gray-700 capitalize transition border border-gray-200 rounded-lg cursor-pointer gap-x-3 hover:bg-gray-50 active:bg-gray-200 focus:outline-none focus:border-gray-200 focus:ring focus:ring-gray-300 disabled:opacity-25"
         :class="{ 'outline-none border-blue-300 shadow-outline-blue': focused }"
     >
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

@@ -36,7 +36,7 @@
 <template>
     <AppLayout title="Products">
         <section>
-            <div class="w-full sm:flex sm:items-end sm:justify-between">
+            <div class="w-full lg:flex lg:items-end lg:justify-between">
                 <div>
                     <div class="flex items-center gap-x-3">
                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Products</h2>
@@ -55,13 +55,27 @@
                             v-model="search"
                             type="text"
                             placeholder="Search here ..." 
-                            class="block w-full py-2.5 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                            class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         >
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-x-4">
-                    <FileUploadButton download @input="submit">Import from spreadsheed</FileUploadButton>
+                <div class="mt-4 sm:flex sm:items-center sm:justify-between sm:gap-x-4 lg:mt-0">
+                    <div class="flex overflow-hidden bg-white border divide-x rounded-lg md:w-auto sm:w-1/2 dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700">
+                        <button class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">
+                            View all
+                        </button>
+
+                        <button class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300">
+                            Untrash
+                        </button>
+
+                        <button class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100">
+                            Trash
+                        </button>
+                    </div>
+
+                    <FileUploadButton download @input="submit">Import</FileUploadButton>
 
                     <NewProduct></NewProduct>
                 </div>
@@ -122,11 +136,14 @@
                                             </td>
 
                                             <th class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap">
-                                                <span :class="product.expired_at > 0 ? 'text-emerald-500' : 'text-red-500'">
-                                                    {{ product.expired_at }}
+                                                <span class="text-emerald-500" v-show="product.expired_at > 0">
+                                                    ({{ product.expire_date }}) Not Expire
+                                                </span>
+
+                                                <span class="text-red-500" v-show="product.expired_at < 0">
+                                                    ({{ product.expire_date }}) Expired
                                                 </span>
                                                 &nbsp;
-                                                <span class="font-light text-gray-500">({{ product.expire_date }})</span>
                                             </th>
 
                                             <td

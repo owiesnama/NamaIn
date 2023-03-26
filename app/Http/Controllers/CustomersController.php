@@ -28,6 +28,6 @@ class CustomersController extends Controller
         Customer::create($data);
 
         return redirect()->route('customers.index')
-            ->with('success', 'Customer created successfully', );
+            ->with('success', 'Customer Created Successfully', );
     }
 }

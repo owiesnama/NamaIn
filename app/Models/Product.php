@@ -27,11 +27,6 @@ class Product extends BaseModel
         return $this->hasMany(Unit::class);
     }
 
-    public function getCreatedAtAttribute()
-    {
-        return Carbon::parse($this->attributes['created_at'])->diffForHumans();
-    }
-
     public function getExpireDateAttribute()
     {
         return Carbon::createFromFormat('Y-m-d H:i:s', $this->attributes['expire_date'])->format('Y-m-d');

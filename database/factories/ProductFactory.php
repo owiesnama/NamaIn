@@ -23,7 +23,7 @@ class ProductFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'cost' => $this->faker->numberBetween(400, 100000),
+            'cost' => $this->faker->numberBetween(400, 1000),
             'expire_date' => $this->faker->dateTime(),
         ];
     }
