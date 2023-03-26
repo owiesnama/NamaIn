@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends BaseModel
 {
-    use HasFactory;
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * The attributes that should be cast to native types.
@@ -20,20 +18,25 @@ class Product extends BaseModel
         'expire_date' => 'date',
     ];
 
-    protected $appends = ['expired_at'];
+    public function stock()
+    {
+        return $this->belongsToMany(Storage::class)->withPivot([
+            'quantity',
+        ])->withTimestamps();
+    }
 
     public function units()
     {
         return $this->hasMany(Unit::class);
     }
 
-    public function getExpireDateAttribute()
+    public function quantityOnHand()
     {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $this->attributes['expire_date'])->format('Y-m-d');
+        return $this->stock->sum('pivot.quantity');
     }
 
-    public function getExpiredAtAttribute()
+    public function isRunningLow()
     {
-        return now()->diffInDays($this->attributes['expire_date'], false);
+        return $this->quantityOnHand() <= config('namain.min_qunantity_acceptable');
     }
 }

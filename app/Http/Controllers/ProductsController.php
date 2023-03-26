@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Product;
 use App\Imports\ProductImport;
+use App\Models\Product;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProductsController extends Controller

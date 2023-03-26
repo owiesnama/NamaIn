@@ -22,6 +22,7 @@ class Invoice extends BaseModel
         $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
             unset($prodcut['product']);
+            unset($prodcut['unit']);
 
             return $prodcut;
         }));
@@ -36,6 +37,7 @@ class Invoice extends BaseModel
             $prodcut['product_id'] = $prodcut['product'];
             $prodcut['unit_id'] = $prodcut['unit'] ?? null;
             unset($prodcut['product']);
+            unset($prodcut['unit']);
 
             return $prodcut;
         }));
@@ -62,6 +64,18 @@ class Invoice extends BaseModel
         $this->fresh()
             ->details()
             ->createMany($products);
+    }
+
+    public static function partialInvoice($invoice, $details)
+    {
+        $partialInvoice = (new static)->fill($invoice->toArray());
+        unset($partialInvoice->id);
+        unset($partialInvoice->details);
+        $partialInvoice->main_invoice = $invoice->id;
+        $partialInvoice->save();
+        $partialInvoice->fresh()->details()->saveMany($details);
+
+        return $partialInvoice;
     }
 
     public function markAsUsed($used = true)

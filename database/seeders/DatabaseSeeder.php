@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use Faker\Generator;
-use App\Models\Vendor;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
-use App\Models\Customer;
+use App\Models\Vendor;
+use Faker\Generator;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
 
         Invoice::sale($attributes)->save();
         Invoice::purchase($attributes)->save();
-        
+
         Storage::factory(10)->create();
 
         \App\Models\User::factory()->create([
