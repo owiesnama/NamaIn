@@ -41,7 +41,7 @@ class StoragesController extends Controller
         return back()->with('success', 'Storage updated successfully');
     }
 
-    public function destory(Storage $storage)
+    public function destroy(Storage $storage)
     {
         $storage->delete();
 
