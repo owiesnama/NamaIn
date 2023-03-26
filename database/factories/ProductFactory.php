@@ -22,7 +22,7 @@ class ProductFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name(),
+            'name' => $this->faker->name,
             'cost' => $this->faker->numberBetween(400, 100000),
             'expire_date' => $this->faker->dateTime(),
         ];

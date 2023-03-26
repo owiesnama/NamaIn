@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\ProductImport;
 use App\Models\Product;
+use App\Imports\ProductImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProductsController extends Controller
@@ -11,16 +11,12 @@ class ProductsController extends Controller
     public function index()
     {
         return inertia('Products/Index', [
+            'products_count' => Product::count(),
             'products' => Product::search(request('search'))
                 ->latest()
-                ->paginate(10)
+                ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
-    }
-
-    public function create()
-    {
-        return inertia('Products/Create');
     }
 
     public function store()

@@ -34,13 +34,13 @@
 <template>
     <div>
         <button
-            class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
+            class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors duration-200 font-bold rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
             @click="show = true"
         >
-            + Add New Customer
+            + Add New Product
         </button>
 
-        <div
+        <!-- <div
             class="relative z-50"
             aria-labelledby="modal-title"
             role="dialog"
@@ -171,6 +171,6 @@
                     </div>
                 </div>
             </transition>
-        </div>
+        </div> -->
     </div>
 </template>
