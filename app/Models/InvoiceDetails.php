@@ -13,13 +13,13 @@ class InvoiceDetails extends BaseModel
 
     public $with = ['product', 'unit'];
 
-
     public function baseQuantity(): Attribute
     {
         return Attribute::make(
-            get: fn () => (!$this->unit) ? $this->quantity : $this->quantity * $this->unit->conversion_factor,
+            get: fn () => (! $this->unit) ? $this->quantity : $this->quantity * $this->unit->conversion_factor,
         );
     }
+
     public function product()
     {
         return $this->belongsTo(Product::class);

@@ -41,7 +41,7 @@ class Storage extends BaseModel
 
     public function hasNoStockFor($productId): bool
     {
-        return !$this->hasStockFor($productId);
+        return ! $this->hasStockFor($productId);
     }
 
     public function hasEnoughStockFor($productId, $quantity): bool
@@ -55,7 +55,7 @@ class Storage extends BaseModel
 
     public function hasNoEnoughStockFor($productId, $quantity)
     {
-       return ! $this->hasEnoughStockFor($productId,$quantity);
+        return ! $this->hasEnoughStockFor($productId, $quantity);
     }
 
     public function addStock($attributes)

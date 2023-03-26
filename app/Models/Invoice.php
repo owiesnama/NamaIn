@@ -74,6 +74,7 @@ class Invoice extends BaseModel
         $partialInvoice->main_invoice = $invoice->id;
         $partialInvoice->save();
         $partialInvoice->fresh()->details()->saveMany($details);
+
         return $partialInvoice;
     }
 
