@@ -21,20 +21,22 @@ class ProductsController extends Controller
 
     public function store()
     {
-        $attributes = request()->validate([
+        $data = request()->validate([
             'name' => 'required',
             'cost' => 'required|numeric|gt:0',
+            'expire_date' => 'required|strtotime',
             'units' => 'array|min:1',
             'units.*.name' => 'required',
             'units.*.conversionFactor' => 'required|numeric|gt:0',
         ]);
 
         $product = Product::create([
-            'name' => $attributes['name'],
-            'cost' => $attributes['cost'],
+            'name' => $data['name'],
+            'cost' => $data['cost'],
+            'expire_date' => $data['expire_date'],
         ]);
 
-        $units = collect($attributes['units'])->map(function ($unit) {
+        $units = collect($data['units'])->map(function ($unit) {
             return [
                 'name' => $unit['name'],
                 'conversion_factor' => $unit['conversionFactor'],
