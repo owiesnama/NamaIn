@@ -47,13 +47,13 @@ class ProductsController extends Controller
 
         $product->units()->createMany($units->toArray());
 
-        return redirect()->route('products.index')->with('flash', ['message' => 'A Product has been added']);
+        return redirect()->route('products.index')->with('success', 'A Product has been Created');
     }
 
     public function import()
     {
         Excel::import(new ProductImport(), request()->file('file'));
 
-        return back()->with('flash', ['message' => 'Imported successfully']);
+        return back()->with('success', 'Imported successfully');
     }
 }

@@ -11,9 +11,11 @@ class ChequeStatusController extends Controller
     public function update(Cheque $cheque)
     {
         request()->validate(['status' => ['required', new Enum(ChequeStatus::class)]]);
+
         $cheque->status = ChequeStatus::from(request('status'));
+
         $cheque->save();
 
-        return back()->with('flash', ['message' => 'Cheque status updated']);
+        return back()->with('success', 'Cheque status updated');
     }
 }

@@ -1,60 +1,73 @@
-<script setup>
-    import { usePage } from "@inertiajs/vue3";
-    import { ref, watch,computed } from "vue";
-    const show = ref(true);
-    const props = computed(() => usePage().props)
-    watch(props, () => show.value.true, {
-        deep: true,
-    });
-</script>
 <template>
     <div
         class="fixed inset-0 z-50 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end"
     >
-        <Transition
-            appear
+        <transition
             enter-active-class="transition duration-300 ease-out transform"
-            enter-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-            enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-            leave-active-class="transition duration-100 ease-in"
-            leave-class="opacity-100"
-            leave-to-class="opacity-0"
+            enter-class="translate-x-20 opacity-0"
+            enter-to-class="translate-x-0 opacity-100"
+            leave-active-class="transition duration-200 ease-in transform"
+            leave-class="opacity-100 otranslate-x-0"
+            leave-to-class="translate-x-20 opacity-0"
         >
-            <div
-                v-show="$page.props.flash && show"
-                :key="new Date().getTime()"
-                class="w-full max-w-sm overflow-hidden bg-white rounded-lg shadow-lg pointer-events-auto ring-1 ring-black ring-opacity-5"
-                @mouseleave="show = false"
-            >
-                <div class="px-5 py-3">
-                    <div class="flex items-start">
-                        <div class="flex-1 w-0">
-                            <template
-                                v-if="
-                                    $page.props.flash?.title &&
-                                    $page.props.flash?.message
-                                "
-                            >
-                                <p class="font-bold text-emerald-500">
-                                    {{ $page.props.flash?.title }}
-                                </p>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    {{ $page.props.flash?.message }}
-                                </p>
-                            </template>
-                            <template v-else>
-                                <p class="text-sm font-semibold tracking-wide text-gray-800 capitalize ">
-                                    {{
-                                        $page.props.flash
-                                            ?.message ||
-                                        $page.props.flash?.title
-                                    }}
-                                </p>
-                            </template>
-                        </div>
+            <div v-show="$page.props.flash.success && show" class="w-full max-w-sm px-2 py-3 rounded-lg shadow-lg bg-emerald-500 sm:p-3">
+                <div class="flex items-center justify-between text-white">
+                    <div class="flex items-center flex-1 w-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+
+                        <p class="mx-2 font-medium tcate">
+                            {{ $page.props.flash?.success }}
+                        </p>
                     </div>
                 </div>
             </div>
-        </Transition>
+        </transition>
+
+        <transition
+            enter-active-class="transition duration-300 ease-out transform"
+            enter-class="translate-x-20 opacity-0"
+            enter-to-class="translate-x-0 opacity-100"
+            leave-active-class="transition duration-200 ease-in transform"
+            leave-class="opacity-100 otranslate-x-0"
+            leave-to-class="translate-x-20 opacity-0"
+        >
+            <div v-show="$page.props.flash.error && show" class="w-full max-w-sm px-2 py-3 bg-red-500 rounded-lg shadow-lg sm:p-3">
+                <div class="flex items-center justify-between text-white">
+                    <div class="flex items-center flex-1 w-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mx-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+
+                        <p class="mx-2 font-medium tcate">
+                            {{ $page.props.flash?.error }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </transition>
     </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      show: false,
+    }
+  },
+  watch: {
+    '$page.props.flash': {
+      handler() {
+        this.show = true;
+
+        setTimeout(() => {
+            this.show = false;
+        }, 2000);
+      },
+      deep: true,
+    },
+  },
+}
+</script>

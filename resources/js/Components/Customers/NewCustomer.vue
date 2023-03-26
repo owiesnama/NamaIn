@@ -19,8 +19,7 @@
             preserveState: true,
             onSuccess: () => {
                 customer.reset();
-            },
-            onFinish: () => {
+
                 show.value = false;
             },
         });

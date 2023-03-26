@@ -43,6 +43,6 @@ class ChequesController extends Controller
             'due' => request('due'),
         ]);
 
-        return redirect()->route('cheques.index')->with('flash', ['message' => 'new cheque has been registered']);
+        return redirect()->route('cheques.index')->with('success', 'New cheque has been registered');
     }
 }
