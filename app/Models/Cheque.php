@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ChequeStatus;
+use App\Filters\Filter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -34,7 +35,7 @@ class Cheque extends BaseModel
     public function amountFormated(): Attribute
     {
         return Attribute::make(
-            get: fn () => number_format($this->amount, '2').' SDG'
+            get: fn () => number_format($this->amount, '2') . ' SDG'
         );
     }
 
@@ -48,6 +49,11 @@ class Cheque extends BaseModel
     public function payee(): MorphTo
     {
         return $this->morphTo('payee', 'chequeable_type', 'chequeable_id');
+    }
+
+    public function scopeFilterUsing($query, Filter $filter)
+    {
+        return $filter->apply($query);
     }
 
     public static function forPayee($attributes)

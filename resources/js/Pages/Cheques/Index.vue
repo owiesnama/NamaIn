@@ -6,21 +6,26 @@
     import Cheque from "@/Shared/Cheque.vue";
     import SelectBox from "@/Shared/SelectBox.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import { watch } from "vue";
+    import { watch, reactive } from "vue";
     import { debounce } from "lodash";
 
     defineProps({
         cheques: Object,
         status: Object,
     });
-    let search = useQueryString("search");
-    let chequeType = useQueryString("chequeType");
+    let filters = reactive({
+        search: useQueryString("search"),
+        type: useQueryString("type"),
+        status: useQueryString("status"),
+        due: useQueryString("due"),
+    });
+
     watch(
-        [search, chequeType],
-        debounce(function ([newSearch, newChequeType]) {
+        filters,
+        debounce(function (watchedFitlers) {
             router.get(
-                route('cheques.index'),
-                { chequeType: newChequeType, search: newSearch },
+                route("cheques.index"),
+                { ...watchedFitlers },
                 { preserveState: true }
             );
         }, 300)
@@ -41,18 +46,24 @@
                     <form class="flex justify-between items-center">
                         <div class="space-x-2">
                             <TextInput
-                                v-model="search"
+                                v-model="filters.search"
                                 type="text"
                                 placeholder="Search here ..."
                             ></TextInput>
                             <SelectBox
-                                v-model="chequeType"
+                                v-model="filters.type"
                                 class="w-52"
                             >
                                 <option value="">All</option>
                                 <option value="1">Credit</option>
                                 <option value="0">Debit</option>
                             </SelectBox>
+
+                            <TextInput
+                                v-model="filters.due"
+                                type="date"
+                                placeholder="Due before.."
+                            />
                         </div>
                         <div>
                             <Link
