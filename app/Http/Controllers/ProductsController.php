@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Imports\ProductImport;
 use App\Models\Product;
+use App\Imports\ProductImport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ProductsController extends Controller
@@ -11,34 +11,32 @@ class ProductsController extends Controller
     public function index()
     {
         return inertia('Products/Index', [
+            'products_count' => Product::count(),
             'products' => Product::search(request('search'))
                 ->latest()
-                ->paginate(10)
+                ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
     }
 
-    public function create()
-    {
-        return inertia('Products/Create');
-    }
-
     public function store()
     {
-        $attributes = request()->validate([
+        $data = request()->validate([
             'name' => 'required',
             'cost' => 'required|numeric|gt:0',
+            'expire_date' => 'required',
             'units' => 'array|min:1',
             'units.*.name' => 'required',
             'units.*.conversionFactor' => 'required|numeric|gt:0',
         ]);
 
         $product = Product::create([
-            'name' => $attributes['name'],
-            'cost' => $attributes['cost'],
+            'name' => $data['name'],
+            'cost' => $data['cost'],
+            'expire_date' => $data['expire_date'],
         ]);
 
-        $units = collect($attributes['units'])->map(function ($unit) {
+        $units = collect($data['units'])->map(function ($unit) {
             return [
                 'name' => $unit['name'],
                 'conversion_factor' => $unit['conversionFactor'],
@@ -47,7 +45,7 @@ class ProductsController extends Controller
 
         $product->units()->createMany($units->toArray());
 
-        return redirect()->route('products.index')->with('success', 'A Product has been Created');
+        return redirect()->route('products.index')->with('success', 'Product has been Created Successfully');
     }
 
     public function import()
