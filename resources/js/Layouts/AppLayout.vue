@@ -6,7 +6,6 @@
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import NavLink from "@/Components/NavLink.vue";
-    import ResponsiveNavLink from "@/Components/ResponsiveNavLink.vue";
     import Flash from "@/Shared/Flash.vue";
 
     defineProps({
@@ -39,7 +38,7 @@
         <Banner />
 
         <div class="flex h-screen">
-            <div x-cloak :class="showingSidebar ? 'block' : 'hidden'" @click="showingSidebar = false" class="fixed inset-0 z-20 transition-opacity bg-gray-200/50 xl:hidden"></div>
+            <div v-cloak :class="showingSidebar ? 'block' : 'hidden'" @click="showingSidebar = false" class="fixed inset-0 z-20 transition-opacity bg-gray-200/50 xl:hidden"></div>
             
             <aside :class="showingSidebar ? 'translate-x-0 ease-in' : '-translate-x-full ease-out'" class="fixed inset-y-0 left-0 z-30 w-64 px-5 py-8 overflow-y-auto transition duration-200 transform bg-white border-r border-gray-200 xl:translate-x-0 xl:relative xl:inset-0 rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-700">
                 <Link :href="route('dashboard')">

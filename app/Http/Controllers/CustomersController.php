@@ -27,9 +27,7 @@ class CustomersController extends Controller
 
         Customer::create($data);
 
-        return redirect()->route('customers.index')->with('flash', [
-            'title' => 'Customer Created 🎉',
-            'message' => 'Customer created successfully',
-        ]);
+        return redirect()->route('customers.index')
+            ->with('success', 'Customer created successfully', );
     }
 }

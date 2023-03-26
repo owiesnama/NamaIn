@@ -18,7 +18,7 @@ class StockController extends Controller
         });
         $invoice->markAsUsed();
 
-        return back()->with('flash', ['message' => "Invoice items has being added to storage: {$storage->name} "]);
+        return back()->with('success', "Invoice items has being added to storage: {$storage->name} ");
     }
 
     public function deduct(Storage $storage)

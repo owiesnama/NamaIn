@@ -23,10 +23,7 @@ class StoragesController extends Controller
             'address' => 'required',
         ]));
 
-        return back()->with('flash', [
-            'title' => 'Storage Created 🎉',
-            'message' => 'Storage created successfully',
-        ]);
+        return back()->with('success', 'Storage created successfully');
     }
 
     public function update(Storage $storage)
@@ -38,19 +35,13 @@ class StoragesController extends Controller
 
         $storage->update($attributes);
 
-        return back()->with('flash', [
-            'title' => 'Storage updated 🎉',
-            'message' => 'Storage updated successfully',
-        ]);
+        return back()->with('success', 'Storage updated successfully');
     }
 
     public function destory(Storage $storage)
     {
         $storage->delete();
 
-        return back()->with('flash', [
-            'title' => 'Storage Created 🎉',
-            'message' => 'Storage created successfully',
-        ]);
+        return back()->with('success', 'Storage Deleted successfully');
     }
 }
