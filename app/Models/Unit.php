@@ -8,5 +8,5 @@ class Unit extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = ['name','conversion_factor'];
+    protected $fillable = ['name', 'conversion_factor'];
 }

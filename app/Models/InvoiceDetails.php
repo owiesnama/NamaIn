@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class InvoiceDetails extends BaseModel
 {
     use HasFactory;
+
     protected static $unguarded = false;
-    protected $fillable = ['product_id', 'quantity' ,'base_quantity', 'unit_id', 'price', 'description'];
+
+    protected $fillable = ['product_id', 'quantity', 'base_quantity', 'unit_id', 'price', 'description'];
 
     public $with = ['product', 'unit'];
 

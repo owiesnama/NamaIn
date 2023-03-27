@@ -11,9 +11,9 @@ class Invoice extends BaseModel
     use HasFactory, SoftDeletes;
 
     protected $casts = [
-        'status' => InvoiceStatus::class
+        'status' => InvoiceStatus::class,
     ];
-    
+
     public function details()
     {
         return $this->hasMany(InvoiceDetails::class);
@@ -29,6 +29,7 @@ class Invoice extends BaseModel
             if ($unitId) {
                 $prodcut['base_quantity'] = Unit::find($unitId)->conversion_factor * $prodcut['quantity'];
             }
+
             return $prodcut;
         }));
 
@@ -73,11 +74,11 @@ class Invoice extends BaseModel
             ->createMany($products);
     }
 
-
     public function markAs(InvoiceStatus $status)
     {
         $this->status = $status;
         $this->save();
+
         return $this;
     }
 }
