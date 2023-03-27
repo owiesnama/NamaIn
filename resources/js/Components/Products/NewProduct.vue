@@ -81,7 +81,7 @@
                         class="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0"
                     >
                         <div
-                            class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
+                            class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-xl sm:p-6"
                         >
                             <h1 class="font-semibold text-gray-800">
                                 Add New Product
@@ -92,95 +92,110 @@
                             </p>
 
                             <form class="mt-4" @submit.prevent="save">
-                                <div>
-                                    <InputLabel
-                                        for="name"
-                                        value="Name"
-                                    />
-                                    <TextInput
-                                        id="name"
-                                        v-model="product.name"
-                                        type="text"
-                                        class="block w-full mt-1"
-                                        required
-                                        autofocus
-                                    />
-                                    <InputError
-                                        class="mt-2"
-                                        :message="product.errors.name"
-                                    />
-                                </div>
-
-                                <div class="mt-4">
-                                    <InputLabel
-                                        for="cost"
-                                        value="cost"
-                                    />
-                                    <TextInput
-                                        id="cost"
-                                        v-model="product.cost"
-                                        type="text"
-                                        class="block w-full mt-1"
-                                        required
-                                    />
-                                    <InputError
-                                        class="mt-2"
-                                        :message="product.errors.cost"
-                                    />
-                                </div>
-
-                                <div class="mt-4">
-                                    <InputLabel
-                                        for="expire_date"
-                                        value="Expire Date"
-                                    />
-                                    <TextInput
-                                        id="expire_date"
-                                        v-model="product.expire_date"
-                                        type="date"
-                                        class="block w-full mt-1"
-                                        required
-                                    />
-                                    <InputError
-                                        class="mt-2"
-                                        :message="product.errors.expire_date"
-                                    />
-                                </div>
-
-                                <div class="mt-4">
-                                    <InputLabel
-                                        for="unit"
-                                        value="Unit"
-                                    />
-
-                                    <div
+                                <div class="md:flex md:gap-x-6">
+                                    <div class="md:w-1/2">
+                                        <div>
+                                            <InputLabel
+                                                for="name"
+                                                value="Name"
+                                            />
+                                            <TextInput
+                                                id="name"
+                                                v-model="product.name"
+                                                type="text"
+                                                class="block w-full mt-1"
+                                                required
+                                                autofocus
+                                            />
+                                            <InputError
+                                                class="mt-2"
+                                                :message="product.errors.name"
+                                            />
+                                        </div>
+        
+                                        <div class="mt-4">
+                                            <InputLabel
+                                                for="cost"
+                                                value="cost"
+                                            />
+                                            <TextInput
+                                                id="cost"
+                                                v-model="product.cost"
+                                                type="text"
+                                                class="block w-full mt-1"
+                                                required
+                                            />
+                                            <InputError
+                                                class="mt-2"
+                                                :message="product.errors.cost"
+                                            />
+                                        </div>
+        
+                                        <div class="mt-4">
+                                            <InputLabel
+                                                for="expire_date"
+                                                value="Expire Date"
+                                            />
+                                            <TextInput
+                                                id="expire_date"
+                                                v-model="product.expire_date"
+                                                type="date"
+                                                class="block w-full mt-1"
+                                                required
+                                            />
+                                            <InputError
+                                                class="mt-2"
+                                                :message="product.errors.expire_date"
+                                            />
+                                        </div>
+        
+                                        <div class="mt-4">
+                                            
+                                        </div>
+                                    </div>
+    
+                                    <div class="h-56 overflow-y-auto md:w-1/2 md:px-2 ">
+                                        <div
                                         v-for="(unit, index) in product.units"
                                         :key="`unit-` + index"
-                                        class="mt-1 space-y-4"
-                                    >
-                                        <TextInput
-                                            v-model="unit.name"
-                                            class="w-full focus:outline-none"
-                                            placeholder="Unit eg: box"
-                                        />
-
-                                        <TextInput
-                                            v-model="unit.conversionFactor"
-                                            class="w-full focus:outline-none"
-                                            type="number"
-                                            min="1"
-                                            placeholder="Unit conversion factor"
-                                        />
-
-                                        <button
-                                            type="button"
-                                            v-if="index == product.units.length - 1"
-                                            @click="addUnit"
-                                            class="px-4 py-2.5 bg-gray-100 rounded-lg w-full text-sm font-semibold"
+                                        class="mt-1 mb-4 space-y-4"
                                         >
-                                            Add Unit
-                                        </button
-                                        >
+                                            <div>
+                                                <InputLabel
+                                                    for="unit name"
+                                                    value="Unit Name"
+                                                />
+                                                <TextInput
+                                                    v-model="unit.name"
+                                                    class="w-full focus:outline-none"
+                                                    placeholder="Unit eg: box"
+                                                />
+                                            </div>
+                                            
+                                            <div>
+                                                <InputLabel
+                                                    for="conversionFactor"
+                                                    value="Unit Conversion Factor"
+                                                />
+                                                <TextInput
+                                                    v-model="unit.conversionFactor"
+                                                    class="w-full mt-1 focus:outline-none"
+                                                    type="number"
+                                                    min="1"
+                                                    placeholder="Unit conversion factor"
+                                                />
+                                            </div>
+    
+                                            <button
+                                                type="button"
+                                                v-if="index == product.units.length - 1"
+                                                @click="addUnit"
+                                                class="px-4 py-2.5 bg-gray-100 rounded-lg w-full text-sm font-semibold"
+                                            >
+                                                Add Unit
+                                            </button
+                                            >
+                                        </div>
                                     </div>
                                 </div>
 
