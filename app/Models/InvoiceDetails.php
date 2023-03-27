@@ -8,17 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class InvoiceDetails extends BaseModel
 {
     use HasFactory;
-
-    public $guarded = [];
+    protected static $unguarded = false;
+    protected $fillable = ['product_id', 'quantity' ,'base_quantity', 'unit_id', 'price', 'description'];
 
     public $with = ['product', 'unit'];
-
-    public function baseQuantity(): Attribute
-    {
-        return Attribute::make(
-            get: fn () => (! $this->unit) ? $this->quantity : $this->quantity * $this->unit->conversion_factor,
-        );
-    }
 
     public function product()
     {

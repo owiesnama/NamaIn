@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -9,8 +10,10 @@ class Invoice extends BaseModel
 {
     use HasFactory, SoftDeletes;
 
-    public $guarded = [];
-
+    protected $casts = [
+        'status' => InvoiceStatus::class
+    ];
+    
     public function details()
     {
         return $this->hasMany(InvoiceDetails::class);
@@ -21,9 +24,11 @@ class Invoice extends BaseModel
         $invoice = static::createInvoiceFor(Supplier::class, $attributes);
         $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
-            unset($prodcut['product']);
-            unset($prodcut['unit']);
-
+            $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
+            $prodcut['base_quantity'] = $prodcut['quantity'];
+            if ($unitId) {
+                $prodcut['base_quantity'] = Unit::find($unitId)->conversion_factor * $prodcut['quantity'];
+            }
             return $prodcut;
         }));
 
@@ -35,9 +40,11 @@ class Invoice extends BaseModel
         $invoice = static::createInvoiceFor(Customer::class, $attributes);
         $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
-            $prodcut['unit_id'] = $prodcut['unit'] ?? null;
-            unset($prodcut['product']);
-            unset($prodcut['unit']);
+            $prodcut['base_quantity'] = $prodcut['quantity'];
+            $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
+            if ($unitId) {
+                $prodcut['base_quantity'] = Unit::find($unitId)->conversion_factor * $prodcut['quantity'];
+            }
 
             return $prodcut;
         }));
@@ -66,23 +73,11 @@ class Invoice extends BaseModel
             ->createMany($products);
     }
 
-    public static function partialInvoice($invoice, $details)
-    {
-        $partialInvoice = (new static)->fill($invoice->toArray());
-        unset($partialInvoice->id);
-        unset($partialInvoice->details);
-        $partialInvoice->main_invoice = $invoice->id;
-        $partialInvoice->save();
-        $partialInvoice->fresh()->details()->saveMany($details);
 
-        return $partialInvoice;
-    }
-
-    public function markAsUsed($used = true)
+    public function markAs(InvoiceStatus $status)
     {
-        $this->has_used = $used;
+        $this->status = $status;
         $this->save();
-
         return $this;
     }
 }

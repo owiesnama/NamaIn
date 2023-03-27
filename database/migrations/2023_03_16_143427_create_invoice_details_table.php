@@ -19,8 +19,10 @@ return new class extends Migration
             $table->foreignId('product_id');
             $table->foreignId('unit_id')->nullable();
             $table->integer('quantity');
+            $table->integer('base_quantity')->default(0);
             $table->double('price');
             $table->text('description')->nullable();
+            $table->boolean('delivered')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

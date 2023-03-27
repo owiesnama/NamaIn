@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Storage;
 use Illuminate\Validation\ValidationException;
@@ -17,27 +18,43 @@ class StockController extends Controller
                 'quantity' => $record->base_quantity,
             ]);
         });
-        $invoice->markAsUsed();
-
+        $invoice->markAs(InvoiceStatus::Delivered);
         return back()->with('success', "Invoice items has being added to storage: {$storage->name} ");
     }
 
     public function deduct(Storage $storage)
     {
         $invoice = Invoice::find(request('invoice'));
-        if ($invoice->details->contains(fn ($record) => $storage->hasNoEnoughStockFor($record->product_id, $record->base_quantity))) {
-            throw ValidationException::withMessages([
-                'storage' => 'Storage dose not contain any product delevierable for this invoice',
-            ]);
+        $invoiceStatus = InvoiceStatus::Initial;
+        if ($invoice->details->filter(fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity))->count() == 0) {
+            throw ValidationException::withMessages(["storage" => "Error Processing Request"]);
         }
-        $invoice->details->each(function ($record) use ($storage) {
+        $invoice->details->each(function ($record) use ($storage, &$invoiceStatus) {
+            if ($storage->hasEnoughStockFor($record->product_id, $record->base_quantity)) {
+                $storage->deductStock([
+                    'product' => $record->product_id,
+                    'quantity' => $record->base_quantity,
+                ]);
+                $invoiceStatus = InvoiceStatus::Delivered;
+                return;
+            }
+
+            $remaining = $record->base_quantity - $storage->qunatityOf($record->product_id);
+            $record->base_quantity -=  $remaining;
+            $record->delivered = true;
+            $record->save();
             $storage->deductStock([
                 'product' => $record->product_id,
-                'quantity' => $record->base_quantity,
+                'quantity' => $remaining,
             ]);
+            $newRecord = $record->replicate();
+            $newRecord->delivered = false;
+            $record->quantity =  $record / $record->unit->conversion_factor;
+            $newRecord->base_quantity = $remaining;
+            $newRecord->save();
+            $invoiceStatus = InvoiceStatus::PartiallyDelivered;
         });
-        $invoice->markAsUsed();
-
+        $invoice->markAs($invoiceStatus);
         return back()->with('flash', ['success' => "Invoice items has being deducted from storage: {$storage->name} "]);
     }
 }

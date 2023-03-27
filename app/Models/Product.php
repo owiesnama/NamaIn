@@ -9,6 +9,7 @@ class Product extends BaseModel
 {
     use HasFactory, SoftDeletes;
 
+    protected $fillable = ['name','cost','expire_date'];
     /**
      * The attributes that should be cast to native types.
      *
