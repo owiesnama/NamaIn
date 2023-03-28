@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProductRequest;
 use App\Imports\ProductImport;
 use App\Models\Product;
 use Maatwebsite\Excel\Facades\Excel;
@@ -19,24 +20,11 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function store()
+    public function store(ProductRequest $request)
     {
-        $data = request()->validate([
-            'name' => 'required',
-            'cost' => 'required|numeric|gt:0',
-            'expire_date' => 'required',
-            'units' => 'array|min:1',
-            'units.*.name' => 'required',
-            'units.*.conversionFactor' => 'required|numeric|gt:0',
-        ]);
+        $product = Product::create($request->all());
 
-        $product = Product::create([
-            'name' => $data['name'],
-            'cost' => $data['cost'],
-            'expire_date' => $data['expire_date'],
-        ]);
-
-        $units = collect($data['units'])->map(function ($unit) {
+        $units = collect($request->get('units'))->map(function ($unit) {
             return [
                 'name' => $unit['name'],
                 'conversion_factor' => $unit['conversionFactor'],
@@ -46,6 +34,20 @@ class ProductsController extends Controller
         $product->units()->createMany($units->toArray());
 
         return redirect()->route('products.index')->with('success', 'Product has been Created Successfully');
+    }
+
+    public function update(Product $product, ProductRequest $request)
+    {
+        $product->update($request->all());
+
+        return back()->with('success', 'Product updated successfully');
+    }
+
+    public function destroy(Product $product)
+    {
+        $product->delete();
+
+        return back()->with('success', 'Product Deleted successfully');
     }
 
     public function import()

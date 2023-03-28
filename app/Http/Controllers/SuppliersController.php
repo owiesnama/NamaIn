@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\SupplierRequest;
 use App\Models\Supplier;
 
 class SuppliersController extends Controller
@@ -16,17 +17,25 @@ class SuppliersController extends Controller
         ]);
     }
 
-    public function store()
+    public function store(SupplierRequest $request)
     {
-        $attributes = request()->validate([
-            'name' => 'required',
-            'address' => 'required|string|min:10',
-            'phone_number' => 'required|numeric|min:10',
-        ]);
-
-        Supplier::create($attributes);
+        Supplier::create($request->all());
 
         return redirect()->route('suppliers.index')
             ->with('success', 'Customer Created Successfully');
+    }
+
+    public function update(Supplier $supplier, SupplierRequest $request)
+    {
+        $supplier->update($request->all());
+
+        return back()->with('success', 'Supplier updated successfully');
+    }
+
+    public function destroy(Supplier $supplier)
+    {
+        $supplier->delete();
+
+        return back()->with('success', 'Storage Deleted successfully');
     }
 }
