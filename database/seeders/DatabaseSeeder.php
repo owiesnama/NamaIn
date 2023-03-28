@@ -26,6 +26,13 @@ class DatabaseSeeder extends Seeder
         $customers = Customer::factory(32)->create();
         $vendors = Supplier::factory(10)->create();
         $products = Product::factory(10)->create();
+        $storages = Storage::factory(10)->create();
+
+        $storages->each(function ($storage) use ($products) {
+            $storage->stock()->attach(
+                $products->random(rand(1, 5))->pluck('id')->toArray(), ['quantity' => rand(1, 20)]
+            );
+        });
 
         $customers->concat($vendors)->each(function ($customer) use ($faker) {
             $customer->cheques()->create([
@@ -50,8 +57,6 @@ class DatabaseSeeder extends Seeder
 
         Invoice::sale($attributes)->save();
         Invoice::purchase($attributes)->save();
-
-        Storage::factory(10)->create();
 
         \App\Models\User::factory()->create([
             'name' => 'Test User',

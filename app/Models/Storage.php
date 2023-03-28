@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Storage extends BaseModel
 {
     use HasFactory, SoftDeletes;
-
+    
     /**
      * The attributes that are mass assignable.
      *
@@ -19,6 +19,8 @@ class Storage extends BaseModel
         'name',
         'address',
     ];
+
+    protected $appends = ['stockCount'];
 
     public function stock(): BelongsToMany
     {
@@ -75,5 +77,10 @@ class Storage extends BaseModel
         $stock = $this->stock()->find($attributes['product']);
 
         return (bool) $stock->pivot->decrement('quantity', $attributes['quantity']);
+    }
+
+    public function getStockCountAttribute()
+    {
+        return $this->stock->count();
     }
 }

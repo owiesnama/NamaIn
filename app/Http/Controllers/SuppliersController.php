@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SupplierRequest;
 use App\Models\Supplier;
+use App\Http\Requests\SupplierRequest;
 
 class SuppliersController extends Controller
 {
@@ -22,7 +22,7 @@ class SuppliersController extends Controller
         Supplier::create($request->all());
 
         return redirect()->route('suppliers.index')
-            ->with('success', 'Customer Created Successfully');
+            ->with('success', 'Supplier Created Successfully');
     }
 
     public function update(Supplier $supplier, SupplierRequest $request)
@@ -36,6 +36,6 @@ class SuppliersController extends Controller
     {
         $supplier->delete();
 
-        return back()->with('success', 'Storage Deleted successfully');
+        return back()->with('success', 'Supplier Deleted successfully');
     }
 }

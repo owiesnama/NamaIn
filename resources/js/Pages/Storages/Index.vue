@@ -7,7 +7,7 @@
     import { watch } from "vue";
     import { debounce } from "lodash";
     import { router, Link } from "@inertiajs/vue3";
-import EmptySearch from "@/Shared/EmptySearch.vue";
+    import EmptySearch from "@/Shared/EmptySearch.vue";
 
     defineProps({
         storages: Object,

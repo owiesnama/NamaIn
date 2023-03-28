@@ -22,6 +22,7 @@ class StoragesController extends Controller
     {
         return inertia('Storages/Show', [
             'storage' => $storage,
+            'products' => $storage->stock()->get(),
         ]);
     }
 
