@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
 
 class CustomersController extends Controller
@@ -16,17 +17,25 @@ class CustomersController extends Controller
         ]);
     }
 
-    public function store()
+    public function store(CustomerRequest $request)
     {
-        $data = request()->validate([
-            'name' => 'required',
-            'address' => 'required|string|min:10',
-            'phone_number' => 'required|numeric|min:10',
-        ]);
-
-        Customer::create($data);
+        Customer::create($request->all());
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer Created Successfully');
+    }
+
+    public function update(Customer $customer, CustomerRequest $request)
+    {
+        $customer->update($request->all());
+
+        return back()->with('success', 'customer updated successfully');
+    }
+
+    public function destroy(Customer $customer)
+    {
+        $customer->delete();
+
+        return back()->with('success', 'Storage Deleted successfully');
     }
 }

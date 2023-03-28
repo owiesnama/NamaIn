@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorageRequest;
 use App\Models\Storage;
 
 class StoragesController extends Controller
 {
     public function index()
     {
-        return inertia('Storages', [
+        return inertia('Storages/Index', [
             'storages_count' => Storage::count(),
             'storages' => Storage::search(request('search'))
                 ->latest()
@@ -17,26 +18,23 @@ class StoragesController extends Controller
         ]);
     }
 
-    public function store()
+    public function show(Storage $storage)
     {
-        $data = request()->validate([
-            'name' => 'required',
-            'address' => 'required',
+        return inertia('Storages/Show', [
+            'storage' => $storage,
         ]);
+    }
 
-        Storage::create($data);
+    public function store(StorageRequest $request)
+    {
+        Storage::create($request->all());
 
         return back()->with('success', 'Storage created successfully');
     }
 
-    public function update(Storage $storage)
+    public function update(Storage $storage, StorageRequest $request)
     {
-        $data = request()->validate([
-            'name' => 'required',
-            'address' => 'required',
-        ]);
-
-        $storage->update($data);
+        $storage->update($request->all());
 
         return back()->with('success', 'Storage updated successfully');
     }
