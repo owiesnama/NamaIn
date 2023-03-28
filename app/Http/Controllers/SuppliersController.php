@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Customer;
+use App\Models\Supplier;
 
-class CustomersController extends Controller
+class SuppliersController extends Controller
 {
     public function index()
     {
-        return inertia('Customers', [
-            'customers' => Customer::search(request('search'))
+        return inertia('Suppliers', [
+            'suppliers' => Supplier::search(request('search'))
                 ->latest()
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
@@ -18,15 +18,15 @@ class CustomersController extends Controller
 
     public function store()
     {
-        $data = request()->validate([
+        $attributes = request()->validate([
             'name' => 'required',
             'address' => 'required|string|min:10',
             'phone_number' => 'required|numeric|min:10',
         ]);
 
-        Customer::create($data);
+        Supplier::create($attributes);
 
-        return redirect()->route('customers.index')
+        return redirect()->route('suppliers.index')
             ->with('success', 'Customer Created Successfully');
     }
 }

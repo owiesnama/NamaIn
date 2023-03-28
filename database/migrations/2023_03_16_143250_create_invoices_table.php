@@ -15,11 +15,10 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('main_invoice')->nullable();
             $table->foreignId('invoicable_id');
             $table->string('invoicable_type');
             $table->double('total');
-            $table->boolean('has_used')->default(false);
+            $table->string('status')->default('initial');
             $table->timestamps();
             $table->softDeletes();
         });

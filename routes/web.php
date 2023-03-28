@@ -8,7 +8,7 @@ use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoragesController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\SuppliersController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -35,6 +35,7 @@ Route::middleware([
     })->name('dashboard');
 
     Route::resource('/customers', CustomersController::class);
+    Route::resource('/suppliers', SuppliersController::class);
     Route::resource('/storages', StoragesController::class);
     Route::resource('/products', ProductsController::class);
     Route::post('/products/import', [ProductsController::class, 'import'])->name('products.import');

@@ -11,7 +11,6 @@
 
     defineProps({
         products: Object,
-        products_count: Number,
     });
 
     let form = useForm({
@@ -41,7 +40,7 @@
                     <div class="flex items-center gap-x-3">
                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Products</h2>
 
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400">{{ products_count }} Products</span>
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400">{{ products.total }} Products</span>
                     </div>
 
                     <div class="relative flex items-center mt-4">
