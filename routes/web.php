@@ -3,12 +3,12 @@
 use App\Http\Controllers\ChequesController;
 use App\Http\Controllers\ChequeStatusController;
 use App\Http\Controllers\CustomersController;
-use App\Http\Controllers\SuppliersController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoragesController;
+use App\Http\Controllers\SuppliersController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

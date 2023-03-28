@@ -9,13 +9,12 @@ class SuppliersController extends Controller
     public function index()
     {
         return inertia('Suppliers', [
-            'suppliers' =>  Supplier::search(request('search'))
+            'suppliers' => Supplier::search(request('search'))
                 ->latest()
                 ->paginate(parent::ELEMENTS_PER_PAGE)
-                ->withQueryString()
+                ->withQueryString(),
         ]);
     }
-
 
     public function store()
     {
