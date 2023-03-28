@@ -13,6 +13,7 @@ class ChequesController extends Controller
     public function index(ChequeFilter $filter)
     {
         return inertia('Cheques/Index', [
+            'cheques_count' => Cheque::count(),
             'cheques' => Cheque::with('payee')
                 ->filterUsing($filter)
                 ->search(request('search'))

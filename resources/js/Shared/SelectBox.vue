@@ -21,7 +21,7 @@
 <template>
     <select
         ref="select"
-        class="border border-gray-200 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded p-2"
+        class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
         :value="modelValue"
         @input="$emit('update:modelValue', $event.target.value)"
     >
