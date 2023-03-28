@@ -10,7 +10,6 @@
 
     defineProps({
         storages: Object,
-        storages_count: Number,
     });
 
     let search = useQueryString("search");
@@ -35,7 +34,7 @@
                     <div class="flex items-center gap-x-3">
                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Storages</h2>
 
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400">{{ storages_count }} storage</span>
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400">{{ storages.total }} Storage</span>
                     </div>
 
                     <div class="relative flex items-center mt-4">

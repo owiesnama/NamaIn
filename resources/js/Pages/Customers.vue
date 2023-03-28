@@ -10,7 +10,6 @@
 
     defineProps({
         customers: Object,
-        customers_count: Number,
     });
 
     let search = useQueryString("search");
@@ -35,7 +34,7 @@
                     <div class="flex items-center gap-x-3">
                         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Customers</h2>
 
-                        <span class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400">{{ customers_count }} customer</span>
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400">{{ customers.total }} Customer</span>
                     </div>
 
                     <div class="relative flex items-center mt-4">
