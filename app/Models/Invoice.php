@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\InvoiceStatus;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -14,9 +15,16 @@ class Invoice extends BaseModel
         'status' => InvoiceStatus::class,
     ];
 
+    protected $appends = ['locked'];
+
     public function details()
     {
         return $this->hasMany(InvoiceDetails::class);
+    }
+
+    public function locked(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->status == InvoiceStatus::Delivered);
     }
 
     public static function purchase($attributes)

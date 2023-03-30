@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Supplier;
 use App\Http\Requests\SupplierRequest;
+use App\Models\Supplier;
 
 class SuppliersController extends Controller
 {

@@ -72,7 +72,7 @@
                         </div>
 
                         <PrimaryButton
-                            v-if="!invoice.has_used"
+                            v-if="! invoice.locked"
                             @click="deductFromStorage(invoice)"
                         >
                             Deduct From Storage

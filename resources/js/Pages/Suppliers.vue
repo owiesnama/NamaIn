@@ -230,6 +230,7 @@
                                                     <form
                                                         method="POST"
                                                         action="#"
+                                                        class="flex items-center"
                                                     >
                                                         <button
                                                             class="inline-flex items-center text-gray-600 gap-x-1 hover:text-red-500 focus:outline-none"

@@ -27,20 +27,19 @@ class StockController extends Controller
     {
         $invoice = Invoice::find(request('invoice'));
         $invoiceStatus = InvoiceStatus::Initial;
-        if ($invoice->details->filter(fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity))->count() == 0) {
-            throw ValidationException::withMessages(['storage' => 'Error Processing Request']);
-        }
+        $this->checkForStockAvailablity($invoice, $storage);
+        $invoiceStatus = InvoiceStatus::Delivered;
         $invoice->details->each(function ($record) use ($storage, &$invoiceStatus) {
             if ($storage->hasEnoughStockFor($record->product_id, $record->base_quantity)) {
                 $storage->deductStock([
                     'product' => $record->product_id,
                     'quantity' => $record->base_quantity,
                 ]);
-                $invoiceStatus = InvoiceStatus::Delivered;
+                $record->delivered = true;
+                $record->save();
 
                 return;
             }
-
             $remaining = $record->base_quantity - $storage->qunatityOf($record->product_id);
             $record->base_quantity -= $remaining;
             $record->delivered = true;
@@ -51,7 +50,8 @@ class StockController extends Controller
             ]);
             $newRecord = $record->replicate();
             $newRecord->delivered = false;
-            $record->quantity = $record / $record->unit->conversion_factor;
+            $newRecord->quantity = $record->unit ? ($remaining / $record->unit->conversion_factor) : $remaining;
+            $record->price = $record->price / $remaining;
             $newRecord->base_quantity = $remaining;
             $newRecord->save();
             $invoiceStatus = InvoiceStatus::PartiallyDelivered;
@@ -59,5 +59,12 @@ class StockController extends Controller
         $invoice->markAs($invoiceStatus);
 
         return back()->with('flash', ['success' => "Invoice items has being deducted from storage: {$storage->name} "]);
+    }
+
+    private function checkForStockAvailablity($invoice, $storage)
+    {
+        if ($invoice->details->filter(fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity))->count() == 0) {
+            throw ValidationException::withMessages(['storage' => 'Error Processing Request']);
+        }
     }
 }
