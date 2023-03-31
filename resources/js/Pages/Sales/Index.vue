@@ -72,11 +72,17 @@
                         </div>
 
                         <PrimaryButton
-                            v-if="! invoice.locked"
+                            v-if="!invoice.locked"
                             @click="deductFromStorage(invoice)"
                         >
                             Deduct From Storage
                         </PrimaryButton>
+                        <a
+                            :href="route('invoice.print', invoice)"
+                            target="_blank"
+                            @click="print(invoice)"
+                            >Print</a
+                        >
                     </div>
                     <InvoiceDetails
                         :invoice="invoice"

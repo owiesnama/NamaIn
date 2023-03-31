@@ -23,4 +23,18 @@ class InvoiceDetails extends BaseModel
     {
         return $this->belongsTo(Unit::class);
     }
+
+    public function normalizedQuantity()
+    {
+        if (! $this->unit) {
+            return "{$this->quantity} <strong>(Base unit)</strong>";
+        }
+
+        return "$this->quantity <storng>($this->unit?->name)</storng>";
+    }
+
+    public function total()
+    {
+        return $this->quantity * $this->price;
+    }
 }
