@@ -2,6 +2,14 @@ Features
 - Notification Button 
 - Active Menu
 - Settings Page 
+    - logo “image”
+    - invoices headline “text box | markdown”
+    - Running out alerts “toggle”
+    - Currency “dropdown list”
+    - Revenue margin “pecentage”
+    - language “ar | en”
+    - timezone “timezone dropdown list”
+    - date format (dropdown of most used formats)
 - Filter and Status on TRANSACTIONS
 - Create product checkbox
 - Add restore for trauch
