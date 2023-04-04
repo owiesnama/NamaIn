@@ -8,12 +8,12 @@
     };
     let deliverableRecords = computed(() => {
         return props.invoice.details.filter((record) => {
-            return !record.delivered;
+            return record.delivered;
         });
     });
     let remainingRecords = computed(() => {
         return props.invoice.details.filter((record) => {
-            return record.delivered;
+            return ! record.delivered;
         });
     });
     let recordQuantity = (record) => {

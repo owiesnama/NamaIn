@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class Storage extends BaseModel
 {
     use HasFactory, SoftDeletes;
-    
+
     /**
      * The attributes that are mass assignable.
      *

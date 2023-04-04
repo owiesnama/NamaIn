@@ -24,15 +24,15 @@ class DatabaseSeeder extends Seeder
         $faker = app()->make(Generator::class);
 
         $customers = Customer::factory(32)->create();
-        $vendors = Supplier::factory(10)->create();
-        $products = Product::factory(10)->create();
-        $storages = Storage::factory(10)->create();
+        $vendors = Supplier::factory(3)->create();
+        $products = Product::factory(3)->create();
+        $storages = Storage::factory(3)->create();
 
-        $storages->each(function ($storage) use ($products) {
-            $storage->stock()->attach(
-                $products->random(rand(1, 5))->pluck('id')->toArray(), ['quantity' => rand(1, 20)]
-            );
-        });
+        // $storages->each(function ($storage) use ($products) {
+        //     $storage->stock()->attach(
+        //         $products->random(rand(1, 5))->pluck('id')->toArray(), ['quantity' => rand(1, 20)]
+        //     );
+        // });
 
         $customers->concat($vendors)->each(function ($customer) use ($faker) {
             $customer->cheques()->create([

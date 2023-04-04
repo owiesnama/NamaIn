@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('invoicable_type');
             $table->double('total');
             $table->string('status')->default('initial');
+            $table->string('serial_number')->unique()->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

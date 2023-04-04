@@ -68,7 +68,7 @@
                             ></span>
                         </div>
                         <PrimaryButton
-                            v-if="!invoice.has_used"
+                            v-if="!invoice.locked"
                             @click="moveToStorage(invoice)"
                         >
                             Deliver to storage
