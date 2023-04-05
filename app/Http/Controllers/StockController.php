@@ -48,12 +48,7 @@ class StockController extends Controller
                 'product' => $record->product_id,
                 'quantity' => $remaining,
             ]);
-            $newRecord = $record->replicate();
-            $newRecord->delivered = false;
-            $newRecord->quantity = $record->unit ? ($remaining / $record->unit->conversion_factor) : $remaining;
-            $record->price = $record->price / $remaining;
-            $newRecord->base_quantity = $remaining;
-            $newRecord->save();
+            $this->attachRemainingRecordsToInvoice($record, $remaining);
             $invoiceStatus = InvoiceStatus::PartiallyDelivered;
         });
         $invoice->markAs($invoiceStatus);
@@ -66,5 +61,15 @@ class StockController extends Controller
         if ($invoice->details->filter(fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity))->count() == 0) {
             throw ValidationException::withMessages(['storage' => 'Error Processing Request']);
         }
+    }
+
+    public function attachRemainingRecordsToInvoice($record, $remaining)
+    {
+        $newRecord = $record->replicate();
+        $newRecord->delivered = false;
+        $newRecord->quantity = $record->unit ? ($remaining / $record->unit->conversion_factor) : $remaining;
+        $record->price = $record->price / $remaining;
+        $newRecord->base_quantity = $remaining;
+        $newRecord->save();
     }
 }

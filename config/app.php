@@ -221,6 +221,7 @@ return [
     */
     'admins' => [
         'owiesnama@gmail.com',
+        'test@example.com',
     ],
     'cheques_notify_before_days' => 1,
 ];
