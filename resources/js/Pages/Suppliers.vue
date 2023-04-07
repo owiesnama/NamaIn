@@ -80,7 +80,7 @@
                         <button
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
                         >
-                            View all
+                            All
                         </button>
 
                         <button

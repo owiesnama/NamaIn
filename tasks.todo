@@ -1,5 +1,4 @@
 Features
-- Notification Button 
 - Active Menu
 - Settings Page 
     - logo “image”
@@ -9,9 +8,9 @@ Features
     - Revenue margin “pecentage”
     - language “ar | en”
     - timezone “timezone dropdown list”
+    - Product category
     - date format (dropdown of most used formats)
 - Filter and Status on TRANSACTIONS
-- Create product checkbox
 - Add restore for trauch
-- Product category
 - Invoice Printable
+- Custom Date picker

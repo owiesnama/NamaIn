@@ -312,10 +312,6 @@
                                     <div class="relative">
                                         <!-- Teams Dropdown -->
                                         <Dropdown
-                                            v-if="
-                                                $page.props.jetstream
-                                                    .hasTeamFeatures
-                                            "
                                             align="right"
                                             width="60"
                                         >
@@ -327,137 +323,31 @@
                                                         type="button"
                                                         class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-transparent rounded-md hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
                                                     >
-                                                        {{
-                                                            $page.props.user
-                                                                .current_team
-                                                                .name
-                                                        }}
-
-                                                        <svg
-                                                            class="ml-2 -mr-0.5 h-4 w-4"
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            fill="none"
-                                                            viewBox="0 0 24 24"
-                                                            stroke-width="1.5"
-                                                            stroke="currentColor"
-                                                        >
-                                                            <path
-                                                                stroke-linecap="round"
-                                                                stroke-linejoin="round"
-                                                                d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"
-                                                            />
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                                                            <path fill-rule="evenodd" d="M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z" clip-rule="evenodd" />
                                                         </svg>
                                                     </button>
                                                 </span>
                                             </template>
 
                                             <template #content>
-                                                <div class="w-60">
-                                                    <!-- Team Management -->
-                                                    <template
-                                                        v-if="
-                                                            $page.props
-                                                                .jetstream
-                                                                .hasTeamFeatures
-                                                        "
-                                                    >
-                                                        <div
-                                                            class="block px-4 py-2 text-xs text-gray-400"
-                                                        >
-                                                            Manage Team
-                                                        </div>
-
-                                                        <!-- Team Settings -->
-                                                        <DropdownLink
-                                                            :href="
-                                                                route(
-                                                                    'teams.show',
-                                                                    $page.props
-                                                                        .user
-                                                                        .current_team
-                                                                )
-                                                            "
-                                                        >
-                                                            Team Settings
-                                                        </DropdownLink>
-
-                                                        <DropdownLink
-                                                            v-if="
-                                                                $page.props
-                                                                    .jetstream
-                                                                    .canCreateTeams
-                                                            "
-                                                            :href="
-                                                                route(
-                                                                    'teams.create'
-                                                                )
-                                                            "
-                                                        >
-                                                            Create New Team
-                                                        </DropdownLink>
-
-                                                        <div
-                                                            class="border-t border-gray-100"
-                                                        />
-
-                                                        <!-- Team Switcher -->
-                                                        <div
-                                                            class="block px-4 py-2 text-xs text-gray-400"
-                                                        >
-                                                            Switch Teams
-                                                        </div>
-
-                                                        <template
-                                                            v-for="team in $page
-                                                                .props.user
-                                                                .all_teams"
-                                                            :key="team.id"
-                                                        >
-                                                            <form
-                                                                @submit.prevent="
-                                                                    switchToTeam(
-                                                                        team
-                                                                    )
-                                                                "
-                                                            >
-                                                                <DropdownLink
-                                                                    as="button"
-                                                                >
-                                                                    <div
-                                                                        class="flex items-center"
-                                                                    >
-                                                                        <svg
-                                                                            v-if="
-                                                                                team.id ==
-                                                                                $page
-                                                                                    .props
-                                                                                    .user
-                                                                                    .current_team_id
-                                                                            "
-                                                                            class="w-5 h-5 mr-2 text-green-400"
-                                                                            xmlns="http://www.w3.org/2000/svg"
-                                                                            fill="none"
-                                                                            viewBox="0 0 24 24"
-                                                                            stroke-width="1.5"
-                                                                            stroke="currentColor"
-                                                                        >
-                                                                            <path
-                                                                                stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                                                            />
-                                                                        </svg>
-
-                                                                        <div>
-                                                                            {{
-                                                                                team.name
-                                                                            }}
-                                                                        </div>
-                                                                    </div>
-                                                                </DropdownLink>
-                                                            </form>
-                                                        </template>
-                                                    </template>
+                                                <div class="w-64 sm:w-80">
+                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700">
+                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar" />
+                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Sara Salah</span> replied on the <span class="text-emerald-500 hover:underline" href="#">Upload Image</span> artical . 2m</p>
+                                                    </a>
+                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700">
+                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80" alt="avatar" />
+                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Slick Net</span> start following you . 45m</p>
+                                                    </a>
+                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700">
+                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar" />
+                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Jane Doe</span> Like Your reply on <span class="text-emerald-500 hover:underline" href="#">Test with TDD</span> artical . 1h</p>
+                                                    </a>
+                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=398&q=80" alt="avatar" />
+                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Abigail Bennett</span> start following you . 3h</p>
+                                                    </a>
                                                 </div>
                                             </template>
                                         </Dropdown>

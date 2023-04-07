@@ -150,7 +150,10 @@
                                         </div>
         
                                         <div class="mt-4">
-                                            
+                                            <label class="inline-flex items-center text-sm text-gray-600 gap-x-2">
+                                                <input type="checkbox" name="alert" class="border-gray-300 p-1.5 rounded-md text-emerald-500 focus:ring-transparent">
+                                                <span>Alert when stock is low</span>
+                                            </label>
                                         </div>
                                     </div>
     

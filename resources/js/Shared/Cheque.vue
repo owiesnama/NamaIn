@@ -19,7 +19,7 @@
     });
 
     let form = useForm({
-        status: null,
+        status: props.cheque.status,
     });
 
     let submit = () => {
@@ -36,7 +36,7 @@
             <p class="text-sm" :class="isBeyondDue ? 'text-red-500 font-semibold' : 'text-gray-500 font-medium'" v-text="cheque.due_for_humans"></p>
         </div>
 
-        <h2 class="mt-1 text-lg font-semibold text-gray-800" v-text="cheque.payee.name"></h2>
+        <h2 class="mt-1 text-lg font-semibold text-gray-800" v-text="cheque.payee.name + '  ' + cheque.status"></h2>
 
         
         <div class="mt-4 sm:flex sm:items-end sm:justify-between" >
