@@ -2,6 +2,8 @@
 import AppLayout from '@/Layouts/AppLayout.vue';
 import SectionBorder from '@/Components/SectionBorder.vue';
 import UpdateApplicationInformationForm from '@/Pages/Settings/Partials/UpdateApplicationInformationForm.vue';
+import UpdateDateInformationForm from '@/Pages/Settings/Partials/UpdateDateInformationForm.vue';
+import CategoryManagments from '@/Pages/Settings/Partials/CategoryManagments.vue';
 </script>
 
 <template>
@@ -17,6 +19,16 @@ import UpdateApplicationInformationForm from '@/Pages/Settings/Partials/UpdateAp
                 <UpdateApplicationInformationForm />
 
                 <SectionBorder />
+            </div>
+
+            <div>
+                <UpdateDateInformationForm />
+
+                <SectionBorder />
+            </div>
+
+            <div>
+                <CategoryManagments />
             </div>
         </div>
     </AppLayout>

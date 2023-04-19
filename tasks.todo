@@ -1,14 +1,6 @@
 Features
 - Active Menu
 - Settings Page 
-    - invoices headline “text box | markdown”
-    - Running out alerts “toggle”
-    - Currency “dropdown list”
     - Revenue margin “pecentage”
-    - language “ar | en”
-    - timezone “timezone dropdown list”
-    - Product category
-    - date format (dropdown of most used formats)
 - Filter and Status on TRANSACTIONS
 - Invoice Printable
-- Custom Date picker
