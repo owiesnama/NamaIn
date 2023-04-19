@@ -9,6 +9,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import SecondaryButton from '@/Components/SecondaryButton.vue';
 import Dropdown from "@/Components/Dropdown.vue";
 import DropdownLink from "@/Components/DropdownLink.vue";
+import TextInput from '@/Components/TextInput.vue';
 
 const form = useForm({
     _method: 'PUT',
@@ -17,6 +18,7 @@ const form = useForm({
     alerts: null,
     language: null,
     currency: null,
+    pecentage: null,
 });
 
 const logoPreview = ref(null);
@@ -129,6 +131,22 @@ const updateLogoPreview = () => {
                     </button>
                 </div>
                 <InputError :message="form.errors.language" class="mt-2" />
+            </div>
+
+            <!-- Pecentage -->
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel for="pecentage" value="Pecentage (%)" />
+                <TextInput
+                    id="pecentage"
+                    v-model="form.pecentage"
+                    type="number"
+                    min="0"
+                    max="100"
+                    placeholder="60"
+                    class="block w-full mt-1"
+                    autocomplete="pecentage"
+                />
+                <InputError :message="form.errors.pecentage" class="mt-2" />
             </div>
 
             <!-- currency -->
