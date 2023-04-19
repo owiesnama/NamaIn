@@ -8,22 +8,28 @@
     import { ref } from "vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
+    
     const props = defineProps({
         invoices: Object,
         storages: Array,
     });
+
     let movingToStorage = ref(false);
+
     let form = useForm({
         invoice: null,
         storage: null,
     });
+
     let moveToStorage = (invoice) => {
         movingToStorage.value = true;
         form.invoice = invoice.id;
     };
+
     let closeModal = () => {
         movingToStorage.value = null;
     };
+    
     let hasNoInvoices = computed(() => {
         return !props.invoices.data.length;
     });
@@ -38,28 +44,28 @@
 <template>
     <AppLayout title="Purchases">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 Purchases
             </h2>
         </template>
 
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <Link
                     as="button"
                     :href="route('purchases.create')"
-                    class="border py-3 px-6 rounded-lg bg-gray-50 font-semibold hover:bg-gray-100"
+                    class="px-6 py-3 font-semibold border rounded-lg bg-gray-50 hover:bg-gray-100"
                     >New Purchase Invoice</Link
                 >
                 <div
                     v-for="invoice in invoices.data"
                     :key="invoice.id"
-                    class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
+                    class="p-4 mt-2 overflow-hidden bg-white border sm:rounded"
                 >
-                    <div class="flex space-x-2 items-center justify-between">
+                    <div class="flex items-center justify-between space-x-2">
                         <div>
                             <span
-                                class="text-white bg-green-500 px-5 py-1 rounded-xl mr-4"
+                                class="px-5 py-1 mr-4 text-white bg-green-500 rounded-xl"
                                 >In-stock</span
                             >
                             <span
@@ -81,7 +87,7 @@
                 </div>
                 <div
                     v-if="hasNoInvoices"
-                    class="bg-white overflow-hidden border sm:rounded p-4 mt-2"
+                    class="p-4 mt-2 overflow-hidden bg-white border sm:rounded"
                 >
                     <p class="text-gray-700">
                         <strong>Opps</strong>, Seems like there no purchases for
@@ -100,7 +106,7 @@
                 <select
                     id="storage"
                     v-model="form.storage"
-                    class="border-gray-300 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 rounded-md shadow-sm"
+                    class="border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                     name="storage"
                 >
                     <option

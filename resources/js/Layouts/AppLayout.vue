@@ -428,6 +428,14 @@
                                                 </DropdownLink>
 
                                                 <DropdownLink
+                                                    :href="
+                                                        route('settings')
+                                                    "
+                                                >
+                                                    Settings
+                                                </DropdownLink>
+
+                                                <DropdownLink
                                                     v-if="
                                                         $page.props.jetstream
                                                             .hasApiFeatures

@@ -1,7 +1,6 @@
 Features
 - Active Menu
 - Settings Page 
-    - logo “image”
     - invoices headline “text box | markdown”
     - Running out alerts “toggle”
     - Currency “dropdown list”
@@ -11,6 +10,5 @@ Features
     - Product category
     - date format (dropdown of most used formats)
 - Filter and Status on TRANSACTIONS
-- Add restore for trauch
 - Invoice Printable
 - Custom Date picker

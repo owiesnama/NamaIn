@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\Supplier;
+use App\Enums\InvoiceStatus;
+use App\Http\Requests\CreateInvoiceRequest;
 
 class PurchasesController extends Controller
 {
@@ -15,6 +16,7 @@ class PurchasesController extends Controller
         return inertia('Purchases/Index', [
             'invoices' => Invoice::where('invoicable_type', Supplier::class)->with('details')->paginate(10)->withQueryString(),
             'storages' => Storage::all(),
+            'status' => InvoiceStatus::casesWithLabels(),
         ]);
     }
 
