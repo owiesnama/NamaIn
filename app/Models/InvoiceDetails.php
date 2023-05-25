@@ -14,6 +14,11 @@ class InvoiceDetails extends BaseModel
 
     public $with = ['product', 'unit'];
 
+    public function invoice()
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class);

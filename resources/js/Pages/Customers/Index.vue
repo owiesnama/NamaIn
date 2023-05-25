@@ -1,40 +1,34 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { watch } from "vue";
-    import { router, useForm } from "@inertiajs/vue3";
+    import { router } from "@inertiajs/vue3";
     import { debounce } from "lodash";
-    import EmptySearch from "@/Shared/EmptySearch.vue";
+    import CustomerForm from "@/Components/Customers/CustomerForm.vue";
     import Pagination from "@/Shared/Pagination.vue";
-    import ProdcutForm from "@/Components/Products/ProdcutForm.vue";
+    import EmptySearch from "@/Shared/EmptySearch.vue";
+    import DeleteCustomer from "@/Components/Customers/DeleteCustomer.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import FileUploadButton from "@/Shared/FileUploadButton.vue";
-    import DeleteProduct from "@/Components/Products/DeleteProduct.vue";
 
     defineProps({
-        products: Object,
-    });
-
-    let form = useForm({
-        file: null,
+        customers: Object,
     });
 
     let search = useQueryString("search");
 
-    let submit = (files) => {
-        form.file = files[0];
-        form.post(route("products.import"));
-    };
-
     watch(
         search,
         debounce(function (value) {
-            router.get("/products", { search: value }, { preserveState: true });
+            router.get(
+                "/customers",
+                { search: value },
+                { preserveState: true }
+            );
         }, 300)
     );
 </script>
 
 <template>
-    <AppLayout title="Products">
+    <AppLayout title="Customers">
         <section>
             <div class="w-full lg:flex lg:items-end lg:justify-between">
                 <div>
@@ -42,12 +36,12 @@
                         <h2
                             class="text-xl font-semibold text-gray-800 dark:text-white"
                         >
-                            Products
+                            Customers
                         </h2>
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                            >{{ products.total }} Products</span
+                            >{{ customers.total }} Customer</span
                         >
                     </div>
 
@@ -103,13 +97,7 @@
                         </button>
                     </div>
 
-                    <FileUploadButton
-                        download
-                        @input="submit"
-                        >Import</FileUploadButton
-                    >
-
-                    <ProdcutForm></ProdcutForm>
+                    <CustomerForm></CustomerForm>
                 </div>
             </div>
 
@@ -144,14 +132,14 @@
                                             scope="col"
                                             class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                         >
-                                            Cost
+                                            Phone
                                         </th>
 
                                         <th
                                             scope="col"
                                             class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                         >
-                                            Expire Date
+                                            Address
                                         </th>
 
                                         <th
@@ -172,58 +160,44 @@
                                 <tbody
                                     class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
                                 >
-                                    <template v-if="products.data">
+                                    <template v-if="customers.data">
                                         <tr
-                                            v-for="product in products.data"
-                                            :key="product.id"
+                                            v-for="customer in customers.data"
+                                            :key="customer.id"
                                         >
                                             <th
                                                 class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
-                                                v-text="product.id"
+                                                v-text="customer.id"
                                             ></th>
 
                                             <th
                                                 class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
-                                                v-text="product.name"
+                                                v-text="customer.name"
                                             ></th>
 
                                             <td
                                                 class="px-8 py-3 text-sm text-left whitespace-nowrap"
                                             >
                                                 <a
-                                                    class="font-semibold text-emerald-500"
-                                                    v-text="'$' + product.cost"
+                                                    class="font-semibold text-emerald-500 hover:underline"
+                                                    :href="
+                                                        'tel:' +
+                                                        customer.phone_number
+                                                    "
+                                                    v-text="
+                                                        customer.phone_number
+                                                    "
                                                 ></a>
                                             </td>
 
                                             <th
                                                 class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
-                                            >
-                                                <span
-                                                    v-show="
-                                                        product.expired_at > 0
-                                                    "
-                                                    class="text-emerald-500"
-                                                >
-                                                    ({{ product.expire_date }})
-                                                    Not Expire
-                                                </span>
-
-                                                <span
-                                                    v-show="
-                                                        product.expired_at < 0
-                                                    "
-                                                    class="text-red-500"
-                                                >
-                                                    ({{ product.expire_date }})
-                                                    Expired
-                                                </span>
-                                                &nbsp;
-                                            </th>
+                                                v-text="customer.address"
+                                            ></th>
 
                                             <td
                                                 class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
-                                                v-text="product.created_at"
+                                                v-text="customer.created_at"
                                             ></td>
 
                                             <td
@@ -232,13 +206,13 @@
                                                 <div
                                                     class="flex items-center justify-end gap-x-6"
                                                 >
-                                                    <ProdcutForm
-                                                        :product="product"
-                                                    ></ProdcutForm>
-
-                                                    <DeleteProduct
-                                                        :product="product"
-                                                    ></DeleteProduct>
+                                                    <CustomerForm
+                                                        :customer="customer"
+                                                    >
+                                                    </CustomerForm>
+                                                    <DeleteCustomer
+                                                        :customer="customer"
+                                                    ></DeleteCustomer>
                                                 </div>
                                             </td>
                                         </tr>
@@ -249,11 +223,11 @@
                     </div>
                 </div>
 
-                <EmptySearch :data="products.data"></EmptySearch>
+                <EmptySearch :data="customers.data"></EmptySearch>
             </div>
 
             <div class="flex justify-center">
-                <Pagination :links="products.links"></Pagination>
+                <Pagination :links="customers.links"></Pagination>
             </div>
         </section>
     </AppLayout>

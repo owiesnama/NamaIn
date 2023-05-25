@@ -1,19 +1,21 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { router } from "@inertiajs/vue3";
+    import { router, usePage } from "@inertiajs/vue3";
     import TextInput from "@/Components/TextInput.vue";
     import Cheque from "@/Shared/Cheque.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import { watch, reactive } from "vue";
+    import { watch, reactive, ref, onMounted } from "vue";
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
 
-    defineProps({
-        cheques: Object,
+    const props = defineProps({
+        initialCheques: Object,
         status: Object,
     });
+    let landMark = ref(null);
+    let cheques = ref(props.initialCheques.data);
 
     let filters = reactive({
         search: useQueryString("search"),
@@ -21,7 +23,34 @@
         status: useQueryString("status"),
         due: useQueryString("due"),
     });
-
+    const initialUrl = usePage().url;
+    const loadMore = () => {
+        if (!props.initialCheques.next_page_url) return;
+        router.get(
+            props.initialCheques.next_page_url,
+            {},
+            {
+                preserveState: true,
+                preserveScroll: true,
+                onSuccess() {
+                    window.history.replaceState({}, "", initialUrl);
+                    cheques.value = [
+                        ...cheques.value,
+                        ...props.initialCheques.data,
+                    ];
+                },
+            }
+        );
+    };
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            loadMore();
+        });
+    });
+    onMounted(() => {
+        observer.observe(landMark.value);
+    });
     watch(
         filters,
         debounce(function (watchedFitlers) {
@@ -48,7 +77,7 @@
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                            >{{ cheques.count }} Cheques</span
+                            >{{ cheques.total }} Cheques</span
                         >
                     </div>
 
@@ -130,11 +159,28 @@
                         </button>
                     </div>
 
-                    <Dropdown align="right" width="48">
+                    <Dropdown
+                        align="right"
+                        width="48"
+                    >
                         <template #trigger>
-                            <button type="button" class="inline-flex items-center justify-center w-full px-3 py-2 mt-4 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg sm:w-auto sm:mt-0 gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" />
+                            <button
+                                type="button"
+                                class="inline-flex items-center justify-center w-full px-3 py-2 mt-4 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg sm:w-auto sm:mt-0 gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    class="w-6 h-6"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"
+                                    />
                                 </svg>
 
                                 Status
@@ -142,16 +188,18 @@
                         </template>
 
                         <template #content>
-                            <button v-for="(key, sta) in status" :key="key" v-text="sta" class="block w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100">
-                            </button>
+                            <button
+                                v-for="(key, sta) in status"
+                                :key="key"
+                                v-text="sta"
+                                class="block w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                            ></button>
                         </template>
                     </Dropdown>
                 </div>
             </div>
 
-            <div
-                class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2 2xl:grid-cols-3"
-            >
+            <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2">
                 <Cheque
                     v-for="cheque in cheques"
                     :key="cheque.id"
@@ -159,6 +207,7 @@
                     :cheque-status="status"
                 ></Cheque>
             </div>
+            <div ref="landMark"></div>
 
             <EmptySearch :data="cheques"></EmptySearch>
         </section>

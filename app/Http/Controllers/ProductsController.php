@@ -14,6 +14,7 @@ class ProductsController extends Controller
         return inertia('Products/Index', [
             'products_count' => Product::count(),
             'products' => Product::search(request('search'))
+                ->with('units')
                 ->latest()
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
@@ -23,15 +24,7 @@ class ProductsController extends Controller
     public function store(ProductRequest $request)
     {
         $product = Product::create($request->all());
-
-        $units = collect($request->get('units'))->map(function ($unit) {
-            return [
-                'name' => $unit['name'],
-                'conversion_factor' => $unit['conversionFactor'],
-            ];
-        });
-
-        $product->units()->createMany($units->toArray());
+        $product->units()->createMany($request->get('units'));
 
         return redirect()->route('products.index')->with('success', 'Product has been Created Successfully');
     }

@@ -13,11 +13,11 @@ class ChequesController extends Controller
     public function index(ChequeFilter $filter)
     {
         return inertia('Cheques/Index', [
-            'cheques' => Cheque::with('payee')
+            'initialCheques' => Cheque::with('payee')
                 ->filterUsing($filter)
                 ->search(request('search'))
                 ->orderBy('type')
-                ->oldest('due')->get(),
+                ->oldest('due')->paginate(10),
             'status' => ChequeStatus::casesWithLabels(),
         ]);
     }

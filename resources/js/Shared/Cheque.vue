@@ -39,7 +39,7 @@
         <h2 class="mt-1 text-lg font-semibold text-gray-800" v-text="cheque.payee.name + '  ' + cheque.status"></h2>
 
         
-        <div class="mt-4 sm:flex sm:items-end sm:justify-between" >
+        <div class="mt-24 sm:flex sm:items-end sm:justify-between" >
             <div>
                 <InputLabel
                     value="Status"

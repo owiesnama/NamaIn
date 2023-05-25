@@ -27,7 +27,7 @@ class ProductRequest extends FormRequest
             'expire_date' => 'required',
             'units' => 'array|min:1',
             'units.*.name' => 'required',
-            'units.*.conversionFactor' => 'required|numeric|gt:0',
+            'units.*.conversion_factor' => 'required|numeric|gt:0',
         ];
     }
 }

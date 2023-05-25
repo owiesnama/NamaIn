@@ -9,7 +9,7 @@ class SuppliersController extends Controller
 {
     public function index()
     {
-        return inertia('Suppliers', [
+        return inertia('Suppliers/Index', [
             'suppliers' => Supplier::search(request('search'))
                 ->latest()
                 ->paginate(parent::ELEMENTS_PER_PAGE)

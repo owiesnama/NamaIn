@@ -1,17 +1,18 @@
 <?php
 
-use Inertia\Inertia;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ChequesController;
+use App\Http\Controllers\ChequeStatusController;
+use App\Http\Controllers\CustomersController;
+use App\Http\Controllers\DashboradController;
+use App\Http\Controllers\InvoicePrintController;
+use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StockController;
-use App\Http\Controllers\ChequesController;
-use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\StoragesController;
-use App\Http\Controllers\CustomersController;
-use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\SuppliersController;
-use App\Http\Controllers\ChequeStatusController;
-use App\Http\Controllers\InvoicePrintController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,9 +32,7 @@ Route::middleware([
 ])->group(function () {
     Route::redirect('/', '/dashboard');
 
-    Route::get('/dashboard', function () {
-        return Inertia::render('Dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboradController::class, 'index'])->name('dashboard');
 
     Route::get('/settings', function () {
         return Inertia::render('Settings/Show');
