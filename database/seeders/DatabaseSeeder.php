@@ -4,12 +4,12 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
-use App\Models\Customer;
+use Faker\Generator;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
+use App\Models\Customer;
 use App\Models\Supplier;
-use Faker\Generator;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
