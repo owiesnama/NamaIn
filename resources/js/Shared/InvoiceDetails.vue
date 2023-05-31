@@ -85,12 +85,12 @@
                                 ></th>
 
                                 <th
-                                    class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm text-left text-emerald-500 whitespace-nowrap"
                                     v-text="record.price"
                                 ></th>
 
                                 <td
-                                    class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm font-semibold text-left text-emerald-500 whitespace-nowrap"
                                     v-text="totalPrice(record)"
                                 ></td>
                             </tr>
@@ -120,12 +120,12 @@
                                     ></th>
 
                                     <th
-                                        class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm text-left text-emerald-500 whitespace-nowrap"
                                         v-text="record.price"
                                     ></th>
 
                                     <td
-                                        class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm font-semibold text-left text-emerald-500 whitespace-nowrap"
                                         v-text="totalPrice(record)"
                                     ></td>
                                 </tr>
