@@ -6,11 +6,14 @@
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { reactive, computed } from "vue";
     import { useForm } from "@inertiajs/vue3";
+
     defineProps({
         storages: Object,
         products: Object,
     });
+
     let purchases = reactive([new PurchaseProduct()]);
+    
     const newRow = () => {
         purchases.push(new PurchaseProduct());
     };
