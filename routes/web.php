@@ -8,11 +8,11 @@ use App\Http\Controllers\InvoicePrintController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchasesController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoragesController;
 use App\Http\Controllers\SuppliersController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,10 +34,8 @@ Route::middleware([
 
     Route::get('/dashboard', [DashboradController::class, 'index'])->name('dashboard');
 
-    Route::get('/settings', function () {
-        return Inertia::render('Settings/Show');
-    })->name('settings');
-
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::resource('/customers', CustomersController::class);
     Route::resource('/suppliers', SuppliersController::class);
     Route::resource('/storages', StoragesController::class);

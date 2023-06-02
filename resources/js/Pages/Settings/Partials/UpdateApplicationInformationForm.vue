@@ -12,7 +12,6 @@
     import TextInput from "@/Components/TextInput.vue";
 
     const form = useForm({
-        _method: "PUT",
         logo: null,
         invoicesHeadline: null,
         alerts: null,
@@ -47,6 +46,10 @@
         };
 
         reader.readAsDataURL(logo);
+    };
+
+    const save = () => {
+        form.put(route("settings.update"));
     };
 </script>
 
@@ -184,13 +187,25 @@
                     class="inline-flex mt-1 overflow-hidden bg-white border border-gray-200 divide-x rounded-lg rtl:flex-row-reverse"
                 >
                     <button
-                        class="px-4 py-2 text-sm font-medium text-gray-600 transition-colors duration-200 sm:text-base sm:px-6 hover:bg-gray-100"
+                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 sm:text-base sm:px-6"
+                        :class="
+                            form.language == 'ar'
+                                ? ' bg-emerald-500 hover:bg-emerald-400  text-white'
+                                : 'hover:bg-gray-100  text-gray-600 '
+                        "
+                        @click="form.language = 'ar'"
                     >
                         Arabic
                     </button>
 
                     <button
-                        class="px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-emerald-500 sm:text-base sm:px-6 hover:bg-emerald-400"
+                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 sm:text-base sm:px-6"
+                        :class="
+                            form.language == 'en'
+                                ? ' bg-emerald-500 hover:bg-emerald-400  text-white'
+                                : 'hover:bg-gray-100  text-gray-600 '
+                        "
+                        @click="form.language = 'en'"
                     >
                         English
                     </button>
@@ -205,7 +220,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="pecentage"
-                    value="Pecentage (%)"
+                    value="Margin revenu pecentage (%)"
                 />
                 <TextInput
                     id="pecentage"
@@ -254,20 +269,28 @@
                                 />
                             </svg>
 
-                            US Dollar
+                            {{
+                                form.currency == "US-Dollar"
+                                    ? "US Dollar"
+                                    : "SDG"
+                            }}
                         </button>
                     </template>
 
                     <template #content>
-                        <DropdownLink as="button"> US Dollar </DropdownLink>
-
+                        <DropdownLink
+                            as="button"
+                            @click="form.currency = 'US-Dollar'"
+                        >
+                            US Dollar
+                        </DropdownLink>
                         <div class="border-t border-gray-100" />
-
-                        <DropdownLink as="button"> Euro </DropdownLink>
-
-                        <div class="border-t border-gray-100" />
-
-                        <DropdownLink as="button"> SDG </DropdownLink>
+                        <DropdownLink
+                            as="button"
+                            @click="form.currency = 'SDG'"
+                        >
+                            SDG
+                        </DropdownLink>
                     </template>
                 </Dropdown>
                 <InputError
@@ -286,6 +309,7 @@
             </ActionMessage>
 
             <PrimaryButton
+                @click="save()"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
             >
