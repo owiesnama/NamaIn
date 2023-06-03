@@ -455,7 +455,7 @@
                                         </Dropdown>
                                     </div>
 
-                                    <!-- Settings Dropdown -->
+                                    <!-- Preferences Dropdown -->
                                     <div class="relative ml-3">
                                         <Dropdown
                                             align="right"
@@ -531,10 +531,12 @@
 
                                                 <DropdownLink
                                                     :href="
-                                                        route('settings.index')
+                                                        route(
+                                                            'preferences.index'
+                                                        )
                                                     "
                                                 >
-                                                    Settings
+                                                    Preferences
                                                 </DropdownLink>
 
                                                 <DropdownLink

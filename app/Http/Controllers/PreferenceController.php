@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Preference;
 
-class SettingsController
+class PreferenceController
 {
     public function index()
     {
-        return inertia('Settings/Show');
+        $preferences = Preference::all()->transform(function ($preference) {
+            return [$preference->key => $preference->value];
+        })->mapWithKeys(fn ($i) => $i);
+        return inertia('Preferences/Show', ['preferences' => $preferences]);
     }
 
     public function update()

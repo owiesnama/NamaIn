@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from "vue";
+    import { inject, ref } from "vue";
     import { useForm } from "@inertiajs/vue3";
     import ActionMessage from "@/Components/ActionMessage.vue";
     import FormSection from "@/Components/FormSection.vue";
@@ -10,14 +10,14 @@
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import TextInput from "@/Components/TextInput.vue";
-
+    const preferences = inject("preferences");
     const form = useForm({
-        logo: null,
-        invoicesHeadline: null,
-        alerts: null,
-        language: null,
-        currency: null,
-        pecentage: null,
+        logo: preferences.logo,
+        invoicesHeadline: preferences.invoicesHeadline,
+        alerts: preferences.alerts,
+        language: preferences.language,
+        currency: preferences.currency,
+        pecentage: preferences.pecentage,
     });
 
     const logoPreview = ref(null);
@@ -25,9 +25,10 @@
     const alertsToggle = ref(true);
 
     const updateApplicationInformation = () => {
-        if (logoInput.value) {
-            form.logo = logoInput.value.files[0];
-        }
+        if (!logoInput.value) return;
+
+        form.logo = logoInput.value.files[0];
+        form.put(route("preferences.update"));
     };
 
     const selectNewLogo = () => {
@@ -36,20 +37,11 @@
 
     const updateLogoPreview = () => {
         const logo = logoInput.value.files[0];
-
-        if (!logo) return;
-
         const reader = new FileReader();
 
-        reader.onload = (e) => {
-            logoPreview.value = e.target.result;
-        };
-
+        if (!logo) return;
+        reader.onload = (e) => (logoPreview.value = e.target.result);
         reader.readAsDataURL(logo);
-    };
-
-    const save = () => {
-        form.put(route("settings.update"));
     };
 </script>
 
@@ -194,6 +186,7 @@
                                 : 'hover:bg-gray-100  text-gray-600 '
                         "
                         @click="form.language = 'ar'"
+                        type="button"
                     >
                         Arabic
                     </button>
@@ -206,6 +199,7 @@
                                 : 'hover:bg-gray-100  text-gray-600 '
                         "
                         @click="form.language = 'en'"
+                        type="button"
                     >
                         English
                     </button>
@@ -309,7 +303,7 @@
             </ActionMessage>
 
             <PrimaryButton
-                @click="save()"
+                type="submit"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
             >
