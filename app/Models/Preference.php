@@ -10,4 +10,11 @@ class Preference extends Model
     use HasFactory;
 
     protected $fillable = ['key', 'value'];
+
+    public static function asPairs()
+    {
+        return static::all()->transform(function ($preference) {
+            return [$preference->key => $preference->value];
+        })->mapWithKeys(fn ($i) => $i);
+    }
 }

@@ -2,7 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Preference;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -34,10 +36,25 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         return array_merge(parent::share($request), [
+            'preferences' => Cache::rememberForever('preferences', fn () =>  Preference::asPairs()),
             'flash' => [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
             ],
+            'locale' => function () {
+                return app()->getLocale();
+            },
+            'translations' => function () {
+                return $this->getJsonFileContent(
+                    base_path('lang/' . app()->getLocale() . '.json')
+                );
+            },
         ]);
+    }
+
+    public function getJsonFileContent($path)
+    {
+        if (!file_exists($path)) return [];
+        return json_decode(file_get_contents($path), true);
     }
 }

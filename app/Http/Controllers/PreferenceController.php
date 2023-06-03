@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Preference;
+use Illuminate\Support\Facades\Cache;
 
 class PreferenceController
 {
     public function index()
     {
-        $preferences = Preference::all()->transform(function ($preference) {
-            return [$preference->key => $preference->value];
-        })->mapWithKeys(fn ($i) => $i);
+        $preferences = Preference::asPairs();
+
         return inertia('Preferences/Show', ['preferences' => $preferences]);
     }
 
@@ -22,7 +22,7 @@ class PreferenceController
                 'value' => $value,
             ]);
         }
-
+        Cache::delete('preferences');
         return back()->with('success', 'Settings updated successfully');
     }
 }

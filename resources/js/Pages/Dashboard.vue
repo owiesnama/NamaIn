@@ -30,7 +30,7 @@
                         >
                             {{ total_sales }}
                             <span class="ml-2 text-sm font-medium text-gray-500"
-                                >from 70,946</span
+                                >from 0</span
                             >
                         </div>
 
@@ -67,7 +67,7 @@
                         >
                             {{ total_purchase }}
                             <span class="ml-2 text-sm font-medium text-gray-500"
-                                >from 56.14%</span
+                                >from 0</span
                             >
                         </div>
 

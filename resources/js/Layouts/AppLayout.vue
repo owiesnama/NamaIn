@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from "vue";
+    import { computed, ref } from "vue";
     import { router, Head, Link } from "@inertiajs/vue3";
     import ApplicationMark from "@/Components/ApplicationMark.vue";
     import Banner from "@/Components/Banner.vue";
@@ -11,9 +11,10 @@
     defineProps({
         title: String,
     });
-
     const showingSidebar = ref(false);
-
+    const direction = computed(() => {
+        return preferences("language", "en") == "en" ? "ltr" : "rtl";
+    });
     const switchToTeam = (team) => {
         router.put(
             route("current-team.update"),
@@ -32,8 +33,8 @@
 </script>
 
 <template>
-    <div>
-        <Head :title="title" />
+    <div :dir="direction">
+        <Head :title="__(title)" />
 
         <Banner />
 
@@ -62,7 +63,7 @@
                         <div class="space-y-3">
                             <label
                                 class="px-3 text-xs text-gray-500 uppercase dark:text-gray-400"
-                                >Main</label
+                                >{{ __("Main") }}</label
                             >
 
                             <NavLink
@@ -84,17 +85,18 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Dashboard</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Dashboard')"
+                                ></span>
                             </NavLink>
                         </div>
 
                         <div class="space-y-3">
                             <label
                                 class="px-3 text-xs text-gray-500 uppercase dark:text-gray-400"
-                                >content</label
-                            >
+                                v-text="__('Content')"
+                            ></label>
 
                             <NavLink
                                 :href="route('customers.index')"
@@ -115,9 +117,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Customers</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Customers')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -139,9 +142,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Products</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Products')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -163,9 +167,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Storages</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Storages')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -187,17 +192,18 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Suppliers</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Suppliers')"
+                                ></span>
                             </NavLink>
                         </div>
 
                         <div class="space-y-3">
                             <label
                                 class="px-3 text-xs text-gray-500 uppercase dark:text-gray-400"
-                                >Transactions</label
-                            >
+                                v-text="__('Transactions')"
+                            ></label>
 
                             <NavLink
                                 :href="route('cheques.index')"
@@ -218,9 +224,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Cheques</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Cheques')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -242,9 +249,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Purchases</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Purchases')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -266,9 +274,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Sales</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Sales')"
+                                ></span>
                             </NavLink>
                         </div>
                     </nav>
@@ -288,8 +297,8 @@
                                 <label
                                     for="search-field"
                                     class="sr-only"
-                                    >Search</label
-                                >
+                                    v-text="__('Search')"
+                                ></label>
                                 <svg
                                     class="absolute inset-y-0 left-0 w-5 h-full text-gray-400 pointer-events-none"
                                     viewBox="0 0 20 20"
@@ -305,7 +314,7 @@
                                 <input
                                     id="search-field"
                                     class="block w-full h-full py-0 pl-8 pr-0 text-gray-900 border-0 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                                    placeholder="Search..."
+                                    :placeholder="__('Search')+'...'"
                                     type="search"
                                     name="search"
                                 />
@@ -321,7 +330,7 @@
                             <div class="flex items-center">
                                 <div class="flex items-center">
                                     <div class="relative">
-                                        <!-- Teams Dropdown -->
+                                        <!-- Teams Dropdown
                                         <Dropdown
                                             align="right"
                                             width="60"
@@ -452,13 +461,13 @@
                                                     </a>
                                                 </div>
                                             </template>
-                                        </Dropdown>
+                                        </Dropdown> -->
                                     </div>
 
                                     <!-- Preferences Dropdown -->
                                     <div class="relative ml-3">
                                         <Dropdown
-                                            align="right"
+                                            :align="$page.props.locale == 'ar' ? 'left': 'right'"
                                             width="48"
                                         >
                                             <template #trigger>
@@ -496,7 +505,7 @@
                                                         }}
 
                                                         <svg
-                                                            class="ml-2 -mr-0.5 h-4 w-4"
+                                                            class="ml-2 rtl:ml-0 rtl:mr-2 -mr-0.5 h-4 w-4"
                                                             xmlns="http://www.w3.org/2000/svg"
                                                             fill="none"
                                                             viewBox="0 0 24 24"
@@ -518,7 +527,7 @@
                                                 <div
                                                     class="block px-4 py-2 text-xs text-gray-400"
                                                 >
-                                                    Manage Account
+                                                    {{__('Manage Account')}}
                                                 </div>
 
                                                 <DropdownLink
@@ -526,7 +535,7 @@
                                                         route('profile.show')
                                                     "
                                                 >
-                                                    Profile
+                                                    {{__('Profile')}}
                                                 </DropdownLink>
 
                                                 <DropdownLink
@@ -536,23 +545,8 @@
                                                         )
                                                     "
                                                 >
-                                                    Preferences
+                                                    {{__('Preferences')}}
                                                 </DropdownLink>
-
-                                                <DropdownLink
-                                                    v-if="
-                                                        $page.props.jetstream
-                                                            .hasApiFeatures
-                                                    "
-                                                    :href="
-                                                        route(
-                                                            'api.index-tokens.index'
-                                                        )
-                                                    "
-                                                >
-                                                    API Tokens
-                                                </DropdownLink>
-
                                                 <div
                                                     class="border-t border-gray-100"
                                                 />
@@ -560,7 +554,7 @@
                                                 <!-- Authentication -->
                                                 <form @submit.prevent="logout">
                                                     <DropdownLink as="button">
-                                                        Log Out
+                                                        <span class="text-red-400">{{__('Log Out')}}</span>
                                                     </DropdownLink>
                                                 </form>
                                             </template>
