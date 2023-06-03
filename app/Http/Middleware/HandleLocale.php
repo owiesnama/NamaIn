@@ -19,6 +19,7 @@ class HandleLocale
     {
         $preferences = Cache::get('preferences');
         App::setLocale($preferences['language'] ?? 'en');
+
         return $next($request);
     }
 }

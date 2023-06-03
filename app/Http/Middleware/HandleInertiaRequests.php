@@ -36,7 +36,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         return array_merge(parent::share($request), [
-            'preferences' => Cache::rememberForever('preferences', fn () =>  Preference::asPairs()),
+            'preferences' => Cache::rememberForever('preferences', fn () => Preference::asPairs()),
             'flash' => [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
@@ -46,7 +46,7 @@ class HandleInertiaRequests extends Middleware
             },
             'translations' => function () {
                 return $this->getJsonFileContent(
-                    base_path('lang/' . app()->getLocale() . '.json')
+                    base_path('lang/'.app()->getLocale().'.json')
                 );
             },
         ]);
@@ -54,7 +54,10 @@ class HandleInertiaRequests extends Middleware
 
     public function getJsonFileContent($path)
     {
-        if (!file_exists($path)) return [];
+        if (! file_exists($path)) {
+            return [];
+        }
+
         return json_decode(file_get_contents($path), true);
     }
 }

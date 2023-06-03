@@ -23,6 +23,7 @@ class PreferenceController
             ]);
         }
         Cache::delete('preferences');
+
         return back()->with('success', 'Settings updated successfully');
     }
 }
