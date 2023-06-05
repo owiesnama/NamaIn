@@ -67,14 +67,14 @@
                     d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
                 />
             </svg>
-            <span>Edit</span>
+            <span>{{__('Edit')}}</span>
         </a>
         <button
             v-else
             class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
             @click="show = true"
         >
-            + Add New Storage
+            + {{__('Add New Storage')}}
         </button>
 
         <div
@@ -115,14 +115,9 @@
                         <div
                             class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
                         >
-                            <h1 class="font-semibold text-gray-800">
-                                Add New storage
+                            <h1 class="font-semibold text-gray-800 rtl:text-right">
+                                {{__('Add New Storage')}}
                             </h1>
-
-                            <p class="mt-1 text-sm text-gray-500">
-                                Lorem ipsum dolor sit, amet consectetur
-                                adipisicing elit.
-                            </p>
 
                             <form
                                 class="mt-4"
@@ -131,7 +126,7 @@
                                 <div>
                                     <InputLabel
                                         for="name"
-                                        value="Name"
+                                        :value="__('Name')"
                                     />
                                     <TextInput
                                         id="name"
@@ -150,7 +145,7 @@
                                 <div class="mt-4">
                                     <InputLabel
                                         for="address"
-                                        value="address"
+                                        :value="__('Address')"
                                     />
                                     <TextInput
                                         id="address"
@@ -171,7 +166,7 @@
                                         class="px-6 w-1/2 py-2.5 text-sm font-semibold tracking-wide focus:outline-none border rounded-lg"
                                         @click="cancel"
                                     >
-                                        Cancel
+                                    {{__('Cancel')}}
                                     </button>
 
                                     <PrimaryButton
@@ -181,7 +176,7 @@
                                         }"
                                         :disabled="storage.processing"
                                     >
-                                        Add
+                                        {{__('Add')}}
                                     </PrimaryButton>
                                 </div>
                             </form>

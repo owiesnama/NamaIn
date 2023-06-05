@@ -74,14 +74,14 @@
                     d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
                 />
             </svg>
-            <span>Edit</span>
+            <span>{{ __("Edit") }}</span>
         </a>
         <button
             v-else
             class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
             @click="show = true"
         >
-            + Add New Product
+            + {{ __("Add New Product") }}
         </button>
 
         <div
@@ -122,13 +122,9 @@
                         <div
                             class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-xl sm:p-6"
                         >
-                            <h1 class="font-semibold text-gray-800">
-                                Add New Product
+                            <h1 class="font-semibold text-gray-800 rtl:text-right">
+                                {{ __("Add New Product") }}
                             </h1>
-                            <p class="mt-1 text-sm text-gray-500">
-                                Lorem ipsum dolor sit, amet consectetur
-                                adipisicing elit.
-                            </p>
 
                             <form
                                 class="mt-4"
@@ -139,7 +135,7 @@
                                         <div>
                                             <InputLabel
                                                 for="name"
-                                                value="Name"
+                                                :value="__('Name')"
                                             />
                                             <TextInput
                                                 id="name"
@@ -158,7 +154,7 @@
                                         <div class="mt-4">
                                             <InputLabel
                                                 for="cost"
-                                                value="cost"
+                                                :value="__('Cost')"
                                             />
                                             <TextInput
                                                 id="cost"
@@ -176,13 +172,13 @@
                                         <div class="mt-4">
                                             <InputLabel
                                                 for="expire_date"
-                                                value="Expire Date"
+                                                :value="__('Expire Date')"
                                             />
                                             <TextInput
                                                 id="expire_date"
                                                 v-model="product.expire_date"
                                                 type="date"
-                                                class="block w-full mt-1"
+                                                class="block w-full mt-1 rtl:text-right"
                                                 required
                                             />
                                             <InputError
@@ -193,19 +189,20 @@
                                             />
                                         </div>
 
-                                        <div class="mt-4">
+                                        <div class="mt-4 rtl:text-right">
                                             <label
-                                                class="inline-flex items-center text-sm text-gray-600 gap-x-2"
+                                                class="inline-flex rtl:flex-row-reverse items-center text-sm text-gray-600 gap-x-2"
                                             >
                                                 <input
                                                     type="checkbox"
                                                     name="alert"
                                                     class="border-gray-300 p-1.5 rounded-md text-emerald-500 focus:ring-transparent"
                                                 />
-                                                <span
-                                                    >Alert when stock is
-                                                    low</span
-                                                >
+                                                <span>{{
+                                                    __(
+                                                        "Alert when stock is low"
+                                                    )
+                                                }}</span>
                                             </label>
                                         </div>
                                     </div>
@@ -223,19 +220,25 @@
                                             <div>
                                                 <InputLabel
                                                     for="unit name"
-                                                    value="Unit Name"
+                                                    :value="__('Unit Name')"
                                                 />
                                                 <TextInput
                                                     v-model="unit.name"
                                                     class="w-full focus:outline-none"
-                                                    placeholder="Unit eg: box"
+                                                    :placeholder="
+                                                        __('Unit eg: box')
+                                                    "
                                                 />
                                             </div>
 
                                             <div>
                                                 <InputLabel
                                                     for="conversion_factor"
-                                                    value="Unit Conversion Factor"
+                                                    :value="
+                                                        __(
+                                                            'Unit Conversion Factor'
+                                                        )
+                                                    "
                                                 />
                                                 <TextInput
                                                     v-model="
@@ -244,32 +247,38 @@
                                                     class="w-full mt-1 focus:outline-none"
                                                     type="number"
                                                     min="1"
-                                                    placeholder="Unit conversion factor"
+                                                    :placeholder="
+                                                        __(
+                                                            'Unit Conversion Factor'
+                                                        )
+                                                    "
                                                 />
                                             </div>
 
                                             <button
-                                                type="button"
                                                 v-if="
                                                     index ==
                                                     product.units.length - 1
                                                 "
-                                                @click="addUnit"
+                                                type="button"
                                                 class="px-4 py-2.5 bg-gray-100 rounded-lg w-full text-sm font-semibold"
+                                                @click="addUnit"
                                             >
-                                                Add Unit
+                                                {{ __("Add Unit") }}
                                             </button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="flex items-center mt-6 gap-x-4">
+                                <div
+                                    class="flex items-center mt-6 gap-x-4"
+                                >
                                     <button
                                         type="button"
                                         class="px-6 w-1/2 py-2.5 text-sm font-semibold tracking-wide focus:outline-none border rounded-lg"
                                         @click="cancel"
                                     >
-                                        Cancel
+                                        {{ __("Cancel") }}
                                     </button>
 
                                     <PrimaryButton
@@ -279,7 +288,7 @@
                                         }"
                                         :disabled="product.processing"
                                     >
-                                        Add
+                                        {{ __("Add") }}
                                     </PrimaryButton>
                                 </div>
                             </form>

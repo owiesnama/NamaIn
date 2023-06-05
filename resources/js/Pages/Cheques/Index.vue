@@ -8,7 +8,6 @@
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import Dropdown from "@/Components/Dropdown.vue";
-    import DropdownLink from "@/Components/DropdownLink.vue";
 
     const props = defineProps({
         initialCheques: Object,
@@ -72,12 +71,12 @@
                         <h2
                             class="text-xl font-semibold text-gray-800 dark:text-white"
                         >
-                            Cheques
+                            {{__('Cheques')}}
                         </h2>
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                            >{{ cheques.total }} Cheques</span
+                            >{{ initialCheques.total }} {{ __("Cheque") }}</span
                         >
                     </div>
 
@@ -103,15 +102,15 @@
                             <input
                                 v-model="filters.search"
                                 type="text"
-                                placeholder="Search here ..."
                                 class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
+                                :placeholder="__('Search here') +'...'"
                             />
                         </div>
                         <TextInput
                             v-model="filters.due"
                             type="date"
-                            class="text-gray-700"
-                            placeholder="Due before.."
+                            class="text-gray-700 rtl:text-right"
+                            :placeholder="__('Due before') + '..'"
                         />
                     </div>
                 </div>
@@ -131,7 +130,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = ''"
                         >
-                            All
+                            {{__('All')}}
                         </button>
 
                         <button
@@ -143,7 +142,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = 1"
                         >
-                            Credit
+                            {{__('Credit')}}
                         </button>
 
                         <button
@@ -155,7 +154,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = 0"
                         >
-                            Debit
+                            {{__('Debit')}}
                         </button>
                     </div>
 
@@ -183,16 +182,16 @@
                                     />
                                 </svg>
 
-                                Status
+                                {{__('Status')}}
                             </button>
                         </template>
 
                         <template #content>
                             <button
-                                v-for="(key, sta) in status"
+                                v-for="(key, status) in status"
                                 :key="key"
-                                v-text="sta"
                                 class="block w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                v-text="__(status)"
                             ></button>
                         </template>
                     </Dropdown>

@@ -7,20 +7,20 @@
     <AppLayout title="Dashboard">
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Dashboard
+                {{__('Dashboard')}}
             </h2>
         </template>
 
         <div>
             <h3 class="text-base font-semibold leading-6 text-gray-900">
-                Last 30 days
+                {{__('Last 30 days')}}
             </h3>
             <dl
                 class="grid grid-cols-1 mt-5 overflow-hidden bg-white divide-y divide-gray-200 rounded-lg shadow md:grid-cols-3 md:divide-y-0 md:divide-x"
             >
                 <div class="px-4 py-5 sm:p-6">
                     <dt class="text-base font-normal text-gray-900">
-                        Total Sales
+                        {{__('Total Sales')}}
                     </dt>
                     <dd
                         class="flex items-baseline justify-between mt-1 md:block lg:flex"
@@ -29,8 +29,8 @@
                             class="flex items-baseline text-2xl font-semibold text-indigo-600"
                         >
                             {{ total_sales }}
-                            <span class="ml-2 text-sm font-medium text-gray-500"
-                                >from 0</span
+                            <span class="ml-2 rtl:ml-0 rtl:mr-2 text-sm font-medium text-gray-500"
+                                >{{__('from')}} 0</span
                             >
                         </div>
 
@@ -49,7 +49,7 @@
                                     clip-rule="evenodd"
                                 />
                             </svg>
-                            <span class="sr-only"> Increased by </span>
+                            <span class="sr-only"> {{__('Increased by')}} </span>
                             12%
                         </div>
                     </dd>
@@ -57,7 +57,7 @@
 
                 <div class="px-4 py-5 sm:p-6">
                     <dt class="text-base font-normal text-gray-900">
-                        Total Purchase
+                        {{__('Total Purchase')}}
                     </dt>
                     <dd
                         class="flex items-baseline justify-between mt-1 md:block lg:flex"
@@ -66,8 +66,8 @@
                             class="flex items-baseline text-2xl font-semibold text-indigo-600"
                         >
                             {{ total_purchase }}
-                            <span class="ml-2 text-sm font-medium text-gray-500"
-                                >from 0</span
+                            <span class="ml-2 rtl:ml-0 rtl:mr-2 text-sm font-medium text-gray-500"
+                                >{{__('from')}} 0</span
                             >
                         </div>
 
@@ -86,7 +86,7 @@
                                     clip-rule="evenodd"
                                 />
                             </svg>
-                            <span class="sr-only"> Increased by </span>
+                            <span class="sr-only"> {{__('Increased by')}} </span>
                             2.02%
                         </div>
                     </dd>
@@ -94,7 +94,7 @@
 
                 <div class="px-4 py-5 sm:p-6">
                     <dt class="text-base font-normal text-gray-900">
-                        Avg. Click Rate
+                        {{__('Avg. Click Rate')}}
                     </dt>
                     <dd
                         class="flex items-baseline justify-between mt-1 md:block lg:flex"
@@ -103,8 +103,8 @@
                             class="flex items-baseline text-2xl font-semibold text-indigo-600"
                         >
                             24.57%
-                            <span class="ml-2 text-sm font-medium text-gray-500"
-                                >from 28.62%</span
+                            <span class="ml-2 rtl:ml-0 rtl:mr-2 text-sm font-medium text-gray-500"
+                                >{{__('from')}} 28.62%</span
                             >
                         </div>
 
@@ -123,7 +123,7 @@
                                     clip-rule="evenodd"
                                 />
                             </svg>
-                            <span class="sr-only"> Decreased by </span>
+                            <span class="sr-only"> {{__('Decreased by')}} </span>
                             4.05%
                         </div>
                     </dd>

@@ -121,9 +121,6 @@
                                 {{ props.customer ? __("Update") : __("Add New") }}
                                 {{__('Customer')}}
                             </h1>
-                            <p class="mt-1 text-sm text-gray-500 rtl:text-right">
-                                {{__('Add a new cutomer to list of ours')}} 
-                            </p>
 
                             <form
                                 class="mt-4"
