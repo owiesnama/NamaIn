@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from "vue";
+    import { computed, ref } from "vue";
     import { router, Head, Link } from "@inertiajs/vue3";
     import ApplicationMark from "@/Components/ApplicationMark.vue";
     import Banner from "@/Components/Banner.vue";
@@ -11,9 +11,10 @@
     defineProps({
         title: String,
     });
-
     const showingSidebar = ref(false);
-
+    const direction = computed(() => {
+        return preferences("language", "en") == "en" ? "ltr" : "rtl";
+    });
     const switchToTeam = (team) => {
         router.put(
             route("current-team.update"),
@@ -32,8 +33,8 @@
 </script>
 
 <template>
-    <div>
-        <Head :title="title" />
+    <div :dir="direction">
+        <Head :title="__(title)" />
 
         <Banner />
 
@@ -62,7 +63,7 @@
                         <div class="space-y-3">
                             <label
                                 class="px-3 text-xs text-gray-500 uppercase dark:text-gray-400"
-                                >Main</label
+                                >{{ __("Main") }}</label
                             >
 
                             <NavLink
@@ -84,17 +85,18 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Dashboard</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Dashboard')"
+                                ></span>
                             </NavLink>
                         </div>
 
                         <div class="space-y-3">
                             <label
                                 class="px-3 text-xs text-gray-500 uppercase dark:text-gray-400"
-                                >content</label
-                            >
+                                v-text="__('Content')"
+                            ></label>
 
                             <NavLink
                                 :href="route('customers.index')"
@@ -115,9 +117,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Customers</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Customers')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -139,9 +142,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Products</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Products')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -163,30 +167,43 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Storages</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Storages')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
                                 :href="route('suppliers.index')"
                                 :active="route().current('suppliers.index')"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    class="w-5 h-5"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"
+                                    />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Suppliers</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Suppliers')"
+                                ></span>
                             </NavLink>
                         </div>
 
                         <div class="space-y-3">
                             <label
                                 class="px-3 text-xs text-gray-500 uppercase dark:text-gray-400"
-                                >Transactions</label
-                            >
+                                v-text="__('Transactions')"
+                            ></label>
 
                             <NavLink
                                 :href="route('cheques.index')"
@@ -207,9 +224,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Cheques</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Cheques')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -231,9 +249,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Purchases</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Purchases')"
+                                ></span>
                             </NavLink>
 
                             <NavLink
@@ -255,9 +274,10 @@
                                     />
                                 </svg>
 
-                                <span class="mx-2 text-sm font-medium"
-                                    >Sales</span
-                                >
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Sales')"
+                                ></span>
                             </NavLink>
                         </div>
                     </nav>
@@ -277,8 +297,8 @@
                                 <label
                                     for="search-field"
                                     class="sr-only"
-                                    >Search</label
-                                >
+                                    v-text="__('Search')"
+                                ></label>
                                 <svg
                                     class="absolute inset-y-0 left-0 w-5 h-full text-gray-400 pointer-events-none"
                                     viewBox="0 0 20 20"
@@ -294,7 +314,7 @@
                                 <input
                                     id="search-field"
                                     class="block w-full h-full py-0 pl-8 pr-0 text-gray-900 border-0 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                                    placeholder="Search..."
+                                    :placeholder="__('Search')+'...'"
                                     type="search"
                                     name="search"
                                 />
@@ -310,7 +330,7 @@
                             <div class="flex items-center">
                                 <div class="flex items-center">
                                     <div class="relative">
-                                        <!-- Teams Dropdown -->
+                                        <!-- Teams Dropdown
                                         <Dropdown
                                             align="right"
                                             width="60"
@@ -323,8 +343,17 @@
                                                         type="button"
                                                         class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-transparent rounded-md hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
                                                     >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                            <path fill-rule="evenodd" d="M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z" clip-rule="evenodd" />
+                                                        <svg
+                                                            xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 24 24"
+                                                            fill="currentColor"
+                                                            class="w-5 h-5"
+                                                        >
+                                                            <path
+                                                                fill-rule="evenodd"
+                                                                d="M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z"
+                                                                clip-rule="evenodd"
+                                                            />
                                                         </svg>
                                                     </button>
                                                 </span>
@@ -332,31 +361,113 @@
 
                                             <template #content>
                                                 <div class="w-64 sm:w-80">
-                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700">
-                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar" />
-                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Sara Salah</span> replied on the <span class="text-emerald-500 hover:underline" href="#">Upload Image</span> artical . 2m</p>
+                                                    <a
+                                                        href="#"
+                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700"
+                                                    >
+                                                        <img
+                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
+                                                            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
+                                                            alt="avatar"
+                                                        />
+                                                        <p
+                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
+                                                        >
+                                                            <span
+                                                                class="font-bold"
+                                                                href="#"
+                                                                >Sara
+                                                                Salah</span
+                                                            >
+                                                            replied on the
+                                                            <span
+                                                                class="text-emerald-500 hover:underline"
+                                                                href="#"
+                                                                >Upload
+                                                                Image</span
+                                                            >
+                                                            artical . 2m
+                                                        </p>
                                                     </a>
-                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700">
-                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80" alt="avatar" />
-                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Slick Net</span> start following you . 45m</p>
+                                                    <a
+                                                        href="#"
+                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700"
+                                                    >
+                                                        <img
+                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
+                                                            src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80"
+                                                            alt="avatar"
+                                                        />
+                                                        <p
+                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
+                                                        >
+                                                            <span
+                                                                class="font-bold"
+                                                                href="#"
+                                                                >Slick Net</span
+                                                            >
+                                                            start following you
+                                                            . 45m
+                                                        </p>
                                                     </a>
-                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700">
-                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" alt="avatar" />
-                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Jane Doe</span> Like Your reply on <span class="text-emerald-500 hover:underline" href="#">Test with TDD</span> artical . 1h</p>
+                                                    <a
+                                                        href="#"
+                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700"
+                                                    >
+                                                        <img
+                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
+                                                            src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
+                                                            alt="avatar"
+                                                        />
+                                                        <p
+                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
+                                                        >
+                                                            <span
+                                                                class="font-bold"
+                                                                href="#"
+                                                                >Jane Doe</span
+                                                            >
+                                                            Like Your reply on
+                                                            <span
+                                                                class="text-emerald-500 hover:underline"
+                                                                href="#"
+                                                                >Test with
+                                                                TDD</span
+                                                            >
+                                                            artical . 1h
+                                                        </p>
                                                     </a>
-                                                    <a href="#" class="flex items-center px-4 py-3 transition-colors duration-300 transform hover:bg-gray-100 dark:hover:bg-gray-700">
-                                                        <img class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=398&q=80" alt="avatar" />
-                                                        <p class="mx-2 text-sm text-gray-600 dark:text-white"><span class="font-bold" href="#">Abigail Bennett</span> start following you . 3h</p>
+                                                    <a
+                                                        href="#"
+                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    >
+                                                        <img
+                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
+                                                            src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=398&q=80"
+                                                            alt="avatar"
+                                                        />
+                                                        <p
+                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
+                                                        >
+                                                            <span
+                                                                class="font-bold"
+                                                                href="#"
+                                                                >Abigail
+                                                                Bennett</span
+                                                            >
+                                                            start following you
+                                                            . 3h
+                                                        </p>
                                                     </a>
                                                 </div>
                                             </template>
-                                        </Dropdown>
+                                        </Dropdown> -->
                                     </div>
 
-                                    <!-- Settings Dropdown -->
+                                    <!-- Preferences Dropdown -->
                                     <div class="relative ml-3">
                                         <Dropdown
-                                            align="right"
+                                            :align="$page.props.locale == 'ar' ? 'left': 'right'"
                                             width="48"
                                         >
                                             <template #trigger>
@@ -394,7 +505,7 @@
                                                         }}
 
                                                         <svg
-                                                            class="ml-2 -mr-0.5 h-4 w-4"
+                                                            class="ml-2 rtl:ml-0 rtl:mr-2 -mr-0.5 h-4 w-4"
                                                             xmlns="http://www.w3.org/2000/svg"
                                                             fill="none"
                                                             viewBox="0 0 24 24"
@@ -416,7 +527,7 @@
                                                 <div
                                                     class="block px-4 py-2 text-xs text-gray-400"
                                                 >
-                                                    Manage Account
+                                                    {{__('Manage Account')}}
                                                 </div>
 
                                                 <DropdownLink
@@ -424,31 +535,18 @@
                                                         route('profile.show')
                                                     "
                                                 >
-                                                    Profile
+                                                    {{__('Profile')}}
                                                 </DropdownLink>
 
                                                 <DropdownLink
-                                                    :href="
-                                                        route('settings')
-                                                    "
-                                                >
-                                                    Settings
-                                                </DropdownLink>
-
-                                                <DropdownLink
-                                                    v-if="
-                                                        $page.props.jetstream
-                                                            .hasApiFeatures
-                                                    "
                                                     :href="
                                                         route(
-                                                            'api.index-tokens.index'
+                                                            'preferences.index'
                                                         )
                                                     "
                                                 >
-                                                    API Tokens
+                                                    {{__('Preferences')}}
                                                 </DropdownLink>
-
                                                 <div
                                                     class="border-t border-gray-100"
                                                 />
@@ -456,7 +554,7 @@
                                                 <!-- Authentication -->
                                                 <form @submit.prevent="logout">
                                                     <DropdownLink as="button">
-                                                        Log Out
+                                                        <span class="text-red-400">{{__('Log Out')}}</span>
                                                     </DropdownLink>
                                                 </form>
                                             </template>

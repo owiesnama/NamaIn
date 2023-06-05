@@ -6,7 +6,7 @@
     let totalPrice = (record) => {
         return record.price * record.quantity;
     };
-    let deliverableRecords = computed(() => {
+    let deliveredRecords = computed(() => {
         return props.invoice.details.filter((record) => {
             return record.delivered;
         });
@@ -71,7 +71,7 @@
                             class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
                         >
                             <tr
-                                v-for="record in deliverableRecords"
+                                v-for="record in deliveredRecords"
                                 :key="record.id"
                             >
                                 <td
@@ -96,7 +96,9 @@
                             </tr>
 
                             <template v-if="remainingRecords.length">
-                                <tr>
+                                <tr
+                                    v-if="deliveredRecords.length"
+                                >
                                     <td
                                         colspan="4"
                                         class="p-2 font-semibold text-center text-gray-800 bg-gray-100 border-t border-b"

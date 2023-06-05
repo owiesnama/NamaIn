@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from "vue";
+    import { inject, ref } from "vue";
     import { useForm } from "@inertiajs/vue3";
     import ActionMessage from "@/Components/ActionMessage.vue";
     import FormSection from "@/Components/FormSection.vue";
@@ -10,15 +10,14 @@
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import TextInput from "@/Components/TextInput.vue";
-
+    const preferences = inject("preferences");
     const form = useForm({
-        _method: "PUT",
-        logo: null,
-        invoicesHeadline: null,
-        alerts: null,
-        language: null,
-        currency: null,
-        pecentage: null,
+        logo: preferences.logo,
+        invoicesHeadline: preferences.invoicesHeadline,
+        alerts: preferences.alerts,
+        language: preferences.language,
+        currency: preferences.currency,
+        pecentage: preferences.pecentage,
     });
 
     const logoPreview = ref(null);
@@ -26,9 +25,10 @@
     const alertsToggle = ref(true);
 
     const updateApplicationInformation = () => {
-        if (logoInput.value) {
-            form.logo = logoInput.value.files[0];
-        }
+        if (!logoInput.value) return;
+
+        form.logo = logoInput.value.files[0];
+        form.put(route("preferences.update"));
     };
 
     const selectNewLogo = () => {
@@ -37,15 +37,10 @@
 
     const updateLogoPreview = () => {
         const logo = logoInput.value.files[0];
-
-        if (!logo) return;
-
         const reader = new FileReader();
 
-        reader.onload = (e) => {
-            logoPreview.value = e.target.result;
-        };
-
+        if (!logo) return;
+        reader.onload = (e) => (logoPreview.value = e.target.result);
         reader.readAsDataURL(logo);
     };
 </script>
@@ -184,13 +179,27 @@
                     class="inline-flex mt-1 overflow-hidden bg-white border border-gray-200 divide-x rounded-lg rtl:flex-row-reverse"
                 >
                     <button
-                        class="px-4 py-2 text-sm font-medium text-gray-600 transition-colors duration-200 sm:text-base sm:px-6 hover:bg-gray-100"
+                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 sm:text-base sm:px-6"
+                        :class="
+                            form.language == 'ar'
+                                ? ' bg-emerald-500 hover:bg-emerald-400  text-white'
+                                : 'hover:bg-gray-100  text-gray-600 '
+                        "
+                        @click="form.language = 'ar'"
+                        type="button"
                     >
                         Arabic
                     </button>
 
                     <button
-                        class="px-4 py-2 text-sm font-medium text-white transition-colors duration-200 bg-emerald-500 sm:text-base sm:px-6 hover:bg-emerald-400"
+                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 sm:text-base sm:px-6"
+                        :class="
+                            form.language == 'en'
+                                ? ' bg-emerald-500 hover:bg-emerald-400  text-white'
+                                : 'hover:bg-gray-100  text-gray-600 '
+                        "
+                        @click="form.language = 'en'"
+                        type="button"
                     >
                         English
                     </button>
@@ -205,7 +214,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="pecentage"
-                    value="Pecentage (%)"
+                    value="Margin revenu pecentage (%)"
                 />
                 <TextInput
                     id="pecentage"
@@ -254,20 +263,28 @@
                                 />
                             </svg>
 
-                            US Dollar
+                            {{
+                                form.currency == "US-Dollar"
+                                    ? "US Dollar"
+                                    : "SDG"
+                            }}
                         </button>
                     </template>
 
                     <template #content>
-                        <DropdownLink as="button"> US Dollar </DropdownLink>
-
+                        <DropdownLink
+                            as="button"
+                            @click="form.currency = 'US-Dollar'"
+                        >
+                            US Dollar
+                        </DropdownLink>
                         <div class="border-t border-gray-100" />
-
-                        <DropdownLink as="button"> Euro </DropdownLink>
-
-                        <div class="border-t border-gray-100" />
-
-                        <DropdownLink as="button"> SDG </DropdownLink>
+                        <DropdownLink
+                            as="button"
+                            @click="form.currency = 'SDG'"
+                        >
+                            SDG
+                        </DropdownLink>
                     </template>
                 </Dropdown>
                 <InputError
@@ -286,6 +303,7 @@
             </ActionMessage>
 
             <PrimaryButton
+                type="submit"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
             >
