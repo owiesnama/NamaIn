@@ -22,10 +22,10 @@
 
 <template>
     <FormSection @submitted="updateDateInformation">
-        <template #title> Date Information </template>
+        <template #title>{{ __("Date Information") }}</template>
 
         <template #description>
-            Update your Date information and Time Zone.
+            {{ __("Update your Date information and Time Zone") }}.
         </template>
 
         <template #form>
@@ -33,7 +33,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="timezone"
-                    value="Timezone"
+                    :value="__('Timezone')"
                 />
                 <Dropdown
                     align="left"
@@ -101,7 +101,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="date_format"
-                    value="Date Format"
+                    :value="__('Date Format')"
                 />
                 <Dropdown
                     align="left"
@@ -180,7 +180,7 @@
                 :on="form.recentlySuccessful"
                 class="mr-3"
             >
-                Saved.
+                {{ __("Saved") }}.
             </ActionMessage>
 
             <PrimaryButton
@@ -188,7 +188,7 @@
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
             >
-                Save
+                {{ __("Save") }}
             </PrimaryButton>
         </template>
     </FormSection>

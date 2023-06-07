@@ -552,9 +552,9 @@
                                                 />
 
                                                 <!-- Authentication -->
-                                                <form @submit.prevent="logout">
+                                                <form>
                                                     <DropdownLink as="button">
-                                                        <span class="text-red-400">{{__('Log Out')}}</span>
+                                                        <span class="text-red-400" @click.prevent="logout">{{__('Log Out')}}</span>
                                                     </DropdownLink>
                                                 </form>
                                             </template>

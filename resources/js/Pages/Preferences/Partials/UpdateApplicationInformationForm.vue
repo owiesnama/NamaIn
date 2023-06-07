@@ -47,10 +47,10 @@
 
 <template>
     <FormSection @submitted="updateApplicationInformation">
-        <template #title> Application Information </template>
+        <template #title> {{ __("Application Information") }} </template>
 
         <template #description>
-            Update your Application information and Basic Data.
+            {{ __("Update your Application information and Basic Data") }}.
         </template>
 
         <template #form>
@@ -99,7 +99,7 @@
                     type="button"
                     @click.prevent="selectNewLogo"
                 >
-                    {{__('Select A New Logo')}}
+                    {{ __("Select A New Logo") }}
                 </SecondaryButton>
 
                 <InputError
@@ -160,7 +160,7 @@
                     </div>
 
                     <p class="mx-3 text-sm text-gray-500">
-                        {{__('Send Notifications When Stocks Running Out')}}
+                        {{ __("Send Notifications When Stocks Running Out") }}
                     </p>
                 </div>
                 <InputError
@@ -188,7 +188,7 @@
                         @click="form.language = 'ar'"
                         type="button"
                     >
-                        {{__('Arabic')}}
+                        {{ __("Arabic") }}
                     </button>
 
                     <button
@@ -201,7 +201,7 @@
                         @click="form.language = 'en'"
                         type="button"
                     >
-                        {{__('English')}}
+                        {{ __("English") }}
                     </button>
                 </div>
                 <InputError
@@ -265,7 +265,7 @@
 
                             {{
                                 form.currency == "US-Dollar"
-                                    ? __('US Dollar')
+                                    ? __("US Dollar")
                                     : __('"SDG"')
                             }}
                         </button>
@@ -276,14 +276,14 @@
                             as="button"
                             @click="form.currency = 'US-Dollar'"
                         >
-                            {{__('US Dollar')}}
+                            {{ __("US Dollar") }}
                         </DropdownLink>
                         <div class="border-t border-gray-100" />
                         <DropdownLink
                             as="button"
                             @click="form.currency = 'SDG'"
                         >
-                            {{__('SDG')}}
+                            {{ __("SDG") }}
                         </DropdownLink>
                     </template>
                 </Dropdown>
@@ -299,7 +299,7 @@
                 :on="form.recentlySuccessful"
                 class="mr-3"
             >
-                {{__('Saved.')}}
+                {{ __("Saved.") }}
             </ActionMessage>
 
             <PrimaryButton
@@ -307,7 +307,7 @@
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
             >
-                {{__('Save')}}
+                {{ __("Save") }}
             </PrimaryButton>
         </template>
     </FormSection>
