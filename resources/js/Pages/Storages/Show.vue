@@ -32,17 +32,21 @@
                         <h2
                             class="text-xl font-semibold text-gray-800 dark:text-white"
                         >
-                            Storage: {{ storage.name }}
+                            {{ __("The Storage") }}: {{ storage.name }}
                         </h2>
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                            >{{ storage.stockCount }} Products</span
+                            >{{ storage.stockCount }} {{ __("Product") }}</span
                         >
                     </div>
 
                     <p class="mt-2 text-gray-500">
-                        Here you can find all products available in this Storage
+                        {{
+                            __(
+                                "Here you can find all products available in this storage with it's transactions"
+                            )
+                        }}
                     </p>
 
                     <!-- <div class="relative flex items-center mt-4">
@@ -97,28 +101,28 @@
                                             scope="col"
                                             class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                         >
-                                            Name
+                                            {{ __("Name") }}
                                         </th>
 
                                         <th
                                             scope="col"
                                             class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                         >
-                                            Quantity
+                                            {{ __("Quantity On Hand") }}
                                         </th>
 
                                         <th
                                             scope="col"
                                             class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                         >
-                                            Expire Date
+                                            {{ __("Expire Date") }}
                                         </th>
 
                                         <th
                                             scope="col"
                                             class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                         >
-                                            Added Time
+                                            {{ __("Added Time") }}
                                         </th>
                                     </tr>
                                 </thead>
@@ -131,17 +135,17 @@
                                             :key="product.id"
                                         >
                                             <th
-                                                class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
                                                 v-text="product.id"
                                             ></th>
 
                                             <th
-                                                class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
                                                 v-text="product.name"
                                             ></th>
 
                                             <td
-                                                class="px-8 py-3 text-sm text-left whitespace-nowrap"
+                                                class="px-8 py-3 text-sm text-left rtl:text-right whitespace-nowrap"
                                             >
                                                 <a
                                                     class="font-semibold text-emerald-500"
@@ -152,7 +156,7 @@
                                             </td>
 
                                             <th
-                                                class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
+                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
                                             >
                                                 <span
                                                     class="text-emerald-500"
@@ -161,7 +165,7 @@
                                                     "
                                                 >
                                                     ({{ product.expire_date }})
-                                                    Not Expire
+                                                    {{ __("Not Expire") }}
                                                 </span>
 
                                                 <span
@@ -171,13 +175,13 @@
                                                     "
                                                 >
                                                     ({{ product.expire_date }})
-                                                    Expired
+                                                    {{ __("Expired") }}
                                                 </span>
                                                 &nbsp;
                                             </th>
 
                                             <td
-                                                class="px-8 py-3 text-sm text-left text-gray-700 whitespace-nowrap"
+                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
                                                 v-text="product.created_at"
                                             ></td>
                                         </tr>

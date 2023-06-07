@@ -1,7 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import Pagination from "@/Shared/Pagination.vue";
-    import InvoiceDetails from "@/Shared/InvoiceDetails.vue";
     import { Link, useForm } from "@inertiajs/vue3";
     import { computed, ref } from "vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
@@ -17,9 +16,6 @@
     });
 
     let deductingFromStorage = ref(false);
-    let hasNoInvoices = computed(() => {
-        return !props.invoices.data.length;
-    });
     let form = useForm({
         invoice: null,
         storage: null,
@@ -48,12 +44,12 @@
                     <h2
                         class="text-xl font-semibold text-gray-800 dark:text-white"
                     >
-                        Sales
+                        {{ __("Sales") }}
                     </h2>
 
                     <span
                         class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                        >{{ invoices.total }} invoices</span
+                        >{{ invoices.total }} {{ __("Invoice") }}</span
                     >
                 </div>
 
@@ -77,7 +73,7 @@
 
                     <input
                         type="text"
-                        placeholder="Search here ..."
+                        :placeholder="__('Search here') + '...'"
                         class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
                     />
                 </div>
@@ -92,19 +88,19 @@
                     <button
                         class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
                     >
-                        All
+                        {{__('All')}}
                     </button>
 
                     <button
                         class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300"
                     >
-                        Untrash
+                        {{__('With Trashed')}}
                     </button>
 
                     <button
                         class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
                     >
-                        Trash
+                        {{__('Trashed')}}
                     </button>
                 </div>
 
@@ -112,17 +108,21 @@
                     class="w-full px-5 py-2.5 mt-4 block text-center text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
                     :href="route('sales.create')"
                 >
-                    + Add New Invoice
+                    + {{__('Add New Invoice')}}
                 </Link>
             </div>
         </div>
-        
+
         <div class="py-8 space-y-8 2xl:space-y-10 md:py-12">
             <div
                 v-for="invoice in invoices.data"
                 :key="invoice.id"
             >
-                <Card :invoice="invoice" @moveToStorage="deductFromStorage" actionTitle="Deduct From Storage"></Card>
+                <Card
+                    :invoice="invoice"
+                    @moveToStorage="deductFromStorage"
+                    :actionTitle="__('Deduct From Storage')"
+                ></Card>
             </div>
 
             <EmptySearch :data="invoices.data"></EmptySearch>
@@ -162,15 +162,15 @@
                 </select>
             </template>
             <template #footer>
-                <SecondaryButton @click="closeModal"> Cancel </SecondaryButton>
+                <SecondaryButton @click="closeModal"> {{__('Cancel')}} </SecondaryButton>
 
                 <PrimaryButton
-                    class="ml-3"
+                    class="ml-3 rtl:mr-3 rtl:ml-0"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                     @click="confirmDeduct"
                 >
-                    Confirm
+                    {{__('Confirm')}}
                 </PrimaryButton>
             </template>
         </DialogModal>

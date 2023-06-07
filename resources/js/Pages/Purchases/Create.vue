@@ -39,7 +39,7 @@
         <h2
             class="text-xl font-semibold text-gray-800 dark:text-white"
         >
-            New Purchase
+            {{__('New Purchase')}}
         </h2>
 
         <form @submit.prevent="submit" class="mt-6">
@@ -47,7 +47,7 @@
                 <h2 class="text-2xl font-semibold text-emerald-500" v-text="totalCost + ' SDG'"></h2>
                 
                 <label for="totalCost" class="text-sm font-medium text-gray-600" >
-                    Total Cost
+                    {{__('Total Cost')}}
                 </label>
             </div>
 
@@ -61,7 +61,7 @@
                         <div>
                             <InputLabel
                                 for="product"
-                                value="Product"
+                                :value="__('Product')"
                             />
                             <select
                                 v-model="purchase.product"
@@ -72,7 +72,7 @@
                                     value=""
                                     selected
                                 >
-                                    Select Product
+                                    {{__('Select Product')}}
                                 </option>
 
                                 <option
@@ -87,7 +87,7 @@
                         <div>
                             <InputLabel
                                 for="quantity"
-                                value="Quantity"
+                                :value="__('Quantity')"
                             />
                             <TextInput
                                 id="quantity"
@@ -102,7 +102,7 @@
                         <div>
                             <InputLabel
                                 for="price"
-                                value="Price"
+                                :value="__('Price')"
                             />
                             <TextInput
                                 id="price"
@@ -117,7 +117,7 @@
                         <div>
                             <InputLabel
                                 for="description"
-                                value="Description"
+                                :value="__('Description')"
                             />
     
                             <textarea
@@ -134,7 +134,7 @@
                     class="w-full px-5 py-2.5 mt-4 text-sm tracking-wide text-gray-700 transition-colors font-bold duration-200 rounded-lg bg-gray-200 shrink-0 sm:w-auto hover:bg-gray-300 dark:hover:bg-gray-500 dark:bg-gray-600"
                     @click="newRow"
                 >
-                    + Add New Row
+                    + {{__('Add New Row')}}
                 </button>
             </div>
 
@@ -143,7 +143,7 @@
                     class="w-full px-5 py-2.5 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
                     type="submit"
                 >
-                    Purchase
+                    {{__('Purchase')}}
                 </button>
             </div>
         </form>

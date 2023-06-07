@@ -41,28 +41,28 @@
                                     scope="col"
                                     class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                 >
-                                    Product
+                                    {{__('The Product')}}
                                 </th>
 
                                 <th
                                     scope="col"
                                     class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                 >
-                                    Quantity
+                                    {{__('Quantity')}}
                                 </th>
 
                                 <th
                                     scope="col"
                                     class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                 >
-                                    Price
+                                    {{__('Price')}}
                                 </th>
 
                                 <th
                                     scope="col"
                                     class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                                 >
-                                    Total Price
+                                    {{__('Total Price')}}
                                 </th>
                             </tr>
                         </thead>
@@ -75,22 +75,22 @@
                                 :key="record.id"
                             >
                                 <td
-                                    class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
                                     v-text="record.product.name"
                                 ></td>
 
                                 <th
-                                    class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
                                     v-html="recordQuantity(record)"
                                 ></th>
 
                                 <th
-                                    class="px-8 py-3 text-sm text-left text-emerald-500 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm text-left rtl:text-right text-emerald-500 whitespace-nowrap"
                                     v-text="record.price"
                                 ></th>
 
                                 <td
-                                    class="px-8 py-3 text-sm font-semibold text-left text-emerald-500 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm font-semibold text-left rtl:text-right text-emerald-500 whitespace-nowrap"
                                     v-text="totalPrice(record)"
                                 ></td>
                             </tr>
@@ -101,9 +101,9 @@
                                 >
                                     <td
                                         colspan="4"
-                                        class="p-2 font-semibold text-center text-gray-800 bg-gray-100 border-t border-b"
+                                        class="py-2  text-center text-gray-500 font-semibold bg-gray-100 border-t border-b"
                                     >
-                                        Invoice Remaining
+                                        {{__('Invoice Remaining')}}
                                     </td>
                                 </tr>
 
@@ -112,22 +112,22 @@
                                     :key="record.id"
                                 >
                                     <td
-                                        class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
                                         v-text="record.product.name"
                                     ></td>
 
                                     <th
-                                        class="px-8 py-3 text-sm text-left text-gray-800 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
                                         v-html="recordQuantity(record)"
                                     ></th>
 
                                     <th
-                                        class="px-8 py-3 text-sm text-left text-emerald-500 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm text-left rtl:text-right text-emerald-500 whitespace-nowrap"
                                         v-text="record.price"
                                     ></th>
 
                                     <td
-                                        class="px-8 py-3 text-sm font-semibold text-left text-emerald-500 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm font-semibold text-left rtl:text-right text-emerald-500 whitespace-nowrap"
                                         v-text="totalPrice(record)"
                                     ></td>
                                 </tr>

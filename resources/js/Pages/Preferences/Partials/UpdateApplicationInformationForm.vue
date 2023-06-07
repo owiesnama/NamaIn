@@ -66,7 +66,7 @@
 
                 <InputLabel
                     for="logo"
-                    value="Logo"
+                    :value="__('Logo')"
                 />
 
                 <!-- Current Profile Logo -->
@@ -99,7 +99,7 @@
                     type="button"
                     @click.prevent="selectNewLogo"
                 >
-                    Select A New Logo
+                    {{__('Select A New Logo')}}
                 </SecondaryButton>
 
                 <InputError
@@ -112,7 +112,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="invoicesHeadline"
-                    value="Invoices Headline"
+                    :value="__('Invoices Headline')"
                 />
                 <textarea
                     id="invoicesHeadline"
@@ -130,7 +130,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="alerts"
-                    value="Alerts"
+                    :value="__('Alerts')"
                 />
                 <div
                     class="flex items-center cursor-pointer"
@@ -160,7 +160,7 @@
                     </div>
 
                     <p class="mx-3 text-sm text-gray-500">
-                        Send Notifications when Stocks Running out
+                        {{__('Send Notifications When Stocks Running Out')}}
                     </p>
                 </div>
                 <InputError
@@ -173,7 +173,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="language"
-                    value="Language"
+                    :value="__('Language')"
                 />
                 <div
                     class="inline-flex mt-1 overflow-hidden bg-white border border-gray-200 divide-x rounded-lg rtl:flex-row-reverse"
@@ -188,7 +188,7 @@
                         @click="form.language = 'ar'"
                         type="button"
                     >
-                        Arabic
+                        {{__('Arabic')}}
                     </button>
 
                     <button
@@ -201,7 +201,7 @@
                         @click="form.language = 'en'"
                         type="button"
                     >
-                        English
+                        {{__('English')}}
                     </button>
                 </div>
                 <InputError
@@ -214,7 +214,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="pecentage"
-                    value="Margin revenu pecentage (%)"
+                    :value="__('Margin Revenu Percentage') + ' ' + '(%)'"
                 />
                 <TextInput
                     id="pecentage"
@@ -236,7 +236,7 @@
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="currency"
-                    value="Currency"
+                    :value="__('Currency')"
                 />
                 <Dropdown
                     align="left"
@@ -265,8 +265,8 @@
 
                             {{
                                 form.currency == "US-Dollar"
-                                    ? "US Dollar"
-                                    : "SDG"
+                                    ? __('US Dollar')
+                                    : __('"SDG"')
                             }}
                         </button>
                     </template>
@@ -276,14 +276,14 @@
                             as="button"
                             @click="form.currency = 'US-Dollar'"
                         >
-                            US Dollar
+                            {{__('US Dollar')}}
                         </DropdownLink>
                         <div class="border-t border-gray-100" />
                         <DropdownLink
                             as="button"
                             @click="form.currency = 'SDG'"
                         >
-                            SDG
+                            {{__('SDG')}}
                         </DropdownLink>
                     </template>
                 </Dropdown>
@@ -299,7 +299,7 @@
                 :on="form.recentlySuccessful"
                 class="mr-3"
             >
-                Saved.
+                {{__('Saved.')}}
             </ActionMessage>
 
             <PrimaryButton
@@ -307,7 +307,7 @@
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
             >
-                Save
+                {{__('Save')}}
             </PrimaryButton>
         </template>
     </FormSection>
