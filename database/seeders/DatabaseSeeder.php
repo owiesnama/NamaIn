@@ -2,9 +2,7 @@
 
 namespace Database\Seeders;
 
-
 use App\Models\Customer;
-use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\Supplier;

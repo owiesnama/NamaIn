@@ -21,10 +21,12 @@ class Transaction extends BaseModel
     {
         return $this->belongsTo(Invoice::class);
     }
+
     public function storage()
     {
         return $this->belongsTo(Storage::class);
     }
+
     public function product()
     {
         return $this->belongsTo(Product::class);
@@ -50,8 +52,10 @@ class Transaction extends BaseModel
     public function for($storage)
     {
         $this->storage_id = $storage->id;
+
         return $this;
     }
+
     public function deduct()
     {
         $this->storage->deductStock([
@@ -61,6 +65,7 @@ class Transaction extends BaseModel
 
         return $this;
     }
+
     public function add()
     {
         $this->storage->addStock([
@@ -70,14 +75,16 @@ class Transaction extends BaseModel
 
         return $this;
     }
+
     public function deliver()
     {
         $this->delivered = true;
         $this->save();
     }
+
     public function normalizedQuantity()
     {
-        if (!$this->unit) {
+        if (! $this->unit) {
             return "{$this->quantity} <strong>(Base unit)</strong>";
         }
 

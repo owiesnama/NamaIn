@@ -14,8 +14,7 @@ class StockController extends Controller
     {
         $invoice = Invoice::find(request('invoice'));
         $invoice->transactions->each(
-            fn (Transaction $transaction) =>
-            $transaction->for($storage)->add()->deliver()
+            fn (Transaction $transaction) => $transaction->for($storage)->add()->deliver()
         );
         $invoice->markAs(InvoiceStatus::Delivered);
 
@@ -39,7 +38,7 @@ class StockController extends Controller
             $newTransaction->delivered = false;
             $newTransaction->quantity = $transaction->unit ? ($remaining / $transaction->unit->conversion_factor) : $remaining;
             $transaction->price = $transaction->price / $remaining;
-            $newTransaction->base_quantity = $transaction->unit ? ($remaining * $transaction->unit->conversion_factor) : $remaining;;
+            $newTransaction->base_quantity = $transaction->unit ? ($remaining * $transaction->unit->conversion_factor) : $remaining;
             $newTransaction->save();
             $invoiceStatus = InvoiceStatus::PartiallyDelivered;
         });
