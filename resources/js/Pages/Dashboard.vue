@@ -1,26 +1,33 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    defineProps(["total_sales", "total_purchase"]);
+    defineProps(["total_sales", "total_purchase", "transactions"]);
+
+    const quantityForHumans = (transaction) => {
+        if (!transaction.unit) {
+            return `${transaction.quantity} <strong>(Base unit)</strong>`;
+        }
+        return `${transaction.quantity} <storng>(${transaction.unit?.name})</storng>`;
+    };
 </script>
 
 <template>
     <AppLayout title="Dashboard">
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                {{__('Dashboard')}}
+                {{ __("Dashboard") }}
             </h2>
         </template>
 
         <div>
             <h3 class="text-base font-semibold leading-6 text-gray-900">
-                {{__('Last 30 days')}}
+                {{ __("Last 30 days") }}
             </h3>
             <dl
-                class="grid grid-cols-1 mt-5 overflow-hidden bg-white divide-y divide-gray-200 rounded-lg shadow md:grid-cols-3 md:divide-y-0 md:divide-x"
+                class="grid grid-cols-1 mt-5 overflow-hidden bg-white divide-y divide-gray-200 rounded-lg shadow md:grid-cols-2 md:divide-y-0 md:divide-x"
             >
                 <div class="px-4 py-5 sm:p-6">
                     <dt class="text-base font-normal text-gray-900">
-                        {{__('Total Sales')}}
+                        {{ __("Total Sales") }}
                     </dt>
                     <dd
                         class="flex items-baseline justify-between mt-1 md:block lg:flex"
@@ -29,35 +36,13 @@
                             class="flex items-baseline text-2xl font-semibold text-indigo-600"
                         >
                             {{ total_sales }}
-                            <span class="ml-2 rtl:ml-0 rtl:mr-2 text-sm font-medium text-gray-500"
-                                >{{__('from')}} 0</span
-                            >
-                        </div>
-
-                        <div
-                            class="inline-flex items-baseline rounded-full px-2.5 py-0.5 text-sm font-medium bg-green-100 text-green-800 md:mt-2 lg:mt-0"
-                        >
-                            <svg
-                                class="-ml-1 mr-0.5 h-5 w-5 flex-shrink-0 self-center text-green-500"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                aria-hidden="true"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                            <span class="sr-only"> {{__('Increased by')}} </span>
-                            12%
                         </div>
                     </dd>
                 </div>
 
                 <div class="px-4 py-5 sm:p-6">
                     <dt class="text-base font-normal text-gray-900">
-                        {{__('Total Purchase')}}
+                        {{ __("Total Purchase") }}
                     </dt>
                     <dd
                         class="flex items-baseline justify-between mt-1 md:block lg:flex"
@@ -66,69 +51,99 @@
                             class="flex items-baseline text-2xl font-semibold text-indigo-600"
                         >
                             {{ total_purchase }}
-                            <span class="ml-2 rtl:ml-0 rtl:mr-2 text-sm font-medium text-gray-500"
-                                >{{__('from')}} 0</span
-                            >
-                        </div>
-
-                        <div
-                            class="inline-flex items-baseline rounded-full px-2.5 py-0.5 text-sm font-medium bg-green-100 text-green-800 md:mt-2 lg:mt-0"
-                        >
-                            <svg
-                                class="-ml-1 mr-0.5 h-5 w-5 flex-shrink-0 self-center text-green-500"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                aria-hidden="true"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M10 17a.75.75 0 01-.75-.75V5.612L5.29 9.77a.75.75 0 01-1.08-1.04l5.25-5.5a.75.75 0 011.08 0l5.25 5.5a.75.75 0 11-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0110 17z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                            <span class="sr-only"> {{__('Increased by')}} </span>
-                            2.02%
-                        </div>
-                    </dd>
-                </div>
-
-                <div class="px-4 py-5 sm:p-6">
-                    <dt class="text-base font-normal text-gray-900">
-                        {{__('Avg. Click Rate')}}
-                    </dt>
-                    <dd
-                        class="flex items-baseline justify-between mt-1 md:block lg:flex"
-                    >
-                        <div
-                            class="flex items-baseline text-2xl font-semibold text-indigo-600"
-                        >
-                            24.57%
-                            <span class="ml-2 rtl:ml-0 rtl:mr-2 text-sm font-medium text-gray-500"
-                                >{{__('from')}} 28.62%</span
-                            >
-                        </div>
-
-                        <div
-                            class="inline-flex items-baseline rounded-full px-2.5 py-0.5 text-sm font-medium bg-red-100 text-red-800 md:mt-2 lg:mt-0"
-                        >
-                            <svg
-                                class="-ml-1 mr-0.5 h-5 w-5 flex-shrink-0 self-center text-red-500"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
-                                aria-hidden="true"
-                            >
-                                <path
-                                    fill-rule="evenodd"
-                                    d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z"
-                                    clip-rule="evenodd"
-                                />
-                            </svg>
-                            <span class="sr-only"> {{__('Decreased by')}} </span>
-                            4.05%
                         </div>
                     </dd>
                 </div>
             </dl>
+        </div>
+
+        <div class="flex flex-col mt-8">
+            <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                <div
+                    class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8"
+                >
+                    <div
+                        class="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700"
+                    >
+                        <table
+                            class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                        >
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("The Product") }}
+                                    </th>
+
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Storage") }}
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Quantity") }}
+                                    </th>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Type") }}
+                                    </th>
+
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Created At") }}
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody
+                                class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
+                            >
+                                <template v-if="transactions">
+                                    <tr
+                                        v-for="transaction in transactions"
+                                        :key="transaction.id"
+                                    >
+                                        <th
+                                            class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
+                                            v-text="transaction.product.name"
+                                        ></th>
+
+                                        <td
+                                            class="px-8 py-3 text-sm text-left rtl:text-right whitespace-nowrap"
+                                            v-text="transaction.storage.name"
+                                        ></td>
+
+                                        <td
+                                            class="px-8 py-3 text-sm text-left rtl:text-right whitespace-nowrap"
+                                            v-html="quantityForHumans(transaction)"
+                                        ></td>
+                                        <th
+                                            class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
+                                            v-text="__(transaction.type)"
+                                        ></th>
+
+                                        <td
+                                            class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
+                                            v-text="transaction.created_at"
+                                        ></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <EmptySearch :data="transaction"></EmptySearch>
         </div>
     </AppLayout>
 </template>

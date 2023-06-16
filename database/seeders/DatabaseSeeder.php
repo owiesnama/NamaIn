@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -28,12 +27,6 @@ class DatabaseSeeder extends Seeder
         $products = Product::factory(3)->create();
         $storages = Storage::factory(3)->create();
 
-        // $storages->each(function ($storage) use ($products) {
-        //     $storage->stock()->attach(
-        //         $products->random(rand(1, 5))->pluck('id')->toArray(), ['quantity' => rand(1, 20)]
-        //     );
-        // });
-
         $customers->concat($vendors)->each(function ($customer) use ($faker) {
             $customer->cheques()->create([
                 'amount' => $faker->numberBetween(5000, 1000000),
@@ -54,9 +47,6 @@ class DatabaseSeeder extends Seeder
                 return $item['price'] * $item['quantity'];
             }),
         ]);
-
-        Invoice::sale($attributes)->save();
-        Invoice::purchase($attributes)->save();
 
         \App\Models\User::factory()->create([
             'name' => 'Test User',

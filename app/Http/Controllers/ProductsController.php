@@ -23,6 +23,7 @@ class ProductsController extends Controller
 
     public function store(ProductRequest $request)
     {
+        dd($request->get('units'));
         $product = Product::create($request->all());
         $product->units()->createMany($request->get('units'));
 
@@ -32,6 +33,8 @@ class ProductsController extends Controller
     public function update(Product $product, ProductRequest $request)
     {
         $product->update($request->all());
+        $product->units()->delete();
+        $product->units()->createMany($request->get('units'));
 
         return back()->with('success', 'Product updated successfully');
     }

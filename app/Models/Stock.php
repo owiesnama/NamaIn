@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ProductStorage extends Pivot
+class Stock extends Pivot
 {
     use HasFactory;
 

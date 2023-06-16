@@ -3,18 +3,18 @@
 namespace Database\Factories;
 
 use App\Models\Product;
-use App\Models\ProductStorage;
+use App\Models\Stock;
 use App\Models\Storage;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ProductStorageFactory extends Factory
+class StockFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = ProductStorage::class;
+    protected $model = Stock::class;
 
     /**
      * Define the model's default state.

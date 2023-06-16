@@ -1,5 +1,5 @@
 <script setup>
-    import InvoiceDetails from "@/Shared/InvoiceDetails.vue";
+    import Transactions from "@/Shared/Transactions.vue";
 
     defineProps({
         invoice: Object,
@@ -16,10 +16,6 @@
     <div class="bg-white border-2 border-dashed rounded-lg ">
         <div class="p-6 md:flex rtl:flex-row-reverse md:items-center md:justify-between">
             <div class="flex rtl:flex-row-reverse items-center gap-x-4">
-                <!-- <span
-                    class="px-3 py-1 text-sm font-semibold text-center rounded-full shrink-0 text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                    >{{__('In-stock')}}</span
-                > -->
 
                 <h2 v-text="invoice.total + ' SDG'" class="text-base font-semibold text-gray-800 sm:text-lg"></h2>
 
@@ -55,7 +51,7 @@
             </div>
         </div>
 
-        <InvoiceDetails
+        <Transactions
             :invoice="invoice"
             class="w-full"
         />

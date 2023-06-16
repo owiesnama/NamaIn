@@ -135,10 +135,12 @@
     "Password": "كلمه المرور",
     "Sign In": "تسجيل الدخول",
     "Log In": "تسجيل الدخول",
-    "Remember me": "تذكرني",
+    "Type": "النوع",
+    "Created At": "تم في",
     "Already registered?": "مسجل مسبقا ؟",
     "Register": "التسجيل",
     "Sign Up": "التسجيل",
     "Remember me": "تذكرني",
-    "Forgot your password ?": "نسيت كلمه المرور؟"
+    "Forgot your password ?": "نسيت كلمه المرور؟",
+    "Deliver to Storage": "التسليم للمخزن"
 }

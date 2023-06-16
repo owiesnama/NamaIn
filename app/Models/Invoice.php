@@ -17,9 +17,9 @@ class Invoice extends BaseModel
 
     protected $appends = ['locked'];
 
-    public function details()
+    public function transactions()
     {
-        return $this->hasMany(InvoiceDetails::class);
+        return $this->hasMany(Transaction::class);
     }
 
     public function locked(): Attribute
@@ -30,7 +30,7 @@ class Invoice extends BaseModel
     public static function purchase($attributes)
     {
         $invoice = static::createInvoiceFor(Supplier::class, $attributes);
-        $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
+        $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
             $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
             $prodcut['base_quantity'] = $prodcut['quantity'];
@@ -47,7 +47,7 @@ class Invoice extends BaseModel
     public static function sale($attributes)
     {
         $invoice = static::createInvoiceFor(Customer::class, $attributes);
-        $invoice->addDetails(collect($attributes->get('products'))->map(function ($prodcut) {
+        $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
             $prodcut['base_quantity'] = $prodcut['quantity'];
             $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
@@ -75,10 +75,10 @@ class Invoice extends BaseModel
         return $invoice;
     }
 
-    public function addDetails($products)
+    public function addTransaction($products)
     {
         $this->fresh()
-            ->details()
+            ->transactions()
             ->createMany($products);
     }
 

@@ -7,20 +7,20 @@
         return record.price * record.quantity;
     };
     let deliveredRecords = computed(() => {
-        return props.invoice.details.filter((record) => {
-            return record.delivered;
+        return props.invoice.transactions.filter((transaction) => {
+            return transaction.delivered;
         });
     });
     let remainingRecords = computed(() => {
-        return props.invoice.details.filter((record) => {
-            return ! record.delivered;
+        return props.invoice.transactions.filter((transaction) => {
+            return ! transaction.delivered;
         });
     });
-    let recordQuantity = (record) => {
-        if (!record.unit) {
-            return `${record.quantity} <strong>(Base unit)</strong>`;
+    let quantityForHumans = (transaction) => {
+        if (!transaction.unit) {
+            return `${transaction.quantity} <strong>(Base unit)</strong>`;
         }
-        return `${record.quantity} <storng>(${record.unit?.name})</storng>`;
+        return `${transaction.quantity} <storng>(${transaction.unit?.name})</storng>`;
     };
 </script>
 <template>
@@ -73,6 +73,7 @@
                             <tr
                                 v-for="record in deliveredRecords"
                                 :key="record.id"
+                                :class="remainingRecords.length ? 'bg-gray-100' : ''"
                             >
                                 <td
                                     class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
@@ -81,7 +82,7 @@
 
                                 <th
                                     class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                    v-html="recordQuantity(record)"
+                                    v-html="quantityForHumans(record)"
                                 ></th>
 
                                 <th
@@ -118,7 +119,7 @@
 
                                     <th
                                         class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                        v-html="recordQuantity(record)"
+                                        v-html="quantityForHumans(record)"
                                     ></th>
 
                                     <th

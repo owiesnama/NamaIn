@@ -27,7 +27,7 @@
         if (!props.initialCheques.next_page_url) return;
         router.get(
             props.initialCheques.next_page_url,
-            {},
+            { ...filters },
             {
                 preserveState: true,
                 preserveScroll: true,
@@ -56,7 +56,15 @@
             router.get(
                 route("cheques.index"),
                 { ...watchedFitlers },
-                { preserveState: true }
+                {
+                    preserveState: true,
+                    onSuccess() {
+                        window.history.replaceState({}, "", initialUrl);
+                        cheques.value = [
+                            ...props.initialCheques.data,
+                        ];
+                    },
+                }
             );
         }, 300)
     );
@@ -71,7 +79,7 @@
                         <h2
                             class="text-xl font-semibold text-gray-800 dark:text-white"
                         >
-                            {{__('Cheques')}}
+                            {{ __("Cheques") }}
                         </h2>
 
                         <span
@@ -103,7 +111,7 @@
                                 v-model="filters.search"
                                 type="text"
                                 class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                                :placeholder="__('Search here') +'...'"
+                                :placeholder="__('Search here') + '...'"
                             />
                         </div>
                         <TextInput
@@ -130,7 +138,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = ''"
                         >
-                            {{__('All')}}
+                            {{ __("All") }}
                         </button>
 
                         <button
@@ -142,7 +150,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = 1"
                         >
-                            {{__('Credit')}}
+                            {{ __("Credit") }}
                         </button>
 
                         <button
@@ -154,7 +162,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = 0"
                         >
-                            {{__('Debit')}}
+                            {{ __("Debit") }}
                         </button>
                     </div>
 
@@ -182,7 +190,7 @@
                                     />
                                 </svg>
 
-                                {{__('Status')}}
+                                {{ __("Status") }}
                             </button>
                         </template>
 

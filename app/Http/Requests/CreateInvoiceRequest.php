@@ -27,6 +27,7 @@ class CreateInvoiceRequest extends FormRequest
             'total' => 'required|integer',
             'products.*.product' => 'integer|required',
             'products.*.quantity' => 'integer|required',
+            'products.*.unit' => 'integer|required',
             'products.*.price' => 'integer|required',
         ];
     }

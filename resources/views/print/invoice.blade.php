@@ -10,7 +10,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($invoice->details as $record)
+                    @foreach ($invoice->transactions as $record)
                         <tr>
                             <td>{{ $record->product->name }}</td>
                             <td>{!! $record->normalizedQuantity() !!}</td>

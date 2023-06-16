@@ -24,7 +24,7 @@ class Storage extends BaseModel
 
     public function stock(): BelongsToMany
     {
-        return $this->belongsToMany(Product::class)->withPivot([
+        return $this->belongsToMany(Product::class,'stocks')->withPivot([
             'quantity',
         ])->withTimestamps();
     }
