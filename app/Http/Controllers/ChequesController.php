@@ -18,6 +18,7 @@ class ChequesController extends Controller
                 ->search(request('search'))
                 ->orderBy('type')
                 ->oldest('due')
+                ->orderBy('created_at')
                 ->paginate(10),
             'status' => ChequeStatus::casesWithLabels(),
         ]);

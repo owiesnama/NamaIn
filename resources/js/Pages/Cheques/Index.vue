@@ -1,6 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { router, usePage } from "@inertiajs/vue3";
+    import { router, Link, usePage } from "@inertiajs/vue3";
     import TextInput from "@/Components/TextInput.vue";
     import Cheque from "@/Shared/Cheque.vue";
     import { useQueryString } from "@/Composables/useQueryString";
@@ -60,9 +60,7 @@
                     preserveState: true,
                     onSuccess() {
                         window.history.replaceState({}, "", initialUrl);
-                        cheques.value = [
-                            ...props.initialCheques.data,
-                        ];
+                        cheques.value = [...props.initialCheques.data];
                     },
                 }
             );
@@ -203,6 +201,15 @@
                             ></button>
                         </template>
                     </Dropdown>
+
+                    <Link
+                        as="button"
+                        :href="route('cheques.create')"
+                        class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
+                        @click="show = true"
+                    >
+                        + {{ __("Add New Cheque") }}
+                    </Link>
                 </div>
             </div>
 
