@@ -23,7 +23,6 @@ class ProductsController extends Controller
 
     public function store(ProductRequest $request)
     {
-        dd($request->get('units'));
         $product = Product::create($request->all());
         $product->units()->createMany($request->get('units'));
 
