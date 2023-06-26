@@ -58,7 +58,7 @@ class Transaction extends BaseModel
 
     public function deduct()
     {
-        $this->storage->deductStock([
+        $this->storage()->first()->deductStock([
             'product' => $this->product_id,
             'quantity' => $this->base_quantity,
         ]);
@@ -68,7 +68,7 @@ class Transaction extends BaseModel
 
     public function add()
     {
-        $this->storage->addStock([
+        $this->storage()->first()->addStock([
             'product' => $this->product_id,
             'quantity' => $this->base_quantity,
         ]);
@@ -84,7 +84,7 @@ class Transaction extends BaseModel
 
     public function normalizedQuantity()
     {
-        if (! $this->unit) {
+        if (!$this->unit) {
             return "{$this->quantity} <strong>(Base unit)</strong>";
         }
 
