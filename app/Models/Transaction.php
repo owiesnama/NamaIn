@@ -82,12 +82,12 @@ class Transaction extends BaseModel
         $this->save();
     }
 
-    public function normalizedQuantity()
+    public function normalizedQuantityHTML()
     {
-        if (!$this->unit) {
+        if (! $this->unit) {
             return "{$this->quantity} <strong>(Base unit)</strong>";
         }
-
-        return "$this->quantity <storng>($this->unit?->name)</storng>";
+        $unit = $this->unit->name;
+        return "$this->quantity <storng>($unit)</storng>";
     }
 }
