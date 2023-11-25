@@ -88,6 +88,7 @@ class Transaction extends BaseModel
             return "{$this->quantity} <strong>(Base unit)</strong>";
         }
         $unit = $this->unit->name;
+
         return "$this->quantity <storng>($unit)</storng>";
     }
 }

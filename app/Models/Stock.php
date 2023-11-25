@@ -13,7 +13,7 @@ class Stock extends Pivot
 
     public function getTotalCostAttribute()
     {
-        return  $this->product ? $this->quantity * $this->product->cost : 0;
+        return $this->product ? $this->quantity * $this->product->cost : 0;
     }
 
     public function product()

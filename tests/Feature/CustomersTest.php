@@ -6,29 +6,30 @@ use Tests\TestCase;
 
 uses(RefreshDatabase::class);
 
-test('only_auth_users_can_see_customers_page', function () {
+test('Only Auth Users Can See Customers Page', function () {
     /** @var TestCase $this */
-    $this->get('/customers')
+    $this->get(route('customers.index'))
         ->assertRedirect();
     $user = User::factory()->create();
     $this->be($user)
-        ->get('/customers')
+        ->get(route('customers.index'))
         ->assertOk();
 });
 
-test('auth_users_can_create_a_new_customers', function () {
+test('Auth Users Can Create A New Customers', function () {
     /** @var TestCase $this */
     $customerAttributes = [
         'name' => 'Fake Customer',
-        'phone' => '012341234',
+        'phone_number' => '0654623',
+        'address' => 'fake address'
     ];
-    $this->post('/customers', $customerAttributes)->assertRedirect();
     $user = User::factory()->create();
-    $this->be($user)
-        ->post('/customers', $customerAttributes)
-        ->assertRedirect()
-        ->assertSessionHas('flash', [
-            'title' => 'Customer Created 🎉',
-            'message' => 'Customer created successfully',
-        ]);
+
+    $this->withoutExceptionHandling();
+    $response = $this->be($user)
+        ->post(route('customers.store'), $customerAttributes);
+
+    $response->assertRedirect();
+
+    $this->assertDatabaseHas(\App\Models\Customer::class, $customerAttributes);
 });
