@@ -21,7 +21,7 @@ test('Auth Users Can Create A New Customers', function () {
     $customerAttributes = [
         'name' => 'Fake Customer',
         'phone_number' => '0654623',
-        'address' => 'fake address'
+        'address' => 'fake address',
     ];
     $user = User::factory()->create();
 
