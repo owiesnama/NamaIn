@@ -13,15 +13,24 @@ class Storage extends BaseModel
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<string>
      */
     protected $fillable = [
         'name',
         'address',
     ];
-
+    /**
+     * The attributes to be appended to this
+     *
+     * @var string<string>
+     */
     protected $appends = ['stockCount'];
 
+    /**
+     * Stock for this storage
+     *
+     * @return BelongsToMany
+     */
     public function stock(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'stocks')->withPivot([
@@ -29,23 +38,48 @@ class Storage extends BaseModel
         ])->withTimestamps();
     }
 
-    public function qunatityOf($product)
+    /**
+     * Quantity of given product on this storage
+     *
+     * @param $product
+     * @return int
+     */
+    public function qunatityOf($product): int
     {
         $productId = is_int($product) ?: $product->id;
 
-        return (int) $this->stock()->find($productId)?->pivot?->quantity ?: 0;
+        return (int)$this->stock()->find($productId)?->pivot?->quantity ?: 0;
     }
 
+    /**
+     * Check this store if it has a stock for a given product id.
+     *
+     * @param $productId
+     * @return bool
+     */
     public function hasStockFor($productId): bool
     {
         return $this->stock()->where('product_id', $productId)->where('quantity', '>', 0)->exists();
     }
 
+    /**
+     * Check this store if it has not stock for a given product id.
+     *
+     * @param $productId
+     * @return bool
+     */
     public function hasNoStockFor($productId): bool
     {
-        return ! $this->hasStockFor($productId);
+        return !$this->hasStockFor($productId);
     }
 
+    /**
+     * Check this store if it has a given quantity from a given product id.
+     *
+     * @param $productId
+     * @param $quantity
+     * @return bool
+     */
     public function hasEnoughStockFor($productId, $quantity): bool
     {
         if ($this->hasNoStockFor($productId)) {
@@ -55,31 +89,57 @@ class Storage extends BaseModel
         return $this->stock()->find($productId)->pivot->quantity >= $quantity;
     }
 
-    public function hasNoEnoughStockFor($productId, $quantity)
+    /**
+     * Check this store if it has a given quantity from a given product id.
+     *
+     * @param $productId
+     * @param $quantity
+     * @return bool
+     */
+    public function hasNoEnoughStockFor($productId, $quantity): bool
     {
-        return ! $this->hasEnoughStockFor($productId, $quantity);
+        return !$this->hasEnoughStockFor($productId, $quantity);
     }
 
-    public function addStock($attributes)
+    /**
+     * Add a stock to this storage
+     *
+     * @param $attributes
+     * @return mixed
+     */
+    public function addStock($attributes): bool
     {
-        if ($this->hasStockFor($attributes['product'])) {
-            return $this->stock()->find($attributes['product'])->pivot->increment('quantity', $attributes['quantity']);
+        if ($this->hasNoStockFor($attributes['product'])) {
+            $this->stock()->attach([$attributes['product'] => ['quantity' => $attributes['quantity']]]);
+        }else{
+            $this->stock()->find($attributes['product'])->pivot->increment('quantity', $attributes['quantity']);
         }
 
-        return $this->stock()->attach([$attributes['product'] => ['quantity' => $attributes['quantity']]]);
+        return true;
     }
 
-    public function deductStock($attributes)
+    /**
+     * Deduct a stock from this store
+     *
+     * @param $attributes
+     * @return bool
+     */
+    public function deductStock($attributes): bool
     {
         if ($this->hasNoStockFor($attributes['product'])) {
             return false;
         }
         $stock = $this->stock()->find($attributes['product']);
 
-        return (bool) $stock->pivot->decrement('quantity', $attributes['quantity']);
+        return (bool)$stock->pivot->decrement('quantity', $attributes['quantity']);
     }
 
-    public function getStockCountAttribute()
+    /**
+     * Get the stock total count for this storage
+     *
+     * @return int
+     */
+    public function getStockCountAttribute(): int
     {
         return $this->stock->count();
     }
