@@ -9,13 +9,21 @@ class InvoicePrintController extends Controller
 {
     public function __invoke(Invoice $invoice)
     {
-        $html = view('print.invoice', [
-            'invoice' => $invoice,
-        ])->render();
-        $path = "/invoices/{$invoice->serial_number}.pdf";
-        Browsershot::html($html)
-            ->save($path);
 
-        return response()->file("/invoices/$invoice->serial_number");
+        $deliveredRecords = $invoice->transactions->filter(fn ($t) => $t->delivered);
+        $remainingRecords = $invoice->transactions->filter(fn ($t) => ! $t->delivered);
+
+        $pdf = Browsershot::html(
+            view('print.invoice', [
+                'invoice' => $invoice,
+            ])->with(compact('deliveredRecords', 'remainingRecords'))->render()
+        )->format('A4')->pdf();
+
+        $headers = [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "inline; filename='invoice-{$invoice->serial_number}.pdf'",
+        ];
+
+        return response(content: $pdf, headers: $headers);
     }
 }

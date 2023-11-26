@@ -4,30 +4,43 @@ namespace App\Models;
 
 use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Invoice extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use SoftDeletes;
 
+    /**
+     * @var string[]
+     */
     protected $casts = [
         'status' => InvoiceStatus::class,
     ];
 
+    /**
+     * @var string[]
+     */
     protected $appends = ['locked'];
 
-    public function transactions()
+    public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
     }
 
+    /**
+     * Adds an attribute to the invoice showing whether it's delivered and should
+     * be locked
+     */
     public function locked(): Attribute
     {
         return Attribute::make(get: fn () => $this->status == InvoiceStatus::Delivered);
     }
 
-    public static function purchase($attributes)
+    /**
+     * Adds a purchase transaction for the invoice
+     */
+    public static function purchase($attributes): static
     {
         $invoice = static::createInvoiceFor(Supplier::class, $attributes);
         $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
@@ -44,7 +57,10 @@ class Invoice extends BaseModel
         return $invoice;
     }
 
-    public static function sale($attributes)
+    /**
+     * Adds a sale transaction for the invoice
+     */
+    public static function sale($attributes): static
     {
         $invoice = static::createInvoiceFor(Customer::class, $attributes);
         $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
@@ -61,7 +77,7 @@ class Invoice extends BaseModel
         return $invoice;
     }
 
-    public static function createInvoiceFor($invoicable, $attributes)
+    public static function createInvoiceFor($invoicable, $attributes): static
     {
         $invoice = new static();
         $invoice->invoicable_type = $invoicable;
@@ -75,14 +91,19 @@ class Invoice extends BaseModel
         return $invoice;
     }
 
-    public function addTransaction($products)
+    public function addTransaction($products): void
     {
         $this->fresh()
             ->transactions()
             ->createMany($products);
     }
 
-    public function markAs(InvoiceStatus $status)
+    /**
+     * Mark the invoice with a given status
+     *
+     * @return $this
+     */
+    public function markAs(InvoiceStatus $status): static
     {
         $this->status = $status;
         $this->save();

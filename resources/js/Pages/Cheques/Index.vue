@@ -4,14 +4,14 @@
     import TextInput from "@/Components/TextInput.vue";
     import Cheque from "@/Shared/Cheque.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import { watch, reactive, ref, onMounted } from "vue";
+    import { watch, reactive, ref, onMounted, computed } from "vue";
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import Dropdown from "@/Components/Dropdown.vue";
 
     const props = defineProps({
         initialCheques: Object,
-        status: Object,
+        status: Object
     });
     let landMark = ref(null);
     let cheques = ref(props.initialCheques.data);
@@ -20,9 +20,17 @@
         search: useQueryString("search"),
         type: useQueryString("type"),
         status: useQueryString("status"),
-        due: useQueryString("due"),
+        due: useQueryString("due")
+    });
+    const getStatusLabel = computed(() => {
+        let [status] = Object
+            .entries(props.status)
+            .filter(([, value]) => filters.status === value)[0];
+
+        return __(status);
     });
     const initialUrl = usePage().url;
+
     const loadMore = () => {
         if (!props.initialCheques.next_page_url) return;
         router.get(
@@ -35,24 +43,26 @@
                     window.history.replaceState({}, "", initialUrl);
                     cheques.value = [
                         ...cheques.value,
-                        ...props.initialCheques.data,
+                        ...props.initialCheques.data
                     ];
-                },
+                }
             }
         );
     };
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
             loadMore();
         });
     });
+
     onMounted(() => {
         observer.observe(landMark.value);
     });
     watch(
         filters,
-        debounce(function (watchedFitlers) {
+        debounce(function(watchedFitlers) {
             router.get(
                 route("cheques.index"),
                 { ...watchedFitlers },
@@ -61,7 +71,7 @@
                     onSuccess() {
                         window.history.replaceState({}, "", initialUrl);
                         cheques.value = [...props.initialCheques.data];
-                    },
+                    }
                 }
             );
         }, 300)
@@ -82,7 +92,7 @@
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                            >{{ initialCheques.total }} {{ __("Cheque") }}</span
+                        >{{ initialCheques.total }} {{ __("Cheque") }}</span
                         >
                     </div>
 
@@ -188,16 +198,17 @@
                                     />
                                 </svg>
 
-                                {{ __("Status") }}
+                                {{ filters.status ? getStatusLabel : __("Status") }}
                             </button>
                         </template>
 
                         <template #content>
                             <button
-                                v-for="(key, status) in status"
+                                v-for="(key, value) in status"
                                 :key="key"
+                                @click="filters.status = key"
                                 class="block rtl:text-right w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                v-text="__(status)"
+                                v-text="__(value)"
                             ></button>
                         </template>
                     </Dropdown>

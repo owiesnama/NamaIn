@@ -151,5 +151,7 @@
     "Payee": "كاتب الشيك",
     "Add New Cheque": "تحرير شيك جديد",
     "Returned": "مسترجع",
-    "Return Invoice": "فاتوره ارجاع"
+    "Return Invoice": "فاتوره ارجاع",
+    "Invoice Details": "تفاصيل الفاتوره",
+    "No result found, Try a different query": "لا توجد سجلات"
 }
