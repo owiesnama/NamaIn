@@ -23,12 +23,14 @@ class Storage extends BaseModel
     /**
      * The attributes to be appended to this
      *
-     * @var string<string>
+     * @var array<string>
      */
     protected $appends = ['stockCount'];
 
     /**
      * Stock for this storage
+     *
+     * @return BelongsToMany
      */
     public function stock(): BelongsToMany
     {
@@ -39,12 +41,15 @@ class Storage extends BaseModel
 
     /**
      * Quantity of given product on this storage
+     * @param Product|int $product
+     *
+     * @return int
      */
-    public function qunatityOf($product): int
+    public function quantityOf(Product|int $product): int
     {
         $productId = is_int($product) ?: $product->id;
 
-        return (int) $this->stock()->find($productId)?->pivot?->quantity ?: 0;
+        return (int)$this->stock()->find($productId)?->pivot?->quantity ?: 0;
     }
 
     /**
@@ -60,13 +65,17 @@ class Storage extends BaseModel
      */
     public function hasNoStockFor($productId): bool
     {
-        return ! $this->hasStockFor($productId);
+        return !$this->hasStockFor($productId);
     }
 
     /**
      * Check this store if it has a given quantity from a given product id.
+     * @param int $productId
+     * @param int $quantity
+     *
+     * @return bool
      */
-    public function hasEnoughStockFor($productId, $quantity): bool
+    public function hasEnoughStockFor(int $productId, int $quantity): bool
     {
         if ($this->hasNoStockFor($productId)) {
             return false;
@@ -77,18 +86,23 @@ class Storage extends BaseModel
 
     /**
      * Check this store if it has a given quantity from a given product id.
+     * @param int $productId
+     * @param int $quantity
+     *
+     * @return bool
      */
-    public function hasNoEnoughStockFor($productId, $quantity): bool
+    public function hasNoEnoughStockFor(int $productId, int $quantity): bool
     {
-        return ! $this->hasEnoughStockFor($productId, $quantity);
+        return !$this->hasEnoughStockFor($productId, $quantity);
     }
 
     /**
      * Add a stock to this storage
+     * @param array $attributes
      *
-     * @return mixed
+     * @return bool
      */
-    public function addStock($attributes): bool
+    public function addStock(array $attributes): bool
     {
         if ($this->hasNoStockFor($attributes['product'])) {
             $this->stock()->attach([$attributes['product'] => ['quantity' => $attributes['quantity']]]);
@@ -100,20 +114,25 @@ class Storage extends BaseModel
     }
 
     /**
-     * Deduct a stock from this store
+     * Deduct a stock from this store.
+     *
+     * @param array $attributes
+     * @return bool
      */
-    public function deductStock($attributes): bool
+    public function deductStock(array $attributes): bool
     {
         if ($this->hasNoStockFor($attributes['product'])) {
             return false;
         }
         $stock = $this->stock()->find($attributes['product']);
 
-        return (bool) $stock->pivot->decrement('quantity', $attributes['quantity']);
+        return (bool)$stock->pivot->decrement('quantity', $attributes['quantity']);
     }
 
     /**
      * Get the stock total count for this storage
+     *
+     * @return int
      */
     public function getStockCountAttribute(): int
     {

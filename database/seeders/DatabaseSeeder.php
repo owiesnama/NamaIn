@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
             $customer->cheques()->create([
                 'amount' => $faker->numberBetween(5000, 1000000),
                 'type' => $faker->randomElement([0, 1]),
+                'Bank' => $faker->colorName(),
                 'due' => $faker->dateTimeBetween('now', '+6 months'),
             ]);
         });

@@ -19,14 +19,14 @@ class Product extends BaseModel
     /**
      * List of fillable fields of the product
      *
-     * @var string[string]
+     * @var array<string>
      */
     protected $fillable = ['name', 'cost', 'expire_date'];
 
     /**
      * List of the attributes to append to the product
      *
-     * @var string[string]
+     * @var array<string>
      */
     protected $appends = ['expired_at'];
 
@@ -40,7 +40,9 @@ class Product extends BaseModel
     ];
 
     /**
-     * The stock details for this product
+     * The stock details for this product.
+     *
+     * @return BelongsToMany
      */
     public function stock(): BelongsToMany
     {
@@ -50,7 +52,9 @@ class Product extends BaseModel
     }
 
     /**
-     * Unites associated with this product
+     * Unites associated with this product.
+     *
+     * @return HasMany
      */
     public function units(): HasMany
     {
@@ -59,6 +63,8 @@ class Product extends BaseModel
 
     /**
      * Quantity on hand for this product
+     *
+     * @return int
      */
     public function quantityOnHand(): int
     {
@@ -66,17 +72,19 @@ class Product extends BaseModel
     }
 
     /**
-     * Check whether this product went low on quantity
+     * Check whether this product went low on quantity.
      *
      * @return bool
      */
     public function isRunningLow()
     {
-        return $this->quantityOnHand() <= config('namain.min_qunantity_acceptable');
+        return $this->quantityOnHand() <= config('namain.min_quantity_acceptable');
     }
 
     /**
-     * Get the expiration date formatted
+     * Get the expiration date formatted.
+     *
+     * @return string
      */
     public function getExpireDateAttribute(): string
     {
@@ -84,7 +92,9 @@ class Product extends BaseModel
     }
 
     /**
-     * Get how many days went since the expiration date
+     * Get how many days went since the expiration date.
+     *
+     * @return int
      */
     public function getExpiredAtAttribute(): int
     {

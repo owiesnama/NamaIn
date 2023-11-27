@@ -46,7 +46,7 @@
                     <div class="mb-4">
                         <InputLabel :value="__('Bank')" />
                         <input
-                            v-model="cheque.due"
+                            v-model="cheque.bank"
                             class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                             type="text"
                             :placeholder="__('Bank')"

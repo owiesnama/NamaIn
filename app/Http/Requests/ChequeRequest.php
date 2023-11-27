@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class CustomerRequest extends FormRequest
+class ChequeRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,9 +23,12 @@ class CustomerRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required',
-            'address' => 'required|string|min:10',
-            'phone_number' => 'required|numeric|min:10',
+            'payee' => 'required|array',
+            'payee.type' => 'required|string',
+            'type' => 'required|in:1,0',
+            'due' => 'required|date',
+            'bank' => 'required|string|min:10',
+            'amount' => 'required|numeric',
         ];
     }
 }

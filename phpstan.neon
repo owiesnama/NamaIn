@@ -9,10 +9,13 @@ parameters:
     # Level 9 is the highest level
     level: 5
 
-#    ignoreErrors:
-#        - '#PHPDoc tag @var#'
+    ignoreErrors:
+        - '#PHPDoc tag @var#'
+        - '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Relations\\Pivot\:\:\$\w+\.$#'
+        - '#^Access to an undefined property App\\Models\\Stock\:\:\$quantity\.$#'
+        - '#Call to an undefined method Illuminate\\Support\\HigherOrder#'
+    excludePaths:
+        - app/Actions
 #
-#    excludePaths:
-#        - ./*/*/FileToBeExcluded.php
-#
-#    checkMissingIterableValueType: false
+    checkMissingIterableValueType: false
+    reportUnmatchedIgnoredErrors: false

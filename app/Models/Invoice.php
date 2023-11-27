@@ -6,23 +6,33 @@ use App\Enums\InvoiceStatus;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Invoice extends BaseModel
 {
     use SoftDeletes;
 
     /**
-     * @var string[]
+     * List of attributes to cast along with what to cast to.
+     *
+     * @var array<string,string>
      */
     protected $casts = [
         'status' => InvoiceStatus::class,
     ];
 
     /**
-     * @var string[]
+     * List of attributes to append to this invoice
+     *
+     * @var array<string>
      */
     protected $appends = ['locked'];
 
+    /**
+     * Transactions belong to this invoice
+     *
+     * @return HasMany
+     */
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
@@ -30,17 +40,22 @@ class Invoice extends BaseModel
 
     /**
      * Adds an attribute to the invoice showing whether it's delivered and should
-     * be locked
+     * be locked.
+     *
+     * @return  Attribute
      */
     public function locked(): Attribute
     {
-        return Attribute::make(get: fn () => $this->status == InvoiceStatus::Delivered);
+        return Attribute::make(get: fn() => $this->status == InvoiceStatus::Delivered);
     }
 
     /**
-     * Adds a purchase transaction for the invoice
+     * Adds a purchase transaction for the invoice.
+     * @param Collection $attributes
+     *
+     * @return Invoice
      */
-    public static function purchase($attributes): static
+    public static function purchase(Collection $attributes): Invoice
     {
         $invoice = static::createInvoiceFor(Supplier::class, $attributes);
         $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
@@ -58,9 +73,12 @@ class Invoice extends BaseModel
     }
 
     /**
-     * Adds a sale transaction for the invoice
+     * Adds a sale transaction for the invoice.
+     * @param Collection $attributes
+     *
+     * @return Invoice
      */
-    public static function sale($attributes): static
+    public static function sale(Collection $attributes): Invoice
     {
         $invoice = static::createInvoiceFor(Customer::class, $attributes);
         $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
@@ -77,9 +95,16 @@ class Invoice extends BaseModel
         return $invoice;
     }
 
-    public static function createInvoiceFor($invoicable, $attributes): static
+    /**
+     * Create an invoice for invoice-ables.
+     * @param string $invoicable
+     * @param Collection $attributes
+     *
+     * @return Invoice
+     */
+    public static function createInvoiceFor(string $invoicable, Collection $attributes): Invoice
     {
-        $invoice = new static();
+        $invoice = new Invoice;
         $invoice->invoicable_type = $invoicable;
         $invoice->invoicable_id = (new $invoicable)->firstOrCreate([
             'name' => 'Random',
@@ -91,7 +116,13 @@ class Invoice extends BaseModel
         return $invoice;
     }
 
-    public function addTransaction($products): void
+    /**
+     * Add new transactions to this invoice.
+     * @param mixed $products
+     *
+     * @return void
+     */
+    public function addTransaction(mixed $products): void
     {
         $this->fresh()
             ->transactions()
@@ -100,10 +131,11 @@ class Invoice extends BaseModel
 
     /**
      * Mark the invoice with a given status
+     * @param InvoiceStatus $status
      *
-     * @return $this
+     * @return Invoice
      */
-    public function markAs(InvoiceStatus $status): static
+    public function markAs(InvoiceStatus $status): Invoice
     {
         $this->status = $status;
         $this->save();
