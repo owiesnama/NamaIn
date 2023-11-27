@@ -9,19 +9,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends BaseModel
 {
-    use HasFactory, SoftDeletes,HasClassAttributes;
+    use HasClassAttributes, HasFactory,SoftDeletes;
 
     /**
      *  List of attributes that can be mass assigned.
      *
      * @var array<string>
      */
-    protected $fillable = ['name', 'address', 'phone_number','type'];
+    protected $fillable = ['name', 'address', 'phone_number', 'type'];
 
     /**
      * The cheques that belongs to this customer.
-     *
-     * @return MorphMany
      */
     public function cheques(): MorphMany
     {

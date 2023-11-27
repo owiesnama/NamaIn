@@ -18,11 +18,6 @@ abstract class BaseModel extends Model
 
     /**
      * Scope for searching the attribute of the model.
-     *
-     * @param $query
-     * @param $searchTerm
-     *
-     * @return Builder
      */
     public function scopeSearch($query, $searchTerm = ''): Builder
     {
@@ -30,14 +25,12 @@ abstract class BaseModel extends Model
         $columns = array_merge($columns, $this->searchableRelationsAttributes);
 
         return $query->when($searchTerm,
-            fn($query) => $query->where(fn($query) => $query->whereLike($columns, $searchTerm))
+            fn ($query) => $query->where(fn ($query) => $query->whereLike($columns, $searchTerm))
         );
     }
 
     /**
      * Get created attribute formatted in a readable way.
-     *
-     * @return string
      */
     public function getCreatedAtAttribute(): string
     {

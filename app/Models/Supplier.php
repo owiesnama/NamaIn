@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends BaseModel
 {
-    use HasFactory, SoftDeletes,HasClassAttributes;
+    use HasClassAttributes, HasFactory,SoftDeletes;
 
     /**
      * List of attributes that can be mass assigned.
@@ -20,8 +20,6 @@ class Supplier extends BaseModel
 
     /**
      * Cheque wrote to this supplier.
-     *
-     * @return MorphMany
      */
     public function cheques(): MorphMany
     {

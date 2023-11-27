@@ -19,8 +19,6 @@ class Stock extends Pivot
 
     /**
      * The total cost of this stock.
-     *
-     * @return float|int
      */
     public function getTotalCostAttribute(): float|int
     {
@@ -29,8 +27,6 @@ class Stock extends Pivot
 
     /**
      * The product of this stock.
-     *
-     * @return BelongsTo
      */
     public function product(): BelongsTo
     {
@@ -39,8 +35,6 @@ class Stock extends Pivot
 
     /**
      * The storage of this stock.
-     *
-     * @return BelongsTo
      */
     public function storage(): BelongsTo
     {

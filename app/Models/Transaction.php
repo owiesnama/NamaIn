@@ -29,8 +29,6 @@ class Transaction extends BaseModel
 
     /**
      * The invoice for this transaction.
-     *
-     * @return BelongsTo
      */
     public function invoice(): BelongsTo
     {
@@ -39,8 +37,6 @@ class Transaction extends BaseModel
 
     /**
      * Storage of this transaction.
-     *
-     * @return BelongsTo
      */
     public function storage(): BelongsTo
     {
@@ -49,8 +45,6 @@ class Transaction extends BaseModel
 
     /**
      * Product of this transaction.
-     *
-     * @return BelongsTo
      */
     public function product(): BelongsTo
     {
@@ -59,8 +53,6 @@ class Transaction extends BaseModel
 
     /**
      * Unit of this transaction product.
-     *
-     * @return BelongsTo
      */
     public function unit(): BelongsTo
     {
@@ -69,8 +61,6 @@ class Transaction extends BaseModel
 
     /**
      * the total price for this transaction.
-     *
-     * @return float
      */
     public function total(): float
     {
@@ -79,21 +69,16 @@ class Transaction extends BaseModel
 
     /**
      *  Type of this transaction.
-     *
-     * @return Attribute
      */
     public function type(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->invoice->invoicable_type == Customer::class ? 'Sales' : 'Purchases'
+            get: fn () => $this->invoice->invoicable_type == Customer::class ? 'Sales' : 'Purchases'
         );
     }
 
     /**
      * Convenient method to assign the storage to this instance
-     * @param Storage $storage
-     *
-     * @return Transaction
      */
     public function for(Storage $storage): Transaction
     {
@@ -104,8 +89,6 @@ class Transaction extends BaseModel
 
     /**
      * Deduct this transaction from the storage
-     *
-     * @return Transaction
      */
     public function deduct(): Transaction
     {
@@ -119,8 +102,6 @@ class Transaction extends BaseModel
 
     /**
      * add this transaction to the storage.
-     *
-     * @return Transaction
      */
     public function add(): Transaction
     {
@@ -134,8 +115,6 @@ class Transaction extends BaseModel
 
     /**
      * Mark this transaction as delivered.
-     *
-     * @return void
      */
     public function deliver(): void
     {
@@ -145,12 +124,10 @@ class Transaction extends BaseModel
 
     /**
      * Format the quantity in html tags.
-     *
-     * @return string
      */
     public function normalizedQuantityHTML(): string
     {
-        if (!$this->unit) {
+        if (! $this->unit) {
             return "{$this->quantity} <strong>(Base unit)</strong>";
         }
         $unit = $this->unit->name;

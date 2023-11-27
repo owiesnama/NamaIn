@@ -30,7 +30,7 @@ class StockController extends Controller
         $invoiceStatus = InvoiceStatus::Delivered;
         $invoice->transactions->each(function (Transaction $transaction) use ($storage, &$invoiceStatus) {
             if ($storage->hasEnoughStockFor($transaction->product_id, $transaction->base_quantity)) {
-                 $transaction->for($storage)->deduct()->deliver();
+                $transaction->for($storage)->deduct()->deliver();
             }
             $remaining = $transaction->base_quantity - $storage->quantityOf($transaction->product_id);
             $transaction->base_quantity -= $remaining;
@@ -50,7 +50,7 @@ class StockController extends Controller
 
     private function checkForStockAvailablity($invoice, $storage)
     {
-        if ($invoice->transactions->filter(fn($record) => $storage->hasStockFor($record->product_id, $record->base_quantity))->count() == 0) {
+        if ($invoice->transactions->filter(fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity))->count() == 0) {
             throw ValidationException::withMessages(['storage' => 'Error Processing Request']);
         }
     }

@@ -22,9 +22,10 @@ class Preference extends Model
     public static function asPairs(): Collection
     {
         $preferences = Preference::all();
+
         return $preferences->map(
-            fn(Preference $preference): array => [$preference->key => $preference->value]
+            fn (Preference $preference): array => [$preference->key => $preference->value]
         )->
-        mapWithKeys(fn($preference) => $preference);
+        mapWithKeys(fn ($preference) => $preference);
     }
 }

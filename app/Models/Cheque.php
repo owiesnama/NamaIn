@@ -20,6 +20,7 @@ class Cheque extends BaseModel
      * @var array<string>
      */
     public $appends = ['is_credit', 'amount_formated', 'due_for_humans'];
+
     /**
      * The attributes to cast along with casts.
      *
@@ -29,6 +30,7 @@ class Cheque extends BaseModel
         'due' => 'datetime',
         'status' => ChequeStatus::class,
     ];
+
     /**
      * Searchable relations attribute of this cheque.
      *
@@ -40,44 +42,36 @@ class Cheque extends BaseModel
 
     /**
      * Check whether it's a credit cheque or debit check.
-     *
-     * @return Attribute
      */
     public function isCredit(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->type === 1
+            get: fn () => $this->type === 1
         );
     }
 
     /**
      * The amount of this cheque formatted.
-     *
-     * @return Attribute
      */
     public function amountFormated(): Attribute
     {
         return Attribute::make(
-            get: fn() => number_format($this->amount, 2) . ' SDG'
+            get: fn () => number_format($this->amount, 2).' SDG'
         );
     }
 
     /**
      * The due of this cheque formatted on a readable way.
-     *
-     * @return Attribute
      */
     public function dueForHumans(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->due->diffForHumans()
+            get: fn () => $this->due->diffForHumans()
         );
     }
 
     /**
      * The payee of this cheque.
-     *
-     * @return MorphTo
      */
     public function payee(): MorphTo
     {
@@ -86,10 +80,6 @@ class Cheque extends BaseModel
 
     /**
      * Scope for filtering cheque query with a given filter.
-     * @param Builder $query
-     * @param Filter $filter
-     *
-     * @return Builder
      */
     public function scopeFilterUsing(Builder $query, Filter $filter): Builder
     {
@@ -98,9 +88,6 @@ class Cheque extends BaseModel
 
     /**
      * Set the payee attributes on the cheque.
-     * @param array $attributes
-     *
-     * @return Cheque
      */
     public static function forPayee(array $attributes): Cheque
     {
@@ -113,7 +100,6 @@ class Cheque extends BaseModel
 
     /**
      * Register cheque attributes and save it to DB.
-     * @param array $attributes
      *
      * @return $this
      */

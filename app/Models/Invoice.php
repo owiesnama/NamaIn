@@ -30,8 +30,6 @@ class Invoice extends BaseModel
 
     /**
      * Transactions belong to this invoice
-     *
-     * @return HasMany
      */
     public function transactions(): HasMany
     {
@@ -41,19 +39,14 @@ class Invoice extends BaseModel
     /**
      * Adds an attribute to the invoice showing whether it's delivered and should
      * be locked.
-     *
-     * @return  Attribute
      */
     public function locked(): Attribute
     {
-        return Attribute::make(get: fn() => $this->status == InvoiceStatus::Delivered);
+        return Attribute::make(get: fn () => $this->status == InvoiceStatus::Delivered);
     }
 
     /**
      * Adds a purchase transaction for the invoice.
-     * @param Collection $attributes
-     *
-     * @return Invoice
      */
     public static function purchase(Collection $attributes): Invoice
     {
@@ -74,9 +67,6 @@ class Invoice extends BaseModel
 
     /**
      * Adds a sale transaction for the invoice.
-     * @param Collection $attributes
-     *
-     * @return Invoice
      */
     public static function sale(Collection $attributes): Invoice
     {
@@ -97,10 +87,6 @@ class Invoice extends BaseModel
 
     /**
      * Create an invoice for invoice-ables.
-     * @param string $invoicable
-     * @param Collection $attributes
-     *
-     * @return Invoice
      */
     public static function createInvoiceFor(string $invoicable, Collection $attributes): Invoice
     {
@@ -118,9 +104,6 @@ class Invoice extends BaseModel
 
     /**
      * Add new transactions to this invoice.
-     * @param mixed $products
-     *
-     * @return void
      */
     public function addTransaction(mixed $products): void
     {
@@ -131,9 +114,6 @@ class Invoice extends BaseModel
 
     /**
      * Mark the invoice with a given status
-     * @param InvoiceStatus $status
-     *
-     * @return Invoice
      */
     public function markAs(InvoiceStatus $status): Invoice
     {

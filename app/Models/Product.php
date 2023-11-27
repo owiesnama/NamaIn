@@ -41,8 +41,6 @@ class Product extends BaseModel
 
     /**
      * The stock details for this product.
-     *
-     * @return BelongsToMany
      */
     public function stock(): BelongsToMany
     {
@@ -53,8 +51,6 @@ class Product extends BaseModel
 
     /**
      * Unites associated with this product.
-     *
-     * @return HasMany
      */
     public function units(): HasMany
     {
@@ -63,8 +59,6 @@ class Product extends BaseModel
 
     /**
      * Quantity on hand for this product
-     *
-     * @return int
      */
     public function quantityOnHand(): int
     {
@@ -83,8 +77,6 @@ class Product extends BaseModel
 
     /**
      * Get the expiration date formatted.
-     *
-     * @return string
      */
     public function getExpireDateAttribute(): string
     {
@@ -93,8 +85,6 @@ class Product extends BaseModel
 
     /**
      * Get how many days went since the expiration date.
-     *
-     * @return int
      */
     public function getExpiredAtAttribute(): int
     {
