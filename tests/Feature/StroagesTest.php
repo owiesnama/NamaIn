@@ -3,12 +3,11 @@
 use App\Models\Storage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
 
 test('Auth users only can see storages page', function () {
-    /** @var TestCase $this */
     $this->get(route('storages.index'))
         ->assertRedirect();
     $user = User::factory()->create();
@@ -17,8 +16,15 @@ test('Auth users only can see storages page', function () {
         ->assertOk();
 });
 
+test('Auth user can see storages', function () {
+    $storage = Storage::factory()->create();
+    $this->signIn(User::factory()->create())
+        ->get(route('storages.show', $storage))
+        ->assertInertia(fn (Assert $page) => $page->component('Storages/Show')
+        );
+});
+
 test('Auth users can create a new storages', function () {
-    /** @var TestCase $this */
     $storageAttributes = [
         'name' => 'Fake Storage',
         'address' => 'wad madni',
@@ -39,7 +45,6 @@ test('Auth users can create a new storages', function () {
 });
 
 test('Auth users can update a storage', function () {
-    /** @var TestCase $this */
     $storage = Storage::factory()->create();
     $storageAttributes = [
         'name' => 'Updated Storage',
@@ -58,5 +63,14 @@ test('Auth users can update a storage', function () {
 });
 
 test('Auth user can delete a storage', function () {
-    /** @var TestCase this */
+    $storage = Storage::factory()->create();
+    $this->assertDatabaseCount(Storage::class, 1);
+    $this->signIn(User::factory()->create())
+        ->delete(route('storages.destroy', $storage))
+        ->assertRedirect();
+
+    $this->assertSoftDeleted(Storage::class, [
+        'id' => $storage->id,
+    ]);
+
 });

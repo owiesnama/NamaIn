@@ -1,13 +1,12 @@
 <?php
 
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
 
 uses(RefreshDatabase::class);
 
-test('Only Auth Users Can See Customers Page', function () {
-    /** @var TestCase $this */
+test('Auth Users Can See Customers Page', function () {
     $this->get(route('customers.index'))
         ->assertRedirect();
     $user = User::factory()->create();
@@ -17,7 +16,6 @@ test('Only Auth Users Can See Customers Page', function () {
 });
 
 test('Auth Users Can Create A New Customers', function () {
-    /** @var TestCase $this */
     $customerAttributes = [
         'name' => 'Fake Customer',
         'phone_number' => '0654623',
@@ -25,11 +23,21 @@ test('Auth Users Can Create A New Customers', function () {
     ];
     $user = User::factory()->create();
 
-    $this->withoutExceptionHandling();
     $response = $this->be($user)
         ->post(route('customers.store'), $customerAttributes);
 
     $response->assertRedirect();
 
-    $this->assertDatabaseHas(\App\Models\Customer::class, $customerAttributes);
+    $this->assertDatabaseHas(Customer::class, $customerAttributes);
+});
+
+test('Only admins can delete customers', function () {
+    $customer = Customer::factory()->create();
+
+    $this->signIn($customer)
+        ->delete(route('customers.destroy', $customer));
+
+    $this->assertSoftDeleted(Customer::class, [
+        'id' => $customer->fresh()->id,
+    ]);
 });

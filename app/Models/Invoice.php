@@ -88,11 +88,11 @@ class Invoice extends BaseModel
     /**
      * Create an invoice for invoice-ables.
      */
-    public static function createInvoiceFor(string $invoicable, Collection $attributes): Invoice
+    public static function createInvoiceFor(string $invocable, Collection $attributes): Invoice
     {
         $invoice = new Invoice;
-        $invoice->invoicable_type = $invoicable;
-        $invoice->invoicable_id = (new $invoicable)->firstOrCreate([
+        $invoice->invocable_type = $invocable;
+        $invoice->invocable_id = (new $invocable)->firstOrCreate([
             'name' => 'Random',
             'address' => 'no-address',
         ])->id;

@@ -73,7 +73,7 @@ class Transaction extends BaseModel
     public function type(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->invoice->invoicable_type == Customer::class ? 'Sales' : 'Purchases'
+            get: fn () => $this->invoice->invocable_type == Customer::class ? 'Sales' : 'Purchases'
         );
     }
 
