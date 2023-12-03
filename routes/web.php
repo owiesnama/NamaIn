@@ -3,7 +3,7 @@
 use App\Http\Controllers\ChequesController;
 use App\Http\Controllers\ChequeStatusController;
 use App\Http\Controllers\CustomersController;
-use App\Http\Controllers\DashboradController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InvoicePrintController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProductsController;
@@ -32,7 +32,7 @@ Route::middleware([
 ])->group(function () {
     Route::redirect('/', '/dashboard');
 
-    Route::get('/dashboard', [DashboradController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/preferences', [PreferenceController::class, 'index'])->name('preferences.index');
     Route::put('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');

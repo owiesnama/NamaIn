@@ -2,9 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @method static delivered(Carbon $datetime): Builder
+ */
 class Transaction extends BaseModel
 {
     /**
@@ -122,16 +127,17 @@ class Transaction extends BaseModel
         $this->save();
     }
 
-    /**
-     * Format the quantity in html tags.
-     */
-    public function normalizedQuantityHTML(): string
+    public function scopeOfType(Builder $builder, string $type): Builder
     {
-        if (! $this->unit) {
-            return "{$this->quantity} <strong>(Base unit)</strong>";
-        }
-        $unit = $this->unit->name;
+        return $builder->where('invocable_type', $type);
+    }
 
-        return "$this->quantity <storng>($unit)</storng>";
+    /**
+     * Filter invoices to delivered.
+     */
+    public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
+    {
+        return $builder->where('delivered', true)
+            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
     }
 }

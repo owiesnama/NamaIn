@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\InvoiceStatus;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class Invoice extends BaseModel
@@ -121,5 +123,14 @@ class Invoice extends BaseModel
         $this->save();
 
         return $this;
+    }
+
+    /**
+     * Filter invoices to delivered.
+     */
+    public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
+    {
+        return $builder->where('delivered', true)
+            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
     }
 }

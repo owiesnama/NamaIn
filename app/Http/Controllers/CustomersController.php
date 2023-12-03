@@ -34,6 +34,7 @@ class CustomersController extends Controller
 
     public function destroy(Customer $customer)
     {
+        $this->authorize('delete', $customer);
         $customer->delete();
 
         return back()->with('success', 'Storage Deleted successfully');
