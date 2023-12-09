@@ -9,17 +9,19 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
     import Card from "@/Pages/Purchases/Card.vue";
-    
+    import Dropdown from "@/Components/Dropdown.vue";
+    import DropdownLink from "@/Components/DropdownLink.vue";
+
     const props = defineProps({
         invoices: Object,
-        storages: Array,
+        storages: Array
     });
 
     let movingToStorage = ref(false);
 
     let form = useForm({
         invoice: null,
-        storage: null,
+        storage: null
     });
 
     let moveToStorage = (invoice) => {
@@ -30,14 +32,14 @@
     let closeModal = () => {
         movingToStorage.value = null;
     };
-    
+
     let hasNoInvoices = computed(() => {
         return !props.invoices.data.length;
     });
 
     let confirmMoving = () => {
         form.put(route("stock.add", form.storage), {
-            onFinish: () => closeModal(),
+            onFinish: () => closeModal()
         }).then();
     };
 </script>
@@ -50,12 +52,12 @@
                     <h2
                         class="text-xl font-semibold text-gray-800 dark:text-white"
                     >
-                        {{__('Purchases')}}
+                        {{ __("Purchases") }}
                     </h2>
 
                     <span
                         class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                        >{{ invoices.total }} {{__('Invoice')}}</span
+                    >{{ invoices.total }} {{ __("Invoice") }}</span
                     >
                 </div>
 
@@ -94,28 +96,56 @@
                     <button
                         class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
                     >
-                        {{__('All')}}
+                        {{ __("All") }}
                     </button>
 
                     <button
                         class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300"
                     >
-                        {{__('With Trashed')}}
+                        {{ __("With Trashed") }}
                     </button>
 
                     <button
                         class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
                     >
-                        {{__('Trashed')}}
+                        {{ __("Trashed") }}
                     </button>
                 </div>
+                <div class="flex">
+                    <Link
+                        class="w-full px-5 py-2.5 mt-4 block text-center text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg rounded-l-none sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
+                        :href="route('purchases.create')"
+                    >
+                        + {{ __("Add New Invoice") }}
+                    </Link>
+                    <Dropdown align="left">
+                        <template #trigger>
+                            <Button
+                                class="inline-flex  items-center justify-center w-full px-1 py-2 mt-4 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg sm:w-auto sm:mt-0 gap-x-2 rounded-r-none focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 32 32" version="1.1" class="w-6 h-6 fill-gray-400">
 
-                <Link
-                    class="w-full px-5 py-2.5 mt-4 block text-center text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
-                    :href="route('purchases.create')"
-                >
-                    + {{__('Add New Invoice')}}
-                </Link>
+                                    <g id="SVGRepo_bgCarrier" stroke-width="0" />
+
+                                    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" />
+
+                                    <g id="SVGRepo_iconCarrier">
+                                        <path
+                                            d="M12.15 28.012v-0.85c0.019-0.069 0.050-0.131 0.063-0.2 0.275-1.788 1.762-3.2 3.506-3.319 1.95-0.137 3.6 0.975 4.137 2.787 0.069 0.238 0.119 0.488 0.181 0.731v0.85c-0.019 0.056-0.050 0.106-0.056 0.169-0.269 1.65-1.456 2.906-3.081 3.262-0.125 0.025-0.25 0.063-0.375 0.094h-0.85c-0.056-0.019-0.113-0.050-0.169-0.056-1.625-0.262-2.862-1.419-3.237-3.025-0.037-0.156-0.081-0.3-0.119-0.444zM20.038 3.988l-0 0.85c-0.019 0.069-0.050 0.131-0.056 0.2-0.281 1.8-1.775 3.206-3.538 3.319-1.944 0.125-3.588-1-4.119-2.819-0.069-0.231-0.119-0.469-0.175-0.7v-0.85c0.019-0.056 0.050-0.106 0.063-0.162 0.3-1.625 1.244-2.688 2.819-3.194 0.206-0.069 0.425-0.106 0.637-0.162h0.85c0.056 0.019 0.113 0.050 0.169 0.056 1.631 0.269 2.863 1.419 3.238 3.025 0.038 0.15 0.075 0.294 0.113 0.437zM20.037 15.575v0.85c-0.019 0.069-0.050 0.131-0.063 0.2-0.281 1.794-1.831 3.238-3.581 3.313-1.969 0.087-3.637-1.1-4.106-2.931-0.050-0.194-0.094-0.387-0.137-0.581v-0.85c0.019-0.069 0.050-0.131 0.063-0.2 0.275-1.794 1.831-3.238 3.581-3.319 1.969-0.094 3.637 1.1 4.106 2.931 0.050 0.2 0.094 0.394 0.137 0.588z" />
+                                    </g>
+
+                                </svg>
+                            </Button>
+                        </template>
+
+                        <template #content>
+                            <button
+                                class="block rtl:text-right w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                v-text="__('Return Invoice')"
+                            ></button>
+                        </template>
+                    </Dropdown>
+                </div>
             </div>
         </div>
 
@@ -155,7 +185,7 @@
                 </select>
             </template>
             <template #footer>
-                <SecondaryButton @click="closeModal"> {{__('Cancel')}} </SecondaryButton>
+                <SecondaryButton @click="closeModal"> {{ __("Cancel") }}</SecondaryButton>
 
                 <PrimaryButton
                     class="ml-3 rtl:mr-3 rtl:ml-0"
@@ -163,7 +193,7 @@
                     :disabled="form.processing"
                     @click="confirmMoving"
                 >
-                    {{__('Confirm')}}
+                    {{ __("Confirm") }}
                 </PrimaryButton>
             </template>
         </DialogModal>

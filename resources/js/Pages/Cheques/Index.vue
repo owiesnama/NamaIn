@@ -4,14 +4,14 @@
     import TextInput from "@/Components/TextInput.vue";
     import Cheque from "@/Shared/Cheque.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import { watch, reactive, ref, onMounted } from "vue";
+    import { watch, reactive, ref, onMounted, computed } from "vue";
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import Dropdown from "@/Components/Dropdown.vue";
 
     const props = defineProps({
         initialCheques: Object,
-        status: Object,
+        status: Object
     });
     let landMark = ref(null);
     let cheques = ref(props.initialCheques.data);
@@ -20,9 +20,17 @@
         search: useQueryString("search"),
         type: useQueryString("type"),
         status: useQueryString("status"),
-        due: useQueryString("due"),
+        due: useQueryString("due")
+    });
+    const getStatusLabel = computed(() => {
+        let [status] = Object
+            .entries(props.status)
+            .filter(([, value]) => filters.status === value)[0];
+
+        return __(status);
     });
     const initialUrl = usePage().url;
+
     const loadMore = () => {
         if (!props.initialCheques.next_page_url) return;
         router.get(
@@ -35,24 +43,26 @@
                     window.history.replaceState({}, "", initialUrl);
                     cheques.value = [
                         ...cheques.value,
-                        ...props.initialCheques.data,
+                        ...props.initialCheques.data
                     ];
-                },
+                }
             }
         );
     };
+
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
             loadMore();
         });
     });
+
     onMounted(() => {
         observer.observe(landMark.value);
     });
     watch(
         filters,
-        debounce(function (watchedFitlers) {
+        debounce(function(watchedFitlers) {
             router.get(
                 route("cheques.index"),
                 { ...watchedFitlers },
@@ -61,7 +71,7 @@
                     onSuccess() {
                         window.history.replaceState({}, "", initialUrl);
                         cheques.value = [...props.initialCheques.data];
-                    },
+                    }
                 }
             );
         }, 300)
@@ -82,7 +92,7 @@
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                            >{{ initialCheques.total }} {{ __("Cheque") }}</span
+                        >{{ initialCheques.total }} {{ __("Cheque") }}</span
                         >
                     </div>
 
@@ -165,13 +175,13 @@
                     </div>
 
                     <Dropdown
-                        align="right"
+                        align="left"
                         width="48"
                     >
                         <template #trigger>
                             <button
                                 type="button"
-                                class="inline-flex items-center justify-center w-full px-3 py-2 mt-4 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg sm:w-auto sm:mt-0 gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none"
+                                class="inline-flex rtl items-center justify-center w-full px-3 py-2 mt-4 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg sm:w-auto sm:mt-0 gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -188,16 +198,17 @@
                                     />
                                 </svg>
 
-                                {{ __("Status") }}
+                                {{ filters.status ? getStatusLabel : __("Status") }}
                             </button>
                         </template>
 
                         <template #content>
                             <button
-                                v-for="(key, status) in status"
+                                v-for="(key, value) in status"
                                 :key="key"
-                                class="block w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                v-text="__(status)"
+                                @click="filters.status = key"
+                                class="block rtl:text-right w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
+                                v-text="__(value)"
                             ></button>
                         </template>
                     </Dropdown>
@@ -213,10 +224,10 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2" v-auto-animate>
                 <Cheque
                     v-for="cheque in cheques"
-                    :key="cheque.id"
+                    :key="cheque.id + (new Date).valueOf()"
                     :cheque="cheque"
                     :cheque-status="status"
                 ></Cheque>

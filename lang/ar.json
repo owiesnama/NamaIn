@@ -145,5 +145,13 @@
     "Deliver to Storage": "التسليم للمخزن",
     "Register Cheque": "تحرير الشيك",
     "Retured": "مرجع",
-    "Desirved": "مستحق"
+    "Desirved": "مستحق",
+    "Bank": "البنك",
+    "Due": "تاريخ الاستحقاق",
+    "Payee": "كاتب الشيك",
+    "Add New Cheque": "تحرير شيك جديد",
+    "Returned": "مسترجع",
+    "Return Invoice": "فاتوره ارجاع",
+    "Invoice Details": "تفاصيل الفاتوره",
+    "No result found, Try a different query": "لا توجد سجلات"
 }

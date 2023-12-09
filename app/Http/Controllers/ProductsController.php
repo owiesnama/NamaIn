@@ -14,6 +14,7 @@ class ProductsController extends Controller
         return inertia('Products/Index', [
             'products_count' => Product::count(),
             'products' => Product::search(request('search'))
+                ->trash(request('status'))
                 ->with('units')
                 ->latest()
                 ->paginate(parent::ELEMENTS_PER_PAGE)

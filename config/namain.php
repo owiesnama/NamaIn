@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'min_qunantity_acceptable' => 3,
+    'min_quantity_acceptable' => 3,
 ];

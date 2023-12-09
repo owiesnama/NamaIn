@@ -14,7 +14,11 @@ class PurchasesController extends Controller
     public function index()
     {
         return inertia('Purchases/Index', [
-            'invoices' => Invoice::where('invoicable_type', Supplier::class)->latest()->with('transactions')->paginate(10)->withQueryString(),
+            'invoices' => Invoice::where('invocable_type', Supplier::class)
+                ->latest()
+                ->with('transactions')
+                ->paginate(10)
+                ->withQueryString(),
             'storages' => Storage::all(),
             'status' => InvoiceStatus::casesWithLabels(),
         ]);

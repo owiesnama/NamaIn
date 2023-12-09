@@ -14,7 +14,9 @@ class StockController extends Controller
     {
         $invoice = Invoice::find(request('invoice'));
         $invoice->transactions->each(
-            fn (Transaction $transaction) => $transaction->for($storage)->add()->deliver()
+            function (Transaction $transaction) use ($storage) {
+                $transaction->for($storage)->add()->deliver();
+            }
         );
         $invoice->markAs(InvoiceStatus::Delivered);
 
@@ -24,14 +26,13 @@ class StockController extends Controller
     public function deduct(Storage $storage)
     {
         $invoice = Invoice::find(request('invoice'));
-        $invoiceStatus = InvoiceStatus::Initial;
         $this->checkForStockAvailablity($invoice, $storage);
         $invoiceStatus = InvoiceStatus::Delivered;
         $invoice->transactions->each(function (Transaction $transaction) use ($storage, &$invoiceStatus) {
             if ($storage->hasEnoughStockFor($transaction->product_id, $transaction->base_quantity)) {
-                return $transaction->for($storage)->deduct()->deliver();
+                $transaction->for($storage)->deduct()->deliver();
             }
-            $remaining = $transaction->base_quantity - $storage->qunatityOf($transaction->product_id);
+            $remaining = $transaction->base_quantity - $storage->quantityOf($transaction->product_id);
             $transaction->base_quantity -= $remaining;
             $transaction->for($storage)->deduct()->deliver();
             $newTransaction = $transaction->replicate();

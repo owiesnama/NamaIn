@@ -7,11 +7,11 @@
     const props = defineProps({
         cheque: {
             type: Object,
-            required: true,
+            required: true
         },
         chequeStatus: {
-            type: Object,
-        },
+            type: Object
+        }
     });
 
     const isBeyondDue = computed(() => {
@@ -19,7 +19,7 @@
     });
 
     const form = useForm({
-        status: props.cheque.status,
+        status: props.cheque.status
     });
 
     const statusLable = (status) =>
@@ -37,7 +37,10 @@
         class="p-6 bg-white border-l-4 border-dashed rounded-lg rounded-l-none shadow-md rtl:border-l-0 rtl:border-r-4 rtl:rounded-l-lg rtl:rounded-r-none shadow-gray-200"
     >
         <div class="flex items-center justify-between">
-            <InputLabel :value="'#' + cheque.id" />
+            <div>
+                <InputLabel :value="'#' + cheque.id" />
+                <InputLabel :value="'#' + cheque.bank" />
+            </div>
 
             <p
                 class="text-sm"
