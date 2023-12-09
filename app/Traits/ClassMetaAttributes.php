@@ -4,12 +4,12 @@ namespace App\Traits;
 
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
-trait HasClassAttributes
+trait ClassMetaAttributes
 {
     /**
      * Initialize the trait
      */
-    public function initializeHasClassAttributes(): void
+    public function initializeClassMetaAttributes(): void
     {
         $this->appends = array_merge($this->appends, ['type', 'type_string']);
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\WithTrashScope;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Product extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, WithTrashScope;
 
     /**
      * List of fillable fields of the product

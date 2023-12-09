@@ -12,6 +12,7 @@ class StoragesController extends Controller
         return inertia('Storages/Index', [
             'storages_count' => Storage::count(),
             'storages' => Storage::search(request('search'))
+                ->trash(request('status'))
                 ->latest()
                 ->paginate(10)
                 ->withQueryString(),

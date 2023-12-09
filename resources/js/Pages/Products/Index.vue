@@ -1,6 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { watch } from "vue";
+    import { reactive, watch } from "vue";
     import { router, useForm } from "@inertiajs/vue3";
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
@@ -9,16 +9,20 @@
     import { useQueryString } from "@/Composables/useQueryString";
     import FileUploadButton from "@/Shared/FileUploadButton.vue";
     import DeleteProduct from "@/Components/Products/DeleteProduct.vue";
+    import TrashFitler from "@/Shared/TrashFitler.vue";
 
     defineProps({
-        products: Object,
+        products: Object
     });
 
     let form = useForm({
-        file: null,
+        file: null
     });
 
-    let search = useQueryString("search");
+    let filters = reactive({
+        search: useQueryString("search"),
+        status: useQueryString("status")
+    });
 
     let submit = (files) => {
         form.file = files[0];
@@ -26,9 +30,9 @@
     };
 
     watch(
-        search,
-        debounce(function (value) {
-            router.get("/products", { search: value }, { preserveState: true });
+        filters,
+        debounce(function() {
+            router.get(route("products.index"), filters, { preserveState: true });
         }, 300)
     );
 </script>
@@ -42,12 +46,12 @@
                         <h2
                             class="text-xl font-semibold text-gray-800 dark:text-white"
                         >
-                            {{__('Products')}}
+                            {{ __("Products") }}
                         </h2>
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                            >{{ products.total }} {{__('Product')}}</span
+                        >{{ products.total }} {{ __("Product") }}</span
                         >
                     </div>
 
@@ -70,7 +74,7 @@
                         </span>
 
                         <input
-                            v-model="search"
+                            v-model="filters.search"
                             type="text"
                             :placeholder="__('Search here') + '...'"
                             class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
@@ -84,29 +88,14 @@
                     <div
                         class="flex overflow-hidden bg-white border divide-x rounded-lg md:w-auto sm:w-1/2 dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700"
                     >
-                        <button
-                            class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                        >
-                            {{__('All')}}
-                        </button>
-
-                        <button
-                            class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300"
-                        >
-                            {{__('With Trashed')}}
-                        </button>
-
-                        <button
-                            class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                        >
-                            {{__('Trashed')}}
-                        </button>
+                        <TrashFitler @tabbed="status => filters.status = status" />
                     </div>
 
                     <FileUploadButton
                         download
                         @input="submit"
-                        >{{__('Import')}}</FileUploadButton
+                    >{{ __("Import") }}
+                    </FileUploadButton
                     >
 
                     <ProdcutForm></ProdcutForm>
@@ -125,80 +114,80 @@
                                 class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
                             >
                                 <thead class="bg-gray-100">
-                                    <tr>
-                                        <th
-                                            scope="col"
-                                            class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                                        >
-                                            #
-                                        </th>
+                                <tr>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        #
+                                    </th>
 
-                                        <th
-                                            scope="col"
-                                            class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                                        >
-                                            {{__('Name')}}
-                                        </th>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Name") }}
+                                    </th>
 
-                                        <th
-                                            scope="col"
-                                            class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                                        >
-                                            {{__('Cost')}}
-                                        </th>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Cost") }}
+                                    </th>
 
-                                        <th
-                                            scope="col"
-                                            class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                                        >
-                                            {{__('Expire Date')}}
-                                        </th>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Expire Date") }}
+                                    </th>
 
-                                        <th
-                                            scope="col"
-                                            class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                                        >
-                                            {{__('Added Time')}}
-                                        </th>
+                                    <th
+                                        scope="col"
+                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    >
+                                        {{ __("Added Time") }}
+                                    </th>
 
-                                        <th
-                                            scope="col"
-                                            class="relative py-3.5 px-8"
-                                        >
-                                            <span class="sr-only">{{__('actions')}}</span>
-                                        </th>
-                                    </tr>
+                                    <th
+                                        scope="col"
+                                        class="relative py-3.5 px-8"
+                                    >
+                                        <span class="sr-only">{{ __("actions") }}</span>
+                                    </th>
+                                </tr>
                                 </thead>
                                 <tbody
                                     class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
                                 >
-                                    <template v-if="products.data">
-                                        <tr
-                                            v-for="product in products.data"
-                                            :key="product.id"
+                                <template v-if="products.data">
+                                    <tr
+                                        v-for="product in products.data"
+                                        :key="product.id"
+                                    >
+                                        <th
+                                            class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
+                                            v-text="product.id"
+                                        ></th>
+
+                                        <th
+                                            class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
+                                            v-text="product.name"
+                                        ></th>
+
+                                        <td
+                                            class="px-8 py-3 text-sm text-left rtl:text-right whitespace-nowrap"
                                         >
-                                            <th
-                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                                v-text="product.id"
-                                            ></th>
+                                            <a
+                                                class="font-semibold text-emerald-500"
+                                                v-text="'$' + product.cost"
+                                            ></a>
+                                        </td>
 
-                                            <th
-                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                                v-text="product.name"
-                                            ></th>
-
-                                            <td
-                                                class="px-8 py-3 text-sm text-left rtl:text-right whitespace-nowrap"
-                                            >
-                                                <a
-                                                    class="font-semibold text-emerald-500"
-                                                    v-text="'$' + product.cost"
-                                                ></a>
-                                            </td>
-
-                                            <th
-                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
-                                            >
+                                        <th
+                                            class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
+                                        >
                                                 <span
                                                     v-show="
                                                         product.expired_at > 0
@@ -209,40 +198,40 @@
                                                     Not Expire
                                                 </span>
 
-                                                <span
-                                                    v-show="
+                                            <span
+                                                v-show="
                                                         product.expired_at < 0
                                                     "
-                                                    class="text-red-500 rtl:text-right"
-                                                >
-                                                    ({{ product.expire_date }})
-                                                    {{__('Expired')}}
-                                                </span>
-                                                &nbsp;
-                                            </th>
-
-                                            <td
-                                                class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
-                                                v-text="product.created_at"
-                                            ></td>
-
-                                            <td
-                                                class="relative px-8 py-3 text-sm font-medium text-right whitespace-nowrap"
+                                                class="text-red-500 rtl:text-right"
                                             >
-                                                <div
-                                                    class="flex items-center justify-end gap-x-6"
-                                                >
-                                                    <ProdcutForm
-                                                        :product="product"
-                                                    ></ProdcutForm>
+                                                    ({{ product.expire_date }})
+                                                    {{ __("Expired") }}
+                                                </span>
+                                            &nbsp;
+                                        </th>
 
-                                                    <DeleteProduct
-                                                        :product="product"
-                                                    ></DeleteProduct>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </template>
+                                        <td
+                                            class="px-8 py-3 text-sm text-left rtl:text-right text-gray-700 whitespace-nowrap"
+                                            v-text="product.created_at"
+                                        ></td>
+
+                                        <td
+                                            class="relative px-8 py-3 text-sm font-medium text-right whitespace-nowrap"
+                                        >
+                                            <div
+                                                class="flex items-center justify-end gap-x-6"
+                                            >
+                                                <ProdcutForm
+                                                    :product="product"
+                                                ></ProdcutForm>
+
+                                                <DeleteProduct
+                                                    :product="product"
+                                                ></DeleteProduct>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
                                 </tbody>
                             </table>
                         </div>

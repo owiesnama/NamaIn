@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * @method static delivered(Carbon $datetime): Builder
+ * @method static delivered(Carbon $datetime).
  */
 class Transaction extends BaseModel
 {

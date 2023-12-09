@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Storage extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes,WithTrashScope;
 
     /**
      * The attributes that are mass assignable.

@@ -224,10 +224,10 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2" v-auto-animate>
                 <Cheque
                     v-for="cheque in cheques"
-                    :key="cheque.id"
+                    :key="cheque.id + (new Date).valueOf()"
                     :cheque="cheque"
                     :cheque-status="status"
                 ></Cheque>

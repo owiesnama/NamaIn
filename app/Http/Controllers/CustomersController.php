@@ -10,7 +10,8 @@ class CustomersController extends Controller
     public function index()
     {
         return inertia('Customers/Index', [
-            'customers' => Customer::search(request('search'))
+            'customers' => Customer::search(request()->get('search'))
+                ->trash(request()->get('trashStatus'))
                 ->latest()
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),

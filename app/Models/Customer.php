@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
-use App\Traits\HasClassAttributes;
+use App\Traits\ClassMetaAttributes;
+use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Customer extends BaseModel
 {
-    use HasClassAttributes, HasFactory, SoftDeletes;
+    use ClassMetaAttributes, HasFactory, SoftDeletes,WithTrashScope;
 
     /**
      *  List of attributes that can be mass assigned.
