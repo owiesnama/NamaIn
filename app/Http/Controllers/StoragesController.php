@@ -43,7 +43,7 @@ class StoragesController extends Controller
 
     public function destroy(Storage $storage)
     {
-        $this->authorize('delete');
+        $this->authorize('delete',$storage);
 
         $storage->delete();
 

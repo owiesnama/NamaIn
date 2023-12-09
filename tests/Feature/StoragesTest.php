@@ -64,13 +64,13 @@ test('Auth users can update a storage', function () {
 
 test('Auth user can delete a storage', function () {
     $storage = Storage::factory()->create();
-    $this->assertDatabaseCount(Storage::class, 1);
-    $this->signIn(User::factory()->create())
-        ->delete(route('storages.destroy', $storage))
-        ->assertRedirect();
 
-    $this->assertSoftDeleted(Storage::class, [
-        'id' => $storage->id,
-    ]);
+    $this->signIn()
+        ->delete(route('storages.destroy', $storage));
+    $this->assertNotSoftDeleted(Storage::class, ['id' => $storage->id]);
+
+    $this->signIn(User::factory()->admin()->create())
+        ->delete(route('storages.destroy', $storage));
+    $this->assertSoftDeleted(Storage::class, ['id' => $storage->id]);
 
 });
