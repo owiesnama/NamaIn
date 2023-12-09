@@ -8,7 +8,7 @@
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import DeleteCustomer from "@/Components/Customers/DeleteCustomer.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import TrashFitler from "@/Shared/TrashFitler.vue";
+    import TrashFilter from "@/Shared/TrashFilter.vue";
 
     defineProps({
         customers: Object
@@ -79,7 +79,7 @@
                 <div
                     class="mt-4 sm:flex sm:items-center sm:justify-between sm:gap-x-4 lg:mt-0"
                 >
-                    <TrashFitler @tabbed="(status) => filters.trashStatus = status" />
+                    <TrashFilter @tabbed="(status) => filters.trashStatus = status" />
 
                     <CustomerForm></CustomerForm>
                 </div>

@@ -1,25 +1,35 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import Pagination from "@/Shared/Pagination.vue";
-    import { Link, useForm } from "@inertiajs/vue3";
-    import { computed, ref } from "vue";
+    import { Link, router, useForm } from "@inertiajs/vue3";
+    import { reactive, ref, watch } from "vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
     import DialogModal from "@/Components/DialogModal.vue";
     import InputError from "@/Components/InputError.vue";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import Card from "@/Pages/Purchases/Card.vue";
+    import TrashFilter from "@/Shared/TrashFilter.vue";
+    import { useQueryString } from "@/Composables/useQueryString";
+    import { debounce } from "lodash";
 
-    const props = defineProps({
+    defineProps({
         invoices: Object,
-        storages: Object,
+        storages: Object
+    });
+
+    let filters = reactive({
+        search: useQueryString("search"),
+        status: useQueryString("status")
     });
 
     let deductingFromStorage = ref(false);
+
     let form = useForm({
         invoice: null,
-        storage: null,
+        storage: null
     });
+
     let deductFromStorage = (invoice) => {
         deductingFromStorage.value = true;
         form.invoice = invoice.id;
@@ -31,9 +41,20 @@
 
     let confirmDeduct = () => {
         form.put(route("stock.deduct", form.storage), {
-            onSuccess: () => closeModal(),
+            onSuccess: () => closeModal()
         }).then();
     };
+
+    watch(
+        filters,
+        debounce(function() {
+            router.get(
+                route("sales.index"),
+                filters,
+                { preserveState: true }
+            );
+        }, 300)
+    );
 </script>
 
 <template>
@@ -49,7 +70,7 @@
 
                     <span
                         class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                        >{{ invoices.total }} {{ __("Invoice") }}</span
+                    >{{ invoices.total }} {{ __("Invoice") }}</span
                     >
                 </div>
 
@@ -72,6 +93,7 @@
                     </span>
 
                     <input
+                        v-model="filters.search"
                         type="text"
                         :placeholder="__('Search here') + '...'"
                         class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
@@ -85,30 +107,14 @@
                 <div
                     class="flex overflow-hidden bg-white border divide-x rounded-lg md:w-auto sm:w-1/2 dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700"
                 >
-                    <button
-                        class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                    >
-                        {{__('All')}}
-                    </button>
-
-                    <button
-                        class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 bg-gray-100 sm:text-sm dark:bg-gray-800 dark:text-gray-300"
-                    >
-                        {{__('With Trashed')}}
-                    </button>
-
-                    <button
-                        class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-                    >
-                        {{__('Trashed')}}
-                    </button>
+                    <TrashFilter @tabbed="status => filters.status = status"></TrashFilter>
                 </div>
 
                 <Link
                     class="w-full px-5 py-2.5 mt-4 block text-center text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
                     :href="route('sales.create')"
                 >
-                    + {{__('Add New Invoice')}}
+                    + {{ __("Add New Invoice") }}
                 </Link>
             </div>
         </div>
@@ -162,7 +168,7 @@
                 </select>
             </template>
             <template #footer>
-                <SecondaryButton @click="closeModal"> {{__('Cancel')}} </SecondaryButton>
+                <SecondaryButton @click="closeModal"> {{ __("Cancel") }}</SecondaryButton>
 
                 <PrimaryButton
                     class="ml-3 rtl:mr-3 rtl:ml-0"
@@ -170,7 +176,7 @@
                     :disabled="form.processing"
                     @click="confirmDeduct"
                 >
-                    {{__('Confirm')}}
+                    {{ __("Confirm") }}
                 </PrimaryButton>
             </template>
         </DialogModal>

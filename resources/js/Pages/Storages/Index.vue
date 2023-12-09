@@ -8,7 +8,7 @@
     import { debounce } from "lodash";
     import { router, Link } from "@inertiajs/vue3";
     import EmptySearch from "@/Shared/EmptySearch.vue";
-    import TrashFitler from "@/Shared/TrashFitler.vue";
+    import TrashFitler from "@/Shared/TrashFilter.vue";
 
     defineProps({
         storages: Object
