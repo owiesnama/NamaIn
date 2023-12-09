@@ -78,7 +78,7 @@ class Transaction extends BaseModel
     public function type(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->invoice->invocable_type == Customer::class ? 'Sales' : 'Purchases'
+            get: fn() => $this->invoice->invocable_type == Customer::class ? 'Sales' : 'Purchases'
         );
     }
 
@@ -132,12 +132,13 @@ class Transaction extends BaseModel
         return $builder->where('invocable_type', $type);
     }
 
+
     /**
      * Filter invoices to delivered.
      */
     public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
     {
         return $builder->where('delivered', true)
-            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
+            ->when($datetime, fn($query) => $query->where('created_at', '>', $datetime));
     }
 }
