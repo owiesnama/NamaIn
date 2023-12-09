@@ -2,32 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
 
 class CustomersController extends Controller
 {
     public function index()
     {
-        return inertia('Customers', [
+        return inertia('Customers/Index', [
             'customers' => Customer::search(request('search'))
                 ->latest()
-                ->paginate(10)
+                ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
     }
 
-    public function store()
+    public function store(CustomerRequest $request)
     {
-        Customer::create(
-            request()->validate([
-                'name' => 'required',
-                'phone' => 'required|numeric|min:10',
-            ])
-        );
+        Customer::create($request->all());
 
-        return back()->with('notification', [
-            'title' => 'Customer Created 🎉',
-            'message' => 'Customer created successfully'
-        ]);
+        return redirect()->route('customers.index')
+            ->with('success', 'Customer Created Successfully');
+    }
+
+    public function update(Customer $customer, CustomerRequest $request)
+    {
+        $customer->update($request->all());
+
+        return back()->with('success', 'customer updated successfully');
+    }
+
+    public function destroy(Customer $customer)
+    {
+        $customer->delete();
+
+        return back()->with('success', 'Storage Deleted successfully');
     }
 }

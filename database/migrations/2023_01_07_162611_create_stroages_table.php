@@ -16,8 +16,9 @@ return new class extends Migration
         Schema::create('storages', function (Blueprint $table) {
             $table->id();
             $table->string('name', 400);
-            $table->longText('Address');
+            $table->text('address');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

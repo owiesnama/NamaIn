@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class ProductFactory extends Factory
 {
@@ -22,9 +22,8 @@ class ProductFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->name(),
-            'price' => $this->faker->numberBetween(),
-            'cost' => $this->faker->numberBetween(),
+            'name' => $this->faker->name,
+            'cost' => $this->faker->numberBetween(400, 1000),
             'expire_date' => $this->faker->dateTime(),
         ];
     }

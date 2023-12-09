@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
 use App\Models\Storage;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 class StorageFactory extends Factory
 {
@@ -22,8 +22,8 @@ class StorageFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->sentence(4),
-            'address' => $this->faker->text,
+            'name' => $this->faker->streetAddress,
+            'address' => $this->faker->address,
         ];
     }
 }
