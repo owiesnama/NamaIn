@@ -9,7 +9,7 @@
     import { useQueryString } from "@/Composables/useQueryString";
     import FileUploadButton from "@/Shared/FileUploadButton.vue";
     import DeleteProduct from "@/Components/Products/DeleteProduct.vue";
-    import TrashFitler from "@/Shared/TrashFitler.vue";
+    import TrashFitler from "@/Shared/TrashFilter.vue";
 
     defineProps({
         products: Object

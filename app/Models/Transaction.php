@@ -78,7 +78,7 @@ class Transaction extends BaseModel
     public function type(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->invoice->invocable_type == Customer::class ? 'Sales' : 'Purchases'
+            get: fn() => $this->invoice->invocable_type == Customer::class ? 'Sales' : 'Purchases'
         );
     }
 
@@ -138,6 +138,20 @@ class Transaction extends BaseModel
     public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
     {
         return $builder->where('delivered', true)
-            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
+            ->when($datetime, fn($query) => $query->where('created_at', '>', $datetime));
+    }
+
+    /**
+     * Replicate a transaction on the invoice for the remaining quantity.
+     *
+     * @return void
+     */
+    public function replicateForRemaining($remaining): void
+    {
+        $newTransaction = $this->replicate();
+        $newTransaction->delivered = false;
+        $newTransaction->quantity = $this->unit ? ($remaining / $this->unit->conversion_factor) : $remaining;
+        $newTransaction->base_quantity = $this->unit ? ($remaining * $this->unit->conversion_factor) : $remaining;
+        $newTransaction->save();
     }
 }

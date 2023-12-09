@@ -8,7 +8,7 @@
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import { useQueryString } from "@/Composables/useQueryString";
     import DeleteSupplier from "@/Components/Suppliers/DeleteSupplier.vue";
-    import TrashFitler from "@/Shared/TrashFitler.vue";
+    import TrashFitler from "@/Shared/TrashFilter.vue";
 
     defineProps({
         suppliers: Object
