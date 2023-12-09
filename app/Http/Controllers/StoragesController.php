@@ -12,6 +12,7 @@ class StoragesController extends Controller
         return inertia('Storages/Index', [
             'storages_count' => Storage::count(),
             'storages' => Storage::search(request('search'))
+                ->trash(request('status'))
                 ->latest()
                 ->paginate(10)
                 ->withQueryString(),
@@ -30,20 +31,22 @@ class StoragesController extends Controller
     {
         Storage::create($request->all());
 
-        return back()->with('success', 'Storage created successfully');
+        return back()->with('success', __('Storage created successfully'));
     }
 
     public function update(Storage $storage, StorageRequest $request)
     {
         $storage->update($request->all());
 
-        return back()->with('success', 'Storage updated successfully');
+        return back()->with('success', __('Storage updated successfully'));
     }
 
     public function destroy(Storage $storage)
     {
+        $this->authorize('delete',$storage);
+
         $storage->delete();
 
-        return back()->with('success', 'Storage Deleted successfully');
+        return back()->with('success', __('Storage Deleted successfully'));
     }
 }

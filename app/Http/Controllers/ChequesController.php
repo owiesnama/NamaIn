@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ChequeStatus;
 use App\Filters\ChequeFilter;
+use App\Http\Requests\ChequeRequest;
 use App\Models\Cheque;
 use App\Models\Customer;
 use App\Models\Supplier;
@@ -26,25 +27,24 @@ class ChequesController extends Controller
 
     public function create()
     {
-        $payees = Customer::all()->concat(Supplier::all())->map(function ($payee) {
-            $payee->type = get_class($payee);
-            $payee->type_string = class_basename($payee);
-
-            return $payee;
-        });
+        $payees = Customer::all()->concat(
+            Supplier::all()->toArray()
+        );
 
         return inertia('Cheques/Create', [
             'payees' => $payees,
         ]);
     }
 
-    public function store()
+    public function store(ChequeRequest $request)
     {
-        Cheque::forPayee(request('payee'))->register([
-            'type' => request('type'),
-            'amount' => request('amount'),
-            'due' => request('due'),
-        ]);
+        Cheque::forPayee($request->get('payee'))
+            ->register([
+                'type' => $request->get('type'),
+                'amount' => $request->get('amount'),
+                'bank' => $request->get('bank'),
+                'due' => $request->get('due'),
+            ]);
 
         return redirect()->route('cheques.index')->with('success', 'New cheque has been registered');
     }

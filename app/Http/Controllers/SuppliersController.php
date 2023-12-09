@@ -11,6 +11,7 @@ class SuppliersController extends Controller
     {
         return inertia('Suppliers/Index', [
             'suppliers' => Supplier::search(request('search'))
+                ->trash(request('status'))
                 ->latest()
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),

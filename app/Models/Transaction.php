@@ -2,61 +2,100 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @method static delivered(Carbon $datetime).
+ */
 class Transaction extends BaseModel
 {
-    use HasFactory;
-
+    /**
+     * @var array<string>
+     */
     public $with = ['product', 'unit', 'storage'];
 
+    /**
+     * @var bool
+     */
     protected static $unguarded = false;
 
+    /**
+     * @var array<string>
+     */
     protected $fillable = ['product_id', 'storage_id', 'quantity', 'base_quantity', 'unit_id', 'price', 'description'];
 
+    /**
+     * @var array<string>
+     */
     protected $appends = ['type'];
 
-    public function invoice()
+    /**
+     * The invoice for this transaction.
+     */
+    public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
     }
 
-    public function storage()
+    /**
+     * Storage of this transaction.
+     */
+    public function storage(): BelongsTo
     {
         return $this->belongsTo(Storage::class);
     }
 
-    public function product()
+    /**
+     * Product of this transaction.
+     */
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    public function unit()
+    /**
+     * Unit of this transaction product.
+     */
+    public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
     }
 
-    public function total()
+    /**
+     * the total price for this transaction.
+     */
+    public function total(): float
     {
         return $this->quantity * $this->price;
     }
 
+    /**
+     *  Type of this transaction.
+     */
     public function type(): Attribute
     {
         return Attribute::make(
-            get: fn () => $this->invoice->invoicable_type == Customer::class ? 'Sales' : 'Purchases'
+            get: fn () => $this->invoice->invocable_type == Customer::class ? 'Sales' : 'Purchases'
         );
     }
 
-    public function for($storage)
+    /**
+     * Convenient method to assign the storage to this instance
+     */
+    public function for(Storage $storage): Transaction
     {
         $this->storage_id = $storage->id;
 
         return $this;
     }
 
-    public function deduct()
+    /**
+     * Deduct this transaction from the storage
+     */
+    public function deduct(): Transaction
     {
         $this->storage()->first()->deductStock([
             'product' => $this->product_id,
@@ -66,7 +105,10 @@ class Transaction extends BaseModel
         return $this;
     }
 
-    public function add()
+    /**
+     * add this transaction to the storage.
+     */
+    public function add(): Transaction
     {
         $this->storage()->first()->addStock([
             'product' => $this->product_id,
@@ -76,18 +118,26 @@ class Transaction extends BaseModel
         return $this;
     }
 
-    public function deliver()
+    /**
+     * Mark this transaction as delivered.
+     */
+    public function deliver(): void
     {
         $this->delivered = true;
         $this->save();
     }
 
-    public function normalizedQuantity()
+    public function scopeOfType(Builder $builder, string $type): Builder
     {
-        if (! $this->unit) {
-            return "{$this->quantity} <strong>(Base unit)</strong>";
-        }
+        return $builder->where('invocable_type', $type);
+    }
 
-        return "$this->quantity <storng>($this->unit?->name)</storng>";
+    /**
+     * Filter invoices to delivered.
+     */
+    public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
+    {
+        return $builder->where('delivered', true)
+            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
     }
 }

@@ -48,6 +48,20 @@ class UserFactory extends Factory
     }
 
     /**
+     * Indicate that the model's role to be admin.
+     *
+     * @return $this
+     */
+    public function admin(): static
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'role' => 'admin',
+            ];
+        });
+    }
+
+    /**
      * Indicate that the user should have a personal team.
      *
      * @return $this

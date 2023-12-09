@@ -1,0 +1,4 @@
+#!/bin/sh
+./vendor/bin/pint
+git add app/ config/ database/ test/ routes/
+git commit -m "Pint format commit"

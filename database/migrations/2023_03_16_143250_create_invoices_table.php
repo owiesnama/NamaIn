@@ -15,8 +15,8 @@ return new class extends Migration
     {
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('invoicable_id');
-            $table->string('invoicable_type');
+            $table->foreignId('invocable_id');
+            $table->string('invocable_type');
             $table->double('total');
             $table->string('status')->default('initial');
             $table->string('serial_number')->unique()->nullable();
