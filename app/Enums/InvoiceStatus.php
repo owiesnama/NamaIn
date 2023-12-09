@@ -11,9 +11,9 @@ enum InvoiceStatus: string
     public static function casesWithLabels()
     {
         return [
-            'Delivered' => static::Delivered,
-            'Partially Delivered' => static::PartiallyDelivered,
-            'Initial' => static::Initial,
+            'Delivered' => self::Delivered,
+            'Partially Delivered' => self::PartiallyDelivered,
+            'Initial' => self::Initial,
         ];
     }
 }

@@ -13,11 +13,11 @@ enum ChequeStatus: string
     public static function casesWithLabels()
     {
         return [
-            'Drafted' => static::Drafted,
-            'Desirved' => static::Desirved,
-            'Paid' => static::Paid,
-            'Partialy Paid' => static::PartialyPaid,
-            'Returned' => static::Returned,
+            'Drafted' => self::Drafted,
+            'Desirved' => self::Desirved,
+            'Paid' => self::Paid,
+            'Partialy Paid' => self::PartialyPaid,
+            'Returned' => self::Returned,
         ];
     }
 }

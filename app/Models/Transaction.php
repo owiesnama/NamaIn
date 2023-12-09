@@ -84,7 +84,7 @@ class Transaction extends BaseModel
 
     public function normalizedQuantity()
     {
-        if (!$this->unit) {
+        if (! $this->unit) {
             return "{$this->quantity} <strong>(Base unit)</strong>";
         }
 
