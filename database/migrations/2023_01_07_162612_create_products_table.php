@@ -16,10 +16,10 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name', 200);
-            $table->unsignedInteger('price');
             $table->unsignedInteger('cost')->default(0);
             $table->timestamp('expire_date')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

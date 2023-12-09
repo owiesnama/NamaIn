@@ -82,7 +82,7 @@ return [
     |
     */
 
-    'locale' => 'en',
+    'locale' => 'ar',
 
     /*
     |--------------------------------------------------------------------------
@@ -90,7 +90,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | The fallback locale determines the locale to use when the current one
-    | is not available. You may change the value to correspond to any of
+    | is not availablbe. You may change the value to correspond to any of
     | the language folders that are provided through your application.
     |
     */
@@ -213,5 +213,14 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
-
+    /*
+    / List of system admins emails
+    /
+    /
+    /
+    */
+    'admins' => [
+        'owiesnama@gmail.com',
+    ],
+    'cheques_notify_before_days' => 1,
 ];

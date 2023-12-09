@@ -2,14 +2,10 @@
 
 namespace Database\Factories;
 
-use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
-use App\Models\Customers;
 
 class CustomerFactory extends Factory
 {
-
     /**
      * Define the model's default state.
      *
@@ -19,8 +15,8 @@ class CustomerFactory extends Factory
     {
         return [
             'name' => $this->faker->name,
-            'address' => $this->faker->text,
-            'phone' => $this->faker->phoneNumber,
+            'address' => $this->faker->address,
+            'phone_number' => $this->faker->phoneNumber,
         ];
     }
 }

@@ -1,80 +1,69 @@
-<script setup>
-    import { usePage } from "@inertiajs/inertia-vue3";
-    import { ref, watch,computed } from "vue";
-    const show = ref(true);
-    const props = computed(() => usePage().props)
-    watch(props, () => show.true, {
-        deep: true,
-    });
-</script>
 <template>
-    <div
-        class="fixed inset-0 z-50 flex items-end justify-center px-4 py-6 pointer-events-none sm:p-6 sm:items-start sm:justify-end"
-    >
-        <Transition
-            appear
-            enter-active-class="transform ease-out duration-300 transition"
-            enter-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-            enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-            leave-active-class="transition ease-in duration-100"
+    <div class="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <transition
+            enter-active-class="duration-300 ease-out"
+            enter-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="duration-200 ease-in"
             leave-class="opacity-100"
             leave-to-class="opacity-0"
         >
-            <div
-                v-show="$page.props.flash.notification && show"
-                class="max-w-sm w-full bg-white shadow-lg rounded-lg pointer-events-auto ring-1 ring-black ring-opacity-5 overflow-hidden"
-                @mouseleave="show = false"
-                :key="new Date().getTime()"
-            >
-                <div class="p-4">
-                    <div class="flex items-start">
-                        <div class="flex-shrink-0">
-                            <!-- <Icon
-                                :class="'text-' + $page.props.flash.notification?.color + '-400'"
-                                :icon="icon"
-                            /> -->
+            <div v-show="$page.props.flash.success && show" class="fixed inset-0 transition-opacity bg-gray-500/20 backdrop-blur-sm"></div>
+        </transition>
+
+        <transition
+            enter-active-class="duration-300 ease-out"
+            enter-class="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95"
+            enter-to-class="translate-y-0 opacity-100 sm:scale-100"
+            leave-active-class="duration-200 ease-in"
+            leave-class="translate-y-0 opacity-100 sm:scale-100"
+            leave-to-class="translate-y-4 opacity-0 sm:translate-y-0 sm:scale-95"
+        >
+            <div v-show="$page.props.flash.success && show" class="fixed inset-0 z-50 overflow-y-auto">
+                <div class="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0">
+                    <div class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+                        <div>
+                            <div class="flex items-center justify-center w-12 h-12 mx-auto rounded-full bg-emerald-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-emerald-500">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
+                                </svg>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-5">
+                                <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Success Message</h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500">{{ $page.props.flash?.success }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="ml-3 w-0 flex-1 pt-0.5">
-                            <template
-                                v-if="
-                                    $page.props.flash.notification?.title &&
-                                    $page.props.flash.notification?.message
-                                "
-                            >
-                                <p class="text-sm font-medium text-gray-900">
-                                    {{ $page.props.flash.notification?.title }}
-                                </p>
-                                <p class="mt-1 text-sm text-gray-500">
-                                    {{
-                                        $page.props.flash.notification?.message
-                                    }}
-                                </p>
-                            </template>
-                            <template v-else>
-                                <p class="text-sm font-medium text-gray-900">
-                                    {{
-                                        $page.props.flash.notification
-                                            ?.message ||
-                                        $page.props.flash.notification?.title
-                                    }}
-                                </p>
-                            </template>
-                        </div>
-                        <div class="ml-4 flex-shrink-0 flex">
-                            <button
-                                class="bg-white rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                @click="show = false"
-                            >
-                                <span class="sr-only">Close</span>
-                                <!-- <icon
-                                    icon="x"
-                                    class="h-5 w-5"
-                                /> -->
-                            </button>
+
+                        <div class="flex justify-center mt-4">
+                            <button @click="show = false" type="button" class="inline-flex justify-center px-6 py-2 mx-auto text-sm font-semibold border border-gray-200 rounded-lg">Ok</button>
                         </div>
                     </div>
                 </div>
             </div>
-        </Transition>
+        </transition>
     </div>
 </template>
+
+<script>
+export default {
+  data() {
+    return {
+      show: false,
+    }
+  },
+  watch: {
+    '$page.props.flash': {
+      handler() {
+        this.show = true;
+
+        setTimeout(() => {
+            this.show = false;
+        }, 3000);
+      },
+      deep: true,
+    },
+  },
+}
+</script>
