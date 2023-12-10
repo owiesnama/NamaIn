@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\InvoiceStatus;
 use App\Http\Requests\CreateInvoiceRequest;
-use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
@@ -17,7 +16,7 @@ class PurchasesController extends Controller
         return inertia('Purchases/Index', [
             'invoices' => Invoice::where('invocable_type', Supplier::class)
                 ->latest()
-                ->with('transactions')
+                ->with(['transactions', 'invocable'])
                 ->paginate(10)
                 ->withQueryString(),
             'storages' => Storage::all(),
@@ -29,7 +28,7 @@ class PurchasesController extends Controller
     {
         return inertia('Purchases/Create', [
             'products' => Product::with('units')->get(),
-            'initialCustomers' => Customer::latest()->limit(5)->get()
+            'suppliers' => Supplier::search(request('customer'))->latest()->limit(5)->get(),
         ]);
     }
 

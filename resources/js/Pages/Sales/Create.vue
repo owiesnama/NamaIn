@@ -9,6 +9,7 @@
     let props = defineProps({
         storages: Object,
         products: Object,
+        customers: Array
     });
 
     let purchases = reactive([new PurchaseProduct()]);
@@ -31,11 +32,14 @@
         return cost;
     });
 
+    let form = reactive({
+        total: totalCost,
+        products: purchases,
+        invocable: null
+    });
+
     const submit = () => {
-        let form = reactive({
-            total: totalCost,
-            products: purchases,
-        });
+
         useForm(form).post(route("sales.store"));
     };
 </script>
@@ -46,24 +50,39 @@
         </h2>
 
         <form
-            class="mt-6"
+            class="mt-6 bg-white border-2 border-dashed rounded-lg p-4"
             @submit.prevent="submit"
         >
-            <div class="flex items-center gap-x-2">
-                <h2
-                    class="text-2xl font-semibold text-emerald-500"
-                    v-text="totalCost + ' SDG'"
-                ></h2>
+            <div class="flex justify-between">
+                <div class="w-1/3" v-auto-animate>
+                    <InputLabel
+                        for="customer"
+                        :value="__('Customer')"
+                    />
+                    <v-select
+                        v-model="form.invocable"
+                        :options="customers"
+                        label="name"
+                        track-by="id"
+                        @search-change="searchCustomer"
+                    />
+                </div>
+                <div>
+                    <h2
+                        class="text-2xl font-semibold text-emerald-500"
+                        v-text="totalCost + ' SDG'"
+                    ></h2>
 
-                <label
-                    for="totalCost"
-                    class="text-sm font-medium text-gray-600"
-                >
-                    {{ __("Total Cost") }}
-                </label>
+                    <label
+                        for="totalCost"
+                        class="text-sm font-medium text-gray-600"
+                    >
+                        {{ __("Total Cost") }}
+                    </label>
+                </div>
             </div>
 
-            <div class="mt-6 divide-y divide-gray-100">
+            <div class="mt-6 divide-y divide-gray-100" v-auto-animate>
                 <div
                     v-for="(purchase, index) in purchases"
                     :key="index"

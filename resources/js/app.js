@@ -7,6 +7,8 @@ import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/vue.m";
 import translations from "./Plugins/translations";
 import preferences from "./Plugins/preferences";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
+import VueMultiselect from 'vue-multiselect'
+import "vue-multiselect/dist/vue-multiselect.css"
 
 
 const appName =
@@ -29,6 +31,7 @@ createInertiaApp({
             .use(ZiggyVue, Ziggy)
             .use(translations)
             .use(preferences)
+            .component('v-select', VueMultiselect)
             .mount(el);
     }
 });

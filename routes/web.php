@@ -4,7 +4,7 @@ use App\Http\Controllers\ChequesController;
 use App\Http\Controllers\ChequeStatusController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\InvoicePrintController;
+use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchasesController;
@@ -44,7 +44,8 @@ Route::middleware([
     Route::resource('/purchases', PurchasesController::class);
     Route::resource('/sales', SalesController::class);
     Route::resource('/cheques', ChequesController::class);
-    Route::get('/invoice/print/{invoice}', InvoicePrintController::class)->name('invoice.print');
+    Route::get('/invoice/print/{invoice}', [InvoicesController::class, 'print'])->name('invoices.print');
+    Route::get('/invoice/show/{invoice}',[InvoicesController::class, 'show'])->name('invoices.show');
     Route::put('/stock/{storage}/add', [StockController::class, 'add'])->name('stock.add');
     Route::put('/stock/{storage}/deduct', [StockController::class, 'deduct'])->name('stock.deduct');
     Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.updateStatus');

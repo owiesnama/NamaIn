@@ -15,7 +15,7 @@ class SalesController extends Controller
         return inertia('Sales/Index', [
             'invoices' => Invoice::where('invocable_type', Customer::class)
                 ->latest()
-                ->with('transactions')
+                ->with(['transactions', 'invocable'])
                 ->paginate(10)
                 ->withQueryString(),
             'storages' => Storage::all(),
@@ -26,6 +26,7 @@ class SalesController extends Controller
     {
         return inertia('Sales/Create', [
             'products' => Product::with('units')->get(),
+            'customers' => Customer::search(request('customer'))->latest()->limit(5)->get(),
         ]);
     }
 

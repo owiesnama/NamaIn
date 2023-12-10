@@ -154,7 +154,7 @@
                 v-for="invoice in invoices.data"
                 :key="invoice.id"
             >
-                <Card :invoice="invoice" @moveToStorage="moveToStorage" :actionTitle="__('Deliver to Storage')"></Card>
+                <Card :invoice="invoice" @moveToStorage="moveToStorage" :actionTitle="__('Deliver to Storage')" :printable="true"></Card>
             </div>
 
             <EmptySearch :data="invoices.data"></EmptySearch>

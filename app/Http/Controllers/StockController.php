@@ -34,6 +34,7 @@ class StockController extends Controller
                 $transaction->for($storage)
                     ->deduct()
                     ->deliver();
+
                 return;
             }
 
@@ -53,10 +54,10 @@ class StockController extends Controller
     private function stockAvailableFor($invoice, $storage)
     {
         if ($invoice
-                ->transactions
-                ->filter(
-                    fn($record) => $storage->hasStockFor($record->product_id, $record->base_quantity)
-                )->count() == 0
+            ->transactions
+            ->filter(
+                fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity)
+            )->count() == 0
         ) {
             throw ValidationException::withMessages(
                 ['storage' => __('No stock available for any of the items on the invoice.')]

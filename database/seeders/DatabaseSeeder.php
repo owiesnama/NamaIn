@@ -6,6 +6,8 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\Supplier;
+use App\Models\Unit;
+use App\Models\User;
 use Faker\Generator;
 use Illuminate\Database\Seeder;
 
@@ -20,7 +22,7 @@ class DatabaseSeeder extends Seeder
     {
         $faker = app()->make(Generator::class);
 
-        $customers = Customer::factory(32)->create();
+        $customers = Customer::factory(10)->create();
         $vendors = Supplier::factory(3)->create();
         $products = Product::factory(3)->create();
         $storages = Storage::factory(3)->create();
@@ -34,20 +36,8 @@ class DatabaseSeeder extends Seeder
             ]);
         });
 
-        $attributes = collect([
-            'products' => $items = $products->map(function ($prodcut) {
-                return [
-                    'product' => $prodcut->id,
-                    'quantity' => rand(1, 20),
-                    'price' => $prodcut->cost * 1.75,
-                ];
-            }),
-            'total' => $items->sum(function ($item) {
-                return $item['price'] * $item['quantity'];
-            }),
-        ]);
-
-        \App\Models\User::factory()->create([
+        $products->each(fn($product) => $product->units()->create(Unit::factory()->make()->toArray()));
+        User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);

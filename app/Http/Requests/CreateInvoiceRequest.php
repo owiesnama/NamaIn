@@ -25,6 +25,9 @@ class CreateInvoiceRequest extends FormRequest
     {
         return [
             'total' => 'required|integer',
+            'invocable' => 'required|array',
+            'invocable.id' => 'required|integer|',
+            'invocable.name' => 'required|string',
             'products.*.product' => 'integer|required',
             'products.*.quantity' => 'integer|required',
             'products.*.unit' => 'integer|required',
