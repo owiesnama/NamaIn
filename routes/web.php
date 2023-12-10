@@ -45,7 +45,7 @@ Route::middleware([
     Route::resource('/sales', SalesController::class);
     Route::resource('/cheques', ChequesController::class);
     Route::get('/invoice/print/{invoice}', [InvoicesController::class, 'print'])->name('invoices.print');
-    Route::get('/invoice/show/{invoice}',[InvoicesController::class, 'show'])->name('invoices.show');
+    Route::get('/invoice/show/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
     Route::put('/stock/{storage}/add', [StockController::class, 'add'])->name('stock.add');
     Route::put('/stock/{storage}/deduct', [StockController::class, 'deduct'])->name('stock.deduct');
     Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.updateStatus');

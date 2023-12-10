@@ -12,13 +12,13 @@ class InvoicesController extends Controller
     public function print(Invoice $invoice)
     {
 
-        $deliveredRecords = $invoice->transactions->filter(fn($t) => $t->delivered);
-        $remainingRecords = $invoice->transactions->filter(fn($t) => !$t->delivered);
+        $deliveredRecords = $invoice->transactions->filter(fn ($t) => $t->delivered);
+        $remainingRecords = $invoice->transactions->filter(fn ($t) => ! $t->delivered);
 
         $pdf = Browsershot::html(
             view('print.invoice', [
                 'invoice' => $invoice,
-                'qr' => QrCode::size(80)->generate(route('invoices.show', $invoice))
+                'qr' => QrCode::size(80)->generate(route('invoices.show', $invoice)),
             ])->with(compact('deliveredRecords', 'remainingRecords'))->render()
         )->format('A4')->pdf();
 
@@ -33,9 +33,10 @@ class InvoicesController extends Controller
     public function show(Invoice $invoice)
     {
         $invoice->load(['transactions', 'invocable']);
-        return inertia("Invoice", [
+
+        return inertia('Invoice', [
             'storages' => Storage::all(),
-            'invoice' => $invoice->load(['transactions', 'invocable'])
+            'invoice' => $invoice->load(['transactions', 'invocable']),
         ]);
     }
 }

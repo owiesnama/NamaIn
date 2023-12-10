@@ -46,8 +46,6 @@ class Invoice extends BaseModel
 
     /**
      * related invocable to the invoice
-     *
-     * @return MorphTo
      */
     public function invocable(): MorphTo
     {
@@ -60,7 +58,7 @@ class Invoice extends BaseModel
      */
     public function locked(): Attribute
     {
-        return Attribute::make(get: fn() => $this->status == InvoiceStatus::Delivered);
+        return Attribute::make(get: fn () => $this->status == InvoiceStatus::Delivered);
     }
 
     /**
@@ -146,6 +144,6 @@ class Invoice extends BaseModel
     public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
     {
         return $builder->where('delivered', true)
-            ->when($datetime, fn($query) => $query->where('created_at', '>', $datetime));
+            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
     }
 }

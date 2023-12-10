@@ -36,7 +36,7 @@ class DatabaseSeeder extends Seeder
             ]);
         });
 
-        $products->each(fn($product) => $product->units()->create(Unit::factory()->make()->toArray()));
+        $products->each(fn ($product) => $product->units()->create(Unit::factory()->make()->toArray()));
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
