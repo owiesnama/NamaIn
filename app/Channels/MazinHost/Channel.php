@@ -17,9 +17,10 @@ class Channel
 
     public function send(object $notifiable, Notification $notification): void
     {
-        $message = $notification->toMazinHost($notifiable);
-        $to = $this->to($notifiable, $notification);
-        $this->client->send($message, $to);
+        $this->client->send(
+            $notification->toMazinHost($notifiable),
+            $this->to($notifiable, $notification)
+        );
     }
 
     public function to($notifiable, $notification)
@@ -29,6 +30,6 @@ class Channel
         }
         $to = $notifiable->phone_number;
 
-        return static::COUNTRY_CODE.ltrim($to);
+        return static::COUNTRY_CODE . ltrim($to);
     }
 }

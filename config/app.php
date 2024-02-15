@@ -221,6 +221,8 @@ return [
     */
     'admins' => [
         'owiesnama@gmail.com',
+        'bakri@elnama.net',
+        'anas@elnama.net'
     ],
     'cheques_notify_before_days' => 1,
 ];

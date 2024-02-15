@@ -2,6 +2,7 @@
 
 namespace App\Notifications;
 
+use App\Channels\MazinHost\Channel;
 use App\Models\Cheque;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -44,29 +45,12 @@ class ChequeDueNotification extends Notification
      */
     public function via($notifiable)
     {
-        return [TwilioChannel::class];
+        return [Channel::class];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     *
-     * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
-     */
-    public function toMail($notifiable)
-    {
-        return (new MailMessage())
-            ->line($this->messageContent($notifiable))
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+    public function toMazinHost(){
+        
     }
-
-    public function toTwilio($notifiable)
-    {
-        return (new TwilioSmsMessage())
-            ->content($this->messageContent($notifiable));
-    }
-
     /**
      * Get the array representation of the notification.
      *
