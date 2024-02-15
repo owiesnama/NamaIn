@@ -7,33 +7,32 @@ use Carbon\Carbon;
 class Message
 {
     /**
-     * 
      * @var mixed
      */
     public $content;
+
     /**
-     * 
      * @var Carbon
      */
     public $schedule;
+
     /**
-     * 
      * @var bool
      */
     public $unicode;
+
     /**
-     * 
-     * @param mixed $message 
-     * @return void 
+     * @param  mixed  $message
+     * @return void
      */
     public function __construct($message = null)
     {
         $this->content = $message;
     }
+
     /**
-     * 
-     * @param mixed $message 
-     * @return $this 
+     * @param  mixed  $message
+     * @return $this
      */
     public function content(string $message)
     {
@@ -41,10 +40,9 @@ class Message
 
         return $this;
     }
+
     /**
-     * 
-     * @param Carbon $datatime 
-     * @return $this 
+     * @return $this
      */
     public function schedule(Carbon $datatime)
     {
@@ -52,10 +50,9 @@ class Message
 
         return $this;
     }
+
     /**
-     * 
-     * @param bool $enable 
-     * @return $this 
+     * @return $this
      */
     public function unicode(bool $enable = true)
     {
@@ -63,9 +60,9 @@ class Message
 
         return $this;
     }
+
     /**
-     * 
-     * @return array 
+     * @return array
      */
     public function toArray()
     {

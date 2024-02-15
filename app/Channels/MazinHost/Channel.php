@@ -29,6 +29,6 @@ class Channel
         }
         $to = $notifiable->phone_number;
 
-        return static::COUNTRY_CODE . ltrim($to);
+        return static::COUNTRY_CODE.ltrim($to);
     }
 }
