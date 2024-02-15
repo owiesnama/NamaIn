@@ -41,7 +41,7 @@ class Kernel extends HttpKernel
             HandleLocale::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            RecordVisitsLog::class
+            RecordVisitsLog::class,
         ],
 
         'api' => [

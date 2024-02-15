@@ -20,23 +20,24 @@ class RecordVisitsLog
     public function handle(Request $request, Closure $next): Response
     {
         RateLimiter::attempt(
-            "visit-from-" . $request->visitor()->ip(),
+            'visit-from-'.$request->visitor()->ip(),
             $preMinute = 1,
             fn () => $this->recordVisit($request)
         );
 
         return $next($request);
     }
+
     /**
-     * 
      * @param \Closure(\Illuminate\Http\Request)
-     * @return void 
-     * @throws RuntimeException 
+     * @return void
+     *
+     * @throws RuntimeException
      */
     public function recordVisit(Request $request)
     {
-        if(DB::table('visits_log')->where('ip',$request->visitor()->ip())->exists()){
-                return;
+        if (DB::table('visits_log')->where('ip', $request->visitor()->ip())->exists()) {
+            return;
         }
         DB::table('visits_log')->insert([
             'ip' => $request->visitor()->ip(),

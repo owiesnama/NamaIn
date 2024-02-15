@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('visits_log',function (Blueprint $table) {
+        Schema::create('visits_log', function (Blueprint $table) {
             $table->id();
             $table->string('device');
             $table->string('platform');
