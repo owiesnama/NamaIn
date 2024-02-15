@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\HandleLocale;
+use App\Http\Middleware\RecordVisitsLog;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -40,6 +41,7 @@ class Kernel extends HttpKernel
             HandleLocale::class,
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
+            RecordVisitsLog::class
         ],
 
         'api' => [
