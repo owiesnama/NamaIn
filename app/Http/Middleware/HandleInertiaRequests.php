@@ -36,6 +36,15 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         return array_merge(parent::share($request), [
+            'user' => $request->user() ? [
+                'name' => $request->user()->name,
+                'email' => $request->user()->email,
+                'profile_photo_url' => $request->user()->profile_photo_url,
+                // Add other properties if needed by Jetstream
+            ] : null,
+            'jetstream' => [
+                'managesProfilePhotos' => true, // You might want to get this from config
+            ],
             'preferences' => Cache::rememberForever('preferences', fn () => Preference::asPairs()),
             'flash' => [
                 'success' => session()->get('success'),

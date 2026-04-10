@@ -17,12 +17,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->constrained();
             $table->foreignId('storage_id')->constrained()->onDelete('cascade');
-            $table->string('quantity');
+            $table->unsignedBigInteger('quantity')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });
-
-        Schema::enableForeignKeyConstraints();
     }
 
     /**

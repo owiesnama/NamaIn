@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('product_id')->references('id')->on('products');
             $table->string('name');
-            $table->unsignedFloat('conversion_factor');
+            $table->decimal('conversion_factor', 10, 4);
             $table->timestamps();
             $table->softDeletes();
         });

@@ -13,11 +13,13 @@ class StockController extends Controller
     public function add(Storage $storage)
     {
         $invoice = Invoice::find(request('invoice'));
+
         $invoice->transactions->each(
             function (Transaction $transaction) use ($storage) {
                 $transaction->for($storage)->add()->deliver();
             }
         );
+
         $invoice->markAs(InvoiceStatus::Delivered);
 
         return back()->with('success', "Invoice items has being added to storage: {$storage->name} ");

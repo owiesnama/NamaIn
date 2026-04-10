@@ -81,7 +81,7 @@ class Product extends BaseModel
      */
     public function getExpireDateAttribute(): string
     {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $this->attributes['expire_date'])->format('Y-m-d');
+        return Carbon::parse($this->attributes['expire_date'])->format('Y-m-d');
     }
 
     /**

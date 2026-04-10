@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\composer.bat\" show:*)",
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\composer.bat\" update:*)",
+      "Bash(COMPOSER_PROCESS_TIMEOUT=1200 \"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\composer.bat\" update --no-interaction --prefer-dist)",
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan:*)",
+      "Bash(cat vendor/laravel/boost/config/*.php)",
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\composer.bat\" dump-autoload:*)"
+    ]
+  }
+}
