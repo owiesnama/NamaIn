@@ -154,16 +154,4 @@ class Transaction extends BaseModel
         $newTransaction->base_quantity = $this->unit ? ($remaining * $this->unit->conversion_factor) : $remaining;
         $newTransaction->save();
     }
-
-    /**
-     * Replicate a transaction on the invoice for the remaining quantity.
-     */
-    public function replicateForRemaining($remaining): void
-    {
-        $newTransaction = $this->replicate();
-        $newTransaction->delivered = false;
-        $newTransaction->quantity = $this->unit ? ($remaining / $this->unit->conversion_factor) : $remaining;
-        $newTransaction->base_quantity = $this->unit ? ($remaining * $this->unit->conversion_factor) : $remaining;
-        $newTransaction->save();
-    }
 }
