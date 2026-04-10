@@ -12,6 +12,7 @@ test('Invoice will be created for every purchase', function () {
     $this->signIn()
         ->post(route('purchases.store'), [
             'total' => 200,
+            'invocable' => \App\Models\Customer::factory()->create()->toArray(),
             'products' => [[
                 'product' => $product->id,
                 'price' => $product->cost + 100,

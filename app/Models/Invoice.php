@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -13,6 +14,11 @@ use Illuminate\Support\Collection;
 class Invoice extends BaseModel
 {
     use SoftDeletes;
+
+    /**
+     * Attributes can be mass assigned.
+     */
+    protected $fillable = ['total'];
 
     /**
      * List of attributes to cast along with what to cast to.
@@ -39,6 +45,14 @@ class Invoice extends BaseModel
     }
 
     /**
+     * related invocable to the invoice
+     */
+    public function invocable(): MorphTo
+    {
+        return $this->morphTo();
+    }
+
+    /**
      * Adds an attribute to the invoice showing whether it's delivered and should
      * be locked.
      */
@@ -52,17 +66,18 @@ class Invoice extends BaseModel
      */
     public static function purchase(Collection $attributes): Invoice
     {
-        $invoice = static::createInvoiceFor(Supplier::class, $attributes);
-        $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
-            $prodcut['product_id'] = $prodcut['product'];
-            $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
-            $prodcut['base_quantity'] = $prodcut['quantity'];
-            if ($unitId) {
-                $prodcut['base_quantity'] = Unit::find($unitId)->conversion_factor * $prodcut['quantity'];
-            }
+        $invoice = static::createInvoice($attributes);
+        $invoice->addTransaction(collect($attributes->get('products'))
+            ->map(function ($prodcut) {
+                $prodcut['product_id'] = $prodcut['product'];
+                $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
+                $prodcut['base_quantity'] = $prodcut['quantity'];
+                if ($unitId) {
+                    $prodcut['base_quantity'] = Unit::find($unitId)->conversion_factor * $prodcut['quantity'];
+                }
 
-            return $prodcut;
-        }));
+                return $prodcut;
+            }));
 
         return $invoice;
     }
@@ -72,7 +87,7 @@ class Invoice extends BaseModel
      */
     public static function sale(Collection $attributes): Invoice
     {
-        $invoice = static::createInvoiceFor(Customer::class, $attributes);
+        $invoice = static::createInvoice($attributes);
         $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
             $prodcut['product_id'] = $prodcut['product'];
             $prodcut['base_quantity'] = $prodcut['quantity'];
@@ -90,18 +105,16 @@ class Invoice extends BaseModel
     /**
      * Create an invoice for invoice-ables.
      */
-    public static function createInvoiceFor(string $invocable, Collection $attributes): Invoice
+    public static function createInvoice(Collection $attributes): Invoice
     {
-        $invoice = new Invoice;
-        $invoice->invocable_type = $invocable;
-        $invoice->invocable_id = (new $invocable)->firstOrCreate([
-            'name' => 'Random',
-            'address' => 'no-address',
-        ])->id;
-        $invoice->total = $attributes->get('total');
-        $invoice->save();
+        $invocable = $attributes->get('invocable');
+        $invocableClass = $invocable['type'];
+        $invocableId = $invocable['id'];
+        $invocable = $invocableClass::find($invocableId);
 
-        return $invoice;
+        return $invocable->invoices()->create([
+            'total' => $attributes->get('total'),
+        ]);
     }
 
     /**

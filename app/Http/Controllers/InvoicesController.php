@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invoice;
+use App\Models\Storage;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Browsershot\Browsershot;
 
-class InvoicePrintController extends Controller
+class InvoicesController extends Controller
 {
-    public function __invoke(Invoice $invoice)
+    public function print(Invoice $invoice)
     {
 
         $deliveredRecords = $invoice->transactions->filter(fn ($t) => $t->delivered);
@@ -16,6 +18,7 @@ class InvoicePrintController extends Controller
         $pdf = Browsershot::html(
             view('print.invoice', [
                 'invoice' => $invoice,
+                'qr' => QrCode::size(80)->generate(route('invoices.show', $invoice)),
             ])->with(compact('deliveredRecords', 'remainingRecords'))->render()
         )->format('A4')->pdf();
 
@@ -25,5 +28,15 @@ class InvoicePrintController extends Controller
         ];
 
         return response(content: $pdf, headers: $headers);
+    }
+
+    public function show(Invoice $invoice)
+    {
+        $invoice->load(['transactions', 'invocable']);
+
+        return inertia('Invoice', [
+            'storages' => Storage::all(),
+            'invoice' => $invoice->load(['transactions', 'invocable']),
+        ]);
     }
 }

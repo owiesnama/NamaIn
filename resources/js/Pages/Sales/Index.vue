@@ -128,6 +128,7 @@
                     :invoice="invoice"
                     @moveToStorage="deductFromStorage"
                     :actionTitle="__('Deduct From Storage')"
+                    :printable="true"
                 ></Card>
             </div>
 

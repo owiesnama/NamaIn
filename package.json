@@ -26,6 +26,7 @@
         "@formkit/auto-animate": "^0.8.1",
         "@inertiajs/vue3": "^1.0.2",
         "eslint-plugin-unused-imports": "^2.0.0",
-        "puppeteer": "^20.7.3"
+        "puppeteer": "^20.7.3",
+        "vue-multiselect": "^3.0.0-beta.3"
     }
 }

@@ -4,11 +4,13 @@
     import TextInput from "@/Components/TextInput.vue";
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { reactive, computed } from "vue";
-    import { useForm } from "@inertiajs/vue3";
+    import { router, useForm } from "@inertiajs/vue3";
+    import { debounce } from "lodash";
 
     const props = defineProps({
         storages: Object,
         products: Object,
+        suppliers: Array
     });
 
     let purchases = reactive([new PurchaseProduct()]);
@@ -31,13 +33,23 @@
         return product.units;
     };
 
-    const submit = () => {
-        let form = reactive({
-            total: totalCost,
-            products: purchases,
+    let form = reactive({
+        total: totalCost,
+        products: purchases,
+        invocable: null
+    });
+    const searchCustomer = debounce(function(search) {
+        router.get(route("purchases.create"), { customer: search }, {
+            preserveScroll: true,
+            preserveState: true
         });
+    }, 300);
+
+
+    const submit = () => {
         useForm(form).post(route("purchases.store"));
     };
+
 </script>
 <template>
     <AppLayout title="New Purchase">
@@ -46,24 +58,39 @@
         </h2>
 
         <form
-            class="mt-6"
+            class="mt-6 bg-white border-2 border-dashed rounded-lg p-4"
             @submit.prevent="submit"
         >
-            <div class="flex items-center gap-x-2">
-                <h2
-                    class="text-2xl font-semibold text-emerald-500"
-                    v-text="totalCost + ' SDG'"
-                ></h2>
+            <div class="flex justify-between">
+                <div class="w-1/3" v-auto-animate>
+                    <InputLabel
+                        for="customer"
+                        :value="__('Supplier')"
+                    />
+                    <v-select
+                        v-model="form.invocable"
+                        :options="suppliers"
+                        label="name"
+                        track-by="id"
+                        @search-change="searchCustomer"
+                    />
+                </div>
+                <div class="flex items-center gap-x-2">
+                    <h2
+                        class="text-2xl font-semibold text-emerald-500"
+                        v-text="totalCost + ' SDG'"
+                    ></h2>
 
-                <label
-                    for="totalCost"
-                    class="text-sm font-medium text-gray-600"
-                >
-                    {{ __("Total Cost") }}
-                </label>
+                    <label
+                        for="totalCost"
+                        class="text-sm font-medium text-gray-600"
+                    >
+                        {{ __("Total Cost") }}
+                    </label>
+                </div>
             </div>
 
-            <div class="mt-6 divide-y divide-gray-100">
+            <div class="mt-6 divide-y divide-gray-100" v-auto-animate>
                 <div
                     v-for="(purchase, index) in purchases"
                     :key="index"
