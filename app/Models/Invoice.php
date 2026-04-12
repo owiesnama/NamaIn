@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -18,7 +20,7 @@ class Invoice extends BaseModel
     /**
      * Attributes can be mass assigned.
      */
-    protected $fillable = ['total'];
+    protected $fillable = ['total', 'payment_method', 'payment_status', 'paid_amount', 'discount'];
 
     /**
      * List of attributes to cast along with what to cast to.
@@ -27,6 +29,11 @@ class Invoice extends BaseModel
      */
     protected $casts = [
         'status' => InvoiceStatus::class,
+        'payment_method' => PaymentMethod::class,
+        'payment_status' => PaymentStatus::class,
+        'total' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'discount' => 'decimal:2',
     ];
 
     /**
@@ -34,7 +41,7 @@ class Invoice extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['locked'];
+    protected $appends = ['locked', 'remaining_balance', 'is_fully_paid'];
 
     /**
      * Transactions belong to this invoice
@@ -42,6 +49,14 @@ class Invoice extends BaseModel
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    /**
+     * Payments made for this invoice
+     */
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
     }
 
     /**
@@ -112,8 +127,15 @@ class Invoice extends BaseModel
         $invocableId = $invocable['id'];
         $invocable = $invocableClass::find($invocableId);
 
+        $paymentMethod = $attributes->get('payment_method', 'credit');
+        $discount = $attributes->get('discount', 0);
+
         return $invocable->invoices()->create([
             'total' => $attributes->get('total'),
+            'payment_method' => $paymentMethod,
+            'payment_status' => PaymentStatus::Unpaid,
+            'paid_amount' => 0,
+            'discount' => $discount,
         ]);
     }
 
@@ -145,5 +167,64 @@ class Invoice extends BaseModel
     {
         return $builder->where('delivered', true)
             ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
+    }
+
+    /**
+     * Get the remaining balance for this invoice.
+     */
+    public function remainingBalance(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => max(0, ($this->total - $this->discount) - $this->paid_amount)
+        );
+    }
+
+    /**
+     * Check if invoice is fully paid.
+     */
+    public function isFullyPaid(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->remaining_balance <= 0
+        );
+    }
+
+    /**
+     * Record a payment for this invoice.
+     */
+    public function recordPayment(float $amount, PaymentMethod $method, ?string $reference = null, ?string $notes = null): Payment
+    {
+        $payment = $this->payments()->create([
+            'amount' => $amount,
+            'payment_method' => $method,
+            'reference' => $reference,
+            'notes' => $notes,
+            'paid_at' => now(),
+            'created_by' => auth()->id(),
+        ]);
+
+        $this->updatePaymentStatus();
+
+        return $payment;
+    }
+
+    /**
+     * Update the payment status based on paid amount.
+     */
+    public function updatePaymentStatus(): void
+    {
+        $this->paid_amount = $this->payments()->sum('amount');
+
+        $netTotal = $this->total - $this->discount;
+
+        if ($this->paid_amount >= $netTotal) {
+            $this->payment_status = PaymentStatus::Paid;
+        } elseif ($this->paid_amount > 0) {
+            $this->payment_status = PaymentStatus::PartiallyPaid;
+        } else {
+            $this->payment_status = PaymentStatus::Unpaid;
+        }
+
+        $this->save();
     }
 }

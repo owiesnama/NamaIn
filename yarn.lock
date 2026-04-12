@@ -2113,6 +2113,11 @@ vue-eslint-parser@^9.0.1:
     lodash "^4.17.21"
     semver "^7.3.6"
 
+vue-multiselect@^3.0.0-beta.3:
+  version "3.5.0"
+  resolved "https://registry.npmjs.org/vue-multiselect/-/vue-multiselect-3.5.0.tgz"
+  integrity sha512-i758SEqWFcFshL1eAg0F3EFeFQ1mOCmh2mgnGCZv1XpHFVIAv8fxo8bQQ4ZnMoaPhMp8KI1A6gPBVHh3YzRg/Q==
+
 vue@^3.0.0, vue@^3.2.25, vue@^3.2.31, vue@3.2.47:
   version "3.2.47"
   resolved "https://registry.npmjs.org/vue/-/vue-3.2.47.tgz"

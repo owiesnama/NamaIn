@@ -1,6 +1,14 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    defineProps(["total_sales", "total_purchase", "transactions"]);
+    import { Link } from "@inertiajs/vue3";
+    defineProps([
+        "total_sales",
+        "total_purchase",
+        "outstanding_receivables",
+        "payments_this_month",
+        "transactions",
+        "recent_payments",
+    ]);
 
     const quantityForHumans = (transaction) => {
         if (!transaction.unit) {
@@ -23,7 +31,7 @@
                 {{ __("Last 30 days") }}
             </h3>
             <dl
-                class="grid grid-cols-1 mt-5 overflow-hidden bg-white divide-y divide-gray-200 rounded-lg shadow md:grid-cols-2 md:divide-y-0 md:divide-x"
+                class="grid grid-cols-1 mt-5 overflow-hidden bg-white divide-y divide-gray-200 rounded-lg shadow md:grid-cols-2 lg:grid-cols-4 md:divide-y-0 md:divide-x"
             >
                 <div class="px-4 py-5 sm:p-6">
                     <dt class="text-base font-normal text-gray-900">
@@ -54,7 +62,100 @@
                         </div>
                     </dd>
                 </div>
+
+                <div class="px-4 py-5 sm:p-6">
+                    <dt class="text-base font-normal text-gray-900">
+                        {{ __("Outstanding Receivables") }}
+                    </dt>
+                    <dd
+                        class="flex items-baseline justify-between mt-1 md:block lg:flex"
+                    >
+                        <div
+                            class="flex items-baseline text-2xl font-semibold text-red-600"
+                        >
+                            {{ outstanding_receivables || 0 }} SDG
+                        </div>
+                    </dd>
+                </div>
+
+                <div class="px-4 py-5 sm:p-6">
+                    <dt class="text-base font-normal text-gray-900">
+                        {{ __("Payments This Month") }}
+                        </dt>
+                    <dd
+                        class="flex items-baseline justify-between mt-1 md:block lg:flex"
+                    >
+                        <div
+                            class="flex items-baseline text-2xl font-semibold text-emerald-600"
+                        >
+                            {{ payments_this_month || 0 }} SDG
+                        </div>
+                    </dd>
+                </div>
             </dl>
+        </div>
+
+        <!-- Recent Payments -->
+        <div v-if="recent_payments && recent_payments.length > 0" class="mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-semibold leading-6 text-gray-900">
+                    {{ __("Recent Payments") }}
+                </h3>
+                <Link
+                    :href="route('payments.index')"
+                    class="text-sm text-emerald-600 hover:text-emerald-700"
+                >
+                    {{ __("View All") }} →
+                </Link>
+            </div>
+
+            <div class="overflow-hidden bg-white rounded-lg shadow">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __("Customer") }}
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __("Invoice") }}
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __("Amount") }}
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __("Method") }}
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                {{ __("Date") }}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr v-for="payment in recent_payments" :key="payment.id">
+                            <td class="px-6 py-4 text-sm text-gray-900">
+                                {{ payment.invoice?.invocable?.name || "-" }}
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                <Link
+                                    :href="route('invoices.show', payment.invoice.id)"
+                                    class="text-emerald-600 hover:underline"
+                                >
+                                    #{{ payment.invoice.serial_number || payment.invoice.id }}
+                                </Link>
+                            </td>
+                            <td class="px-6 py-4 text-sm font-semibold text-emerald-600">
+                                {{ payment.amount }} SDG
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700">
+                                {{ __(payment.payment_method?.replace("_", " ") || "cash") }}
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-700">
+                                {{ new Date(payment.paid_at).toLocaleDateString() }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
 
         <div class="flex flex-col mt-8">

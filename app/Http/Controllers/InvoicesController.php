@@ -32,11 +32,11 @@ class InvoicesController extends Controller
 
     public function show(Invoice $invoice)
     {
-        $invoice->load(['transactions', 'invocable']);
+        $invoice->load(['transactions', 'invocable', 'payments']);
 
         return inertia('Invoice', [
             'storages' => Storage::all(),
-            'invoice' => $invoice->load(['transactions', 'invocable']),
+            'invoice' => $invoice,
         ]);
     }
 }

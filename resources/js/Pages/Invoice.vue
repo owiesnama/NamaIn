@@ -67,6 +67,99 @@
               :invoice="invoice"
               @moveToStorage="deductFromStorage"
               :actionTitle="__('Deduct From Storage')" :printable="false"></card>
+
+        <!-- Payment Information -->
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6 dark:bg-gray-800">
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                {{ __("Payment Information") }}
+            </h3>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __("Total") }}</p>
+                    <p class="text-lg font-semibold text-gray-800 dark:text-white">
+                        {{ invoice.total }} SDG
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __("Paid") }}</p>
+                    <p class="text-lg font-semibold text-emerald-600">
+                        {{ invoice.paid_amount || 0 }} SDG
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __("Balance") }}</p>
+                    <p class="text-lg font-semibold text-red-600">
+                        {{ invoice.remaining_balance || invoice.total }} SDG
+                    </p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __("Status") }}</p>
+                    <span
+                        class="inline-block px-3 py-1 text-xs rounded-full"
+                        :class="{
+                            'bg-emerald-100 text-emerald-700': invoice.payment_status === 'paid',
+                            'bg-yellow-100 text-yellow-700': invoice.payment_status === 'partially_paid',
+                            'bg-red-100 text-red-700': invoice.payment_status === 'unpaid',
+                        }"
+                    >
+                        {{ __(invoice.payment_status?.replace('_', ' ') || 'unpaid') }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Payment History -->
+            <div v-if="invoice.payments && invoice.payments.length > 0">
+                <h4 class="text-md font-semibold text-gray-800 dark:text-white mb-3">
+                    {{ __("Payment History") }}
+                </h4>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50 dark:bg-gray-900">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    {{ __("Date") }}
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    {{ __("Amount") }}
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    {{ __("Method") }}
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    {{ __("Reference") }}
+                                </th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">
+                                    {{ __("Notes") }}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
+                            <tr v-for="payment in invoice.payments" :key="payment.id">
+                                <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                    {{ new Date(payment.paid_at).toLocaleDateString() }}
+                                </td>
+                                <td class="px-4 py-3 text-sm font-semibold text-emerald-600">
+                                    {{ payment.amount }} SDG
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    {{ __(payment.payment_method?.replace('_', ' ') || 'cash') }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    {{ payment.reference || '-' }}
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
+                                    {{ payment.notes || '-' }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div v-else class="text-center py-4 text-gray-500 dark:text-gray-400">
+                {{ __("No payments recorded yet") }}
+            </div>
+        </div>
     </div>
 
     <DialogModal

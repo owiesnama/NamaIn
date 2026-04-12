@@ -10,7 +10,8 @@
     const props = defineProps({
         storages: Object,
         products: Object,
-        suppliers: Array
+        suppliers: Array,
+        payment_methods: Object
     });
 
     let purchases = reactive([new PurchaseProduct()]);
@@ -36,7 +37,12 @@
     let form = reactive({
         total: totalCost,
         products: purchases,
-        invocable: null
+        invocable: null,
+        payment_method: 'credit',
+        discount: 0,
+        initial_payment_amount: 0,
+        payment_reference: '',
+        payment_notes: ''
     });
     const searchCustomer = debounce(function(search) {
         router.get(route("purchases.create"), { customer: search }, {
@@ -204,6 +210,76 @@
                 >
                     + {{ __("Add New Row") }}
                 </button>
+            </div>
+
+            <!-- Payment Section -->
+            <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                    {{ __("Payment Details") }}
+                </h3>
+
+                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <div>
+                        <InputLabel for="payment_method" :value="__('Payment Method')" />
+                        <select
+                            v-model="form.payment_method"
+                            id="payment_method"
+                            class="w-full px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                        >
+                            <option
+                                v-for="(value, label) in payment_methods"
+                                :key="value"
+                                :value="value"
+                            >
+                                {{ __(label) }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <InputLabel for="discount" :value="__('Discount')" />
+                        <TextInput
+                            id="discount"
+                            v-model="form.discount"
+                            type="number"
+                            step="0.01"
+                            class="block w-full mt-1"
+                        />
+                    </div>
+
+                    <div>
+                        <InputLabel for="initial_payment" :value="__('Initial Payment')" />
+                        <TextInput
+                            id="initial_payment"
+                            v-model="form.initial_payment_amount"
+                            type="number"
+                            step="0.01"
+                            class="block w-full mt-1"
+                        />
+                    </div>
+
+                    <div>
+                        <InputLabel for="payment_reference" :value="__('Reference')" />
+                        <TextInput
+                            id="payment_reference"
+                            v-model="form.payment_reference"
+                            type="text"
+                            class="block w-full mt-1"
+                            placeholder="Cheque number, etc."
+                        />
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <InputLabel for="payment_notes" :value="__('Payment Notes')" />
+                        <textarea
+                            id="payment_notes"
+                            v-model="form.payment_notes"
+                            rows="2"
+                            class="w-full px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                            placeholder="Additional payment notes..."
+                        ></textarea>
+                    </div>
+                </div>
             </div>
 
             <div class="mt-5 text-right md:mt-8">

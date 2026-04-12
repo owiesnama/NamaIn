@@ -40,4 +40,43 @@ class CustomersController extends Controller
 
         return back()->with('success', 'Storage Deleted successfully');
     }
+
+    /**
+     * Show customer account with balance and unpaid invoices.
+     */
+    public function account(Customer $customer)
+    {
+        return inertia('Customers/Account', [
+            'customer' => $customer,
+            'account_balance' => $customer->account_balance,
+            'unpaid_invoices' => $customer->getUnpaidInvoices(),
+            'payment_history' => $customer->getPaymentHistory(),
+        ]);
+    }
+
+    /**
+     * Get customer statement for a date range.
+     */
+    public function statement(Customer $customer)
+    {
+        $startDate = request('start_date', now()->subMonth());
+        $endDate = request('end_date', now());
+
+        $invoices = $customer->invoices()
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->with('payments')
+            ->get();
+
+        $payments = $customer->getPaymentHistory()
+            ->whereBetween('paid_at', [$startDate, $endDate]);
+
+        return inertia('Customers/Statement', [
+            'customer' => $customer,
+            'invoices' => $invoices,
+            'payments' => $payments,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'opening_balance' => $customer->calculateAccountBalance(),
+        ]);
+    }
 }
