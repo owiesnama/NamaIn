@@ -30,7 +30,7 @@ class InvoicesController extends Controller
                 'invoice' => $invoice,
                 'qr' => $qrCode,
             ])->with(compact('deliveredRecords', 'remainingRecords'))->render()
-        )->format('A4')->pdf();
+        )->noSandbox()->format('A4')->pdf();
 
         $headers = [
             'Content-Type' => 'application/pdf',
