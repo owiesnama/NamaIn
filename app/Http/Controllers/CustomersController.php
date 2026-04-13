@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\CustomerExport;
 use App\Http\Requests\CustomerRequest;
 use App\Imports\CustomerImport;
 use App\Models\Category;
@@ -202,5 +203,10 @@ class CustomersController extends Controller
         fclose($handle);
 
         return response()->download($filePath)->deleteFileAfterSend();
+    }
+
+    public function export()
+    {
+        return Excel::download(new CustomerExport, 'customers.xlsx');
     }
 }

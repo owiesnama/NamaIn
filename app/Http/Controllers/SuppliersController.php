@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\SupplierExport;
 use App\Http\Requests\SupplierRequest;
 use App\Imports\SupplierImport;
 use App\Models\Category;
@@ -85,5 +86,10 @@ class SuppliersController extends Controller
         fclose($handle);
 
         return response()->download($filePath)->deleteFileAfterSend();
+    }
+
+    public function export()
+    {
+        return Excel::download(new SupplierExport, 'suppliers.xlsx');
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ProductExport;
 use App\Http\Requests\ProductRequest;
 use App\Imports\ProductImport;
 use App\Models\Category;
@@ -88,5 +89,10 @@ class ProductsController extends Controller
         fclose($handle);
 
         return response()->download($filePath)->deleteFileAfterSend();
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductExport, 'products.xlsx');
     }
 }

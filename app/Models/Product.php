@@ -35,7 +35,7 @@ class Product extends BaseModel
     protected static function booted(): void
     {
         static::creating(function (Product $product) {
-            $product->currency = $product->currency ?? preference('currency', '$');
+            $product->currency = $product->currency ?? preference('currency', 'USD');
         });
     }
 

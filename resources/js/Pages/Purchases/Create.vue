@@ -85,7 +85,7 @@
                     <h2
                         class="text-2xl font-semibold text-emerald-500"
                     >
-                        {{ totalCost }} <span class="text-sm font-medium uppercase">{{ preferences('currency') || 'USD' }}</span>
+                        {{ totalCost }} <span class="text-sm font-medium uppercase">{{ (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'USD' }}</span>
                     </h2>
 
                     <label

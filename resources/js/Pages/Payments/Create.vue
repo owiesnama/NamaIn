@@ -41,9 +41,13 @@ const form = useForm({
 });
 
 const formatCurrency = (amount, currency = null) => {
+    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
+        (selectedInvoiceData.value?.currency && /^[A-Z]{3}$/.test(selectedInvoiceData.value.currency) ? selectedInvoiceData.value.currency :
+        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD'));
+
     return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
         style: 'currency',
-        currency: currency || selectedInvoiceData.value?.currency || preferences('currency') || 'USD',
+        currency: validCurrency,
     }).format(amount || 0);
 };
 

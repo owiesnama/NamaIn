@@ -34,7 +34,7 @@ class Invoice extends BaseModel
     protected static function booted(): void
     {
         static::creating(function (Invoice $invoice) {
-            $invoice->currency = $invoice->currency ?? preference('currency', '$');
+            $invoice->currency = $invoice->currency ?? preference('currency', 'USD');
         });
     }
 

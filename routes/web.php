@@ -41,22 +41,25 @@ Route::middleware([
     Route::get('/preferences', [PreferenceController::class, 'index'])->name('preferences.index');
     Route::post('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
     Route::put('/preferences', [PreferenceController::class, 'update']);
-    Route::resource('/customers', CustomersController::class);
+    Route::get('/customers/export', [CustomersController::class, 'export'])->name('customers.export');
     Route::post('/customers/import', [CustomersController::class, 'import'])->name('customers.import');
     Route::get('/customers/import/sample', [CustomersController::class, 'importSample'])->name('customers.import-sample');
+    Route::resource('/customers', CustomersController::class);
     Route::get('/customers/{customer}/account', [CustomersController::class, 'account'])->name('customers.account');
     Route::get('/customers/{customer}/statement', [CustomersController::class, 'statement'])->name('customers.statement');
     Route::get('/customers/{customer}/statement/print', [CustomersController::class, 'printStatement'])->name('customers.print-statement');
 
-    Route::resource('/suppliers', SuppliersController::class);
+    Route::get('/suppliers/export', [SuppliersController::class, 'export'])->name('suppliers.export');
     Route::post('/suppliers/import', [SuppliersController::class, 'import'])->name('suppliers.import');
     Route::get('/suppliers/import/sample', [SuppliersController::class, 'importSample'])->name('suppliers.import-sample');
+    Route::resource('/suppliers', SuppliersController::class);
 
     Route::resource('/storages', StoragesController::class);
 
-    Route::resource('/products', ProductsController::class);
+    Route::get('/products/export', [ProductsController::class, 'export'])->name('products.export');
     Route::post('/products/import', [ProductsController::class, 'import'])->name('products.import');
     Route::get('/products/import/sample', [ProductsController::class, 'importSample'])->name('products.import-sample');
+    Route::resource('/products', ProductsController::class);
     Route::resource('/purchases', PurchasesController::class);
     Route::resource('/sales', SalesController::class);
     Route::resource('/payments', PaymentsController::class);
