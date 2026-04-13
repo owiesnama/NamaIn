@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProductRequest;
 use App\Imports\ProductImport;
+use App\Models\Category;
 use App\Models\Product;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProductsController extends Controller
 {
@@ -13,10 +15,16 @@ class ProductsController extends Controller
     {
         return inertia('Products/Index', [
             'products_count' => Product::count(),
+            'categories' => Category::all(),
             'products' => Product::search(request('search'))
                 ->trash(request('status'))
-                ->with('units')
-                ->latest()
+                ->when(request('category'), fn ($query, $category) => $query->whereRelation('categories', 'categories.id', $category))
+                ->when(request('min_cost'), fn ($q, $min) => $q->where('cost', '>=', $min))
+                ->when(request('max_cost'), fn ($q, $max) => $q->where('cost', '<=', $max))
+                ->when(request('expire_from'), fn ($q, $from) => $q->whereDate('expire_date', '>=', $from))
+                ->when(request('expire_to'), fn ($q, $to) => $q->whereDate('expire_date', '<=', $to))
+                ->with(['units', 'categories'])
+                ->orderBy(request('sort_by', 'created_at'), request('sort_order', 'desc'))
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
@@ -27,6 +35,14 @@ class ProductsController extends Controller
         $product = Product::create($request->all());
         $product->units()->createMany($request->get('units'));
 
+        $categoryIds = collect($request->get('categories'))->map(function ($category) {
+            return Category::firstOrCreate(
+                ['id' => is_numeric($category['id']) ? $category['id'] : null],
+                ['name' => $category['name']]
+            )->id;
+        });
+        $product->categories()->sync($categoryIds);
+
         return redirect()->route('products.index')->with('success', 'Product has been Created Successfully');
     }
 
@@ -35,6 +51,14 @@ class ProductsController extends Controller
         $product->update($request->all());
         $product->units()->delete();
         $product->units()->createMany($request->get('units'));
+
+        $categoryIds = collect($request->get('categories'))->map(function ($category) {
+            return Category::firstOrCreate(
+                ['id' => is_numeric($category['id']) ? $category['id'] : null],
+                ['name' => $category['name']]
+            )->id;
+        });
+        $product->categories()->sync($categoryIds);
 
         return back()->with('success', 'Product updated successfully');
     }
@@ -48,8 +72,21 @@ class ProductsController extends Controller
 
     public function import()
     {
-        Excel::import(new ProductImport(), request()->file('file'));
+        Excel::import(new ProductImport, request()->file('file'));
 
         return back()->with('success', 'Imported successfully');
+    }
+
+    public function importSample(): BinaryFileResponse
+    {
+        $filePath = storage_path('app/public/product_import_sample.csv');
+        $headers = ['name', 'cost', 'currency', 'expire_date', 'unit_name', 'unit_conversion_factor', 'categories'];
+
+        $handle = fopen($filePath, 'w');
+        fputcsv($handle, $headers);
+        fputcsv($handle, ['Example Product', '100', 'USD', '2026-12-31', 'Box', '10', 'Category1,Category2']);
+        fclose($handle);
+
+        return response()->download($filePath)->deleteFileAfterSend();
     }
 }

@@ -40,6 +40,13 @@ const form = useForm({
     notes: "",
 });
 
+const formatCurrency = (amount, currency = null) => {
+    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
+        style: 'currency',
+        currency: currency || selectedInvoiceData.value?.currency || preferences('currency') || 'USD',
+    }).format(amount || 0);
+};
+
 const submit = () => {
     form.invoice_id = selectedInvoice.value;
     form.post(route("payments.store"));
@@ -94,9 +101,8 @@ const submit = () => {
                             :value="invoice.id"
                         >
                             #{{ invoice.serial_number || invoice.id }} - {{
-                                invoice.remaining_balance
+                                formatCurrency(invoice.remaining_balance, invoice.currency)
                             }}
-                            SDG
                         </option>
                     </select>
                     <InputError class="mt-2" :message="form.errors.invoice_id" />
@@ -113,7 +119,7 @@ const submit = () => {
                                 >{{ __("Total") }}:</span
                             >
                             <span class="ml-2 font-semibold"
-                                >{{ selectedInvoiceData.total }} SDG</span
+                                >{{ formatCurrency(selectedInvoiceData.total, selectedInvoiceData.currency) }}</span
                             >
                         </div>
                         <div>
@@ -121,7 +127,7 @@ const submit = () => {
                                 >{{ __("Paid") }}:</span
                             >
                             <span class="ml-2 font-semibold text-emerald-600"
-                                >{{ selectedInvoiceData.paid_amount }} SDG</span
+                                >{{ formatCurrency(selectedInvoiceData.paid_amount, selectedInvoiceData.currency) }}</span
                             >
                         </div>
                         <div class="col-span-2">
@@ -130,9 +136,8 @@ const submit = () => {
                             >
                             <span class="ml-2 font-semibold text-red-600"
                                 >{{
-                                    selectedInvoiceData.remaining_balance
-                                }}
-                                SDG</span
+                                    formatCurrency(selectedInvoiceData.remaining_balance, selectedInvoiceData.currency)
+                                }}</span
                             >
                         </div>
                     </div>

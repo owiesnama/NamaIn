@@ -4,7 +4,9 @@
         invoice: Object,
     });
     let totalPrice = (record) => {
-        return record.price * record.quantity;
+        const total = record.price * record.quantity;
+        const currency = record.currency || props.invoice?.currency || preferences('currency') || 'USD';
+        return `${total} ${currency}`;
     };
     let deliveredRecords = computed(() => {
         return props.invoice.transactions.filter((transaction) => {

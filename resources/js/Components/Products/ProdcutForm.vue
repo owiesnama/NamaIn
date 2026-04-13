@@ -5,6 +5,8 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
+    import VueMultiselect from "vue-multiselect";
+    import "vue-multiselect/dist/vue-multiselect.css";
 
     const props = defineProps({
         product: {
@@ -12,17 +14,32 @@
             default: () => {},
             required: false,
         },
+        categories: {
+            type: Array,
+            default: () => [],
+            required: false,
+        },
     });
 
     const show = ref(false);
     const product = useForm({
         name: props.product?.name,
-        cost: props.product?.cost,
+        cost: props.product?.cost ? String(props.product?.cost) : "",
         expire_date: props.product?.expire_date,
+        currency: props.product?.currency || preferences("currency") || "$",
+        categories: props.product?.categories || [],
         units: props.product?.units?.length
             ? props.product?.units
             : [{ unit: "", conversion_factor: null }],
     });
+
+    const addCategory = (newTag) => {
+        const tag = {
+            name: newTag,
+            id: newTag, // Use name as ID for new tags, backend will handle it
+        };
+        product.categories.push(tag);
+    };
     const addUnit = () => {
         product.units.push({ name: "", conversion_factor: "" });
     };
@@ -156,16 +173,31 @@
                                                 for="cost"
                                                 :value="__('Cost')"
                                             />
-                                            <TextInput
-                                                id="cost"
-                                                v-model="product.cost"
-                                                type="text"
-                                                class="block w-full mt-1"
-                                                required
-                                            />
+                                            <div class="flex gap-x-2">
+                                                <TextInput
+                                                    id="cost"
+                                                    v-model="product.cost"
+                                                    type="text"
+                                                    class="block w-full mt-1"
+                                                    required
+                                                />
+                                                <TextInput
+                                                    id="currency"
+                                                    v-model="product.currency"
+                                                    type="text"
+                                                    class="block w-20 mt-1 uppercase"
+                                                    maxlength="3"
+                                                    required
+                                                    :placeholder="__('USD')"
+                                                />
+                                            </div>
                                             <InputError
                                                 class="mt-2"
                                                 :message="product.errors.cost"
+                                            />
+                                            <InputError
+                                                class="mt-2"
+                                                :message="product.errors.currency"
                                             />
                                         </div>
 
@@ -204,6 +236,28 @@
                                                     )
                                                 }}</span>
                                             </label>
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <InputLabel
+                                                for="categories"
+                                                :value="__('Categories')"
+                                            />
+                                            <VueMultiselect
+                                                id="categories"
+                                                v-model="product.categories"
+                                                :options="props.categories"
+                                                multiple
+                                                :taggable="true"
+                                                :close-on-select="false"
+                                                label="name"
+                                                track-by="id"
+                                                @tag="addCategory"
+                                            />
+                                            <InputError
+                                                class="mt-2"
+                                                :message="product.errors.categories"
+                                            />
                                         </div>
                                     </div>
 

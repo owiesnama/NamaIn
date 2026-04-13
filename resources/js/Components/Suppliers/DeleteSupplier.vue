@@ -16,6 +16,7 @@
     const deleteSupplier = () => {
         form.delete(route('suppliers.destroy', props.supplier.id), {
             preserveScroll: true,
+            onSuccess: () => closeModal(),
         });
     };
 

@@ -5,9 +5,102 @@
 @import "tailwindcss/utilities";
 
 
+/* Vue Multiselect Global Styling - Native Input Look */
+.multiselect {
+    @apply text-sm text-gray-700 dark:text-gray-300;
+    min-height: 42px;
+}
+
+.multiselect__tags {
+    @apply border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-600 min-h-[42px] py-1.5 px-3 flex flex-wrap items-center !important;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
 .multiselect__input {
-    @apply px-3 py-2 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 mb-0;
-    border-radius: .5rem !important;
-    margin-bottom: 0 !important;
-    padding: .5rem 1rem !important;
+    @apply dark:bg-gray-900 dark:text-gray-300 text-sm p-0 m-0 !important;
+    background: transparent !important;
+    border: none !important;
+    width: 100% !important;
+    min-height: 28px !important;
+    line-height: 28px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+.multiselect__single {
+    @apply dark:bg-gray-900 dark:text-gray-300 text-sm p-0 m-0 !important;
+    background: transparent !important;
+    border: none !important;
+    min-height: 28px !important;
+    line-height: 28px !important;
+    position: relative !important;
+    z-index: 10;
+}
+
+.multiselect__input::placeholder {
+    @apply text-gray-400/70 dark:text-gray-500;
+}
+
+.multiselect__placeholder {
+    @apply text-gray-400/70 dark:text-gray-500 m-0 p-0 leading-[28px] !important;
+    position: absolute !important;
+}
+
+.multiselect--active .multiselect__placeholder,
+.multiselect--has-values .multiselect__placeholder,
+.multiselect__single + .multiselect__placeholder {
+    display: none !important;
+}
+
+/* Hide default arrow and search icon for more native look if desired,
+   but keeping a small subtle one often helps UX.
+   User asked for "native like", and native selects have arrows,
+   but native text inputs don't. Since this is often a search/tag input,
+   let's make the arrow very subtle or hide it. */
+.multiselect__select {
+    display: none !important;
+}
+
+.multiselect--active .multiselect__tags {
+    @apply border-emerald-300 ring ring-emerald-200 ring-opacity-50 dark:border-emerald-500 !important;
+}
+
+.multiselect__content-wrapper {
+    @apply border-gray-200 rounded-b-lg shadow-lg dark:bg-gray-900 dark:border-gray-600 !important;
+}
+
+.multiselect__option {
+    @apply py-2 px-3 text-sm !important;
+}
+
+.multiselect__option--highlight {
+    @apply bg-emerald-500 text-white !important;
+}
+
+.multiselect__option--selected {
+    @apply bg-gray-100 text-gray-900 font-semibold dark:bg-gray-800 dark:text-white !important;
+}
+
+.multiselect__option--selected.multiselect__option--highlight {
+    @apply bg-red-400 text-white dark:bg-red-500 !important;
+}
+
+/* Tags styling */
+.multiselect__tag {
+    @apply bg-emerald-500 text-white text-xs font-semibold py-1 px-2 mr-2 my-0.5 rounded-md flex items-center !important;
+}
+
+.multiselect__tag-icon {
+    @apply ml-1 bg-transparent hover:bg-emerald-600 rounded-sm !important;
+    line-height: 14px !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.multiselect__tag-icon:after {
+    @apply text-white !important;
+}
+
+.multiselect__spinner {
+    @apply dark:bg-gray-900 !important;
 }

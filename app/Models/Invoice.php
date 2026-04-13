@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -15,12 +17,26 @@ use Illuminate\Support\Collection;
 
 class Invoice extends BaseModel
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes, WithTrashScope;
+
+    /**
+     * List of searchable model's relation attributes
+     *
+     * @var array<string>
+     */
+    protected array $searchableRelationsAttributes = ['invocable.name'];
 
     /**
      * Attributes can be mass assigned.
      */
-    protected $fillable = ['total', 'payment_method', 'payment_status', 'paid_amount', 'discount'];
+    protected $fillable = ['total', 'payment_method', 'payment_status', 'paid_amount', 'discount', 'invocable_id', 'invocable_type', 'serial_number', 'currency'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Invoice $invoice) {
+            $invoice->currency = $invoice->currency ?? preference('currency', '$');
+        });
+    }
 
     /**
      * List of attributes to cast along with what to cast to.
@@ -163,7 +179,7 @@ class Invoice extends BaseModel
     /**
      * Filter invoices to delivered.
      */
-    public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
+    public function scopeDelivered(Builder $builder, ?Carbon $datetime = null): Builder
     {
         return $builder->where('delivered', true)
             ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));

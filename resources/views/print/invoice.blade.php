@@ -2,7 +2,7 @@
     <div class="p-4">
         <header>
             <div class="flex items-center justify-center mb-4">
-                <img class="img-rounded" height="70px" src="{{ preference('logo', '/imgs/logo.svg') }}">
+                <img class="img-rounded" height="30px" style="max-width: 120px; object-fit: contain;" src="{{ preference('logo', '/images/logo.svg') }}">
             </div>
             <div>
                 <b>{{__("Date")}}: </b> {{ $invoice->created_at }}<br />
@@ -20,7 +20,7 @@
                         <label for="totalCost" class="text-sm font-medium text-gray-600">
                             {{__('Total Cost')}}
                         </label>
-                        <h2 class="text-base font-semibold text-gray-800 sm:text-lg px-4">{{$invoice->total . ' SDG'}}</h2>
+                        <h2 class="text-base font-semibold text-gray-800 sm:text-lg px-4">{{$invoice->total . ' ' . ($invoice->currency ?: preference('currency', 'USD'))}}</h2>
                     </div>
                 </div>
             </div>
@@ -98,7 +98,7 @@
                                             class="px-8 py-3 text-sm font-semibold text-left rtl:text-right text-emerald-500 whitespace-nowrap"
 
                                         >
-                                            {{$record->price * $record->quantity}}
+                                            {{$record->price * $record->quantity . ' ' . ($record->currency ?: $invoice->currency ?: preference('currency', 'USD'))}}
                                         </td>
                                     </tr>
                                 @endforeach

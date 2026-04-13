@@ -1,5 +1,5 @@
 <script setup>
-    import { inject, ref } from "vue";
+    import { ref } from "vue";
     import { useForm } from "@inertiajs/vue3";
     import ActionMessage from "@/Components/ActionMessage.vue";
     import FormSection from "@/Components/FormSection.vue";
@@ -7,28 +7,35 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
-    import Dropdown from "@/Components/Dropdown.vue";
-    import DropdownLink from "@/Components/DropdownLink.vue";
     import TextInput from "@/Components/TextInput.vue";
-    const preferences = inject("preferences");
+    const alertsToggle = ref(preferences('alerts', true));
+
     const form = useForm({
-        logo: preferences.logo,
-        invoicesHeadline: preferences.invoicesHeadline,
-        alerts: preferences.alerts,
-        language: preferences.language,
-        currency: preferences.currency,
-        pecentage: preferences.pecentage,
+        logo: preferences('logo'),
+        invoicesHeadline: preferences('invoicesHeadline'),
+        alerts: alertsToggle.value,
+        language: preferences('language', 'en'),
+        currency: preferences('currency', 'USD'),
+        pecentage: preferences('pecentage', 60),
     });
 
     const logoPreview = ref(null);
     const logoInput = ref(null);
-    const alertsToggle = ref(true);
 
     const updateApplicationInformation = () => {
-        if (!logoInput.value) return;
+        form.alerts = alertsToggle.value;
+        if (logoInput.value && logoInput.value.files[0]) {
+            form.logo = logoInput.value.files[0];
+        }
 
-        form.logo = logoInput.value.files[0];
-        form.put(route("preferences.update"));
+        form.post(route("preferences.update"), {
+            onSuccess: () => {
+                logoPreview.value = null;
+                if (logoInput.value) {
+                    logoInput.value.value = null;
+                }
+            },
+        });
     };
 
     const selectNewLogo = () => {
@@ -75,9 +82,9 @@
                     class="mt-2"
                 >
                     <img
-                        src="/images/logo.svg"
+                        :src="preferences('logo', '/images/logo.svg')"
                         alt="App Logo"
-                        class="object-cover w-12 h-12 rounded-full"
+                        class="object-contain w-12 h-12"
                     />
                 </div>
 
@@ -86,11 +93,9 @@
                     v-show="logoPreview"
                     class="mt-2"
                 >
-                    <span
-                        class="block w-12 h-12 bg-center bg-no-repeat bg-cover rounded-full"
-                        :style="
-                            'background-image: url(\'' + logoPreview + '\');'
-                        "
+                    <img
+                        :src="logoPreview"
+                        class="object-contain w-12 h-12"
                     />
                 </div>
 
@@ -238,55 +243,29 @@
                     for="currency"
                     :value="__('Currency')"
                 />
-                <Dropdown
-                    align="left"
-                    width="48"
-                    class="inline-block mt-1"
-                >
-                    <template #trigger>
+                <div class="flex gap-x-2 mt-1">
+                    <TextInput
+                        id="currency"
+                        v-model="form.currency"
+                        type="text"
+                        class="block w-full uppercase"
+                        maxlength="3"
+                        required
+                        :placeholder="__('USD')"
+                    />
+                    <div class="flex gap-x-1">
                         <button
+                            v-for="curr in ['USD', 'EUR', 'SDG']"
+                            :key="curr"
                             type="button"
-                            class="inline-flex items-center px-3 py-2 mt-1 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none"
+                            @click="form.currency = curr"
+                            class="px-3 py-2 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                            :class="form.currency === curr ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white text-gray-600'"
                         >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke-width="1.5"
-                                stroke="currentColor"
-                                class="w-5 h-5"
-                            >
-                                <path
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                    d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                />
-                            </svg>
-
-                            {{
-                                form.currency == "US-Dollar"
-                                    ? __("US Dollar")
-                                    : __('"SDG"')
-                            }}
+                            {{ curr }}
                         </button>
-                    </template>
-
-                    <template #content>
-                        <DropdownLink
-                            as="button"
-                            @click="form.currency = 'US-Dollar'"
-                        >
-                            {{ __("US Dollar") }}
-                        </DropdownLink>
-                        <div class="border-t border-gray-100" />
-                        <DropdownLink
-                            as="button"
-                            @click="form.currency = 'SDG'"
-                        >
-                            {{ __("SDG") }}
-                        </DropdownLink>
-                    </template>
-                </Dropdown>
+                    </div>
+                </div>
                 <InputError
                     :message="form.errors.currency"
                     class="mt-2"

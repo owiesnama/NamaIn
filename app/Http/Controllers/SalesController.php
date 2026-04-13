@@ -15,7 +15,13 @@ class SalesController extends Controller
     {
         return inertia('Sales/Index', [
             'invoices' => Invoice::where('invocable_type', Customer::class)
-                ->latest()
+                ->search(request('search'))
+                ->trash(request('status'))
+                ->when(request('sort_by'), function ($query, $sortBy) {
+                    $query->orderBy(in_array($sortBy, ['id', 'created_at', 'total']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
+                }, function ($query) {
+                    $query->latest();
+                })
                 ->with(['transactions', 'invocable'])
                 ->paginate(10)
                 ->withQueryString(),

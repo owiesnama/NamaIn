@@ -26,6 +26,9 @@ class CustomerRequest extends FormRequest
             'name' => 'required',
             'address' => 'required|string|min:10',
             'phone_number' => 'required|numeric|min:10',
+            'categories' => 'nullable|array',
+            'categories.*.id' => 'required',
+            'categories.*.name' => 'required',
         ];
     }
 }

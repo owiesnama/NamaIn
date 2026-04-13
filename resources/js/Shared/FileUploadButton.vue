@@ -7,8 +7,13 @@
             default: "fileImport",
         },
     });
-    defineEmits(["input"]);
+    const emit = defineEmits(["update:modelValue", "input"]);
     let focused = ref(false);
+
+    const handleInput = (event) => {
+        emit('input', event.target.files);
+        emit('update:modelValue', event.target.files);
+    };
 </script>
 <template>
     <label
@@ -21,14 +26,13 @@
         </svg>
 
         <slot> {{__('Import')}} </slot>
-    </label
-    >
+    </label>
     <input
         :id="id"
         type="file"
         class="sr-only"
         @focus="focused = true"
         @blur="focused = false"
-        @input="$emit('input', $event.target.files)"
+        @input="handleInput"
     />
 </template>

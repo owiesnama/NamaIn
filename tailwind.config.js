@@ -13,7 +13,7 @@ module.exports = {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Nunito', ...defaultTheme.fontFamily.sans],
+                sans: ['Cairo', '"IBM Plex Sans Arabic"', 'Nunito', ...defaultTheme.fontFamily.sans],
             },
         },
     },

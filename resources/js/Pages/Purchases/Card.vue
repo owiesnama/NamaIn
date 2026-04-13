@@ -21,7 +21,7 @@
         <div class="p-6 md:flex rtl:flex-row-reverse md:items-center md:justify-between">
             <div class="flex rtl:flex-row-reverse items-center gap-x-4">
 
-                <h2 v-text="invoice.total + ' SDG'" class="text-base font-semibold text-gray-800 sm:text-lg"></h2>
+                <h2 v-text="invoice.total + ' ' + (invoice.currency || preferences('currency') || 'USD')" class="text-base font-semibold text-gray-800 sm:text-lg"></h2>
 
                 <label for="totalCost" class="text-sm font-medium text-gray-600">
                     {{ __("Total Cost") }}

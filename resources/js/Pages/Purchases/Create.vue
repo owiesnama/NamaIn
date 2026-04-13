@@ -44,8 +44,8 @@
         payment_reference: '',
         payment_notes: ''
     });
-    const searchCustomer = debounce(function(search) {
-        router.get(route("purchases.create"), { customer: search }, {
+    const searchSupplier = debounce(function(search) {
+        router.get(route("purchases.create"), { supplier: search }, {
             preserveScroll: true,
             preserveState: true
         });
@@ -70,7 +70,7 @@
             <div class="flex justify-between">
                 <div class="w-1/3" v-auto-animate>
                     <InputLabel
-                        for="customer"
+                        for="supplier"
                         :value="__('Supplier')"
                     />
                     <v-select
@@ -78,14 +78,15 @@
                         :options="suppliers"
                         label="name"
                         track-by="id"
-                        @search-change="searchCustomer"
+                        @search-change="searchSupplier"
                     />
                 </div>
-                <div class="flex items-center gap-x-2">
+                <div class="ltr:text-right rtl:text-left">
                     <h2
                         class="text-2xl font-semibold text-emerald-500"
-                        v-text="totalCost + ' SDG'"
-                    ></h2>
+                    >
+                        {{ totalCost }} <span class="text-sm font-medium uppercase">{{ preferences('currency') || 'USD' }}</span>
+                    </h2>
 
                     <label
                         for="totalCost"

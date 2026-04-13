@@ -7,16 +7,14 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
-    import { inject } from "vue";
 
-    const preferences = inject("preferences");
     const form = useForm({
-        timezone: preferences.timezone,
-        dateFormat: preferences.dateFormat,
+        timezone: preferences('timezone'),
+        dateFormat: preferences('dateFormat'),
     });
 
     const updateDateInformation = () => {
-        form.put(route("preferences.update"));
+        form.post(route("preferences.update"));
     };
 </script>
 

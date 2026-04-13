@@ -13,8 +13,12 @@ class StoragesController extends Controller
             'storages_count' => Storage::count(),
             'storages' => Storage::search(request('search'))
                 ->trash(request('status'))
-                ->latest()
-                ->paginate(10)
+                ->when(request('sort_by'), function ($query, $sortBy) {
+                    $query->orderBy(in_array($sortBy, ['name', 'created_at']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
+                }, function ($query) {
+                    $query->latest();
+                })
+                ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
     }

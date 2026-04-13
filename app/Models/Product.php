@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -18,11 +19,25 @@ class Product extends BaseModel
     use HasFactory, SoftDeletes, WithTrashScope;
 
     /**
+     * List of searchable model's relation attributes
+     *
+     * @var array<string>
+     */
+    protected array $searchableRelationsAttributes = ['categories.name'];
+
+    /**
      * List of fillable fields of the product
      *
      * @var array<string>
      */
-    protected $fillable = ['name', 'cost', 'expire_date'];
+    protected $fillable = ['name', 'cost', 'expire_date', 'currency'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Product $product) {
+            $product->currency = $product->currency ?? preference('currency', '$');
+        });
+    }
 
     /**
      * List of the attributes to append to the product
@@ -56,6 +71,14 @@ class Product extends BaseModel
     public function units(): HasMany
     {
         return $this->hasMany(Unit::class);
+    }
+
+    /**
+     * Categories associated with this product.
+     */
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(Category::class, 'categorizable');
     }
 
     /**

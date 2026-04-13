@@ -1,13 +1,13 @@
 <script setup>
-    import { computed, ref } from "vue";
+    import { computed, ref, watch } from "vue";
 
     const props = defineProps({
-        "default": {
+        modelValue: {
             type: String,
             default: "all"
         }
     });
-    const emits = defineEmits(["tabbed"]);
+    const emits = defineEmits(["update:modelValue", "tabbed"]);
 
     const tabs = {
         all: __("All"),
@@ -15,27 +15,33 @@
         trash: __("Trashed")
     };
 
-    const activeTab = ref();
+    const activeTab = ref(props.modelValue);
 
-    const isDefault = (key) => key === props.default;
+    watch(() => props.modelValue, (val) => {
+        activeTab.value = val;
+    });
+
+    const isDefault = (key) => key === "all";
 
     const isActive = computed(() => (tab) => tab === activeTab.value);
 
     const tabbed = (key) => {
         activeTab.value = key;
+        emits("update:modelValue", key);
         emits("tabbed", key);
     };
 </script>
 <template>
     <div
-        class="flex overflow-hidden bg-white border divide-x rounded-lg md:w-auto sm:w-1/2 dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700"
+        class="flex divide-x md:w-auto sm:w-1/2 rtl:flex-row-reverse dark:divide-gray-700 h-full"
     >
         <button
             v-for="(tab,key) in tabs"
             :key="'tab'+key+ (new Date).valueOf()"
-            class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-            :class="isActive(key) || (isDefault(key) && ! activeTab) ? 'bg-gray-100' : '' "
+            class="px-2 flex-1 shrink-0 py-2 text-xs font-semibold text-gray-600 transition-colors duration-200 dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100 whitespace-nowrap overflow-hidden text-ellipsis"
+            :class="isActive(key) || (isDefault(key) && ! activeTab) ? 'bg-gray-100 dark:bg-gray-700' : '' "
             @click="tabbed(key)"
+            :title="tab"
             v-text="tab"
         >
         </button>

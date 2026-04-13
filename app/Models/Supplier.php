@@ -6,6 +6,7 @@ use App\Traits\ClassMetaAttributes;
 use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends BaseModel
@@ -33,5 +34,13 @@ class Supplier extends BaseModel
     public function invoices(): MorphMany
     {
         return $this->morphMany(Invoice::class, 'invocable');
+    }
+
+    /**
+     * The categories that belongs to this supplier.
+     */
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(Category::class, 'categorizable');
     }
 }

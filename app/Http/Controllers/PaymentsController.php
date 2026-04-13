@@ -13,8 +13,15 @@ class PaymentsController extends Controller
     public function index()
     {
         return inertia('Payments/Index', [
-            'payments' => Payment::with(['invoice.invocable', 'createdBy'])
-                ->latest()
+            'payments' => Payment::query()
+                ->search(request('search'))
+                ->trash(request('status'))
+                ->when(request('sort_by'), function ($query, $sortBy) {
+                    $query->orderBy(in_array($sortBy, ['id', 'created_at', 'amount']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
+                }, function ($query) {
+                    $query->latest();
+                })
+                ->with(['invoice.invocable', 'createdBy'])
                 ->paginate(10)
                 ->withQueryString(),
         ]);
@@ -37,6 +44,7 @@ class PaymentsController extends Controller
                 if ($customer->invoices->count() > 0) {
                     return $customer;
                 }
+
                 return null;
             })
             ->filter();

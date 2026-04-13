@@ -48,11 +48,12 @@
         deductingFromStorage.value = null;
     };
 
-    let confirmDeduct = () => {
-        form.put(route("stock.deduct", form.storage), {
-            onSuccess: () => closeModal()
-        }).then();
-    };
+const formatCurrency = (amount, currency = null) => {
+    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
+        style: 'currency',
+        currency: currency || props.invoice?.currency || preferences('currency') || 'USD',
+    }).format(amount || 0);
+};
 
 </script>
 
@@ -78,19 +79,19 @@
                 <div>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ __("Total") }}</p>
                     <p class="text-lg font-semibold text-gray-800 dark:text-white">
-                        {{ invoice.total }} SDG
+                        {{ formatCurrency(invoice.total, invoice.currency) }}
                     </p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ __("Paid") }}</p>
                     <p class="text-lg font-semibold text-emerald-600">
-                        {{ invoice.paid_amount || 0 }} SDG
+                        {{ formatCurrency(invoice.paid_amount || 0, invoice.currency) }}
                     </p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 dark:text-gray-400">{{ __("Balance") }}</p>
                     <p class="text-lg font-semibold text-red-600">
-                        {{ invoice.remaining_balance || invoice.total }} SDG
+                        {{ formatCurrency(invoice.remaining_balance || invoice.total, invoice.currency) }}
                     </p>
                 </div>
                 <div>
@@ -140,7 +141,7 @@
                                     {{ new Date(payment.paid_at).toLocaleDateString() }}
                                 </td>
                                 <td class="px-4 py-3 text-sm font-semibold text-emerald-600">
-                                    {{ payment.amount }} SDG
+                                    {{ formatCurrency(payment.amount, payment.currency) }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700 dark:text-gray-300">
                                     {{ __(payment.payment_method?.replace('_', ' ') || 'cash') }}

@@ -1,13 +1,42 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
+import { ref } from "vue";
+import Pagination from "@/Shared/Pagination.vue";
+import { format, parseISO } from "date-fns";
 
 defineProps({
     customer: Object,
     account_balance: Number,
-    unpaid_invoices: Array,
-    payment_history: Array,
+    invoices: Object,
+    payments: Object,
+    transactions: Object,
 });
+
+const activeTab = ref('invoices');
+
+const tabs = [
+    { id: 'invoices', name: 'Invoices' },
+    { id: 'payments', name: 'Payments' },
+    { id: 'transactions', name: 'Transactions' },
+];
+
+const formatCurrency = (amount, currency = null) => {
+    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
+        style: 'currency',
+        currency: currency || preferences('currency') || 'USD',
+    }).format(amount || 0);
+};
+
+const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    try {
+        const date = parseISO(dateString);
+        return format(date, "yyyy-MM-dd");
+    } catch (e) {
+        return "-";
+    }
+};
 </script>
 
 <template>
@@ -23,12 +52,20 @@ defineProps({
                     </p>
                 </div>
 
-                <Link
-                    :href="route('payments.create')"
-                    class="px-5 py-2 text-sm text-white bg-emerald-500 rounded-lg hover:bg-emerald-600"
-                >
-                    {{ __("Record Payment") }}
-                </Link>
+                <div class="flex gap-x-3">
+                    <Link
+                        :href="route('customers.statement', customer.id)"
+                        class="px-5 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
+                    >
+                        {{ __("View Statement") }}
+                    </Link>
+                    <Link
+                        :href="route('payments.create')"
+                        class="px-5 py-2 text-sm text-white bg-emerald-500 rounded-lg hover:bg-emerald-600"
+                    >
+                        {{ __("Record Payment") }}
+                    </Link>
+                </div>
             </div>
 
             <!-- Account Summary Cards -->
@@ -42,7 +79,7 @@ defineProps({
                             <p
                                 class="text-2xl font-bold text-red-600 dark:text-red-400"
                             >
-                                {{ account_balance }} SDG
+                                {{ formatCurrency(account_balance) }}
                             </p>
                         </div>
                         <div
@@ -74,7 +111,7 @@ defineProps({
                             <p
                                 class="text-2xl font-bold text-gray-800 dark:text-gray-200"
                             >
-                                {{ customer.credit_limit || 0 }} SDG
+                                {{ formatCurrency(customer.credit_limit || 0) }}
                             </p>
                         </div>
                         <div
@@ -101,12 +138,12 @@ defineProps({
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                {{ __("Unpaid Invoices") }}
+                                {{ __("Total Invoices") }}
                             </p>
                             <p
                                 class="text-2xl font-bold text-gray-800 dark:text-gray-200"
                             >
-                                {{ unpaid_invoices.length }}
+                                {{ invoices.total }}
                             </p>
                         </div>
                         <div
@@ -130,208 +167,161 @@ defineProps({
                 </div>
             </div>
 
-            <!-- Unpaid Invoices Table -->
+            <!-- Tabs -->
             <div class="mt-8">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-                    {{ __("Unpaid Invoices") }}
-                </h3>
-
-                <div
-                    class="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700"
-                >
-                    <table
-                        class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                <div class="sm:hidden">
+                    <label for="tabs" class="sr-only">Select a tab</label>
+                    <select
+                        id="tabs"
+                        name="tabs"
+                        class="block w-full rounded-md border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
+                        v-model="activeTab"
                     >
-                        <thead class="bg-gray-100 dark:bg-gray-800">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Invoice") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Total") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Paid") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Balance") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Status") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Date") }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody
-                            class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
-                        >
-                            <tr
-                                v-for="invoice in unpaid_invoices"
-                                :key="invoice.id"
+                        <option v-for="tab in tabs" :key="tab.id" :value="tab.id">{{ __(tab.name) }}</option>
+                    </select>
+                </div>
+                <div class="hidden sm:block">
+                    <div class="border-b border-gray-200 dark:border-gray-700">
+                        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                            <button
+                                v-for="tab in tabs"
+                                :key="tab.id"
+                                @click="activeTab = tab.id"
+                                :class="[
+                                    activeTab === tab.id
+                                        ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
+                                    'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
+                                ]"
                             >
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100"
-                                >
-                                    <Link
-                                        :href="
-                                            route('invoices.show', invoice.id)
-                                        "
-                                        class="text-emerald-600 hover:underline"
-                                    >
-                                        #{{
-                                            invoice.serial_number || invoice.id
-                                        }}
-                                    </Link>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ invoice.total }} SDG
-                                </td>
-                                <td class="px-6 py-4 text-sm text-emerald-600">
-                                    {{ invoice.paid_amount }} SDG
-                                </td>
-                                <td class="px-6 py-4 text-sm text-red-600 font-semibold">
-                                    {{ invoice.remaining_balance }} SDG
-                                </td>
-                                <td class="px-6 py-4 text-sm">
-                                    <span
-                                        class="px-2 py-1 text-xs rounded-full"
-                                        :class="{
-                                            'bg-red-100 text-red-700':
-                                                invoice.payment_status ===
-                                                'unpaid',
-                                            'bg-yellow-100 text-yellow-700':
-                                                invoice.payment_status ===
-                                                'partially_paid',
-                                        }"
-                                    >
-                                        {{
-                                            __(
-                                                invoice.payment_status.replace(
-                                                    "_",
-                                                    " "
-                                                )
-                                            )
-                                        }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                    {{
-                                        new Date(
-                                            invoice.created_at
-                                        ).toLocaleDateString()
-                                    }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                {{ __(tab.name) }}
+                            </button>
+                        </nav>
+                    </div>
                 </div>
             </div>
 
-            <!-- Payment History -->
-            <div class="mt-8">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-                    {{ __("Payment History") }}
-                </h3>
+            <!-- Tab Content -->
+            <div class="mt-6">
+                <!-- Invoices Tab -->
+                <div v-if="activeTab === 'invoices'">
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg dark:border-gray-700">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-100 dark:bg-gray-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Invoice") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Total") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Paid") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Balance") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Status") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Date") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                                <tr v-for="invoice in invoices.data" :key="invoice.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                        <Link :href="route('invoices.show', invoice.id)" class="text-emerald-600 hover:text-emerald-500 transition-colors">
+                                            #{{ invoice.serial_number || invoice.id }}
+                                        </Link>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ formatCurrency(invoice.total, invoice.currency) }}</td>
+                                    <td class="px-6 py-4 text-sm text-emerald-600 font-medium whitespace-nowrap">{{ formatCurrency(invoice.paid_amount, invoice.currency) }}</td>
+                                    <td class="px-6 py-4 text-sm text-red-600 font-bold whitespace-nowrap">{{ formatCurrency(invoice.remaining_balance, invoice.currency) }}</td>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full"
+                                            :class="{
+                                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': invoice.payment_status === 'unpaid',
+                                                'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400': invoice.payment_status === 'partially_paid',
+                                                'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': invoice.payment_status === 'paid',
+                                            }">
+                                            {{ __(invoice.payment_status.replace("_", " ")) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ formatDate(invoice.created_at) }}</td>
+                                </tr>
+                                <tr v-if="invoices.data.length === 0">
+                                    <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400">{{ __("No invoices found") }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                        <Pagination :links="invoices.links" />
+                    </div>
+                </div>
 
-                <div
-                    class="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700"
-                >
-                    <table
-                        class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
-                    >
-                        <thead class="bg-gray-100 dark:bg-gray-800">
-                            <tr>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Invoice") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Amount") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Method") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Reference") }}
-                                </th>
-                                <th
-                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase"
-                                >
-                                    {{ __("Date") }}
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody
-                            class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
-                        >
-                            <tr
-                                v-for="payment in payment_history"
-                                :key="payment.id"
-                            >
-                                <td
-                                    class="px-6 py-4 text-sm text-gray-900 dark:text-gray-100"
-                                >
-                                    <Link
-                                        :href="
-                                            route(
-                                                'invoices.show',
-                                                payment.invoice.id
-                                            )
-                                        "
-                                        class="text-emerald-600 hover:underline"
-                                    >
-                                        #{{
-                                            payment.invoice.serial_number ||
-                                            payment.invoice.id
-                                        }}
-                                    </Link>
-                                </td>
-                                <td class="px-6 py-4 text-sm text-emerald-600 font-semibold">
-                                    {{ payment.amount }} SDG
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                    {{
-                                        __(
-                                            payment.payment_method
-                                                .replace("_", " ")
-                                                .toUpperCase()
-                                        )
-                                    }}
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ payment.reference || "-" }}
-                                </td>
-                                <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
-                                    {{
-                                        new Date(
-                                            payment.paid_at
-                                        ).toLocaleDateString()
-                                    }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <!-- Payments Tab -->
+                <div v-if="activeTab === 'payments'">
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg dark:border-gray-700">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-100 dark:bg-gray-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Invoice") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Amount") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Method") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Reference") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Date") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                                <tr v-for="payment in payments.data" :key="payment.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                                        <Link :href="route('invoices.show', payment.invoice.id)" class="text-emerald-600 hover:text-emerald-500 transition-colors">
+                                            #{{ payment.invoice.serial_number || payment.invoice.id }}
+                                        </Link>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-emerald-600 font-bold whitespace-nowrap">{{ formatCurrency(payment.amount, payment.currency) }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ __(payment.payment_method.replace("_", " ").toUpperCase()) }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ payment.reference || "-" }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ formatDate(payment.paid_at) }}</td>
+                                </tr>
+                                <tr v-if="payments.data.length === 0">
+                                    <td colspan="5" class="px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400">{{ __("No payments found") }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                        <Pagination :links="payments.links" />
+                    </div>
+                </div>
+
+                <!-- Transactions Tab -->
+                <div v-if="activeTab === 'transactions'">
+                    <div class="overflow-x-auto border border-gray-200 rounded-lg dark:border-gray-700">
+                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                            <thead class="bg-gray-100 dark:bg-gray-800">
+                                <tr>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Product") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Qty") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Price") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Total") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Invoice") }}</th>
+                                    <th class="px-6 py-3 text-start text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Date") }}</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                                <tr v-for="transaction in transactions.data" :key="transaction.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100 whitespace-nowrap">{{ transaction.product.name }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ transaction.quantity }}</td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ formatCurrency(transaction.price, transaction.currency) }}</td>
+                                    <td class="px-6 py-4 text-sm text-emerald-600 font-bold whitespace-nowrap">{{ formatCurrency(transaction.quantity * transaction.price, transaction.currency) }}</td>
+                                    <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                        <Link :href="route('invoices.show', transaction.invoice.id)" class="text-emerald-600 hover:text-emerald-500 transition-colors">
+                                            #{{ transaction.invoice.serial_number || transaction.invoice.id }}
+                                        </Link>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300 whitespace-nowrap">{{ formatDate(transaction.created_at) }}</td>
+                                </tr>
+                                <tr v-if="transactions.data.length === 0">
+                                    <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500 dark:text-gray-400">{{ __("No transactions found") }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-4 flex justify-center">
+                        <Pagination :links="transactions.links" />
+                    </div>
                 </div>
             </div>
         </section>

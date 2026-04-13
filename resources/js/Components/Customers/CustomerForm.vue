@@ -5,6 +5,7 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
+    import VueMultiselect from "vue-multiselect";
 
     const props = defineProps({
         customer: {
@@ -12,15 +13,28 @@
             default: () => {},
             required: false,
         },
+        categories: {
+            type: Array,
+            default: () => [],
+        },
     });
 
     const customer = useForm({
         name: props.customer?.name,
         address: props.customer?.address,
         phone_number: props.customer?.phone_number,
+        categories: props.customer?.categories || [],
     });
 
     let show = ref(false);
+
+    const addTag = (newTag) => {
+        const tag = {
+            name: newTag,
+            id: newTag,
+        };
+        customer.categories.push(tag);
+    };
 
     const formAttributes = () => {
         let action = props.customer ? "put" : "post";
@@ -180,6 +194,27 @@
                                     <InputError
                                         class="mt-2"
                                         :message="customer.errors.phone_number"
+                                    />
+                                </div>
+
+                                <div class="mt-4">
+                                    <InputLabel
+                                        for="categories"
+                                        :value="__('Categories')"
+                                    />
+                                    <VueMultiselect
+                                        v-model="customer.categories"
+                                        :options="categories"
+                                        :multiple="true"
+                                        :taggable="true"
+                                        label="name"
+                                        track-by="id"
+                                        :placeholder="__('Select or Add Category')"
+                                        @tag="addTag"
+                                    />
+                                    <InputError
+                                        class="mt-2"
+                                        :message="customer.errors.categories"
                                     />
                                 </div>
 

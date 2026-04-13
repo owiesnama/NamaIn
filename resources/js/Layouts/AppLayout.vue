@@ -1,11 +1,12 @@
 <script setup>
     import { computed, ref } from "vue";
     import { router, Head, Link } from "@inertiajs/vue3";
-    import ApplicationMark from "@/Components/ApplicationMark.vue";
+    import ApplicationLogo from "@/Components/ApplicationLogo.vue";
     import Banner from "@/Components/Banner.vue";
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import NavLink from "@/Components/NavLink.vue";
+    import GlobalSearch from "@/Components/GlobalSearch.vue";
     import Flash from "@/Shared/Flash.vue";
 
     defineProps({
@@ -55,7 +56,7 @@
                 class="fixed inset-y-0 left-0 z-30 w-64 px-5 py-8 overflow-y-auto transition duration-200 transform bg-white border-r border-gray-200 xl:translate-x-0 xl:relative xl:inset-0 rtl:border-r-0 rtl:border-l dark:bg-gray-900 dark:border-gray-700"
             >
                 <Link :href="route('dashboard')">
-                    <ApplicationMark class="block w-auto h-9" />
+                    <ApplicationLogo class="block w-auto h-9" />
                 </Link>
 
                 <div class="flex flex-col justify-between flex-1 mt-6">
@@ -279,6 +280,31 @@
                                     v-text="__('Sales')"
                                 ></span>
                             </NavLink>
+
+                            <NavLink
+                                :href="route('payments.index')"
+                                :active="route().current('payments.index')"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    class="w-5 h-5"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M2.25 18.75V16.5m1.5 2.25v-2.25m1.5 2.25v-2.25m13.5 0v2.25m-1.5-2.25v2.25m-1.5-2.25v2.25M6.75 12h10.5a2.25 2.25 0 012.25 2.25v4.5a2.25 2.25 0 01-2.25 2.25H6.75a2.25 2.25 0 01-2.25-2.25v-4.5a2.25 2.25 0 012.25-2.25zM12 18.75V16.5m0 2.25L12 12"
+                                    />
+                                </svg>
+
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Payments')"
+                                ></span>
+                            </NavLink>
                         </div>
                     </nav>
                 </div>
@@ -289,42 +315,13 @@
                     <!-- Primary Navigation Menu -->
                     <div class="px-4 mx-auto sm:px-6 lg:px-8 2xl:container">
                         <div class="flex items-center justify-between h-16">
-                            <form
-                                class="relative flex-1 hidden xl:flex"
-                                action="#"
-                                method="GET"
-                            >
-                                <label
-                                    for="search-field"
-                                    class="sr-only"
-                                    v-text="__('Search')"
-                                ></label>
-                                <svg
-                                    class="absolute inset-y-0 left-0 w-5 h-full text-gray-400 pointer-events-none"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
-                                    aria-hidden="true"
-                                >
-                                    <path
-                                        fill-rule="evenodd"
-                                        d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                                        clip-rule="evenodd"
-                                    />
-                                </svg>
-                                <input
-                                    id="search-field"
-                                    class="block w-full h-full py-0 pl-8 pr-0 text-gray-900 border-0 placeholder:text-gray-400 focus:ring-0 sm:text-sm"
-                                    :placeholder="__('Search')+'...'"
-                                    type="search"
-                                    name="search"
-                                />
-                            </form>
+                            <GlobalSearch />
 
                             <Link
                                 class="xl:hidden"
                                 :href="route('dashboard')"
                             >
-                                <ApplicationMark class="block w-auto h-9" />
+                                <ApplicationLogo class="block w-auto h-9" />
                             </Link>
 
                             <div class="flex items-center">

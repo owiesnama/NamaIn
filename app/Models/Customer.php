@@ -9,6 +9,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 
@@ -56,6 +57,14 @@ class Customer extends BaseModel
     }
 
     /**
+     * The categories that belongs to this customer.
+     */
+    public function categories(): MorphToMany
+    {
+        return $this->morphToMany(Category::class, 'categorizable');
+    }
+
+    /**
      * Calculate the account balance for this customer.
      */
     public function accountBalance(): Attribute
@@ -67,11 +76,25 @@ class Customer extends BaseModel
 
     /**
      * Calculate the total account balance (unpaid invoices).
+     * If $asOfDate is provided, calculate balance as of that date.
      */
-    public function calculateAccountBalance(): float
+    public function calculateAccountBalance(?string $asOfDate = null): float
     {
+        if ($asOfDate) {
+            $totalInvoiced = $this->invoices()
+                ->where('created_at', '<', $asOfDate)
+                ->sum('total');
+
+            $totalPaid = Payment::whereHas('invoice', function ($query) {
+                $query->where('invocable_id', $this->id)
+                    ->where('invocable_type', self::class);
+            })->where('paid_at', '<', $asOfDate)
+                ->sum('amount');
+
+            return $totalInvoiced - $totalPaid;
+        }
+
         return $this->invoices()
-            ->whereIn('payment_status', [PaymentStatus::Unpaid, PaymentStatus::PartiallyPaid])
             ->get()
             ->sum('remaining_balance');
     }

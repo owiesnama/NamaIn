@@ -7,6 +7,10 @@ if (! function_exists('preference')) {
     {
         $value = Preference::where('key', $key)->first()?->value;
 
+        if ($key === 'logo' && $value && ! str_starts_with($value, 'http') && ! str_starts_with($value, '/')) {
+            return asset('storage/'.$value);
+        }
+
         return $value ?? $default;
     }
 }

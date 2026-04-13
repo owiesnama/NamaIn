@@ -25,7 +25,22 @@ class Transaction extends BaseModel
     /**
      * @var array<string>
      */
-    protected $fillable = ['product_id', 'storage_id', 'quantity', 'base_quantity', 'unit_id', 'price', 'description'];
+    protected $fillable = ['product_id', 'storage_id', 'invoice_id', 'quantity', 'base_quantity', 'unit_id', 'price', 'description', 'delivered', 'created_at', 'currency'];
+
+    protected static function booted(): void
+    {
+        static::creating(function (Transaction $transaction) {
+            $transaction->currency = $transaction->currency ?? $transaction->invoice?->currency ?? preference('currency', '$');
+        });
+    }
+
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'delivered' => 'boolean',
+        'created_at' => 'datetime',
+    ];
 
     /**
      * @var array<string>
@@ -78,7 +93,7 @@ class Transaction extends BaseModel
     public function type(): Attribute
     {
         return Attribute::make(
-            get: fn() => $this->invoice->invocable_type == Customer::class ? 'Sales' : 'Purchases'
+            get: fn () => $this->invoice?->invocable_type == Customer::class ? 'Sales' : 'Purchases'
         );
     }
 
@@ -135,16 +150,14 @@ class Transaction extends BaseModel
     /**
      * Filter invoices to delivered.
      */
-    public function scopeDelivered(Builder $builder, Carbon $datetime = null): Builder
+    public function scopeDelivered(Builder $builder, ?Carbon $datetime = null): Builder
     {
         return $builder->where('delivered', true)
-            ->when($datetime, fn($query) => $query->where('created_at', '>', $datetime));
+            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
     }
 
     /**
      * Replicate a transaction on the invoice for the remaining quantity.
-     *
-     * @return void
      */
     public function replicateForRemaining($remaining): void
     {
