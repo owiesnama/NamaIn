@@ -1,65 +1,129 @@
 <x-print>
-    <div class="p-4">
-        <header>
-            <div class="flex items-center justify-center mb-4">
-                <img class="img-rounded" height="30px" style="max-width: 120px; object-fit: contain;" src="{{ preference('logo', '/images/logo.svg') }}">
-            </div>
-            <div class="flex justify-between items-start">
-                <div>
-                    <b>{{__("Date")}}: </b> {{ now() }}<br />
-                    <b>{{__("Statement")}}: </b> {{ $customer->name }}
-                </div>
-                <div class="text-right">
-                    <b>{{__("Period")}}: </b> {{ $start_date }} {{__("to")}} {{ $end_date }}
-                </div>
-            </div>
-            <br />
-        </header>
+    @php
+        $currency = preference('currency', 'USD');
+        $logo     = preference('logo', '/images/logo.svg');
 
-        <h2 class="font-bold text-lg mb-4">{{__('Customer Statement')}}</h2>
+        // Build sorted activity list
+        $activities = collect();
 
-        <div class="bg-white border border-gray-200 rounded-lg">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-100">
+        foreach($invoices as $invoice) {
+            $activities->push([
+                'date'        => \Carbon\Carbon::parse($invoice->getRawOriginal('created_at')),
+                'description' => __('Invoice') . ' #' . ($invoice->serial_number ?: $invoice->id),
+                'debit'       => (float) $invoice->total,
+                'credit'      => 0,
+                'type'        => 'invoice',
+            ]);
+        }
+
+        foreach($payments as $payment) {
+            $activities->push([
+                'date'        => $payment->paid_at,
+                'description' => __('Payment') . ' — ' . __($payment->payment_method->label()),
+                'debit'       => 0,
+                'credit'      => (float) $payment->amount,
+                'type'        => 'payment',
+            ]);
+        }
+
+        $activities    = $activities->sortBy('date')->values();
+        $totalDebits   = $activities->sum('debit');
+        $totalCredits  = $activities->sum('credit');
+        $closingBalance = $opening_balance + $totalDebits - $totalCredits;
+    @endphp
+
+    <div class="page">
+
+        {{-- ── Header band ─────────────────────────────── --}}
+        <div class="print-header dark">
+            <div class="logo">
+                <img src="{{ $logo }}" alt="Logo">
+            </div>
+            <div class="doc-title">{{ __('Account Statement') }}</div>
+        </div>
+
+        {{-- ── Meta strip ──────────────────────────────── --}}
+        <div class="meta-strip">
+            <div class="meta-item">
+                <div class="meta-label">{{ __('Account') }}</div>
+                <div class="meta-value">{{ $customer->name }}</div>
+            </div>
+            @if($customer->phone_number)
+                <div class="meta-item">
+                    <div class="meta-label">{{ __('Phone') }}</div>
+                    <div class="meta-value">{{ $customer->phone_number }}</div>
+                </div>
+            @endif
+            <div class="meta-item">
+                <div class="meta-label">{{ __('Period') }}</div>
+                <div class="meta-value">{{ $start_date }} — {{ $end_date }}</div>
+            </div>
+            <div class="meta-item">
+                <div class="meta-label">{{ __('Generated') }}</div>
+                <div class="meta-value">{{ now()->format('Y-m-d') }}</div>
+            </div>
+        </div>
+
+        @if($customer->address)
+            <div style="padding: 8px 32px; font-size: 10px; color: #6b7280; background: #fafafa; border-bottom: 1px solid #e5e7eb;">
+                {{ $customer->address }}
+            </div>
+        @endif
+
+        {{-- ── Stats row ────────────────────────────────── --}}
+        <div class="stats-row">
+            <div class="stat-card neutral">
+                <div class="stat-label">{{ __('Opening Balance') }}</div>
+                <div class="stat-value">{{ number_format($opening_balance, 2) }}</div>
+                <div style="font-size: 8px; color: #9ca3af; margin-top: 2px;">{{ $currency }}</div>
+            </div>
+            <div class="stat-card danger">
+                <div class="stat-label">{{ __('Total Invoiced') }}</div>
+                <div class="stat-value">{{ number_format($totalDebits, 2) }}</div>
+                <div style="font-size: 8px; color: #9ca3af; margin-top: 2px;">{{ $currency }}</div>
+            </div>
+            <div class="stat-card accent">
+                <div class="stat-label">{{ __('Total Paid') }}</div>
+                <div class="stat-value">{{ number_format($totalCredits, 2) }}</div>
+                <div style="font-size: 8px; color: #9ca3af; margin-top: 2px;">{{ $currency }}</div>
+            </div>
+            <div class="stat-card {{ $closingBalance > 0 ? 'danger' : 'accent' }}">
+                <div class="stat-label">{{ __('Closing Balance') }}</div>
+                <div class="stat-value">{{ number_format(abs($closingBalance), 2) }}</div>
+                <div style="font-size: 8px; color: #9ca3af; margin-top: 2px;">
+                    {{ $currency }}
+                    @if($closingBalance < 0) ({{ __('credit') }}) @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- ── Ledger ───────────────────────────────────── --}}
+        <div class="section" style="padding-top: 0;">
+            <div class="section-title">{{ __('Transaction History') }}</div>
+
+            @php $runningBalance = $opening_balance; @endphp
+
+            <table class="table-ledger">
+                <thead>
                     <tr>
-                        <th class="px-4 py-2 text-left rtl:text-right">{{__('Date')}}</th>
-                        <th class="px-4 py-2 text-left rtl:text-right">{{__('Description')}}</th>
-                        <th class="px-4 py-2 text-left rtl:text-right">{{__('Debit')}}</th>
-                        <th class="px-4 py-2 text-left rtl:text-right">{{__('Credit')}}</th>
-                        <th class="px-4 py-2 text-left rtl:text-right">{{__('Balance')}}</th>
+                        <th style="width: 90px;">{{ __('Date') }}</th>
+                        <th>{{ __('Description') }}</th>
+                        <th style="width: 110px; text-align: end;">{{ __('Debit') }}</th>
+                        <th style="width: 110px; text-align: end;">{{ __('Credit') }}</th>
+                        <th style="width: 120px; text-align: end;">{{ __('Balance') }}</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-200">
-                    <tr>
-                        <td class="px-4 py-2">{{ $start_date }}</td>
-                        <td class="px-4 py-2 font-bold">{{__('Opening Balance')}}</td>
-                        <td class="px-4 py-2"></td>
-                        <td class="px-4 py-2"></td>
-                        <td class="px-4 py-2 font-bold text-gray-800">{{ number_format($opening_balance, 2) . ' ' . preference('currency', 'USD') }}</td>
+                <tbody>
+                    {{-- Opening row --}}
+                    <tr class="opening-row">
+                        <td>{{ $start_date }}</td>
+                        <td class="font-semibold">{{ __('Opening Balance') }}</td>
+                        <td class="text-end"></td>
+                        <td class="text-end"></td>
+                        <td class="text-end font-semibold">
+                            {{ number_format($opening_balance, 2) }} {{ $currency }}
+                        </td>
                     </tr>
-                    @php
-                        $runningBalance = $opening_balance;
-                        $activities = collect();
-                        foreach($invoices as $invoice) {
-                            $activities->push([
-                                'date' => $invoice->created_at,
-                                'description' => __('Invoice') . ' #' . ($invoice->serial_number ?: $invoice->id),
-                                'debit' => $invoice->total,
-                                'credit' => 0,
-                                'type' => 'invoice'
-                            ]);
-                        }
-                        foreach($payments as $payment) {
-                            $activities->push([
-                                'date' => $payment->paid_at,
-                                'description' => __('Payment') . ' - ' . __($payment->payment_method->label()),
-                                'debit' => 0,
-                                'credit' => $payment->amount,
-                                'type' => 'payment'
-                            ]);
-                        }
-                        $activities = $activities->sortBy('date');
-                    @endphp
 
                     @foreach($activities as $activity)
                         @php
@@ -67,25 +131,41 @@
                             $runningBalance -= $activity['credit'];
                         @endphp
                         <tr>
-                            <td class="px-4 py-2">{{ $activity['date'] }}</td>
-                            <td class="px-4 py-2">{{ $activity['description'] }}</td>
-                            <td class="px-4 py-2 text-red-600">{{ $activity['debit'] > 0 ? number_format($activity['debit'], 2) : '' }}</td>
-                            <td class="px-4 py-2 text-emerald-600">{{ $activity['credit'] > 0 ? number_format($activity['credit'], 2) : '' }}</td>
-                            <td class="px-4 py-2 font-semibold">{{ number_format($runningBalance, 2) . ' ' . preference('currency', 'USD') }}</td>
+                            <td class="no-wrap text-gray-500">{{ \Carbon\Carbon::parse($activity['date'])->format('Y-m-d') }}</td>
+                            <td>{{ $activity['description'] }}</td>
+                            <td class="text-end no-wrap text-red">
+                                {{ $activity['debit'] > 0 ? number_format($activity['debit'], 2) . ' ' . $currency : '' }}
+                            </td>
+                            <td class="text-end no-wrap text-emerald">
+                                {{ $activity['credit'] > 0 ? number_format($activity['credit'], 2) . ' ' . $currency : '' }}
+                            </td>
+                            <td class="text-end no-wrap font-semibold">
+                                {{ number_format($runningBalance, 2) }} {{ $currency }}
+                            </td>
                         </tr>
                     @endforeach
                 </tbody>
-                <tfoot class="bg-gray-50">
+                <tfoot>
                     <tr>
-                        <td colspan="4" class="px-4 py-2 text-right rtl:text-left font-bold">{{__('Closing Balance')}}</td>
-                        <td class="px-4 py-2 font-bold text-gray-800">{{ number_format($runningBalance, 2) . ' ' . preference('currency', 'USD') }}</td>
+                        <td colspan="2" class="text-end">{{ __('Totals') }}</td>
+                        <td class="text-end no-wrap text-red">{{ number_format($totalDebits, 2) }} {{ $currency }}</td>
+                        <td class="text-end no-wrap text-emerald">{{ number_format($totalCredits, 2) }} {{ $currency }}</td>
+                        <td class="text-end no-wrap">{{ number_format($closingBalance, 2) }} {{ $currency }}</td>
                     </tr>
                 </tfoot>
             </table>
         </div>
 
-        <div class="mt-8 flex justify-end">
-            {!! $qr !!}
+        {{-- ── Footer ───────────────────────────────────── --}}
+        <div class="print-footer">
+            <div>
+                <div class="signature-line">{{ __('Authorized Signature') }}</div>
+                <div style="margin-top: 8px; font-size: 8px; color: #9ca3af;">
+                    {{ __('Generated on') }} {{ now()->format('Y-m-d H:i') }}
+                </div>
+            </div>
+            <div class="qr-wrap">{!! $qr !!}</div>
         </div>
+
     </div>
 </x-print>

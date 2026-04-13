@@ -23,12 +23,13 @@ class ChequeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'payee' => 'required|array',
-            'payee.type' => 'required|string',
+            'payee_id' => 'required|integer',
+            'payee_type' => 'required|string',
             'type' => 'required|in:1,0',
             'due' => 'required|date',
-            'bank' => 'required|string|min:10',
-            'amount' => 'required|numeric',
+            'bank_id' => 'required|exists:banks,id',
+            'reference_number' => 'required|string|max:255',
+            'amount' => 'required|numeric|min:0.01',
         ];
     }
 }

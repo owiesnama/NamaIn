@@ -13,17 +13,15 @@ enum PaymentMethod: string
     public static function casesWithLabels(): array
     {
         return [
-            'Cash' => self::Cash,
-            'Credit' => self::Credit,
-            'Cheque' => self::Cheque,
-            'Bank Transfer' => self::BankTransfer,
-            'Mixed' => self::Mixed,
+            'Cash' => self::Cash->value,
+            'Cheque' => self::Cheque->value,
+            'Bank Transfer' => self::BankTransfer->value,
         ];
     }
 
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::Cash => 'Cash',
             self::Credit => 'Credit',
             self::Cheque => 'Cheque',

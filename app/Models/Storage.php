@@ -16,6 +16,8 @@ class Storage extends BaseModel
      *
      * @var array<string>
      */
+    protected array $searchable = ['name', 'address'];
+
     protected $fillable = [
         'name',
         'address',
@@ -116,6 +118,6 @@ class Storage extends BaseModel
      */
     public function getStockCountAttribute(): int
     {
-        return $this->stock->count();
+        return $this->stock()->count();
     }
 }

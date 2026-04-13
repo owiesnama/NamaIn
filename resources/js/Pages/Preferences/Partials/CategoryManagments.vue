@@ -31,7 +31,7 @@ const AddNewCategory = () => {};
                 <InputLabel for="category_name" value="Category Name" />
                 <TextInput
                     id="name"
-                    v-model="form.name"
+                    v-model="form.category_name"
                     type="text"
                     class="block w-full mt-1"
                     autocomplete="name"
@@ -41,7 +41,7 @@ const AddNewCategory = () => {};
 
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel for="categories" value="Categories" />
-                
+
                 <div class="flex flex-wrap gap-2 mt-2">
                     <p class="inline-flex items-center px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-100 rounded-lg gap-x-2 ">
                         Watches
@@ -62,7 +62,7 @@ const AddNewCategory = () => {};
                             </svg>
                         </button>
                     </p>
-                    
+
                      <p class="inline-flex items-center px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-100 rounded-lg gap-x-2 ">
                         Watches
 
@@ -102,7 +102,7 @@ const AddNewCategory = () => {};
                             </svg>
                         </button>
                     </p>
-                    
+
                      <p class="inline-flex items-center px-3 py-2 text-sm font-semibold text-gray-800 bg-gray-100 rounded-lg gap-x-2 ">
                         Watches
 

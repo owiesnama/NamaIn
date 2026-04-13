@@ -6,6 +6,7 @@ use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Storage;
 use App\Models\Transaction;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\ValidationException;
 
 class StockController extends Controller
@@ -22,6 +23,8 @@ class StockController extends Controller
 
         $invoice->markAs(InvoiceStatus::Delivered);
 
+        Cache::forget('low_stock_products');
+
         return back()->with('success', "Invoice items has being added to storage: {$storage->name} ");
     }
 
@@ -36,6 +39,7 @@ class StockController extends Controller
                 $transaction->for($storage)
                     ->deduct()
                     ->deliver();
+
                 return;
             }
 
@@ -49,16 +53,18 @@ class StockController extends Controller
 
         $invoice->markAs($invoiceStatus);
 
+        Cache::forget('low_stock_products');
+
         return back()->with('flash', ['success' => "Invoice items has being deducted from storage: {$storage->name} "]);
     }
 
     private function stockAvailableFor($invoice, $storage)
     {
         if ($invoice
-                ->transactions
-                ->filter(
-                    fn($record) => $storage->hasStockFor($record->product_id, $record->base_quantity)
-                )->count() == 0
+            ->transactions
+            ->filter(
+                fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity)
+            )->count() == 0
         ) {
             throw ValidationException::withMessages(
                 ['storage' => __('No stock available for any of the items on the invoice.')]

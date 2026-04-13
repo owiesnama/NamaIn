@@ -10,8 +10,10 @@ class InvoiceObserver
 {
     public function created(Invoice $invoice): void
     {
-        $invoice->serial_number = $this->generateSerialNumber($invoice);
-        $invoice->save();
+        if (empty($invoice->serial_number)) {
+            $invoice->serial_number = $this->generateSerialNumber($invoice);
+            $invoice->save();
+        }
     }
 
     public function generateSerialNumber($invoice)

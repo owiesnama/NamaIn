@@ -2,33 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\SyncCategoriesAction;
 use App\Exports\CustomerExport;
+use App\Filters\CustomerFilter;
 use App\Http\Requests\CustomerRequest;
 use App\Imports\CustomerImport;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Transaction;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use App\Services\StatementService;
 use Maatwebsite\Excel\Facades\Excel;
-use Spatie\Browsershot\Browsershot;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CustomersController extends Controller
 {
-    public function index()
+    public function index(CustomerFilter $filter)
     {
         return inertia('Customers/Index', [
-            'customers' => Customer::search(request('search'))
-                ->trash(request('status'))
-                ->when(request('category'), function ($query, $category) {
-                    $query->whereHas('categories', function ($query) use ($category) {
-                        $query->where('categories.id', $category);
-                    });
-                })
+            'customers' => Customer::filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
                     $query->orderBy(in_array($sortBy, ['name', 'created_at', 'credit_limit']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
                 }, function ($query) {
@@ -41,33 +33,21 @@ class CustomersController extends Controller
         ]);
     }
 
-    public function store(CustomerRequest $request)
+    public function store(CustomerRequest $request, SyncCategoriesAction $syncCategories)
     {
         $customer = Customer::create($request->all());
 
-        $categoryIds = collect($request->get('categories'))->map(function ($category) {
-            return Category::firstOrCreate(
-                ['id' => is_numeric($category['id']) ? $category['id'] : null],
-                ['name' => $category['name']]
-            )->id;
-        });
-        $customer->categories()->sync($categoryIds);
+        $syncCategories->execute($customer, $request->get('categories', []));
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer Created Successfully');
     }
 
-    public function update(Customer $customer, CustomerRequest $request)
+    public function update(Customer $customer, CustomerRequest $request, SyncCategoriesAction $syncCategories)
     {
         $customer->update($request->all());
 
-        $categoryIds = collect($request->get('categories'))->map(function ($category) {
-            return Category::firstOrCreate(
-                ['id' => is_numeric($category['id']) ? $category['id'] : null],
-                ['name' => $category['name']]
-            )->id;
-        });
-        $customer->categories()->sync($categoryIds);
+        $syncCategories->execute($customer, $request->get('categories', []));
 
         return back()->with('success', 'customer updated successfully');
     }
@@ -143,39 +123,12 @@ class CustomersController extends Controller
         ]);
     }
 
-    public function printStatement(Customer $customer)
+    public function printStatement(Customer $customer, StatementService $statementService)
     {
-        $startDate = request('start_date', now()->subMonth());
-        $endDate = request('end_date', now());
+        $startDate = request('start_date', now()->subMonth()->toDateTimeString());
+        $endDate = request('end_date', now()->toDateTimeString());
 
-        $invoices = $customer->invoices()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->with('payments')
-            ->get();
-
-        $payments = $customer->getPaymentHistory()
-            ->whereBetween('paid_at', [$startDate, $endDate]);
-
-        $opening_balance = $customer->calculateAccountBalance($startDate);
-
-        $renderer = new ImageRenderer(
-            new RendererStyle(80),
-            new SvgImageBackEnd
-        );
-        $writer = new Writer($renderer);
-        $qrCode = $writer->writeString(route('customers.statement', [$customer, 'start_date' => $startDate, 'end_date' => $endDate]));
-
-        $pdf = Browsershot::html(
-            view('print.statement', [
-                'customer' => $customer,
-                'invoices' => $invoices,
-                'payments' => $payments,
-                'start_date' => $startDate,
-                'end_date' => $endDate,
-                'opening_balance' => $opening_balance,
-                'qr' => $qrCode,
-            ])->render()
-        )->noSandbox()->format('A4')->pdf();
+        $pdf = $statementService->generatePdf($customer, $startDate, $endDate);
 
         $headers = [
             'Content-Type' => 'application/pdf',

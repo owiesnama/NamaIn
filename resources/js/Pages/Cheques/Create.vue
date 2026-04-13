@@ -1,18 +1,20 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { useForm } from "@inertiajs/vue3";
-    import TextInput from "@/Components/TextInput.vue";
-    import PrimaryButton from "@/Components/PrimaryButton.vue";
+    import InputError from "@/Components/InputError.vue";
     import InputLabel from "@/Components/InputLabel.vue";
     import SelectBox from "@/Shared/SelectBox.vue";
 
     defineProps({
-        payees: Object
+        payees: Object,
+        banks: Object
     });
     let cheque = useForm({
         type: 1,
-        payee: {},
-        bank: "",
+        payee_id: null,
+        payee_type: "",
+        bank_id: "",
+        reference_number: "",
         amount: 0.0,
         due: null
     });
@@ -45,12 +47,30 @@
                 <div class="flex items-center justify-between">
                     <div class="mb-4">
                         <InputLabel :value="__('Bank')" />
+                        <select
+                            v-model="cheque.bank_id"
+                            class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                        >
+                            <option value="">{{ __('Select Bank') }}</option>
+                            <option
+                                v-for="bank in banks"
+                                :key="bank.id"
+                                :value="bank.id"
+                            >
+                                {{ bank.name }}
+                            </option>
+                        </select>
+                        <InputError :message="cheque.errors.bank_id" class="mt-1" />
+                    </div>
+                    <div class="mb-4">
+                        <InputLabel :value="__('Cheque Number')" />
                         <input
-                            v-model="cheque.bank"
+                            v-model="cheque.reference_number"
                             class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                             type="text"
-                            :placeholder="__('Bank')"
+                            :placeholder="__('Cheque Number')"
                         />
+                        <InputError :message="cheque.errors.reference_number" class="mt-1" />
                     </div>
                     <div>
                         <InputLabel :value="__('Due')" />
@@ -60,22 +80,27 @@
                             type="date"
                             :placeholder="__('Due')"
                         />
+                        <InputError :message="cheque.errors.due" class="mt-1" />
                     </div>
                 </div>
                 <h2 class="mt-1 text-lg font-semibold text-gray-800">
                     <InputLabel :value="__('Payee')" />
                     <select
-                        v-model="cheque.payee"
+                        v-model="cheque.payee_id"
+                        @change="cheque.payee_type = payees.find(p => p.id === cheque.payee_id)?.type"
                         class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                         name="payee"
                     >
+                        <option :value="null">{{ __('Select Payee') }}</option>
                         <option
                             v-for="payee in payees"
-                            :key="payee.id"
-                            :value="payee"
-                            v-text="payee.name + '(' + payee.type_string + ')'"
+                            :key="payee.id + payee.type"
+                            :value="payee.id"
+                            v-text="payee.name + ' (' + payee.type_string + ')'"
                         ></option>
                     </select>
+                    <InputError :message="cheque.errors.payee_id" class="mt-1" />
+                    <InputError :message="cheque.errors.payee_type" class="mt-1" />
                 </h2>
                 <div class="mt-24 sm:flex sm:items-end sm:justify-between">
                     <div>
@@ -102,6 +127,7 @@
                             type="number"
                             :placeholder="__('Amount')"
                         />
+                        <InputError :message="cheque.errors.amount" class="mt-1" />
                     </h3>
                 </div>
             </div>

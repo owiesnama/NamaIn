@@ -27,6 +27,7 @@ class ProductRequest extends FormRequest
             'cost' => 'required|numeric|gt:0',
             'currency' => 'nullable|string|max:3',
             'expire_date' => 'required',
+            'alert_quantity' => 'nullable|numeric|min:0',
             'units' => 'array|min:1',
             'units.*.name' => 'required',
             'units.*.conversion_factor' => 'required|numeric|gt:0',

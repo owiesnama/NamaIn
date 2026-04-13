@@ -2,8 +2,9 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import InputLabel from "@/Components/InputLabel.vue";
     import TextInput from "@/Components/TextInput.vue";
+    import InputError from "@/Components/InputError.vue";
     import PurchaseProduct from "@/Models/PurchaseProduct";
-    import { reactive, computed } from "vue";
+    import { ref, computed } from "vue";
     import { router, useForm } from "@inertiajs/vue3";
     import { debounce } from "lodash";
 
@@ -14,15 +15,15 @@
         payment_methods: Object
     });
 
-    let purchases = reactive([new PurchaseProduct()]);
+    const purchases = ref([new PurchaseProduct()]);
 
     const newRow = () => {
-        purchases.push(new PurchaseProduct());
+        purchases.value.push(new PurchaseProduct());
     };
 
     const totalCost = computed(() => {
         let cost = 0;
-        purchases.forEach((product) => {
+        purchases.value.forEach((product) => {
             cost = product.total() + cost;
         });
         return cost;
@@ -34,9 +35,9 @@
         return product.units;
     };
 
-    let form = reactive({
-        total: totalCost,
-        products: purchases,
+    const form = useForm({
+        total: 0,
+        products: purchases.value,
         invocable: null,
         payment_method: 'credit',
         discount: 0,
@@ -44,6 +45,7 @@
         payment_reference: '',
         payment_notes: ''
     });
+
     const searchSupplier = debounce(function(search) {
         router.get(route("purchases.create"), { supplier: search }, {
             preserveScroll: true,
@@ -51,9 +53,10 @@
         });
     }, 300);
 
-
     const submit = () => {
-        useForm(form).post(route("purchases.store"));
+        form.total = totalCost.value;
+        form.products = purchases.value;
+        form.post(route("purchases.store"));
     };
 
 </script>
@@ -80,6 +83,7 @@
                         track-by="id"
                         @search-change="searchSupplier"
                     />
+                    <InputError :message="form.errors.invocable" class="mt-1" />
                 </div>
                 <div class="ltr:text-right rtl:text-left">
                     <h2
@@ -130,6 +134,7 @@
                                     v-text="product.name"
                                 ></option>
                             </select>
+                            <InputError :message="form.errors[`products.${index}.product`]" class="mt-1" />
                         </div>
 
                         <div>
@@ -157,6 +162,7 @@
                                     v-text="unit.name"
                                 ></option>
                             </select>
+                            <InputError :message="form.errors[`products.${index}.unit`]" class="mt-1" />
                         </div>
 
                         <div>
@@ -172,6 +178,7 @@
                                 required
                                 autofocus
                             />
+                            <InputError :message="form.errors[`products.${index}.quantity`]" class="mt-1" />
                         </div>
 
                         <div>
@@ -187,6 +194,7 @@
                                 required
                                 autofocus
                             />
+                            <InputError :message="form.errors[`products.${index}.price`]" class="mt-1" />
                         </div>
 
                         <div>
@@ -201,6 +209,7 @@
                                 name="description"
                                 class="w-full h-20 px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                             ></textarea>
+                            <InputError :message="form.errors[`products.${index}.description`]" class="mt-1" />
                         </div>
                     </div>
                 </div>
@@ -235,6 +244,7 @@
                                 {{ __(label) }}
                             </option>
                         </select>
+                        <InputError :message="form.errors.payment_method" class="mt-1" />
                     </div>
 
                     <div>
@@ -246,6 +256,7 @@
                             step="0.01"
                             class="block w-full mt-1"
                         />
+                        <InputError :message="form.errors.discount" class="mt-1" />
                     </div>
 
                     <div>
@@ -257,6 +268,7 @@
                             step="0.01"
                             class="block w-full mt-1"
                         />
+                        <InputError :message="form.errors.initial_payment_amount" class="mt-1" />
                     </div>
 
                     <div>
@@ -268,6 +280,7 @@
                             class="block w-full mt-1"
                             placeholder="Cheque number, etc."
                         />
+                        <InputError :message="form.errors.payment_reference" class="mt-1" />
                     </div>
 
                     <div class="sm:col-span-2">
@@ -279,6 +292,7 @@
                             class="w-full px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                             placeholder="Additional payment notes..."
                         ></textarea>
+                        <InputError :message="form.errors.payment_notes" class="mt-1" />
                     </div>
                 </div>
             </div>

@@ -141,7 +141,7 @@
                 />
 
                 <!-- Table Content -->
-                <div class="flex-grow min-w-0">
+                <div class="flex-grow min-w-0 overflow-hidden">
                     <div class="overflow-x-auto">
                         <div class="inline-block min-w-full align-middle">
                             <div class="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700 shadow-sm">
@@ -158,10 +158,21 @@
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
                                     <template v-if="suppliers.data.length">
-                                        <tr v-for="supplier in suppliers.data" :key="supplier.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <tr
+                                            v-for="supplier in suppliers.data"
+                                            :key="supplier.id"
+                                            class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                                            @click="router.visit(route('suppliers.account', supplier.id))"
+                                        >
                                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">#{{ supplier.id }}</td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900 dark:text-white">{{ supplier.name }}</div>
+                                                <Link
+                                                    :href="route('suppliers.account', supplier.id)"
+                                                    class="text-sm font-medium text-gray-900 dark:text-white hover:text-emerald-600 transition-colors inline-block"
+                                                    @click.stop
+                                                >
+                                                    {{ supplier.name }}
+                                                </Link>
                                                 <div class="flex flex-wrap gap-1 mt-1">
                                                     <span v-for="cat in supplier.categories" :key="cat.id" class="px-1.5 py-0.5 text-[10px] font-medium bg-emerald-50 text-emerald-700 rounded border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
                                                         {{ cat.name }}
@@ -169,11 +180,11 @@
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                <a class="text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors" :href="'tel:' + supplier.phone_number">{{ supplier.phone_number }}</a>
+                                                <a class="text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors" :href="'tel:' + supplier.phone_number" @click.stop>{{ supplier.phone_number }}</a>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">{{ supplier.address }}</td>
                                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">{{ supplier.created_at }}</td>
-                                            <td class="px-6 py-4 text-sm font-medium text-end whitespace-nowrap">
+                                            <td class="px-6 py-4 text-sm font-medium text-end whitespace-nowrap" @click.stop>
                                                 <div class="flex items-center justify-end gap-x-3">
                                                     <SupplierForm :supplier="supplier" :categories="categories" />
                                                     <DeleteSupplier :supplier="supplier" />

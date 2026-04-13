@@ -24,11 +24,22 @@ class PaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'invoice_id' => 'required|exists:invoices,id',
+            'invoice_id' => 'required_without:payable_id|nullable|exists:invoices,id',
+            'payable_id' => 'required_without:invoice_id|nullable|integer',
+            'payable_type' => 'required_with:payable_id|nullable|string',
             'amount' => 'required|numeric|min:0.01',
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
             'reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
+
+            // Bank Transfer fields
+            'bank_name' => 'required_if:payment_method,bank_transfer|nullable|string|max:255',
+            'receipt' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
+
+            // Cheque fields
+            'cheque_bank_id' => 'required_if:payment_method,cheque|nullable|exists:banks,id',
+            'cheque_due_date' => 'required_if:payment_method,cheque|nullable|date',
+            'cheque_number' => 'required_if:payment_method,cheque|nullable|string|max:255',
         ];
     }
 
@@ -40,7 +51,8 @@ class PaymentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'invoice_id.required' => 'Please select an invoice',
+            'invoice_id.required_without' => 'Please select an invoice or a customer/supplier',
+            'payable_id.required_without' => 'Please select an invoice or a customer/supplier',
             'invoice_id.exists' => 'The selected invoice does not exist',
             'amount.required' => 'Payment amount is required',
             'amount.min' => 'Payment amount must be greater than zero',

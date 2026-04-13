@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Filters\StorageFilter;
 use App\Http\Requests\StorageRequest;
 use App\Models\Storage;
 
 class StoragesController extends Controller
 {
-    public function index()
+    public function index(StorageFilter $filter)
     {
         return inertia('Storages/Index', [
             'storages_count' => Storage::count(),
-            'storages' => Storage::search(request('search'))
-                ->trash(request('status'))
+            'storages' => Storage::filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
                     $query->orderBy(in_array($sortBy, ['name', 'created_at']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
                 }, function ($query) {
                     $query->latest();
                 })
+                ->withCount('stock')
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
@@ -27,7 +28,12 @@ class StoragesController extends Controller
     {
         return inertia('Storages/Show', [
             'storage' => $storage,
-            'products' => $storage->stock()->get(),
+            'products' => $storage->stock()
+                ->when(request('search'), function ($query, $search) {
+                    $query->where('name', config('database.default') === 'pgsql' ? 'ILIKE' : 'LIKE', "%{$search}%");
+                })
+                ->paginate(parent::ELEMENTS_PER_PAGE)
+                ->withQueryString(),
         ]);
     }
 

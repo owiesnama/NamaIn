@@ -2,16 +2,20 @@
 
 namespace App\Models;
 
+use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @method static delivered(Carbon $datetime).
  */
 class Transaction extends BaseModel
 {
+    use SoftDeletes, WithTrashScope;
+
     /**
      * @var array<string>
      */
@@ -35,12 +39,15 @@ class Transaction extends BaseModel
     }
 
     /**
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'delivered' => 'boolean',
-        'created_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'delivered' => 'boolean',
+            'created_at' => 'datetime',
+        ];
+    }
 
     /**
      * @var array<string>
@@ -90,11 +97,9 @@ class Transaction extends BaseModel
     /**
      *  Type of this transaction.
      */
-    public function type(): Attribute
+    public function getTypeAttribute(): string
     {
-        return Attribute::make(
-            get: fn () => $this->invoice?->invocable_type == Customer::class ? 'Sales' : 'Purchases'
-        );
+        return $this->invoice?->invocable_type == Customer::class ? 'Sales' : 'Purchases';
     }
 
     /**
@@ -140,6 +145,21 @@ class Transaction extends BaseModel
     {
         $this->delivered = true;
         $this->save();
+    }
+
+    public function scopeForCustomer(Builder $query): Builder
+    {
+        return $query->whereHas('invoice', fn ($q) => $q->where('invocable_type', Customer::class));
+    }
+
+    public function scopeForSupplier(Builder $query): Builder
+    {
+        return $query->whereHas('invoice', fn ($q) => $q->where('invocable_type', Supplier::class));
+    }
+
+    public function scopeTotalValue(Builder $query): float|int|string
+    {
+        return $query->sum(DB::raw('price * base_quantity'));
     }
 
     public function scopeOfType(Builder $builder, string $type): Builder

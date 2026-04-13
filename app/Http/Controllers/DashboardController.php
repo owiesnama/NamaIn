@@ -2,135 +2,118 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\PaymentStatus;
-use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Product;
-use App\Models\Supplier;
 use App\Models\Transaction;
-use Carbon\Carbon;
+use App\Queries\DashboardStatsQuery;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(DashboardStatsQuery $query)
     {
-        [$totalSales, $totalPurchase] = collect([Customer::class => 'total_sales', Supplier::class => 'total_purchase'])
-            ->map(function ($key, $type) {
-                return Cache::remember(
-                    $key,
-                    now()->addDay(),
-                    fn () => Transaction::delivered(now()->subMonth())
-                        ->whereHas('invoice', fn ($query) => $query->where('invocable_type', $type))
-                        ->sum(DB::raw('price * base_quantity'))
-                );
-            })->values();
-
-        // Calculate outstanding receivables
-        $outstandingReceivables = Cache::remember(
-            'outstanding_receivables',
-            now()->addHour(),
-            fn () => Invoice::where('invocable_type', Customer::class)
-                ->whereIn('payment_status', [PaymentStatus::Unpaid, PaymentStatus::PartiallyPaid])
-                ->get()
-                ->sum('remaining_balance')
-        );
-
-        // Calculate payments this month
-        $paymentsThisMonth = Cache::remember(
-            'payments_this_month',
-            now()->addHour(),
-            fn () => Payment::whereMonth('paid_at', now()->month)
-                ->whereYear('paid_at', now()->year)
-                ->sum('amount')
-        );
-
-        // Get recent payments
-        $recentPayments = Payment::with(['invoice.invocable', 'createdBy'])
-            ->latest('paid_at')
-            ->limit(5)
-            ->get();
-
-        // Top Selling Products
-        $topProducts = Cache::remember(
-            'top_products',
-            app()->environment('testing') ? 0 : now()->addDay(),
-            fn () => Transaction::delivered(now()->subMonth())
-                ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Customer::class))
-                ->select('product_id', DB::raw('SUM(base_quantity) as total_quantity'), DB::raw('SUM(price * base_quantity) as total_revenue'))
-                ->groupBy('product_id')
-                ->orderByDesc('total_quantity')
-                ->limit(5)
-                ->with('product')
-                ->get()
-        );
-
-        // Low Stock Products
-        $lowStockProducts = Cache::remember(
-            'low_stock_products',
-            app()->environment('testing') ? 0 : now()->addHour(),
-            fn () => Product::with('stock')
-                ->get()
-                ->filter(fn ($product) => $product->isRunningLow())
-                ->take(5)
-        );
-
-        // Monthly stats for chart
-        $monthlyStats = Cache::remember(
-            'monthly_stats',
-            now()->addHour(),
-            function () {
-                $months = collect(range(5, 0))->map(fn ($i) => now()->subMonths($i)->format('Y-m'));
-
-                $driver = DB::getDriverName();
-                if ($driver === 'sqlite') {
-                    $dateFormat = "strftime('%Y-%m', created_at)";
-                } elseif ($driver === 'pgsql') {
-                    $dateFormat = "TO_CHAR(created_at, 'YYYY-MM')";
-                } else {
-                    $dateFormat = "DATE_FORMAT(created_at, '%Y-%m')";
-                }
-
-                $sales = Transaction::delivered(now()->subMonths(6))
-                    ->whereHas('invoice', fn ($q) => $q->where('invocable_type', Customer::class))
-                    ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity) as total'))
-                    ->groupBy('month')
-                    ->pluck('total', 'month');
-
-                $purchases = Transaction::delivered(now()->subMonths(6))
-                    ->whereHas('invoice', fn ($q) => $q->where('invocable_type', Supplier::class))
-                    ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity) as total'))
-                    ->groupBy('month')
-                    ->pluck('total', 'month');
-
-                return [
-                    'labels' => $months->map(fn ($m) => Carbon::parse($m)->locale(app()->getLocale())->translatedFormat('M Y')),
-                    'sales' => $months->map(fn ($m) => $sales->get($m, 0)),
-                    'purchases' => $months->map(fn ($m) => $purchases->get($m, 0)),
-                ];
-            }
-        );
-
         return inertia('Dashboard', [
-            'total_sales' => $totalSales,
-            'total_purchase' => $totalPurchase,
-            'outstanding_receivables' => $outstandingReceivables,
-            'payments_this_month' => $paymentsThisMonth,
-            'transactions' => $this->transactions()->toArray(),
-            'recent_payments' => $recentPayments,
-            'top_products' => $topProducts,
-            'low_stock_products' => $lowStockProducts->values(),
-            'monthly_stats' => $monthlyStats,
+            'total_sales' => $this->totalSales(),
+            'total_purchase' => $this->totalPurchase(),
+            'outstanding_receivables' => $this->outstandingReceivables(),
+            'payments_this_month' => $this->paymentsThisMonth(),
+            'transactions' => $this->recentTransactions(),
+            'recent_payments' => $this->recentPayments(),
+            'top_products' => $this->topSellingProducts(),
+            'low_stock_products' => $this->lowStockProducts(),
+            'monthly_stats' => Cache::remember('monthly_stats', $this->cacheTtl('hour'), fn () => $query->getMonthlyStats()),
         ]);
     }
 
-    public function transactions()
+    private function totalSales(): float|string
+    {
+        return Cache::remember('total_sales', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subMonth())
+            ->forCustomer()
+            ->totalValue()
+        );
+    }
+
+    private function totalPurchase(): float|string
+    {
+        return Cache::remember('total_purchase', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subMonth())
+            ->forSupplier()
+            ->totalValue()
+        );
+    }
+
+    private function outstandingReceivables(): float|string
+    {
+        return Cache::remember('outstanding_receivables', $this->cacheTtl('hour'), fn () => Invoice::forCustomer()
+            ->outstanding()
+            ->sum(DB::raw('(total - discount) - paid_amount'))
+        );
+    }
+
+    private function paymentsThisMonth(): float|string
+    {
+        return Cache::remember('payments_this_month', $this->cacheTtl('hour'), fn () => Payment::whereMonth('paid_at', now()->month)
+            ->whereYear('paid_at', now()->year)
+            ->sum('amount')
+        );
+    }
+
+    private function recentPayments(): Collection
+    {
+        return Cache::remember('recent_payments', $this->cacheTtl('hour'), fn () => Payment::with(['invoice.invocable', 'createdBy'])
+            ->latest('paid_at')
+            ->limit(5)
+            ->get()
+        );
+    }
+
+    private function topSellingProducts(): Collection
+    {
+        return Cache::remember('top_products', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subMonth())
+            ->forCustomer()
+            ->select('product_id', DB::raw('SUM(base_quantity) as total_quantity'), DB::raw('SUM(price * base_quantity) as total_revenue'))
+            ->groupBy('product_id')
+            ->orderByDesc('total_quantity')
+            ->limit(5)
+            ->get()
+        );
+    }
+
+    private function lowStockProducts(): Collection
+    {
+        $stockSubquery = '(SELECT COALESCE(SUM(quantity), 0) FROM stocks WHERE stocks.product_id = products.id AND stocks.deleted_at IS NULL)';
+
+        return Cache::remember('low_stock_products', $this->cacheTtl('hour'), fn () => Product::with('stock')
+            ->whereRaw("$stockSubquery <= COALESCE(products.alert_quantity, ?)", [config('namain.min_quantity_acceptable')])
+            ->orderByRaw("$stockSubquery ASC")
+            ->limit(5)
+            ->get()
+        );
+    }
+
+    private function recentTransactions(): Collection
     {
         return Transaction::delivered(now()->subMonth())
             ->latest()
             ->limit(10)
             ->get();
+    }
+
+    /**
+     * Returns 0 in the testing environment to bypass the cache between test runs.
+     */
+    private function cacheTtl(string $duration): DateTimeInterface|int
+    {
+        if (app()->environment('testing')) {
+            return 0;
+        }
+
+        return match ($duration) {
+            'day' => now()->addDay(),
+            default => now()->addHour(),
+        };
     }
 }

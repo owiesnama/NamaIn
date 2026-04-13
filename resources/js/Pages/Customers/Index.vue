@@ -142,7 +142,7 @@
                 />
 
                 <!-- Table Content -->
-                <div class="flex-grow min-w-0">
+                <div class="flex-grow min-w-0 overflow-hidden">
                     <div class="overflow-x-auto">
                         <div class="inline-block min-w-full align-middle">
                             <div class="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700 shadow-sm">

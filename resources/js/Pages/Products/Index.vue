@@ -177,7 +177,7 @@
                 </FilterSidebar>
 
                 <!-- Products List -->
-                <div class="flex-1 min-w-0">
+                <div class="flex-1 min-w-0 overflow-hidden">
                     <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

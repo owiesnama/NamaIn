@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
+use App\Filters\InvoiceFilter;
 use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -12,12 +13,11 @@ use App\Models\Supplier;
 
 class PurchasesController extends Controller
 {
-    public function index()
+    public function index(InvoiceFilter $filter)
     {
         return inertia('Purchases/Index', [
             'invoices' => Invoice::where('invocable_type', Supplier::class)
-                ->search(request('search'))
-                ->trash(request('status'))
+                ->filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
                     $query->orderBy(in_array($sortBy, ['id', 'created_at', 'total']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
                 }, function ($query) {

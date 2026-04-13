@@ -6,7 +6,22 @@
       "Bash(COMPOSER_PROCESS_TIMEOUT=1200 \"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\composer.bat\" update --no-interaction --prefer-dist)",
       "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" artisan:*)",
       "Bash(cat vendor/laravel/boost/config/*.php)",
-      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\composer.bat\" dump-autoload:*)"
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\composer.bat\" dump-autoload:*)",
+      "Bash(vendor/bin/pint:*)",
+      "Bash(php:*)",
+      "Bash(herd php:*)",
+      "Bash(/c/Users/Owiesnama/AppData/Local/Programs/Herd/resources/bin/php/php8.4/php.exe:*)",
+      "Read(//c/Users/Owiesnama/AppData/Local/**)",
+      "Read(//c/Program Files/Herd//**)",
+      "Bash($PHP:*)",
+      "Bash($PHP artisan:*)",
+      "Bash(curl:*)",
+      "Bash(ls -lh cairo-*.woff2)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84/php.exe artisan:*)"
     ]
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "laravel-boost"
+  ]
 }

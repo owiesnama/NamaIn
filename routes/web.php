@@ -4,6 +4,7 @@ use App\Http\Controllers\ChequesController;
 use App\Http\Controllers\ChequeStatusController;
 use App\Http\Controllers\CustomersController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\PaymentsController;
@@ -53,6 +54,9 @@ Route::middleware([
     Route::post('/suppliers/import', [SuppliersController::class, 'import'])->name('suppliers.import');
     Route::get('/suppliers/import/sample', [SuppliersController::class, 'importSample'])->name('suppliers.import-sample');
     Route::resource('/suppliers', SuppliersController::class);
+    Route::get('/suppliers/{supplier}/account', [SuppliersController::class, 'account'])->name('suppliers.account');
+    Route::get('/suppliers/{supplier}/statement', [SuppliersController::class, 'statement'])->name('suppliers.statement');
+    Route::get('/suppliers/{supplier}/statement/print', [SuppliersController::class, 'printStatement'])->name('suppliers.print-statement');
 
     Route::resource('/storages', StoragesController::class);
 
@@ -64,6 +68,7 @@ Route::middleware([
     Route::resource('/sales', SalesController::class);
     Route::resource('/payments', PaymentsController::class);
     Route::resource('/cheques', ChequesController::class);
+    Route::resource('/expenses', ExpensesController::class);
     Route::get('/invoice/print/{invoice}', [InvoicesController::class, 'print'])->name('invoices.print');
     Route::get('/invoice/show/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
     Route::put('/stock/{storage}/add', [StockController::class, 'add'])->name('stock.add');

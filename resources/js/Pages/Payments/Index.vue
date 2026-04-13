@@ -109,9 +109,9 @@ watch(
             />
 
             <!-- Payments List -->
-            <div class="flex-1 min-w-0">
+            <div class="flex-1 min-w-0 overflow-hidden">
                 <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-                    <div class="overflow-x-auto">
+                    <div class="overflow-hidden">
                         <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-50 dark:bg-gray-800">
                                 <tr>
@@ -173,11 +173,15 @@ watch(
                                         class="px-8 py-4 text-sm whitespace-nowrap"
                                     >
                                         <Link
+                                            v-if="payment.invoice"
                                             :href="route('invoices.show', payment.invoice.id)"
                                             class="text-emerald-600 hover:underline font-medium"
                                         >
                                             #{{ payment.invoice.serial_number || payment.invoice.id }}
                                         </Link>
+                                        <span v-else class="text-gray-400 italic">
+                                            {{ __("General") }}
+                                        </span>
                                     </td>
 
                                     <td
@@ -185,8 +189,16 @@ watch(
                                     >
                                         <div class="flex items-center gap-x-2">
                                             <div class="flex flex-col">
-                                                <span class="font-medium text-gray-900 dark:text-white">{{ payment.invoice.invocable?.name }}</span>
-                                                <span class="text-xs text-gray-500 capitalize">{{ __(payment.invoice.invocable_type.split('\\').pop().toLowerCase()) }}</span>
+                                                <span class="font-medium text-gray-900 dark:text-white">
+                                                    {{ payment.invoice?.invocable?.name || payment.invoice?.invocable_type || payment.payable?.name }}
+                                                </span>
+                                                <span class="text-xs text-gray-500 capitalize">
+                                                    {{
+                                                        payment.invoice
+                                                            ? __(payment.invoice.invocable_type.split('\\').pop().toLowerCase())
+                                                            : (payment.payable_type ? __(payment.payable_type.split('\\').pop().toLowerCase()) : '')
+                                                    }}
+                                                </span>
                                             </div>
                                         </div>
                                     </td>

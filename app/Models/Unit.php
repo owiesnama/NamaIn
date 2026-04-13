@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Unit extends BaseModel
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes, WithTrashScope;
 
     /**
      * List of attributes that can be massed assigned.

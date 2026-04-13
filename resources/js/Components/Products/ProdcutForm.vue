@@ -27,6 +27,7 @@
         cost: props.product?.cost ? String(props.product?.cost) : "",
         expire_date: props.product?.expire_date,
         currency: props.product?.currency || preferences("currency") || "$",
+        alert_quantity: props.product?.alert_quantity || "",
         categories: props.product?.categories || [],
         units: props.product?.units?.length
             ? props.product?.units
@@ -57,8 +58,8 @@
         product[action](route, {
             preserveState: true,
             onSuccess: () => {
-                product.reset();
                 show.value = false;
+                product.reset();
             },
         });
     };
@@ -221,21 +222,24 @@
                                             />
                                         </div>
 
-                                        <div class="mt-4 rtl:text-right">
-                                            <label
-                                                class="inline-flex rtl:flex-row-reverse items-center text-sm text-gray-600 gap-x-2"
-                                            >
-                                                <input
-                                                    type="checkbox"
-                                                    name="alert"
-                                                    class="border-gray-300 p-1.5 rounded-md text-emerald-500 focus:ring-transparent"
-                                                />
-                                                <span>{{
-                                                    __(
-                                                        "Alert when stock is low"
-                                                    )
-                                                }}</span>
-                                            </label>
+                                        <div class="mt-4">
+                                            <InputLabel
+                                                for="alert_quantity"
+                                                :value="__('Alert Quantity')"
+                                            />
+                                            <TextInput
+                                                id="alert_quantity"
+                                                v-model="product.alert_quantity"
+                                                type="number"
+                                                class="block w-full mt-1"
+                                                :placeholder="__('3')"
+                                            />
+                                            <InputError
+                                                class="mt-2"
+                                                :message="
+                                                    product.errors.alert_quantity
+                                                "
+                                            />
                                         </div>
 
                                         <div class="mt-4">
@@ -283,6 +287,14 @@
                                                         __('Unit eg: box')
                                                     "
                                                 />
+                                                <InputError
+                                                    class="mt-2"
+                                                    :message="
+                                                        product.errors[
+                                                            `units.${index}.name`
+                                                        ]
+                                                    "
+                                                />
                                             </div>
 
                                             <div>
@@ -305,6 +317,14 @@
                                                         __(
                                                             'Unit Conversion Factor'
                                                         )
+                                                    "
+                                                />
+                                                <InputError
+                                                    class="mt-2"
+                                                    :message="
+                                                        product.errors[
+                                                            `units.${index}.conversion_factor`
+                                                        ]
                                                     "
                                                 />
                                             </div>

@@ -6,12 +6,12 @@ use App\Enums\PaymentStatus;
 use App\Traits\ClassMetaAttributes;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Customer extends BaseModel
 {
@@ -22,16 +22,19 @@ class Customer extends BaseModel
      *
      * @var array<string>
      */
-    protected $fillable = ['name', 'address', 'phone_number', 'type', 'credit_limit'];
+    protected array $searchable = ['name', 'address', 'phone_number'];
+
+    protected $fillable = ['name', 'address', 'phone_number', 'credit_limit'];
 
     /**
-     * List of attributes to cast.
-     *
-     * @var array<string,string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'credit_limit' => 'decimal:2',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'credit_limit' => 'decimal:2',
+        ];
+    }
 
     /**
      * List of attributes to append.
@@ -67,15 +70,21 @@ class Customer extends BaseModel
     /**
      * Calculate the account balance for this customer.
      */
-    public function accountBalance(): Attribute
+    public function getAccountBalanceAttribute(): float
     {
-        return Attribute::make(
-            get: fn () => $this->calculateAccountBalance()
-        );
+        return $this->calculateAccountBalance();
     }
 
     /**
-     * Calculate the total account balance (unpaid invoices).
+     * The payments that belongs to this customer.
+     */
+    public function payments(): MorphMany
+    {
+        return $this->morphMany(Payment::class, 'payable');
+    }
+
+    /**
+     * Calculate the total account balance (unpaid invoices and direct payments).
      * If $asOfDate is provided, calculate balance as of that date.
      */
     public function calculateAccountBalance(?string $asOfDate = null): float
@@ -85,18 +94,26 @@ class Customer extends BaseModel
                 ->where('created_at', '<', $asOfDate)
                 ->sum('total');
 
-            $totalPaid = Payment::whereHas('invoice', function ($query) {
+            $totalPaidOnInvoices = Payment::whereHas('invoice', function ($query) {
                 $query->where('invocable_id', $this->id)
                     ->where('invocable_type', self::class);
             })->where('paid_at', '<', $asOfDate)
                 ->sum('amount');
 
-            return $totalInvoiced - $totalPaid;
+            $totalDirectPayments = $this->payments()
+                ->where('paid_at', '<', $asOfDate)
+                ->sum('amount');
+
+            return (float) ($totalInvoiced - $totalPaidOnInvoices - $totalDirectPayments);
         }
 
-        return $this->invoices()
-            ->get()
-            ->sum('remaining_balance');
+        $invoiceBalance = (float) $this->invoices()
+            ->sum(DB::raw('(total - discount) - paid_amount'));
+
+        $directPayments = (float) $this->payments()
+            ->sum('amount');
+
+        return $invoiceBalance - $directPayments;
     }
 
     /**
@@ -115,10 +132,15 @@ class Customer extends BaseModel
      */
     public function getPaymentHistory(): Collection
     {
-        return Payment::whereHas('invoice', function ($query) {
-            $query->where('invocable_id', $this->id)
-                ->where('invocable_type', self::class);
-        })->with('invoice')->latest()->get();
+        return Payment::where(function ($query) {
+            $query->whereHas('invoice', function ($query) {
+                $query->where('invocable_id', $this->id)
+                    ->where('invocable_type', self::class);
+            })->orWhere(function ($query) {
+                $query->where('payable_id', $this->id)
+                    ->where('payable_type', self::class);
+            });
+        })->with('invoice', 'payable')->latest()->get();
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentMethod;
+use App\Filters\InvoiceFilter;
 use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -11,12 +12,11 @@ use App\Models\Storage;
 
 class SalesController extends Controller
 {
-    public function index()
+    public function index(InvoiceFilter $filter)
     {
         return inertia('Sales/Index', [
             'invoices' => Invoice::where('invocable_type', Customer::class)
-                ->search(request('search'))
-                ->trash(request('status'))
+                ->filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
                     $query->orderBy(in_array($sortBy, ['id', 'created_at', 'total']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
                 }, function ($query) {

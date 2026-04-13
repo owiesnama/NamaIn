@@ -2,13 +2,21 @@
 
 namespace App\Models;
 
+use App\Filters\Filters;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Schema;
 
 abstract class BaseModel extends Model
 {
+    /**
+     * Direct columns to search against.
+     *
+     * @var array<string>
+     */
+    protected array $searchable = [];
+
     /**
      * List of searchable model's relation attributes
      *
@@ -17,14 +25,19 @@ abstract class BaseModel extends Model
     protected array $searchableRelationsAttributes = [];
 
     /**
+     * Scope for filtering the query with a given filter.
+     */
+    public function scopeFilter(Builder $query, Filters $filter): Builder
+    {
+        return $filter->apply($query);
+    }
+
+    /**
      * Scope for searching the attribute of the model.
      */
     public function scopeSearch($query, $searchTerm = ''): Builder
     {
-        $columns = Schema::getColumnListing($this->getTable());
-        // Exclude internal/technical columns that don't make sense to search by text
-        $columns = array_diff($columns, ['id', 'created_at', 'updated_at', 'deleted_at', 'created_by', 'invocable_id', 'invocable_type']);
-        $columns = array_merge($columns, $this->searchableRelationsAttributes);
+        $columns = array_merge($this->searchable, $this->searchableRelationsAttributes);
         $like = config('database.default') === 'pgsql' ? 'ILIKE' : 'LIKE';
 
         return $query->when($searchTerm,
@@ -36,7 +49,8 @@ abstract class BaseModel extends Model
                         $relation = implode('.', $parts);
 
                         $query->orWhereHas($relation, function ($query) use ($attribute, $searchTerm, $like) {
-                            $query->where($attribute, $like, "%{$searchTerm}%");
+                            $model = $query->getModel();
+                            $query->where($model->getTable().'.'.$attribute, $like, "%{$searchTerm}%");
                         });
                     } else {
                         $query->orWhere($this->getTable().'.'.$column, $like, "%{$searchTerm}%");
@@ -47,7 +61,7 @@ abstract class BaseModel extends Model
     }
 
     /**
-     * Get created attribute formatted in a readable way.
+     * Get created_at formatted in a readable way.
      */
     public function getCreatedAtAttribute($value): string
     {

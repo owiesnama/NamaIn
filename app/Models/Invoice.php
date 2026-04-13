@@ -24,6 +24,8 @@ class Invoice extends BaseModel
      *
      * @var array<string>
      */
+    protected array $searchable = ['serial_number', 'payment_method', 'payment_status', 'currency'];
+
     protected array $searchableRelationsAttributes = ['invocable.name'];
 
     /**
@@ -39,18 +41,19 @@ class Invoice extends BaseModel
     }
 
     /**
-     * List of attributes to cast along with what to cast to.
-     *
-     * @var array<string,string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'status' => InvoiceStatus::class,
-        'payment_method' => PaymentMethod::class,
-        'payment_status' => PaymentStatus::class,
-        'total' => 'decimal:2',
-        'paid_amount' => 'decimal:2',
-        'discount' => 'decimal:2',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'status' => InvoiceStatus::class,
+            'payment_method' => PaymentMethod::class,
+            'payment_status' => PaymentStatus::class,
+            'total' => 'decimal:2',
+            'paid_amount' => 'decimal:2',
+            'discount' => 'decimal:2',
+        ];
+    }
 
     /**
      * List of attributes to append to this invoice
@@ -87,9 +90,9 @@ class Invoice extends BaseModel
      * Adds an attribute to the invoice showing whether it's delivered and should
      * be locked.
      */
-    public function locked(): Attribute
+    public function getLockedAttribute(): bool
     {
-        return Attribute::make(get: fn () => $this->status == InvoiceStatus::Delivered);
+        return $this->status == InvoiceStatus::Delivered;
     }
 
     /**
@@ -177,6 +180,22 @@ class Invoice extends BaseModel
     }
 
     /**
+     * Scope for filtering invoices by customer.
+     */
+    public function scopeForCustomer(Builder $builder): Builder
+    {
+        return $builder->where('invocable_type', Customer::class);
+    }
+
+    /**
+     * Scope for filtering outstanding invoices.
+     */
+    public function scopeOutstanding(Builder $builder): Builder
+    {
+        return $builder->whereIn('payment_status', [PaymentStatus::Unpaid, PaymentStatus::PartiallyPaid]);
+    }
+
+    /**
      * Filter invoices to delivered.
      */
     public function scopeDelivered(Builder $builder, ?Carbon $datetime = null): Builder
@@ -188,28 +207,30 @@ class Invoice extends BaseModel
     /**
      * Get the remaining balance for this invoice.
      */
-    public function remainingBalance(): Attribute
+    public function getRemainingBalanceAttribute(): float
     {
-        return Attribute::make(
-            get: fn () => max(0, ($this->total - $this->discount) - $this->paid_amount)
-        );
+        return max(0, ($this->total - $this->discount) - $this->paid_amount);
     }
 
     /**
      * Check if invoice is fully paid.
      */
-    public function isFullyPaid(): Attribute
+    public function getIsFullyPaidAttribute(): bool
     {
-        return Attribute::make(
-            get: fn () => $this->remaining_balance <= 0
-        );
+        return $this->remaining_balance <= 0;
     }
 
     /**
      * Record a payment for this invoice.
      */
-    public function recordPayment(float $amount, PaymentMethod $method, ?string $reference = null, ?string $notes = null): Payment
-    {
+    public function recordPayment(
+        float $amount,
+        PaymentMethod $method,
+        ?string $reference = null,
+        ?string $notes = null,
+        ?array $metadata = null,
+        ?string $receiptPath = null
+    ): Payment {
         $payment = $this->payments()->create([
             'amount' => $amount,
             'payment_method' => $method,
@@ -217,6 +238,8 @@ class Invoice extends BaseModel
             'notes' => $notes,
             'paid_at' => now(),
             'created_by' => auth()->id(),
+            'metadata' => $metadata,
+            'receipt_path' => $receiptPath,
         ]);
 
         $this->updatePaymentStatus();

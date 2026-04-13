@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exports\ProductExport;
+use App\Filters\ProductFilter;
 use App\Http\Requests\ProductRequest;
 use App\Imports\ProductImport;
 use App\Models\Category;
@@ -12,18 +13,12 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProductsController extends Controller
 {
-    public function index()
+    public function index(ProductFilter $filter)
     {
         return inertia('Products/Index', [
             'products_count' => Product::count(),
             'categories' => Category::all(),
-            'products' => Product::search(request('search'))
-                ->trash(request('status'))
-                ->when(request('category'), fn ($query, $category) => $query->whereRelation('categories', 'categories.id', $category))
-                ->when(request('min_cost'), fn ($q, $min) => $q->where('cost', '>=', $min))
-                ->when(request('max_cost'), fn ($q, $max) => $q->where('cost', '<=', $max))
-                ->when(request('expire_from'), fn ($q, $from) => $q->whereDate('expire_date', '>=', $from))
-                ->when(request('expire_to'), fn ($q, $to) => $q->whereDate('expire_date', '<=', $to))
+            'products' => Product::filter($filter)
                 ->with(['units', 'categories'])
                 ->orderBy(request('sort_by', 'created_at'), request('sort_order', 'desc'))
                 ->paginate(parent::ELEMENTS_PER_PAGE)
@@ -54,14 +49,16 @@ class ProductsController extends Controller
         $product->units()->createMany($request->get('units'));
 
         $categoryIds = collect($request->get('categories'))->map(function ($category) {
-            return Category::firstOrCreate(
-                ['id' => is_numeric($category['id']) ? $category['id'] : null],
-                ['name' => $category['name']]
-            )->id;
+            if (isset($category['id']) && is_numeric($category['id'])) {
+                return $category['id'];
+            }
+
+            return Category::firstOrCreate(['name' => $category['name']])->id;
         });
+
         $product->categories()->sync($categoryIds);
 
-        return back()->with('success', 'Product updated successfully');
+        return back()->with('success', __('Product updated successfully'));
     }
 
     public function destroy(Product $product)

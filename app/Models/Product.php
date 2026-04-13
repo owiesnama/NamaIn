@@ -23,6 +23,8 @@ class Product extends BaseModel
      *
      * @var array<string>
      */
+    protected array $searchable = ['name', 'currency'];
+
     protected array $searchableRelationsAttributes = ['categories.name'];
 
     /**
@@ -30,7 +32,7 @@ class Product extends BaseModel
      *
      * @var array<string>
      */
-    protected $fillable = ['name', 'cost', 'expire_date', 'currency'];
+    protected $fillable = ['name', 'cost', 'expire_date', 'currency', 'alert_quantity'];
 
     protected static function booted(): void
     {
@@ -47,13 +49,14 @@ class Product extends BaseModel
     protected $appends = ['expired_at'];
 
     /**
-     * The attributes that should be cast to native types.
-     *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'expire_date' => 'date',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'expire_date' => 'date',
+        ];
+    }
 
     /**
      * The stock details for this product.
@@ -96,15 +99,15 @@ class Product extends BaseModel
      */
     public function isRunningLow()
     {
-        return $this->quantityOnHand() <= config('namain.min_quantity_acceptable');
+        return $this->quantityOnHand() <= ($this->alert_quantity ?? config('namain.min_quantity_acceptable'));
     }
 
     /**
      * Get the expiration date formatted.
      */
-    public function getExpireDateAttribute(): string
+    public function getExpireDateAttribute($value): string
     {
-        return Carbon::parse($this->attributes['expire_date'])->format('Y-m-d');
+        return $value ? Carbon::parse($value)->format('Y-m-d') : '';
     }
 
     /**
@@ -112,6 +115,6 @@ class Product extends BaseModel
      */
     public function getExpiredAtAttribute(): int
     {
-        return now()->diffInDays($this->attributes['expire_date'], false);
+        return $this->attributes['expire_date'] ? now()->diffInDays($this->attributes['expire_date'], false) : 0;
     }
 }
