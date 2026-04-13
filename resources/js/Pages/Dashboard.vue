@@ -42,14 +42,14 @@
         labels: props.monthly_stats.labels,
         datasets: [
             {
-                label: 'Sales',
+                label: __('Sales'),
                 backgroundColor: '#10b981',
                 borderColor: '#10b981',
                 data: props.monthly_stats.sales,
                 tension: 0.3
             },
             {
-                label: 'Purchases',
+                label: __('Purchases'),
                 backgroundColor: '#6366f1',
                 borderColor: '#6366f1',
                 data: props.monthly_stats.purchases,
@@ -70,7 +70,7 @@
             y: {
                 beginAtZero: true,
                 ticks: {
-                    callback: (value) => value.toLocaleString() + ' ' + (preferences('currency') || 'USD')
+                    callback: (value) => formatCurrency(value)
                 }
             }
         }

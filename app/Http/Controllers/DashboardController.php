@@ -106,7 +106,7 @@ class DashboardController extends Controller
                     ->pluck('total', 'month');
 
                 return [
-                    'labels' => $months->map(fn ($m) => Carbon::parse($m)->format('M Y')),
+                    'labels' => $months->map(fn ($m) => Carbon::parse($m)->locale(app()->getLocale())->translatedFormat('M Y')),
                     'sales' => $months->map(fn ($m) => $sales->get($m, 0)),
                     'purchases' => $months->map(fn ($m) => $purchases->get($m, 0)),
                 ];

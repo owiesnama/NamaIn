@@ -89,4 +89,16 @@ class Payment extends BaseModel
     {
         return $this->belongsTo(User::class, 'created_by');
     }
+
+    /**
+     * Get paid_at formatted for humans with locale support.
+     */
+    public function getPaidAtHumanAttribute(): ?string
+    {
+        if (! $this->paid_at) {
+            return null;
+        }
+
+        return $this->paid_at->locale(app()->getLocale())->diffForHumans();
+    }
 }
