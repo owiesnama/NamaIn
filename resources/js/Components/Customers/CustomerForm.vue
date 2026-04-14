@@ -23,6 +23,8 @@
         name: props.customer?.name,
         address: props.customer?.address,
         phone_number: props.customer?.phone_number,
+        credit_limit: props.customer?.credit_limit || 0,
+        opening_balance: props.customer?.opening_balance || 0,
         categories: props.customer?.categories || [],
     });
 
@@ -194,6 +196,46 @@
                                     <InputError
                                         class="mt-2"
                                         :message="customer.errors.phone_number"
+                                    />
+                                </div>
+
+                                <div class="mt-4">
+                                    <InputLabel
+                                        for="credit_limit"
+                                        :value="__('Credit Limit')"
+                                    />
+                                    <TextInput
+                                        id="credit_limit"
+                                        v-model="customer.credit_limit"
+                                        type="number"
+                                        step="0.01"
+                                        class="block w-full mt-1"
+                                        required
+                                    />
+                                    <InputError
+                                        class="mt-2"
+                                        :message="customer.errors.credit_limit"
+                                    />
+                                </div>
+
+                                <div
+                                    class="mt-4"
+                                >
+                                    <InputLabel
+                                        for="opening_balance"
+                                        :value="__('Opening Balance')"
+                                    />
+                                    <TextInput
+                                        id="opening_balance"
+                                        v-model="customer.opening_balance"
+                                        type="number"
+                                        step="0.01"
+                                        class="block w-full mt-1"
+                                        :disabled="props.customer"
+                                    />
+                                    <InputError
+                                        class="mt-2"
+                                        :message="customer.errors.opening_balance"
                                     />
                                 </div>
 

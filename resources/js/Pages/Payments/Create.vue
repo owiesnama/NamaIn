@@ -3,7 +3,6 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import InputError from "@/Components/InputError.vue";
-import PrimaryButton from "@/Components/PrimaryButton.vue";
 import { useForm } from "@inertiajs/vue3";
 import { ref, computed } from "vue";
 
@@ -44,6 +43,7 @@ const form = useForm({
     payable_id: null,
     payable_type: null,
     amount: 0,
+    paid_at: new Date().toISOString().slice(0, 10),
     payment_method: "cash",
     reference: "",
     notes: "",
@@ -90,17 +90,18 @@ const submit = () => {
         </h2>
 
         <form
-            class="mt-6 bg-white border-2 border-dashed rounded-lg p-6 dark:bg-gray-900 dark:border-gray-700"
+            class="mt-6 flex flex-col lg:flex-row gap-8"
             @submit.prevent="submit"
         >
-            <div class="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+            <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8">
+            <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <!-- Select Type -->
                 <div>
-                    <InputLabel for="type" :value="__('Payment For')" />
+                    <InputLabel for="type" :value="__('Payment For')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                     <select
                         v-model="selectedType"
                         id="type"
-                        class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                         required
                         @change="selectedEntity = null; selectedInvoice = null"
                     >
@@ -111,11 +112,11 @@ const submit = () => {
 
                 <!-- Select Customer/Supplier -->
                 <div>
-                    <InputLabel for="entity" :value="selectedType === 'customer' ? __('Customer') : __('Supplier')" />
+                    <InputLabel for="entity" :value="selectedType === 'customer' ? __('Customer') : __('Supplier')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                     <select
                         v-model="selectedEntity"
                         id="entity"
-                        class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                         required
                         @change="selectedInvoice = null"
                     >
@@ -131,13 +132,13 @@ const submit = () => {
                 </div>
 
                 <!-- Select Invoice -->
-                <div>
-                    <InputLabel for="invoice" :value="__('Invoice (Optional)')" />
+                <div class="sm:col-span-2">
+                    <InputLabel for="invoice" :value="__('Invoice (Optional)')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                     <select
                         v-model="selectedInvoice"
                         id="invoice"
                         :disabled="!selectedEntity"
-                        class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring disabled:opacity-50"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white disabled:opacity-50"
                     >
                         <option :value="null">{{ __("General Payment (No Invoice)") }}</option>
                         <option
@@ -155,65 +156,65 @@ const submit = () => {
                 <!-- Invoice Details -->
                 <div
                     v-if="selectedInvoiceData"
-                    class="col-span-2 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg"
+                    class="sm:col-span-2 p-6 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-200 dark:border-gray-700"
                 >
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                            <span class="text-gray-600 dark:text-gray-400"
-                                >{{ __("Total") }}:</span
-                            >
-                            <span class="ml-2 font-semibold"
-                                >{{ formatCurrency(selectedInvoiceData.total, selectedInvoiceData.currency) }}</span
-                            >
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">{{ __("Total") }}</span>
+                            <span class="text-lg font-bold text-gray-900 dark:text-white">{{ formatCurrency(selectedInvoiceData.total, selectedInvoiceData.currency) }}</span>
                         </div>
-                        <div>
-                            <span class="text-gray-600 dark:text-gray-400"
-                                >{{ __("Paid") }}:</span
-                            >
-                            <span class="ml-2 font-semibold text-emerald-600"
-                                >{{ formatCurrency(selectedInvoiceData.paid_amount, selectedInvoiceData.currency) }}</span
-                            >
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">{{ __("Paid") }}</span>
+                            <span class="text-lg font-bold text-emerald-600 dark:text-emerald-400">{{ formatCurrency(selectedInvoiceData.paid_amount, selectedInvoiceData.currency) }}</span>
                         </div>
-                        <div class="col-span-2">
-                            <span class="text-gray-600 dark:text-gray-400"
-                                >{{ __("Remaining Balance") }}:</span
-                            >
-                            <span class="ml-2 font-semibold text-red-600"
-                                >{{
-                                    formatCurrency(selectedInvoiceData.remaining_balance, selectedInvoiceData.currency)
-                                }}</span
-                            >
+                        <div class="flex flex-col">
+                            <span class="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">{{ __("Remaining Balance") }}</span>
+                            <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ formatCurrency(selectedInvoiceData.remaining_balance, selectedInvoiceData.currency) }}</span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Amount -->
                 <div>
-                    <InputLabel for="amount" :value="__('Amount')" />
+                    <InputLabel for="amount" :value="__('Amount')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                     <TextInput
                         id="amount"
                         v-model="form.amount"
                         type="number"
                         step="0.01"
-                        class="block w-full mt-2"
+                        class="block w-full"
                         required
                         :max="
                             selectedInvoiceData?.remaining_balance
                         "
                     />
-                    <InputError class="mt-2" :message="form.errors.amount" />
+                    <InputError class="mt-1" :message="form.errors.amount" />
+                </div>
+
+                <!-- Payment Date -->
+                <div>
+                    <InputLabel for="paid_at" :value="__('Payment Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
+                    <TextInput
+                        id="paid_at"
+                        v-model="form.paid_at"
+                        type="date"
+                        class="block w-full"
+                        required
+                    />
+                    <InputError class="mt-1" :message="form.errors.paid_at" />
                 </div>
 
                 <!-- Payment Method -->
-                <div>
+                <div class="sm:col-span-2">
                     <InputLabel
                         for="payment_method"
                         :value="__('Payment Method')"
+                        class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500"
                     />
                     <select
                         v-model="form.payment_method"
                         id="payment_method"
-                        class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring"
+                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                         required
                     >
                         <option
@@ -225,44 +226,44 @@ const submit = () => {
                         </option>
                     </select>
                     <InputError
-                        class="mt-2"
+                        class="mt-1"
                         :message="form.errors.payment_method"
                     />
                 </div>
 
                 <!-- Bank Transfer Details -->
-                <div v-if="form.payment_method === 'bank_transfer'" class="col-span-2 grid grid-cols-1 gap-6 sm:grid-cols-2 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg">
+                <div v-if="form.payment_method === 'bank_transfer'" class="sm:col-span-2 grid grid-cols-1 gap-6 sm:grid-cols-2 p-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
                     <div>
-                        <InputLabel for="bank_name" :value="__('Bank Name')" />
+                        <InputLabel for="bank_name" :value="__('Bank Name')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                         <TextInput
                             id="bank_name"
                             v-model="form.bank_name"
                             type="text"
-                            class="block w-full mt-2"
+                            class="block w-full"
                             required
                         />
-                        <InputError class="mt-2" :message="form.errors.bank_name" />
+                        <InputError class="mt-1" :message="form.errors.bank_name" />
                     </div>
                     <div>
-                        <InputLabel for="receipt" :value="__('Payment Receipt (Optional)')" />
+                        <InputLabel for="receipt" :value="__('Payment Receipt (Optional)')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                         <input
                             id="receipt"
                             type="file"
-                            class="block w-full mt-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400"
+                            class="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-white dark:bg-gray-800 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/50 dark:file:text-emerald-300"
                             @input="form.receipt = $event.target.files[0]"
                         />
-                        <InputError class="mt-2" :message="form.errors.receipt" />
+                        <InputError class="mt-1" :message="form.errors.receipt" />
                     </div>
                 </div>
 
                 <!-- Cheque Details -->
-                <div v-if="form.payment_method === 'cheque'" class="col-span-2 grid grid-cols-1 gap-6 sm:grid-cols-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <div v-if="form.payment_method === 'cheque'" class="sm:col-span-2 grid grid-cols-1 gap-6 sm:grid-cols-3 p-6 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
                     <div>
-                        <InputLabel for="cheque_bank" :value="__('Select Bank')" />
+                        <InputLabel for="cheque_bank" :value="__('Select Bank')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                         <select
                             v-model="form.cheque_bank_id"
                             id="cheque_bank"
-                            class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring"
+                            class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                             required
                         >
                             <option :value="null">{{ __("Select Bank") }}</option>
@@ -274,63 +275,95 @@ const submit = () => {
                                 {{ bank.name }}
                             </option>
                         </select>
-                        <InputError class="mt-2" :message="form.errors.cheque_bank_id" />
+                        <InputError class="mt-1" :message="form.errors.cheque_bank_id" />
                     </div>
                     <div>
-                        <InputLabel for="cheque_number" :value="__('Cheque Number')" />
+                        <InputLabel for="cheque_number" :value="__('Cheque Number')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                         <TextInput
                             id="cheque_number"
                             v-model="form.cheque_number"
                             type="text"
-                            class="block w-full mt-2"
+                            class="block w-full"
                             required
                         />
-                        <InputError class="mt-2" :message="form.errors.cheque_number" />
+                        <InputError class="mt-1" :message="form.errors.cheque_number" />
                     </div>
                     <div>
-                        <InputLabel for="cheque_due_date" :value="__('Due Date')" />
+                        <InputLabel for="cheque_due_date" :value="__('Due Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                         <TextInput
                             id="cheque_due_date"
                             v-model="form.cheque_due_date"
                             type="date"
-                            class="block w-full mt-2"
+                            class="block w-full"
                             required
                         />
-                        <InputError class="mt-2" :message="form.errors.cheque_due_date" />
+                        <InputError class="mt-1" :message="form.errors.cheque_due_date" />
                     </div>
                 </div>
 
                 <!-- Reference -->
                 <div>
-                    <InputLabel for="reference" :value="__('Reference')" />
+                    <InputLabel for="reference" :value="__('Reference')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                     <TextInput
                         id="reference"
                         v-model="form.reference"
                         type="text"
-                        class="block w-full mt-2"
+                        class="block w-full"
                         :placeholder="__('Cheque number, transaction ID, etc.')"
                     />
-                    <InputError class="mt-2" :message="form.errors.reference" />
+                    <InputError class="mt-1" :message="form.errors.reference" />
                 </div>
 
                 <!-- Notes -->
-                <div class="col-span-2">
-                    <InputLabel for="notes" :value="__('Notes')" />
+                <div class="sm:col-span-2">
+                    <InputLabel for="notes" :value="__('Notes')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                     <textarea
                         id="notes"
                         v-model="form.notes"
                         rows="3"
-                        class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:ring-opacity-40 dark:focus:border-emerald-300 focus:outline-none focus:ring"
+                        class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                         :placeholder="__('Additional notes about this payment')"
                     ></textarea>
-                    <InputError class="mt-2" :message="form.errors.notes" />
+                    <InputError class="mt-1" :message="form.errors.notes" />
                 </div>
             </div>
+            </div>
 
-            <div class="flex justify-end mt-6">
-                <PrimaryButton :disabled="form.processing">
-                    {{ __("Record Payment") }}
-                </PrimaryButton>
+            <div class="lg:w-96">
+                <div class="bg-white dark:bg-gray-800 p-8 rounded-lg border border-gray-200 dark:border-gray-700 sticky top-6">
+                    <div class="text-center mb-6">
+                        <h3 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
+                            {{ __("Payment Summary") }}
+                        </h3>
+                    </div>
+
+                    <div class="space-y-4 mb-6">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">{{ __("Payment Type") }}</span>
+                            <span class="font-bold text-gray-900 dark:text-white">{{ selectedType === 'customer' ? __('Customer') : __('Supplier') }}</span>
+                        </div>
+                        <div v-if="selectedInvoiceData" class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">{{ __("Invoice") }}</span>
+                            <span class="font-bold text-gray-900 dark:text-white">#{{ selectedInvoiceData.serial_number || selectedInvoiceData.id }}</span>
+                        </div>
+                        <div v-if="form.amount > 0" class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                            <div class="text-center">
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-wider block mb-1">{{ __("Amount") }}</span>
+                                <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
+                                    {{ formatCurrency(form.amount) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        class="w-full px-6 py-4 text-lg tracking-wide text-white transition-colors font-black duration-200 rounded-lg bg-emerald-600 hover:bg-emerald-700"
+                        type="submit"
+                        :disabled="form.processing"
+                    >
+                        {{ __("Record Payment") }}
+                    </button>
+                </div>
             </div>
         </form>
     </AppLayout>

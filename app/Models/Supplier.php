@@ -22,7 +22,17 @@ class Supplier extends BaseModel
      */
     protected array $searchable = ['name', 'phone_number', 'address'];
 
-    protected $fillable = ['name', 'phone_number', 'address'];
+    protected $fillable = ['name', 'phone_number', 'address', 'opening_balance'];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'opening_balance' => 'decimal:2',
+        ];
+    }
 
     /**
      * List of attributes to append.
@@ -80,7 +90,7 @@ class Supplier extends BaseModel
         if ($asOfDate) {
             $totalInvoiced = $this->invoices()
                 ->where('created_at', '<', $asOfDate)
-                ->sum('total');
+                ->sum(DB::raw('total - discount'));
 
             $totalPaidOnInvoices = Payment::whereHas('invoice', function ($query) {
                 $query->where('invocable_id', $this->id)
@@ -92,7 +102,7 @@ class Supplier extends BaseModel
                 ->where('paid_at', '<', $asOfDate)
                 ->sum('amount');
 
-            return (float) ($totalInvoiced - $totalPaidOnInvoices - $totalDirectPayments);
+            return (float) ($totalInvoiced - $totalPaidOnInvoices - $totalDirectPayments + $this->opening_balance);
         }
 
         $invoiceBalance = (float) $this->invoices()
@@ -101,7 +111,7 @@ class Supplier extends BaseModel
         $directPayments = (float) $this->payments()
             ->sum('amount');
 
-        return $invoiceBalance - $directPayments;
+        return $invoiceBalance - $directPayments + (float) $this->opening_balance;
     }
 
     /**

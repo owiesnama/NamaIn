@@ -17,7 +17,7 @@ class ProductsController extends Controller
     {
         return inertia('Products/Index', [
             'products_count' => Product::count(),
-            'categories' => Category::all(),
+            'categories' => Category::ofType('product')->get(),
             'products' => Product::filter($filter)
                 ->with(['units', 'categories'])
                 ->orderBy(request('sort_by', 'created_at'), request('sort_order', 'desc'))
@@ -31,10 +31,11 @@ class ProductsController extends Controller
         $product = Product::create($request->all());
         $product->units()->createMany($request->get('units'));
 
-        $categoryIds = collect($request->get('categories'))->map(function ($category) {
+        $type = 'product';
+        $categoryIds = collect($request->get('categories'))->map(function ($category) use ($type) {
             return Category::firstOrCreate(
                 ['id' => is_numeric($category['id']) ? $category['id'] : null],
-                ['name' => $category['name']]
+                ['name' => $category['name'], 'type' => $type]
             )->id;
         });
         $product->categories()->sync($categoryIds);
@@ -48,12 +49,13 @@ class ProductsController extends Controller
         $product->units()->delete();
         $product->units()->createMany($request->get('units'));
 
-        $categoryIds = collect($request->get('categories'))->map(function ($category) {
+        $type = 'product';
+        $categoryIds = collect($request->get('categories'))->map(function ($category) use ($type) {
             if (isset($category['id']) && is_numeric($category['id'])) {
                 return $category['id'];
             }
 
-            return Category::firstOrCreate(['name' => $category['name']])->id;
+            return Category::firstOrCreate(['name' => $category['name'], 'type' => $type])->id;
         });
 
         $product->categories()->sync($categoryIds);

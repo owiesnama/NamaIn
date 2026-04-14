@@ -26,22 +26,22 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Secure Area" />
+    <Head :title="__('Confirm Password')" />
 
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
 
-            <h2 class="mt-6 text-xl font-bold text-center text-gray-800">Confirm Password</h2>
+            <h2 class="mt-6 text-xl font-bold text-center text-gray-800">{{ __('Confirm Password') }}</h2>
         </template>
 
         <div class="mb-4 text-sm text-gray-600">
-            This is a secure area of the application. Please confirm your password before continuing.
+            {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
         </div>
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" :value="__('Password')" />
                 <TextInput
                     id="password"
                     ref="passwordInput"
@@ -57,7 +57,7 @@ const submit = () => {
 
             <div class="mt-4">
                 <PrimaryButton class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Confirm
+                    {{ __('Confirm') }}
                 </PrimaryButton>
             </div>
         </form>

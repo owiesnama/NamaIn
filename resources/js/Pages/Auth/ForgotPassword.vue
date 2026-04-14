@@ -21,17 +21,17 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Forgot Password" />
+    <Head :title="__('Forgot Password')" />
 
     <AuthenticationCard>
         <template #logo>
             <AuthenticationCardLogo />
 
-            <h2 class="mt-6 text-xl font-bold text-center text-gray-800">Forget Password</h2>
+            <h2 class="mt-6 text-xl font-bold text-center text-gray-800">{{ __('Forgot Password') }}</h2>
         </template>
 
         <div class="mb-4 text-sm text-gray-600">
-            Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.
+            {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
         </div>
 
         <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
@@ -40,7 +40,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" :value="__('Email')" />
                 <TextInput
                     id="email"
                     v-model="form.email"
@@ -54,7 +54,7 @@ const submit = () => {
 
             <div class="mt-4">
                 <PrimaryButton class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
-                    Email Password Reset Link
+                    {{ __('Email Password Reset Link') }}
                 </PrimaryButton>
             </div>
         </form>

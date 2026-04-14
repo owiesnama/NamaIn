@@ -5,14 +5,15 @@
     import InputError from "@/Components/InputError.vue";
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { ref, computed } from "vue";
-    import { router, useForm } from "@inertiajs/vue3";
+    import { router, useForm, Link } from "@inertiajs/vue3";
     import { debounce } from "lodash";
 
     const props = defineProps({
         storages: Object,
         products: Object,
         suppliers: Array,
-        payment_methods: Object
+        payment_methods: Object,
+        banks: Array
     });
 
     const purchases = ref([new PurchaseProduct()]);
@@ -22,12 +23,10 @@
     };
 
     const totalCost = computed(() => {
-        let cost = 0;
-        purchases.value.forEach((product) => {
-            cost = product.total() + cost;
-        });
-        return cost;
+        return purchases.value.reduce((sum, product) => sum + product.total(), 0);
     });
+
+    const netTotal = computed(() => totalCost.value - Number(form.discount || 0));
 
     let productUnits = (id) => {
         let product = props.products.filter((product) => product.id == id)[0];
@@ -43,7 +42,16 @@
         discount: 0,
         initial_payment_amount: 0,
         payment_reference: '',
-        payment_notes: ''
+        payment_notes: '',
+
+        // Bank Transfer
+        bank_name: '',
+        receipt: null,
+
+        // Cheque
+        cheque_bank_id: null,
+        cheque_due_date: '',
+        cheque_number: ''
     });
 
     const searchSupplier = debounce(function(search) {
@@ -58,252 +66,365 @@
         form.products = purchases.value;
         form.post(route("purchases.store"));
     };
-
 </script>
+
 <template>
     <AppLayout title="New Purchase">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
-            {{ __("New Purchase") }}
-        </h2>
-
-        <form
-            class="mt-6 bg-white border-2 border-dashed rounded-lg p-4"
-            @submit.prevent="submit"
-        >
-            <div class="flex justify-between">
-                <div class="w-1/3" v-auto-animate>
-                    <InputLabel
-                        for="supplier"
-                        :value="__('Supplier')"
-                    />
-                    <v-select
-                        v-model="form.invocable"
-                        :options="suppliers"
-                        label="name"
-                        track-by="id"
-                        @search-change="searchSupplier"
-                    />
-                    <InputError :message="form.errors.invocable" class="mt-1" />
-                </div>
-                <div class="ltr:text-right rtl:text-left">
-                    <h2
-                        class="text-2xl font-semibold text-emerald-500"
-                    >
-                        {{ totalCost }} <span class="text-sm font-medium uppercase">{{ (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'USD' }}</span>
-                    </h2>
-
-                    <label
-                        for="totalCost"
-                        class="text-sm font-medium text-gray-600"
-                    >
-                        {{ __("Total Cost") }}
-                    </label>
-                </div>
+        <!-- Page Header -->
+        <div class="flex items-center gap-3 mb-6">
+            <Link
+                :href="route('purchases.index')"
+                class="p-2 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+            </Link>
+            <div>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __("New Purchase Invoice") }}</h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ __("Create a new purchase invoice for a supplier") }}</p>
             </div>
+        </div>
 
-            <div class="mt-6 divide-y divide-gray-100" v-auto-animate>
-                <div
-                    v-for="(purchase, index) in purchases"
-                    :key="index"
-                    class="mt-6"
-                >
-                    <div
-                        class="grid flex-1 grid-cols-1 gap-6 mt-6 sm:grid-cols-2 lg:border-none lg:border-0 lg:p-0 sm:border sm:border-dashed sm:p-4 sm:rounded-lg sm: 3 lg:grid-cols-5"
-                    >
-                        <div>
-                            <InputLabel
-                                for="product"
-                                :value="__('Product')"
-                            />
-                            <select
-                                v-model="purchase.product"
-                                class="w-full px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                name="product[]"
-                            >
-                                <option
-                                    value=""
-                                    selected
-                                >
-                                    {{ __("Select Product") }}
-                                </option>
-
-                                <option
-                                    v-for="product in products"
-                                    :key="'product-' + product.id"
-                                    :value="product.id"
-                                    v-text="product.name"
-                                ></option>
-                            </select>
-                            <InputError :message="form.errors[`products.${index}.product`]" class="mt-1" />
+        <form class="flex flex-col lg:flex-row gap-6 items-start" @submit.prevent="submit">
+            <!-- Main Panel -->
+            <div class="flex-1 min-w-0 space-y-4">
+                <!-- Supplier Selector -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                            </svg>
                         </div>
-
-                        <div>
-                            <InputLabel
-                                for="units"
-                                :value="__('Units')"
-                            />
-                            <select
-                                v-model="purchase.unit"
-                                class="w-full px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                name="units[]"
-                            >
-                                <option
-                                    value=""
-                                    selected
-                                >
-                                    {{ __("Unit") }}
-                                </option>
-                                <option
-                                    v-for="unit in productUnits(
-                                        purchase.product
-                                    )"
-                                    :key="'unit-' + unit.id"
-                                    :value="unit.id"
-                                    v-text="unit.name"
-                                ></option>
-                            </select>
-                            <InputError :message="form.errors[`products.${index}.unit`]" class="mt-1" />
-                        </div>
-
-                        <div>
-                            <InputLabel
-                                for="quantity"
-                                :value="__('Quantity')"
-                            />
-                            <TextInput
-                                id="quantity"
-                                v-model="purchase.quantity"
-                                type="number"
-                                class="block w-full mt-1"
-                                required
-                                autofocus
-                            />
-                            <InputError :message="form.errors[`products.${index}.quantity`]" class="mt-1" />
-                        </div>
-
-                        <div>
-                            <InputLabel
-                                for="price"
-                                :value="__('Price')"
-                            />
-                            <TextInput
-                                id="price"
-                                v-model="purchase.price"
-                                type="number"
-                                class="block w-full mt-1"
-                                required
-                                autofocus
-                            />
-                            <InputError :message="form.errors[`products.${index}.price`]" class="mt-1" />
-                        </div>
-
-                        <div>
-                            <InputLabel
-                                for="description"
-                                :value="__('Description')"
-                            />
-
-                            <textarea
-                                id="description"
-                                v-model="purchase.description"
-                                name="description"
-                                class="w-full h-20 px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                            ></textarea>
-                            <InputError :message="form.errors[`products.${index}.description`]" class="mt-1" />
-                        </div>
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __("Supplier") }}</span>
+                    </div>
+                    <div class="max-w-sm" v-auto-animate>
+                        <v-select
+                            v-model="form.invocable"
+                            :options="suppliers"
+                            label="name"
+                            track-by="id"
+                            @search-change="searchSupplier"
+                            class="modern-select"
+                            :placeholder="__('Search supplier...')"
+                        />
+                        <InputError :message="form.errors.invocable" class="mt-1" />
                     </div>
                 </div>
 
-                <button
-                    class="w-full px-5 py-2.5 mt-4 text-sm tracking-wide text-gray-700 transition-colors font-bold duration-200 rounded-lg bg-gray-200 shrink-0 sm:w-auto hover:bg-gray-300 dark:hover:bg-gray-500 dark:bg-gray-600"
-                    @click="newRow"
-                >
-                    + {{ __("Add New Row") }}
-                </button>
-            </div>
+                <!-- Line Items -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <!-- Items section header -->
+                    <div class="flex items-center gap-2 px-5 py-4 border-b border-gray-100 dark:border-gray-700">
+                        <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __("Line Items") }}</span>
+                        <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-bold text-emerald-700 bg-emerald-100 dark:text-emerald-300 dark:bg-emerald-900/40 rounded-full">
+                            {{ purchases.length }}
+                        </span>
+                    </div>
 
-            <!-- Payment Section -->
-            <div class="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-                    {{ __("Payment Details") }}
-                </h3>
+                    <!-- Column headers -->
+                    <div class="hidden md:grid md:grid-cols-12 gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-900/50 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                        <div class="col-span-4">{{ __("Product") }}</div>
+                        <div class="col-span-2">{{ __("Unit") }}</div>
+                        <div class="col-span-2">{{ __("Qty") }}</div>
+                        <div class="col-span-2">{{ __("Price") }}</div>
+                        <div class="col-span-2 text-right pr-8">{{ __("Total") }}</div>
+                    </div>
 
-                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <div>
-                        <InputLabel for="payment_method" :value="__('Payment Method')" />
-                        <select
-                            v-model="form.payment_method"
-                            id="payment_method"
-                            class="w-full px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                    <!-- Item rows -->
+                    <div class="divide-y divide-gray-50 dark:divide-gray-700/50" v-auto-animate>
+                        <div v-for="(purchase, index) in purchases" :key="index" class="px-5 py-4">
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
+                                <div class="md:col-span-4">
+                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
+                                    <select
+                                        v-model="purchase.product"
+                                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white text-sm"
+                                        name="product[]"
+                                    >
+                                        <option value="" disabled>{{ __("Select Product") }}</option>
+                                        <option
+                                            v-for="product in products"
+                                            :key="'product-' + product.id"
+                                            :value="product.id"
+                                            v-text="product.name"
+                                        ></option>
+                                    </select>
+                                    <InputError :message="form.errors[`products.${index}.product`]" class="mt-1" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Unit") }}</label>
+                                    <select
+                                        v-model="purchase.unit"
+                                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white text-sm"
+                                        name="units[]"
+                                    >
+                                        <option value="" disabled>{{ __("Unit") }}</option>
+                                        <option
+                                            v-for="unit in productUnits(purchase.product)"
+                                            :key="'unit-' + unit.id"
+                                            :value="unit.id"
+                                            v-text="unit.name"
+                                        ></option>
+                                    </select>
+                                    <InputError :message="form.errors[`products.${index}.unit`]" class="mt-1" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Qty") }}</label>
+                                    <TextInput
+                                        v-model="purchase.quantity"
+                                        type="number"
+                                        class="block w-full"
+                                        required
+                                    />
+                                    <InputError :message="form.errors[`products.${index}.quantity`]" class="mt-1" />
+                                </div>
+
+                                <div class="md:col-span-2">
+                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Price") }}</label>
+                                    <TextInput
+                                        v-model="purchase.price"
+                                        type="number"
+                                        class="block w-full"
+                                        required
+                                    />
+                                    <InputError :message="form.errors[`products.${index}.price`]" class="mt-1" />
+                                </div>
+
+                                <div class="md:col-span-2 flex items-center justify-between md:justify-end gap-2 md:pt-1.5">
+                                    <div>
+                                        <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Total") }}</label>
+                                        <span class="font-bold text-gray-900 dark:text-white tabular-nums text-sm">
+                                            {{ purchase.total().toFixed(2) }}
+                                        </span>
+                                    </div>
+                                    <button
+                                        v-if="purchases.length > 1"
+                                        type="button"
+                                        @click="purchases.splice(index, 1)"
+                                        class="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mt-3">
+                                <textarea
+                                    v-model="purchase.description"
+                                    rows="1"
+                                    class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white text-sm resize-none"
+                                    :placeholder="__('Description (optional)...')"
+                                ></textarea>
+                                <InputError :message="form.errors[`products.${index}.description`]" class="mt-1" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Add row -->
+                    <div class="px-5 py-4 bg-gray-50/50 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700">
+                        <button
+                            type="button"
+                            @click="newRow"
+                            class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
                         >
-                            <option
-                                v-for="(value, label) in payment_methods"
-                                :key="value"
-                                :value="value"
-                            >
-                                {{ __(label) }}
-                            </option>
-                        </select>
-                        <InputError :message="form.errors.payment_method" class="mt-1" />
-                    </div>
-
-                    <div>
-                        <InputLabel for="discount" :value="__('Discount')" />
-                        <TextInput
-                            id="discount"
-                            v-model="form.discount"
-                            type="number"
-                            step="0.01"
-                            class="block w-full mt-1"
-                        />
-                        <InputError :message="form.errors.discount" class="mt-1" />
-                    </div>
-
-                    <div>
-                        <InputLabel for="initial_payment" :value="__('Initial Payment')" />
-                        <TextInput
-                            id="initial_payment"
-                            v-model="form.initial_payment_amount"
-                            type="number"
-                            step="0.01"
-                            class="block w-full mt-1"
-                        />
-                        <InputError :message="form.errors.initial_payment_amount" class="mt-1" />
-                    </div>
-
-                    <div>
-                        <InputLabel for="payment_reference" :value="__('Reference')" />
-                        <TextInput
-                            id="payment_reference"
-                            v-model="form.payment_reference"
-                            type="text"
-                            class="block w-full mt-1"
-                            placeholder="Cheque number, etc."
-                        />
-                        <InputError :message="form.errors.payment_reference" class="mt-1" />
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <InputLabel for="payment_notes" :value="__('Payment Notes')" />
-                        <textarea
-                            id="payment_notes"
-                            v-model="form.payment_notes"
-                            rows="2"
-                            class="w-full px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                            placeholder="Additional payment notes..."
-                        ></textarea>
-                        <InputError :message="form.errors.payment_notes" class="mt-1" />
+                            <span class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                                </svg>
+                            </span>
+                            {{ __("Add Another Item") }}
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div class="mt-5 text-right md:mt-8">
-                <button
-                    class="w-full px-5 py-2.5 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
-                    type="submit"
-                >
-                    {{ __("Purchase") }}
-                </button>
+            <!-- Sidebar -->
+            <div class="w-full lg:w-80 xl:w-96 flex flex-col gap-4 lg:sticky lg:top-4">
+                <!-- Summary Card -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                    <div class="px-5 py-5 bg-emerald-600 dark:bg-emerald-700">
+                        <p class="text-xs font-bold uppercase tracking-wider text-emerald-200 mb-1">{{ __("Invoice Total") }}</p>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-4xl font-black text-white tabular-nums">{{ netTotal.toFixed(2) }}</span>
+                            <span class="text-sm font-medium text-emerald-200">{{ (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'USD' }}</span>
+                        </div>
+                    </div>
+                    <div class="px-5 py-4 space-y-2.5 border-b border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">{{ __("Subtotal") }}</span>
+                            <span class="font-semibold text-gray-900 dark:text-white tabular-nums">{{ totalCost.toFixed(2) }}</span>
+                        </div>
+                        <div v-if="form.discount > 0" class="flex items-center justify-between text-sm">
+                            <span class="text-red-500">{{ __("Discount") }}</span>
+                            <span class="font-semibold text-red-500 tabular-nums">-{{ form.discount }}</span>
+                        </div>
+                        <div v-if="form.initial_payment_amount > 0" class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500 dark:text-gray-400">{{ __("Paid") }}</span>
+                            <span class="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">{{ form.initial_payment_amount }}</span>
+                        </div>
+                    </div>
+                    <div class="px-5 py-4">
+                        <button
+                            type="submit"
+                            :disabled="form.processing"
+                            class="w-full py-3 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                            <span v-if="!form.processing">{{ __("Complete Purchase") }}</span>
+                            <span v-else class="inline-flex items-center justify-center gap-2">
+                                <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 12 0 12 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ __("Processing...") }}
+                            </span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Payment Details -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+                    <h3 class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        {{ __("Payment Details") }}
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <InputLabel for="payment_method" :value="__('Payment Method')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                            <select
+                                v-model="form.payment_method"
+                                id="payment_method"
+                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-sm text-gray-900 dark:text-white"
+                            >
+                                <option v-for="(value, label) in payment_methods" :key="value" :value="value">
+                                    {{ __(label) }}
+                                </option>
+                            </select>
+                            <InputError :message="form.errors.payment_method" class="mt-1" />
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <InputLabel for="discount" :value="__('Discount')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                                <TextInput id="discount" v-model="form.discount" type="number" step="0.01" class="block w-full" />
+                                <InputError :message="form.errors.discount" class="mt-1" />
+                            </div>
+                            <div>
+                                <InputLabel for="initial_payment" :value="__('Payment')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                                <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" step="0.01" class="block w-full" />
+                                <InputError :message="form.errors.initial_payment_amount" class="mt-1" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <InputLabel for="payment_reference" :value="__('Reference #')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                            <TextInput
+                                id="payment_reference"
+                                v-model="form.payment_reference"
+                                type="text"
+                                class="block w-full"
+                                placeholder="Ref / Cheque #"
+                            />
+                            <InputError :message="form.errors.payment_reference" class="mt-1" />
+                        </div>
+
+                        <!-- Bank Transfer Details -->
+                        <div v-if="form.payment_method === 'bank_transfer'" class="col-span-full space-y-4 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                            <div>
+                                <InputLabel for="bank_name" :value="__('Bank Name')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                                <TextInput
+                                    id="bank_name"
+                                    v-model="form.bank_name"
+                                    type="text"
+                                    class="block w-full"
+                                    required
+                                />
+                                <InputError class="mt-1" :message="form.errors.bank_name" />
+                            </div>
+                            <div>
+                                <InputLabel for="receipt" :value="__('Payment Receipt (Optional)')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                                <input
+                                    id="receipt"
+                                    type="file"
+                                    class="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-white dark:bg-gray-800 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/50 dark:file:text-emerald-300"
+                                    @input="form.receipt = $event.target.files[0]"
+                                />
+                                <InputError class="mt-1" :message="form.errors.receipt" />
+                            </div>
+                        </div>
+
+                        <!-- Cheque Details -->
+                        <div v-if="form.payment_method === 'cheque'" class="col-span-full space-y-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                            <div>
+                                <InputLabel for="cheque_bank" :value="__('Select Bank')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                                <select
+                                    v-model="form.cheque_bank_id"
+                                    id="cheque_bank"
+                                    class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-sm text-gray-900 dark:text-white"
+                                    required
+                                >
+                                    <option :value="null">{{ __("Select Bank") }}</option>
+                                    <option
+                                        v-for="bank in banks"
+                                        :key="bank.id"
+                                        :value="bank.id"
+                                    >
+                                        {{ bank.name }}
+                                    </option>
+                                </select>
+                                <InputError class="mt-1" :message="form.errors.cheque_bank_id" />
+                            </div>
+                            <div>
+                                <InputLabel for="cheque_number" :value="__('Cheque Number')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                                <TextInput
+                                    id="cheque_number"
+                                    v-model="form.cheque_number"
+                                    type="text"
+                                    class="block w-full"
+                                    required
+                                />
+                                <InputError class="mt-1" :message="form.errors.cheque_number" />
+                            </div>
+                            <div>
+                                <InputLabel for="cheque_due_date" :value="__('Due Date')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                                <TextInput
+                                    id="cheque_due_date"
+                                    v-model="form.cheque_due_date"
+                                    type="date"
+                                    class="block w-full"
+                                    required
+                                />
+                                <InputError class="mt-1" :message="form.errors.cheque_due_date" />
+                            </div>
+                        </div>
+
+                        <div>
+                            <InputLabel for="payment_notes" :value="__('Notes')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                            <textarea
+                                id="payment_notes"
+                                v-model="form.payment_notes"
+                                rows="3"
+                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-sm resize-none"
+                                :placeholder="__('Internal notes...')"
+                            ></textarea>
+                            <InputError :message="form.errors.payment_notes" class="mt-1" />
+                        </div>
+                    </div>
+                </div>
             </div>
         </form>
     </AppLayout>

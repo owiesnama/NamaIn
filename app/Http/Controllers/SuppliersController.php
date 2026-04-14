@@ -29,7 +29,7 @@ class SuppliersController extends Controller
                 ->with('categories')
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
-            'categories' => Category::all(),
+            'categories' => Category::ofType('supplier')->get(),
         ]);
     }
 
@@ -69,11 +69,11 @@ class SuppliersController extends Controller
     public function importSample(): BinaryFileResponse
     {
         $filePath = storage_path('app/public/supplier_import_sample.csv');
-        $headers = ['name', 'address', 'phone_number'];
+        $headers = ['name', 'address', 'phone_number', 'opening_balance'];
 
         $handle = fopen($filePath, 'w');
         fputcsv($handle, $headers);
-        fputcsv($handle, ['Example Supplier', 'Supplier Address 123', '0123456789']);
+        fputcsv($handle, ['Example Supplier', 'Supplier Address 123', '0123456789', '1000']);
         fclose($handle);
 
         return response()->download($filePath)->deleteFileAfterSend();

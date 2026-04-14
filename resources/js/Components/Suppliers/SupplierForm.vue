@@ -22,6 +22,7 @@
         name: props.supplier?.name,
         address: props.supplier?.address,
         phone_number: props.supplier?.phone_number,
+        opening_balance: props.supplier?.opening_balance || 0,
         categories: props.supplier?.categories || [],
     });
 
@@ -194,6 +195,27 @@
                                     <InputError
                                         class="mt-2"
                                         :message="supplier.errors.phone_number"
+                                    />
+                                </div>
+
+                                <div
+                                    class="mt-4"
+                                >
+                                    <InputLabel
+                                        for="opening_balance"
+                                        :value="__('Opening Balance')"
+                                    />
+                                    <TextInput
+                                        id="opening_balance"
+                                        v-model="supplier.opening_balance"
+                                        type="number"
+                                        step="0.01"
+                                        class="block w-full mt-1"
+                                        :disabled="props.supplier"
+                                    />
+                                    <InputError
+                                        class="mt-2"
+                                        :message="supplier.errors.opening_balance"
                                     />
                                 </div>
 

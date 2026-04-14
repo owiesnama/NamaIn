@@ -72,15 +72,15 @@ const closeModal = () => {
 
                     <div class="ml-3">
                         <div class="text-sm text-gray-600">
-                            {{ session.agent.platform ? session.agent.platform : 'Unknown' }} - {{ session.agent.browser ? session.agent.browser : 'Unknown' }}
+                            {{ session.agent.platform ? session.agent.platform : __('Unknown') }} - {{ session.agent.browser ? session.agent.browser : __('Unknown') }}
                         </div>
 
                         <div>
                             <div class="text-xs text-gray-500">
                                 {{ session.ip_address }},
 
-                                <span v-if="session.is_current_device" class="text-green-500 font-semibold">This device</span>
-                                <span v-else>Last active {{ session.last_active }}</span>
+                                <span v-if="session.is_current_device" class="text-green-500 font-semibold">{{ __('This device') }}</span>
+                                <span v-else>{{ __('Last active') }} {{ session.last_active }}</span>
                             </div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@ const closeModal = () => {
                             v-model="form.password"
                             type="password"
                             class="mt-1 block w-3/4"
-                            placeholder="Password"
+                            :placeholder="__('Password')"
                             @keyup.enter="logoutOtherBrowserSessions"
                         />
 

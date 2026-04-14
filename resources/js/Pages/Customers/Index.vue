@@ -153,8 +153,9 @@
                                         <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Name") }}</th>
                                         <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Phone") }}</th>
                                         <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Address") }}</th>
+                                        <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Credit Limit") }}</th>
                                         <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Added Time") }}</th>
-                                        <th scope="col" class="px-6 py-4 relative"><span class="sr-only">actions</span></th>
+                                        <th scope="col" class="px-6 py-4 relative"><span class="sr-only">{{ __("Actions") }}</span></th>
                                     </tr>
                                     </thead>
                                     <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
@@ -184,6 +185,7 @@
                                                 <a class="text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors" :href="'tel:' + customer.phone_number" @click.stop>{{ customer.phone_number }}</a>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">{{ customer.address }}</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300 font-semibold">{{ customer.credit_limit }}</td>
                                             <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">{{ customer.created_at }}</td>
                                             <td class="px-6 py-4 text-sm font-medium text-end whitespace-nowrap" @click.stop>
                                                 <div class="flex items-center justify-end gap-x-3">

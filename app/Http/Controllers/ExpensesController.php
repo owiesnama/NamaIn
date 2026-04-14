@@ -27,7 +27,7 @@ class ExpensesController extends Controller
     public function create()
     {
         return inertia('Expenses/Create', [
-            'categories' => Category::all(),
+            'categories' => Category::ofType('expense')->get(),
         ]);
     }
 
@@ -54,6 +54,8 @@ class ExpensesController extends Controller
 
         if ($request->category_ids) {
             $expense->categories()->sync($request->category_ids);
+            // Ensure these categories are marked as 'expense' type
+            Category::whereIn('id', $request->category_ids)->update(['type' => 'expense']);
         }
 
         return redirect()
@@ -82,7 +84,7 @@ class ExpensesController extends Controller
 
         return inertia('Expenses/Edit', [
             'expense' => $expense,
-            'categories' => Category::all(),
+            'categories' => Category::ofType('expense')->get(),
         ]);
     }
 
@@ -108,6 +110,9 @@ class ExpensesController extends Controller
         ]);
 
         $expense->categories()->sync($request->category_ids ?? []);
+
+        // Ensure these categories are marked as 'expense' type
+        Category::whereIn('id', $request->category_ids ?? [])->update(['type' => 'expense']);
 
         return redirect()
             ->route('expenses.index')

@@ -70,7 +70,8 @@ class PaymentsController extends Controller
                 reference: $request->reference,
                 notes: $request->notes,
                 metadata: $metadata,
-                receiptPath: $receiptPath
+                receiptPath: $receiptPath,
+                paidAt: $request->paid_at
             );
         } else {
             $payment = Payment::create([
@@ -80,7 +81,7 @@ class PaymentsController extends Controller
                 'payment_method' => PaymentMethod::from($request->payment_method),
                 'reference' => $request->reference,
                 'notes' => $request->notes,
-                'paid_at' => now(),
+                'paid_at' => $request->paid_at ?? now(),
                 'created_by' => auth()->id(),
                 'metadata' => $metadata,
                 'receipt_path' => $receiptPath,

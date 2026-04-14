@@ -29,7 +29,7 @@
                                 </svg>
                             </div>
                             <div class="mt-3 text-center sm:mt-5">
-                                <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Success Message</h3>
+                                <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">{{ __('Success Message') }}</h3>
                                 <div class="mt-2">
                                     <p class="text-sm text-gray-500">{{ $page.props.flash?.success }}</p>
                                 </div>
@@ -37,7 +37,7 @@
                         </div>
 
                         <div class="flex justify-center mt-4">
-                            <button @click="show = false" type="button" class="inline-flex justify-center px-6 py-2 mx-auto text-sm font-semibold border border-gray-200 rounded-lg">Ok</button>
+                            <button @click="show = false" type="button" class="inline-flex justify-center px-6 py-2 mx-auto text-sm font-semibold border border-gray-200 rounded-lg">{{ __('OK') }}</button>
                         </div>
                     </div>
                 </div>

@@ -25,11 +25,12 @@ class Channel
 
     public function to($notifiable, $notification)
     {
+        $to = $notifiable->phone_number;
+
         if (method_exists($notifiable, 'routeNotificationForMazinHost')) {
             $to = $notifiable->routeNotificationForMazinHost($notification);
         }
-        $to = $notifiable->phone_number;
 
-        return static::COUNTRY_CODE . ltrim($to);
+        return static::COUNTRY_CODE.ltrim($to);
     }
 }

@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Supplier>
+ * @extends Factory<Supplier>
  */
 class SupplierFactory extends Factory
 {
@@ -17,9 +18,9 @@ class SupplierFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->name,
-            'address' => $this->faker->address,
-            'phone_number' => $this->faker->phoneNumber,
+            'name' => $this->faker->name(),
+            'address' => $this->faker->address(),
+            'phone_number' => $this->faker->phoneNumber(),
         ];
     }
 }

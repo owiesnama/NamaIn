@@ -229,14 +229,15 @@ class Invoice extends BaseModel
         ?string $reference = null,
         ?string $notes = null,
         ?array $metadata = null,
-        ?string $receiptPath = null
+        ?string $receiptPath = null,
+        ?string $paidAt = null
     ): Payment {
         $payment = $this->payments()->create([
             'amount' => $amount,
             'payment_method' => $method,
             'reference' => $reference,
             'notes' => $notes,
-            'paid_at' => now(),
+            'paid_at' => $paidAt ?? now(),
             'created_by' => auth()->id(),
             'metadata' => $metadata,
             'receipt_path' => $receiptPath,

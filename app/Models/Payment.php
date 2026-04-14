@@ -5,13 +5,14 @@ namespace App\Models;
 use App\Enums\PaymentMethod;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Payment extends BaseModel
 {
-    use SoftDeletes, WithTrashScope;
+    use HasFactory, SoftDeletes, WithTrashScope;
 
     /**
      * Attributes that can be mass assigned.

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\DB;
  */
 class Transaction extends BaseModel
 {
-    use SoftDeletes, WithTrashScope;
+    use HasFactory, SoftDeletes, WithTrashScope;
 
     /**
      * @var array<string>

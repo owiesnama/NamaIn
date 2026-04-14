@@ -72,7 +72,39 @@ const formatDate = (dateString) => {
             </div>
 
             <!-- Account Summary Cards -->
-            <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2">
+            <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-3">
+                <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                {{ __("Opening Balance") }}
+                            </p>
+                            <p
+                                class="text-2xl font-bold text-gray-800 dark:text-gray-200"
+                            >
+                                {{ formatCurrency(supplier.opening_balance || 0) }}
+                            </p>
+                        </div>
+                        <div
+                            class="p-3 bg-blue-100 rounded-full dark:bg-blue-900"
+                        >
+                            <svg
+                                class="w-6 h-6 text-blue-600 dark:text-blue-300"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    stroke-linecap="round"
+                                    stroke-linejoin="round"
+                                    stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
+                                />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="p-6 bg-white rounded-lg shadow dark:bg-gray-800">
                     <div class="flex items-center justify-between">
                         <div>
@@ -141,7 +173,7 @@ const formatDate = (dateString) => {
             <!-- Tabs -->
             <div class="mt-8">
                 <div class="sm:hidden">
-                    <label for="tabs" class="sr-only">Select a tab</label>
+                    <label for="tabs" class="sr-only">{{ __("Select a tab") }}</label>
                     <select
                         id="tabs"
                         name="tabs"

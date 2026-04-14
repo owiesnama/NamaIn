@@ -65,6 +65,6 @@ abstract class BaseModel extends Model
      */
     public function getCreatedAtAttribute($value): string
     {
-        return Carbon::parse($value)->locale(app()->getLocale())->diffForHumans();
+        return Carbon::parse($value)->locale(app()->getLocale() ?: 'en')->diffForHumans();
     }
 }

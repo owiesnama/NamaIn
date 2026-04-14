@@ -21,7 +21,7 @@
                 />
             </svg>
 
-            <span>Resotre</span>
+            <span>{{ __("Restore") }}</span>
         </button>
     </form>
 </template>

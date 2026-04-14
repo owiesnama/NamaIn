@@ -9,7 +9,12 @@ class Category extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'type'];
+
+    public function scopeOfType($query, string $type)
+    {
+        return $query->where('type', $type);
+    }
 
     public function products(): MorphToMany
     {

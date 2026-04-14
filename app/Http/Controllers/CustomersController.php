@@ -29,7 +29,7 @@ class CustomersController extends Controller
                 ->with('categories')
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
-            'categories' => Category::all(),
+            'categories' => Category::ofType('customer')->get(),
         ]);
     }
 
@@ -70,12 +70,17 @@ class CustomersController extends Controller
             ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'invoices_page')
             ->withQueryString();
 
-        $payments = Payment::whereHas('invoice', function ($query) use ($customer) {
-            $query->where('invocable_id', $customer->id)
-                ->where('invocable_type', Customer::class);
+        $payments = Payment::where(function ($query) use ($customer) {
+            $query->whereHas('invoice', function ($query) use ($customer) {
+                $query->where('invocable_id', $customer->id)
+                    ->where('invocable_type', Customer::class);
+            })->orWhere(function ($query) use ($customer) {
+                $query->where('payable_id', $customer->id)
+                    ->where('payable_type', Customer::class);
+            });
         })
             ->with('invoice')
-            ->latest()
+            ->orderBy('paid_at', 'desc')
             ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'payments_page')
             ->withQueryString();
 
@@ -148,11 +153,11 @@ class CustomersController extends Controller
     public function importSample(): BinaryFileResponse
     {
         $filePath = storage_path('app/public/customer_import_sample.csv');
-        $headers = ['name', 'address', 'phone_number', 'credit_limit'];
+        $headers = ['name', 'address', 'phone_number', 'credit_limit', 'opening_balance'];
 
         $handle = fopen($filePath, 'w');
         fputcsv($handle, $headers);
-        fputcsv($handle, ['Example Customer', 'Customer Address 123', '0123456789', '5000']);
+        fputcsv($handle, ['Example Customer', 'Customer Address 123', '0123456789', '5000', '1000']);
         fclose($handle);
 
         return response()->download($filePath)->deleteFileAfterSend();
