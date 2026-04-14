@@ -14,6 +14,7 @@ const form = useForm({
     amount: 0,
     expensed_at: new Date().toISOString().substr(0, 10),
     category_ids: [],
+    category_objects: [],
     notes: "",
     receipt: null,
     is_recurring: false,
@@ -47,7 +48,7 @@ const submit = () => {
                 class="mt-6 flex flex-col lg:flex-row gap-8"
                 @submit.prevent="submit"
             >
-                <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-8">
+                <div class="flex-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 shadow-none">
                     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                         <!-- Title -->
                         <div class="sm:col-span-2">
@@ -93,22 +94,28 @@ const submit = () => {
                         <!-- Categories -->
                         <div class="sm:col-span-2">
                             <InputLabel for="categories" :value="__('Categories')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                            <select
-                                v-model="form.category_ids"
-                                id="categories"
-                                multiple
-                                class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white h-32"
+                            <VueMultiselect
+                                v-model="form.category_objects"
+                                :options="categories"
+                                :multiple="true"
+                                :close-on-select="false"
+                                :clear-on-select="false"
+                                :preserve-search="true"
+                                :placeholder="__('Select Categories')"
+                                label="name"
+                                track-by="id"
+                                :preselect-first="false"
+                                class="w-full"
+                                :select-label="__('Press enter to select')"
+                                :deselect-label="__('Press enter to remove')"
+                                :selected-label="__('Selected')"
+                                @update:model-value="form.category_ids = form.category_objects.map(c => c.id)"
                             >
-                                <option
-                                    v-for="category in categories"
-                                    :key="category.id"
-                                    :value="category.id"
-                                >
-                                    {{ category.name }}
-                                </option>
-                            </select>
+                                <template #noResult>
+                                    <span>{{ __("No elements found. Consider changing the search query.") }}</span>
+                                </template>
+                            </VueMultiselect>
                             <InputError :message="form.errors.category_ids" class="mt-2" />
-                            <p class="mt-1 text-xs text-gray-500 italic">{{ __("Hold Ctrl (or Cmd) to select multiple categories.") }}</p>
                         </div>
 
                         <!-- Notes -->
@@ -188,7 +195,7 @@ const submit = () => {
                 </div>
 
                 <div class="lg:w-96">
-                    <div class="bg-white dark:bg-gray-800 p-8 rounded-lg border border-gray-200 dark:border-gray-700 sticky top-6">
+                    <div class="bg-white dark:bg-gray-800 p-8 rounded-xl border border-gray-200 dark:border-gray-700 sticky top-6 shadow-none">
                         <div class="text-center mb-6">
                             <h3 class="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">
                                 {{ __("Expense Summary") }}

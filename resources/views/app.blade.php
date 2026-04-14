@@ -33,6 +33,9 @@
         </style>
 
         <!-- Scripts -->
+        <script>
+            window.lang = '{{ app()->getLocale() }}';
+        </script>
         @routes
         @vite(['resources/css/app.css', 'resources/js/app.js', "resources/js/Pages/{$page['component']}.vue"])
         @inertiaHead

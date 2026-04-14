@@ -70,7 +70,7 @@ const rejectExpense = () => {
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
                 <div class="lg:col-span-2 space-y-8">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-none">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                             <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ __("Expense Information") }}</h3>
                         </div>
@@ -105,7 +105,7 @@ const rejectExpense = () => {
                         </div>
                     </div>
 
-                    <div v-if="expense.notes" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <div v-if="expense.notes" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-none">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                             <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ __("Notes") }}</h3>
                         </div>
@@ -116,7 +116,7 @@ const rejectExpense = () => {
                 </div>
 
                 <div class="space-y-8">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-none">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                             <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ __("Audit Trail") }}</h3>
                         </div>
@@ -144,7 +144,7 @@ const rejectExpense = () => {
                         </div>
                     </div>
 
-                    <div v-if="expense.receipt_path" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+                    <div v-if="expense.receipt_path" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-none">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
                             <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ __("Receipt") }}</h3>
                         </div>

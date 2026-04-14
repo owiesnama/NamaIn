@@ -28,37 +28,37 @@
                 class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8"
             >
                 <div
-                    class="overflow-hidden border border-gray-200 rounded-b-lg dark:border-gray-700"
+                    class="overflow-hidden border border-gray-100 dark:border-gray-800"
                 >
                     <table
-                        class="min-w-full divide-y divide-gray-200 dark:divide-gray-700"
+                        class="min-w-full divide-y divide-gray-100 dark:divide-gray-800"
                     >
-                        <thead class="bg-gray-100">
+                        <thead class="bg-gray-50/50 dark:bg-gray-800/50">
                             <tr>
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                 >
                                     {{__('The Product')}}
                                 </th>
 
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                 >
                                     {{__('Quantity')}}
                                 </th>
 
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                 >
                                     {{__('Price')}}
                                 </th>
 
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                 >
                                     {{__('Total Price')}}
                                 </th>
@@ -66,7 +66,7 @@
                         </thead>
 
                         <tbody
-                            class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
+                            class="bg-white divide-y divide-gray-50 dark:divide-gray-800 dark:bg-gray-900"
                         >
                             <tr
                                 v-for="record in deliveredRecords"

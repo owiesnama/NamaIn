@@ -35,13 +35,19 @@ class SuppliersController extends Controller
         return inertia('Suppliers/Index', [
             'suppliers' => Supplier::filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
-                    $query->orderBy(in_array($sortBy, ['name', 'created_at']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
+                    $query->orderBy(in_array($sortBy, ['name', 'created_at']) ? $sortBy : 'name', request('sort_order', 'asc'));
                 }, function ($query) {
-                    $query->latest();
+                    $query->orderBy('name', 'asc');
                 })
                 ->with('categories')
-                ->paginate(parent::ELEMENTS_PER_PAGE)
-                ->withQueryString(),
+                ->withCount(['invoices', 'payments'])
+                ->get()
+                ->map(fn ($supplier) => [
+                    ...$supplier->toArray(),
+                    'account_balance' => (float) $supplier->calculateAccountBalance(),
+                    'total_invoiced' => (float) $supplier->invoices()->sum(\DB::raw('total - discount')),
+                    'last_transaction_date' => $supplier->invoices()->latest()->value('created_at'),
+                ]),
             'categories' => Category::ofType('supplier')->get(),
         ]);
     }
@@ -51,6 +57,13 @@ class SuppliersController extends Controller
         $supplier = Supplier::create($request->validated());
 
         $syncCategories->execute($supplier, $request->get('categories', []));
+
+        if ($request->wantsJson() || $request->hasHeader('X-Quick-Add')) {
+            return response()->json([
+                'data' => $supplier,
+                'message' => 'Supplier Created Successfully',
+            ]);
+        }
 
         return redirect()->route('suppliers.index')
             ->with('success', 'Supplier Created Successfully');

@@ -22,7 +22,7 @@ const resetFilters = () => {
     <aside class="w-full lg:w-72 shrink-0 transition-all duration-300">
         <div class="sticky top-4 space-y-4">
             <!-- Unified Filter Sidebar -->
-            <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm space-y-6">
+            <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl space-y-6 transition-all">
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
                     <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ __("Filters") }}</h3>
                     <button type="button" @click="resetFilters" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium">{{ __("Reset") }}</button>
@@ -56,13 +56,34 @@ const resetFilters = () => {
                 <div class="space-y-2" v-if="sortByOptions && sortByOptions.length">
                     <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Sort By") }}</label>
                     <div class="space-y-2">
-                        <select :value="filters.sort_by" @change="$emit('update:filters', { ...filters, sort_by: $event.target.value })" class="block w-full py-2 px-3 text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40">
-                            <option v-for="option in sortByOptions" :key="option.value" :value="option.value">{{ option.label }}</option>
-                        </select>
-                        <select :value="filters.sort_order" @change="$emit('update:filters', { ...filters, sort_order: $event.target.value })" class="block w-full py-2 px-3 text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40">
-                            <option value="asc">{{ __("Ascending") }}</option>
-                            <option value="desc">{{ __("Descending") }}</option>
-                        </select>
+                        <VueMultiselect
+                            :model-value="sortByOptions.find(o => o.value === filters.sort_by)"
+                            :options="sortByOptions"
+                            :multiple="false"
+                            :close-on-select="true"
+                            :placeholder="__('Sort By')"
+                            label="label"
+                            track-by="value"
+                            class="w-full"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            @update:model-value="option => $emit('update:filters', { ...filters, sort_by: option?.value })"
+                        />
+                        <VueMultiselect
+                            :model-value="[{ value: 'asc', label: __('Ascending') }, { value: 'desc', label: __('Descending') }].find(o => o.value === filters.sort_order)"
+                            :options="[{ value: 'asc', label: __('Ascending') }, { value: 'desc', label: __('Descending') }]"
+                            :multiple="false"
+                            :close-on-select="true"
+                            :placeholder="__('Sort Order')"
+                            label="label"
+                            track-by="value"
+                            class="w-full"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            @update:model-value="option => $emit('update:filters', { ...filters, sort_order: option?.value })"
+                        />
                     </div>
                 </div>
 

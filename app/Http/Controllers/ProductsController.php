@@ -23,7 +23,7 @@ class ProductsController extends Controller
             'products_count' => Product::count(),
             'categories' => Category::ofType('product')->get(),
             'products' => Product::filter($filter)
-                ->with(['units', 'categories'])
+                ->with(['units', 'categories', 'stock'])
                 ->orderBy(request('sort_by', 'created_at'), request('sort_order', 'desc'))
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
@@ -114,6 +114,38 @@ class ProductsController extends Controller
             'purchases' => $months->map(fn ($m) => $chart_purchases->get($m, 0))->toArray(),
         ];
 
+        $insights = [];
+        $qtyOnHand = $product->quantityOnHand();
+        $pendingSales = $product->pendingSalesQuantity();
+        $availableQty = $product->availableQuantity();
+        $pendingPurchases = $product->pendingPurchaseQuantity();
+
+        if ($pendingSales > $qtyOnHand) {
+            $insights[] = [
+                'type' => 'danger',
+                'message' => __('Product overcommitted: :units units needed', ['units' => number_format($pendingSales - $qtyOnHand, 2)]),
+            ];
+        }
+
+        if ($qtyOnHand == 0) {
+            $insights[] = [
+                'type' => 'danger',
+                'message' => __('Out of Stock'),
+            ];
+        } elseif ($availableQty <= $product->alert_quantity && $availableQty > 0) {
+            $insights[] = [
+                'type' => 'warning',
+                'message' => __('Low stock alert: :units units remaining', ['units' => number_format($availableQty, 2)]),
+            ];
+        }
+
+        if ($pendingPurchases > 0) {
+            $insights[] = [
+                'type' => 'info',
+                'message' => __('Incoming stock: :units units expected', ['units' => number_format($pendingPurchases, 2)]),
+            ];
+        }
+
         return inertia('Products/Show', [
             'product' => $product,
             'transactions' => $transactions,
@@ -122,9 +154,13 @@ class ProductsController extends Controller
             'stats' => [
                 'sales_count' => (float) $sales_count,
                 'purchases_count' => (float) $purchases_count,
-                'current_stock' => $product->quantityOnHand(),
+                'current_stock' => $qtyOnHand,
+                'available_qty' => $availableQty,
+                'pending_sales' => $pendingSales,
+                'pending_purchases' => $pendingPurchases,
             ],
             'chart_data' => $chart_data,
+            'insights' => $insights,
         ]);
     }
 

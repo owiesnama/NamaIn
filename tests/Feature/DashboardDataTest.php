@@ -86,8 +86,8 @@ test('dashboard displays enriched data', function () {
     ]);
 
     // Create a low stock product
-    $lowStockProduct = Product::factory()->create(['name' => 'Low Stock Item']);
-    $lowStockProduct->stock()->attach($storage->id, ['quantity' => 1]);
+    $lowStockProduct = Product::factory()->create(['name' => 'Low Stock Item', 'cost' => 50, 'alert_quantity' => 100]);
+    $lowStockProduct->stock()->attach($storage->id, ['quantity' => 10]);
 
     $response = $this->actingAs($user)->get(route('dashboard'));
 
@@ -98,6 +98,7 @@ test('dashboard displays enriched data', function () {
     $this->assertEquals(200, $data['expenses_this_month']);
     $this->assertEquals(400, $data['outstanding_payables']); // 500 total - 100 paid
     $this->assertEquals(1000 - 500 - 200, $data['gross_profit']); // sales - purchases - expenses
+    $this->assertEquals(500, $data['total_inventory_value']); // 10 * 50
 
     // Assertions for top products and customers
     $this->assertCount(1, $data['top_products']);

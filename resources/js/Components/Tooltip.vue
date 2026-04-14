@@ -34,7 +34,7 @@ const arrowClasses = {
         <slot />
 
         <div v-if="show"
-             class="absolute z-[100] px-2 py-1 text-xs font-medium text-white bg-gray-800 dark:bg-gray-700 rounded shadow-sm whitespace-nowrap pointer-events-none transition-opacity duration-200"
+             class="absolute z-[100] px-2 py-1 text-xs font-medium text-white bg-gray-800 dark:bg-gray-700 rounded shadow-sm whitespace-normal min-w-[200px] max-w-[300px] text-center pointer-events-none transition-opacity duration-200"
              :class="positionClasses[position]">
             {{ text }}
             <div class="absolute border-4 border-transparent" :class="arrowClasses[position]"></div>

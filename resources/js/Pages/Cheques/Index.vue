@@ -79,7 +79,7 @@
 </script>
 
 <template>
-    <AppLayout title="Cheques">
+    <AppLayout :title="__('Cheques')">
         <section>
             <div class="w-full lg:flex lg:items-end lg:justify-between">
                 <div>

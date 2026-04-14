@@ -1,7 +1,7 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { watch, ref } from "vue";
-    import { router, useForm } from "@inertiajs/vue3";
+    import { router, useForm, Link } from "@inertiajs/vue3";
     import { debounce } from "lodash";
     import CustomerForm from "@/Components/Customers/CustomerForm.vue";
     import Pagination from "@/Shared/Pagination.vue";
@@ -10,11 +10,31 @@
     import { useQueryString } from "@/Composables/useQueryString";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import FileUploadButton from "@/Shared/FileUploadButton.vue";
+    import Tooltip from "@/Components/Tooltip.vue";
 
     defineProps({
-        customers: Object,
+        customers: Array,
         categories: Array
     });
+
+    const formatCurrency = (amount, currency = 'USD') => {
+        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD');
+        return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
+            style: 'currency',
+            currency: validCurrency,
+        }).format(amount);
+    };
+
+    const lang = window.lang || 'en';
+
+    const formatDate = (dateString) => {
+        if (!dateString) return __("No transactions");
+        return new Date(dateString).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
 
     const showSidebar = ref(true);
 
@@ -45,8 +65,8 @@
         search: searchQS.value,
         status: statusQS.value,
         category: categoryQS.value,
-        sort_by: sortByQS.value || "created_at",
-        sort_order: sortOrderQS.value || "desc"
+        sort_by: sortByQS.value || "name",
+        sort_order: sortOrderQS.value || "asc"
     });
 
     const resetFilters = () => {
@@ -54,14 +74,14 @@
             search: null,
             status: null,
             category: null,
-            sort_by: "created_at",
-            sort_order: "desc"
+            sort_by: "name",
+            sort_order: "asc"
         };
     };
 
     const sortByOptions = [
-        { label: __("Added Time"), value: "created_at" },
         { label: __("Name"), value: "name" },
+        { label: __("Added Time"), value: "created_at" },
         { label: __("Credit Limit"), value: "credit_limit" },
     ];
 
@@ -79,7 +99,7 @@
 </script>
 
 <template>
-    <AppLayout title="Customers">
+    <AppLayout :title="__('Customers')">
         <section>
             <div class="w-full lg:flex lg:items-center lg:justify-between">
                 <div>
@@ -92,7 +112,7 @@
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                        >{{ customers.total }} {{ __("Customer") }}</span
+                        >{{ customers.length }} {{ __("Customer") }}</span
                         >
                     </div>
                 </div>
@@ -157,68 +177,96 @@
 
                 <!-- Table Content -->
                 <div class="flex-grow min-w-0 overflow-hidden">
-                    <div class="overflow-x-auto">
-                        <div class="inline-block min-w-full align-middle">
-                            <div class="overflow-hidden border border-gray-200 rounded-lg dark:border-gray-700 shadow-sm">
-                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead class="bg-gray-50 dark:bg-gray-800/50">
-                                    <tr>
-                                        <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">#</th>
-                                        <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Name") }}</th>
-                                        <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Phone") }}</th>
-                                        <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Address") }}</th>
-                                        <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Credit Limit") }}</th>
-                                        <th scope="col" class="px-6 py-4 text-xs font-semibold text-start text-gray-500 uppercase tracking-wider dark:text-gray-400">{{ __("Added Time") }}</th>
-                                        <th scope="col" class="px-6 py-4 relative"><span class="sr-only">{{ __("Actions") }}</span></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-                                    <template v-if="customers.data.length">
-                                        <tr
-                                            v-for="customer in customers.data"
-                                            :key="customer.id"
-                                            class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
-                                            @click="router.visit(route('customers.account', customer.id))"
-                                        >
-                                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">#{{ customer.id }}</td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <Link
-                                                    :href="route('customers.account', customer.id)"
-                                                    class="text-sm font-medium text-gray-900 dark:text-white hover:text-emerald-600 transition-colors inline-block"
-                                                    @click.stop
-                                                >
-                                                    {{ customer.name }}
-                                                </Link>
-                                                <div class="flex flex-wrap gap-1 mt-1">
-                                                    <span v-for="cat in customer.categories" :key="cat.id" class="px-1.5 py-0.5 text-[10px] font-medium bg-emerald-50 text-emerald-700 rounded border border-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800">
+                    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                <thead class="bg-gray-50/50 dark:bg-gray-800/40">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Customer") }}</th>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Contact") }}</th>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">
+                                        <div class="flex items-center gap-x-1">
+                                            {{ __("Account Balance") }}
+                                            <Tooltip :text="__('Net balance including unpaid invoices, payments, and opening balance.')" position="bottom">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 cursor-help text-gray-400">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
+                                                </svg>
+                                            </Tooltip>
+                                        </div>
+                                    </th>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Total Invoiced") }}</th>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Last Transaction") }}</th>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-end text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"></th>
+                                </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
+                                <tr v-for="customer in customers" :key="customer.id" @click="router.visit(route('customers.account', customer.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex items-center gap-x-3">
+                                            <div>
+                                                <div class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug">{{ customer.name }}</div>
+                                                <div class="flex flex-wrap items-center gap-2 mt-1">
+                                                    <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">#{{ customer.id }}</span>
+                                                    <span v-for="cat in customer.categories" :key="cat.id" class="px-1.5 py-0.5 text-[9px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md leading-tight uppercase tracking-wider">
                                                         {{ cat.name }}
                                                     </span>
                                                 </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <a class="text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors" :href="'tel:' + customer.phone_number" @click.stop>{{ customer.phone_number }}</a>
-                                            </td>
-                                            <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300">{{ customer.address }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-600 whitespace-nowrap dark:text-gray-300 font-semibold">{{ customer.credit_limit }}</td>
-                                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">{{ customer.created_at }}</td>
-                                            <td class="px-6 py-4 text-sm font-medium text-end whitespace-nowrap" @click.stop>
-                                                <div class="flex items-center justify-end gap-x-3">
-                                                    <CustomerForm :customer="customer" :categories="categories" />
-                                                    <DeleteCustomer :customer="customer" />
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </template>
-                                    </tbody>
-                                </table>
-                            </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="flex flex-col gap-y-1">
+                                            <a class="text-sm font-semibold text-emerald-600 hover:text-emerald-500 transition-colors leading-tight" :href="'tel:' + customer.phone_number" @click.stop>{{ customer.phone_number }}</a>
+                                            <div class="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-[150px]" :title="customer.address">{{ customer.address }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div :class="['text-sm font-bold leading-tight', customer.account_balance > 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400']">
+                                            {{ formatCurrency(customer.account_balance) }}
+                                        </div>
+                                        <div v-if="customer.credit_limit > 0" class="mt-1 text-[10px] font-medium text-gray-400 uppercase tracking-wider">
+                                            {{ __("Limit") }}: {{ formatCurrency(customer.credit_limit) }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <div class="text-sm font-bold text-gray-900 dark:text-white leading-tight">
+                                            {{ formatCurrency(customer.total_invoiced) }}
+                                        </div>
+                                        <div class="mt-1 text-[10px] font-medium text-gray-400 uppercase tracking-wider">
+                                            {{ customer.invoices_count }} {{ __("Invoices") }}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                        <div class="flex flex-col gap-y-1">
+                                            <span class="text-xs font-medium">{{ formatDate(customer.last_transaction_date) }}</span>
+                                            <span class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">{{ __("Last activity") }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-x-2">
+                                            <Link @click.stop :href="route('customers.account', customer.id)" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Statement')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                                                </svg>
+                                            </Link>
+                                            <div @click.stop>
+                                                <CustomerForm :customer="customer" :categories="categories" />
+                                            </div>
+                                            <div @click.stop>
+                                                <DeleteCustomer :customer="customer" />
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
-                    <EmptySearch :data="customers.data" />
+                    <EmptySearch :data="customers" />
 
                     <div class="mt-6 flex justify-center">
-                        <Pagination :links="customers.links" />
+                        <Pagination :links="[]" v-if="false" />
                     </div>
                 </div>
             </div>

@@ -35,13 +35,19 @@ class CustomersController extends Controller
         return inertia('Customers/Index', [
             'customers' => Customer::filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
-                    $query->orderBy(in_array($sortBy, ['name', 'created_at', 'credit_limit']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
+                    $query->orderBy(in_array($sortBy, ['name', 'created_at', 'credit_limit']) ? $sortBy : 'name', request('sort_order', 'asc'));
                 }, function ($query) {
-                    $query->latest();
+                    $query->orderBy('name', 'asc');
                 })
                 ->with('categories')
-                ->paginate(parent::ELEMENTS_PER_PAGE)
-                ->withQueryString(),
+                ->withCount(['invoices', 'payments'])
+                ->get()
+                ->map(fn ($customer) => [
+                    ...$customer->toArray(),
+                    'account_balance' => (float) $customer->calculateAccountBalance(),
+                    'total_invoiced' => (float) $customer->invoices()->sum(\DB::raw('total - discount')),
+                    'last_transaction_date' => $customer->invoices()->latest()->value('created_at'),
+                ]),
             'categories' => Category::ofType('customer')->get(),
         ]);
     }
@@ -51,6 +57,13 @@ class CustomersController extends Controller
         $customer = Customer::create($request->validated());
 
         $syncCategories->execute($customer, $request->get('categories', []));
+
+        if ($request->wantsJson() || $request->hasHeader('X-Quick-Add')) {
+            return response()->json([
+                'data' => $customer,
+                'message' => 'Customer Created Successfully',
+            ]);
+        }
 
         return redirect()->route('customers.index')
             ->with('success', 'Customer Created Successfully');

@@ -126,16 +126,21 @@ const resetFilters = () => {
 <template>
     <AppLayout :title="storage.name">
         <div class="py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div class="flex items-center gap-x-3">
-                    <Link :href="route('storages.index')" class="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+            <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-6 px-4 sm:px-0">
+                <div class="flex items-center gap-x-4">
+                    <Link :href="route('storages.index')" class="p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                         </svg>
                     </Link>
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-white">
-                        {{ __("Storage Dashboard") }}: {{ storage.name }}
-                    </h2>
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
+                            {{ storage.name }}
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            {{ __("Storage Dashboard") }}
+                        </p>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-x-3">
@@ -145,108 +150,147 @@ const resetFilters = () => {
             </div>
 
             <!-- Filters -->
-            <div class="mb-8 flex flex-wrap items-center gap-4 bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
-                <div class="flex flex-col min-w-[140px]">
-                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 px-1">{{ __("From") }}</label>
-                    <TextInput v-model="filters.from_date" type="date" class="!py-1.5 !px-3 text-sm focus:ring-2 focus:ring-emerald-500/20" />
-                </div>
-                <div class="flex flex-col min-w-[140px]">
-                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 px-1">{{ __("To") }}</label>
-                    <TextInput v-model="filters.to_date" type="date" class="!py-1.5 !px-3 text-sm focus:ring-2 focus:ring-emerald-500/20" />
-                </div>
-                <div class="flex flex-col min-w-[200px]">
-                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 px-1">{{ __("Product") }}</label>
-                    <select v-model="filters.product_id" class="text-sm py-1.5 pl-3 pr-10 border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-lg shadow-sm transition-all">
-                        <option value="">{{ __("All Products") }}</option>
-                        <option v-for="product in all_products" :key="product.id" :value="product.id">{{ product.name }}</option>
-                    </select>
-                </div>
-                <div class="flex flex-col min-w-[120px]">
-                    <label class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1.5 px-1">{{ __("Type") }}</label>
-                    <select v-model="filters.type" class="text-sm py-1.5 pl-3 pr-10 border-gray-300 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 rounded-lg shadow-sm transition-all">
-                        <option value="All">{{ __("All") }}</option>
-                        <option value="Sales">{{ __("Sales") }}</option>
-                        <option value="Purchases">{{ __("Purchases") }}</option>
-                    </select>
-                </div>
-                <div class="flex items-end h-full self-end pb-0.5 ml-auto">
-                    <Tooltip :text="__('Reset Filters')">
-                        <button @click="resetFilters" class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
+            <div class="mb-8 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 sm:px-6">
+                <div class="flex flex-wrap items-center gap-6">
+                    <div class="flex flex-col min-w-[140px]">
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("From Date") }}</label>
+                        <TextInput v-model="filters.from_date" type="date" class="!py-1.5 !px-3 text-sm rounded-lg" />
+                    </div>
+                    <div class="flex flex-col min-w-[140px]">
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("To Date") }}</label>
+                        <TextInput v-model="filters.to_date" type="date" class="!py-1.5 !px-3 text-sm rounded-lg" />
+                    </div>
+                    <div class="flex flex-col min-w-[180px]">
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("Filter by Product") }}</label>
+                        <VueMultiselect
+                            :model-value="all_products.find(p => p.id == filters.product_id)"
+                            :options="all_products"
+                            :multiple="false"
+                            :close-on-select="true"
+                            :placeholder="__('All Products')"
+                            label="name"
+                            track-by="id"
+                            class="w-full"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            @update:model-value="option => filters.product_id = option?.id || ''"
+                        />
+                    </div>
+                    <div class="flex flex-col min-w-[140px]">
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("Movement Type") }}</label>
+                        <VueMultiselect
+                            :model-value="[{ id: 'All', label: __('All Movement') }, { id: 'Sales', label: __('Only Sales') }, { id: 'Purchases', label: __('Only Purchases') }].find(o => o.id === filters.type)"
+                            :options="[{ id: 'All', label: __('All Movement') }, { id: 'Sales', label: __('Only Sales') }, { id: 'Purchases', label: __('Only Purchases') }]"
+                            :multiple="false"
+                            :close-on-select="true"
+                            :placeholder="__('All Movement')"
+                            label="label"
+                            track-by="id"
+                            class="w-full"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            @update:model-value="option => filters.type = option?.id || 'All'"
+                        />
+                    </div>
+                    <div class="flex items-end flex-grow justify-end h-full self-end pb-0.5">
+                        <button @click="resetFilters" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
+                            {{ __("Reset Filters") }}
                         </button>
-                    </Tooltip>
+                    </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 px-4 sm:px-0">
+                <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ __("Unique Products") }}</span>
+                        <div class="p-2 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-emerald-600 dark:text-emerald-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.unique_products_count }}</h3>
+                        <Tooltip :text="__('Number of distinct products currently held in this storage.')" position="top">
+                            <span class="text-xs text-gray-400 cursor-help border-b border-dotted border-gray-400">{{ __("Items") }}</span>
+                        </Tooltip>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ __("Total Stock Value") }}</span>
+                        <div class="p-2 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-blue-600 dark:text-blue-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ formatCurrency(stats.total_stock_value) }}</h3>
+                        <Tooltip :text="__('Total monetary value of all stock in this storage (Quantity * Cost).')" position="top">
+                            <span class="text-xs text-gray-400 cursor-help border-b border-dotted border-gray-400">{{ __("Value") }}</span>
+                        </Tooltip>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ __("Sales Volume") }}</span>
+                        <div class="p-2 bg-amber-50 dark:bg-amber-900/30 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-amber-600 dark:text-amber-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a.5.5 0 00.71 0L20.25 4.5M2.25 18.75h19.5" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.sales_count }}</h3>
+                        <Tooltip :text="__('Total quantity sold from this storage, respecting active filters (Base Unit).')" position="top">
+                            <span class="text-xs text-gray-400 cursor-help border-b border-dotted border-gray-400">{{ __("Units") }}</span>
+                        </Tooltip>
+                    </div>
+                </div>
+
+                <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ __("Purchase Volume") }}</span>
+                        <div class="p-2 bg-indigo-50 dark:bg-indigo-900/30 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-indigo-600 dark:text-indigo-400">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex items-baseline gap-2">
+                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white">{{ stats.purchases_count }}</h3>
+                        <Tooltip :text="__('Total quantity purchased into this storage, respecting active filters (Base Unit).')" position="top">
+                            <span class="text-xs text-gray-400 cursor-help border-b border-dotted border-gray-400">{{ __("Units") }}</span>
+                        </Tooltip>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-8 px-4 sm:px-0">
                 <!-- Chart -->
-                <div class="lg:col-span-3 p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white mb-4">
+                <div class="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl transition-all">
+                    <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">
                         {{ __("Monthly Movement Trend") }}
                     </h3>
                     <div class="h-[300px]">
                         <Line :data="chartData" :options="chartOptions" />
                     </div>
                 </div>
-
-                <!-- Stats Stack -->
-                <div class="flex flex-col gap-6 lg:col-span-1">
-                    <div class="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                            {{ __("Unique Products") }}
-                            <Tooltip :text="__('Number of distinct products currently held in this storage.')" position="top">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-400 cursor-help hover:text-gray-500 transition-colors">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                </svg>
-                            </Tooltip>
-                        </p>
-                        <h3 class="mt-2 text-2xl font-bold text-emerald-600 dark:text-emerald-400">{{ stats.unique_products_count }}</h3>
-                    </div>
-
-                    <div class="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                            {{ __("Total Stock Value") }}
-                            <Tooltip :text="__('Total monetary value of all stock in this storage (Quantity * Cost).')" position="top">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-400 cursor-help hover:text-gray-500 transition-colors">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                </svg>
-                            </Tooltip>
-                        </p>
-                        <h3 class="mt-2 text-2xl font-bold text-blue-600 dark:text-blue-400">{{ formatCurrency(stats.total_stock_value) }}</h3>
-                    </div>
-
-                    <div class="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                            {{ __("Sales Volume") }}
-                            <Tooltip :text="__('Total quantity sold from this storage, respecting active filters (Base Unit).')" position="top">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-400 cursor-help hover:text-gray-500 transition-colors">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                </svg>
-                            </Tooltip>
-                        </p>
-                        <h3 class="mt-2 text-2xl font-bold text-amber-600 dark:text-amber-400">{{ stats.sales_count }}</h3>
-                    </div>
-
-                    <div class="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                            {{ __("Purchase Volume") }}
-                            <Tooltip :text="__('Total quantity purchased into this storage, respecting active filters (Base Unit).')" position="top">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-400 cursor-help hover:text-gray-500 transition-colors">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                                </svg>
-                            </Tooltip>
-                        </p>
-                        <h3 class="mt-2 text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ stats.purchases_count }}</h3>
-                    </div>
-                </div>
             </div>
 
             <!-- Current Stock Table -->
-            <div class="mb-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+            <div class="mb-10 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                         {{ __("Current Stock") }}
                     </h3>
                     <div class="relative flex items-center max-w-xs">
@@ -302,9 +346,9 @@ const resetFilters = () => {
             </div>
 
             <!-- Inventory Movement Table -->
-            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-white">
+            <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all">
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                    <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                         {{ __("Inventory Movement") }}
                     </h3>
                 </div>

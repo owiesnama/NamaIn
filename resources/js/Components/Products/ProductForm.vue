@@ -5,7 +5,7 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
-    import VueMultiselect from "vue-multiselect";
+    import CustomSelect from "../CustomSelect.vue";
     import "vue-multiselect/dist/vue-multiselect.css";
 
     const props = defineProps({
@@ -75,7 +75,7 @@
         <a
             v-if="props.product"
             href="#"
-            class="p-2 text-gray-600 transition-colors duration-200 rounded-lg hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 focus:outline-none"
+            class="p-2 text-gray-400 transition-colors duration-200 rounded-lg hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 focus:outline-none"
             @click="show = true"
             :title="__('Edit')"
         >
@@ -85,7 +85,7 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-5 h-5"
+                class="w-4 h-4"
             >
                 <path
                     stroke-linecap="round"
@@ -247,7 +247,7 @@
                                                 for="categories"
                                                 :value="__('Categories')"
                                             />
-                                            <VueMultiselect
+                                            <CustomSelect
                                                 id="categories"
                                                 v-model="product.categories"
                                                 :options="props.categories"

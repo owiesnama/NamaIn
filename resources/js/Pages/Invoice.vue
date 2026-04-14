@@ -14,6 +14,8 @@
         storages: Array
     });
 
+    const selectedStorage = ref(null);
+
     let movingToStorage = ref(false);
 
     let form = useForm({
@@ -26,9 +28,6 @@
         form.invoice = invoice.id;
     };
 
-    let hasNoInvoices = computed(() => {
-        return !props.invoices.data.length;
-    });
 
     let confirmMoving = () => {
         form.put(route("stock.add", form.storage), {
@@ -48,16 +47,27 @@
         deductingFromStorage.value = null;
     };
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (props.invoice?.currency && /^[A-Z]{3}$/.test(props.invoice.currency) ? props.invoice.currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD'));
+    const lang = window.lang || 'en';
 
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+    const formatDate = (dateString) => {
+        if (!dateString) return "-";
+        return new Date(dateString).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+        });
+    };
+
+    const formatCurrency = (amount, currency = null) => {
+        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
+            (props.invoice?.currency && /^[A-Z]{3}$/.test(props.invoice.currency) ? props.invoice.currency :
+                (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD'));
+
+        return new Intl.NumberFormat(lang === 'ar' ? 'ar-SA' : 'en-US', {
+            style: 'currency',
+            currency: validCurrency,
+        }).format(amount || 0);
+    };
 
 </script>
 
@@ -142,7 +152,7 @@ const formatCurrency = (amount, currency = null) => {
                         <tbody class="bg-white divide-y divide-gray-200 dark:bg-gray-800 dark:divide-gray-700">
                             <tr v-for="payment in invoice.payments" :key="payment.id">
                                 <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
-                                    {{ new Date(payment.paid_at).toLocaleDateString() }}
+                                    {{ formatDate(payment.paid_at) }}
                                 </td>
                                 <td class="px-4 py-3 text-sm font-semibold text-emerald-600">
                                     {{ formatCurrency(payment.amount, payment.currency) }}
@@ -182,19 +192,20 @@ const formatCurrency = (amount, currency = null) => {
                     :message="form.errors.storage"
                 />
             </div>
-            <select
-                id="storage"
-                v-model="form.storage"
-                class="border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                name="storage"
-            >
-                <option
-                    v-for="storage in storages"
-                    :key="storage.id"
-                    :value="storage.id"
-                    v-text="storage.name"
-                ></option>
-            </select>
+            <VueMultiselect
+                v-model="selectedStorage"
+                :options="storages"
+                :multiple="false"
+                :close-on-select="true"
+                :placeholder="__('Select Storage')"
+                label="name"
+                track-by="id"
+                class="w-full"
+                :select-label="''"
+                :deselect-label="''"
+                :selected-label="__('Selected')"
+                @update:model-value="form.storage = selectedStorage?.id || null"
+            />
         </template>
         <template #footer>
             <SecondaryButton @click="closeModal"> {{ __("Cancel") }}</SecondaryButton>
@@ -216,19 +227,20 @@ const formatCurrency = (amount, currency = null) => {
     >
         <template #title></template>
         <template #content>
-            <select
-                id="storage"
-                v-model="form.storage"
-                class="border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                name="storage"
-            >
-                <option
-                    v-for="storage in storages"
-                    :key="storage.id"
-                    :value="storage.id"
-                    v-text="storage.name"
-                ></option>
-            </select>
+            <VueMultiselect
+                v-model="selectedStorage"
+                :options="storages"
+                :multiple="false"
+                :close-on-select="true"
+                :placeholder="__('Select Storage')"
+                label="name"
+                track-by="id"
+                class="w-full"
+                :select-label="''"
+                :deselect-label="''"
+                :selected-label="__('Selected')"
+                @update:model-value="form.storage = selectedStorage?.id || null"
+            />
         </template>
         <template #footer>
             <SecondaryButton @click="closeModal"> {{ __("Cancel") }}</SecondaryButton>

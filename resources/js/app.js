@@ -7,8 +7,7 @@ import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/index.esm.js";
 import translations from "./Plugins/translations";
 import preferences from "./Plugins/preferences";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
-import VueMultiselect from 'vue-multiselect'
-import "vue-multiselect/dist/vue-multiselect.css"
+import CustomSelect from './Components/CustomSelect.vue'
 
 
 import { translate } from "./Plugins/translations";
@@ -34,7 +33,9 @@ createInertiaApp({
             .use(ZiggyVue, Ziggy)
             .use(translations)
             .use(preferences)
-            .component('VueMultiselect', VueMultiselect)
+            .component('CustomSelect', CustomSelect)
+            .component('VueMultiselect', CustomSelect)
+            .component('VueSelect', CustomSelect)
             .mount(el);
     }
 });

@@ -25,7 +25,7 @@ class Transaction extends BaseModel
     /**
      * @var array<string>
      */
-    protected $fillable = ['product_id', 'storage_id', 'invoice_id', 'quantity', 'base_quantity', 'unit_id', 'price', 'description', 'delivered', 'created_at', 'currency'];
+    protected $fillable = ['product_id', 'storage_id', 'invoice_id', 'quantity', 'base_quantity', 'unit_id', 'price', 'unit_cost', 'description', 'delivered', 'created_at', 'currency'];
 
     protected static function booted(): void
     {
@@ -91,6 +91,14 @@ class Transaction extends BaseModel
     }
 
     /**
+     * The total cost of this transaction.
+     */
+    public function getTotalCostAttribute(): float|int
+    {
+        return $this->base_quantity * ($this->unit_cost ?? 0);
+    }
+
+    /**
      *  Type of this transaction.
      */
     public function getTypeAttribute(): string
@@ -126,6 +134,11 @@ class Transaction extends BaseModel
      */
     public function add(): Transaction
     {
+        if ($this->getTypeAttribute() === 'Purchases') {
+            $this->unit_cost = $this->product?->cost;
+            $this->save();
+        }
+
         $this->storage()->first()->addStock([
             'product' => $this->product_id,
             'quantity' => $this->base_quantity,

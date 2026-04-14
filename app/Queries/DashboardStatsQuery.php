@@ -60,6 +60,21 @@ class DashboardStatsQuery
         );
     }
 
+    public function totalInventoryValue(): float|string
+    {
+        return Cache::remember('total_inventory_value', $this->cacheTtl('hour'), function () {
+            $totalValue = 0;
+            Product::with(['stock', 'transactions' => function ($query) {
+                $query->where('delivered', true)
+                    ->whereHas('invoice', fn ($q) => $q->where('invocable_type', '!=', Customer::class));
+            }])->get()->each(function ($product) use (&$totalValue) {
+                $totalValue += $product->quantityOnHand() * $product->average_cost;
+            });
+
+            return $totalValue;
+        });
+    }
+
     public function totalPurchase(): float|string
     {
         return Cache::remember('total_purchase', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))

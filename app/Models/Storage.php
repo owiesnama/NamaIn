@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Storage extends BaseModel
@@ -111,6 +112,14 @@ class Storage extends BaseModel
         $stock = $this->stock()->find($attributes['product']);
 
         return (bool) $stock->pivot->decrement('quantity', $attributes['quantity']);
+    }
+
+    /**
+     * Get the transactions for this storage
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
     }
 
     /**

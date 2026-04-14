@@ -28,6 +28,7 @@
     const props = defineProps([
         "total_sales",
         "total_purchase",
+        "total_inventory_value",
         "expenses_this_month",
         "outstanding_receivables",
         "outstanding_payables",
@@ -106,32 +107,29 @@
 </script>
 
 <template>
-    <AppLayout title="Dashboard">
+    <AppLayout :title="__('Dashboard')">
         <div class="space-y-6">
 
             <!-- Zone 1: 4 Key Numbers -->
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
 
                 <!-- Gross Profit -->
-                <div class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6">
-                    <Tooltip :text="__('Net result: Sales minus purchases and expenses over the last 30 days.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                        </svg>
-                    </Tooltip>
+                <div class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 transition-all">
                     <div class="flex items-center">
-                        <div class="p-2 rounded-md ltr:mr-4 rtl:ml-4 flex-shrink-0 transition-colors"
-                             :class="gross_profit >= 0 ? 'bg-emerald-500' : 'bg-red-500'">
-                            <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <div class="p-2 rounded-lg ltr:mr-4 rtl:ml-4 flex-shrink-0 transition-colors"
+                             :class="gross_profit >= 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-red-500/10 text-red-600'">
+                            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
                             </svg>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="text-sm font-medium text-gray-500 truncate">{{ __("Gross Profit") }}</p>
-                            <p class="text-2xl font-semibold mt-1" :class="gross_profit >= 0 ? 'text-gray-900' : 'text-red-600'">
+                            <Tooltip :text="__('Net result: Sales minus purchases and expenses over the last 30 days.')" position="top">
+                                <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Gross Profit") }}</p>
+                            </Tooltip>
+                            <p class="text-2xl font-bold mt-1 tracking-tight" :class="gross_profit >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'">
                                 {{ formatCurrency(gross_profit) }}
                             </p>
-                            <p class="text-xs text-gray-400 mt-1">
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium">
                                 {{ __("Exp") }}: {{ formatCurrency(expenses_this_month) }} &middot; {{ __("Pmts") }}: {{ formatCurrency(payments_this_month) }}
                             </p>
                         </div>
@@ -139,59 +137,52 @@
                 </div>
 
                 <!-- Total Sales -->
-                <Link :href="route('sales.index')" class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
-                    <Tooltip :text="__('Total revenue from sales over the last 30 days.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                        </svg>
-                    </Tooltip>
-                    <div class="p-2 rounded-md bg-emerald-500 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <Link :href="route('sales.index')" class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
+                    <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                         </svg>
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Total Sales") }}</p>
-                        <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(total_sales) }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ __("Last 30 days") }}</p>
+                    <div class="min-w-0 flex-1">
+                        <Tooltip :text="__('Total revenue from sales and inventory value.')" position="top">
+                            <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Total Revenue") }}</p>
+                        </Tooltip>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(parseFloat(total_sales) + parseFloat(total_inventory_value)) }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 font-medium">
+                            {{ __("Sales") }}: {{ formatCurrency(total_sales) }} &middot; {{ __("Inventory") }}: {{ formatCurrency(total_inventory_value) }}
+                        </p>
                     </div>
                 </Link>
 
                 <!-- Outstanding Receivables -->
-                <Link :href="route('customers.index')" class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
-                    <Tooltip :text="__('Total money owed by customers.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                        </svg>
-                    </Tooltip>
-                    <div class="p-2 rounded-md bg-amber-500 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <Link :href="route('customers.index')" class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
+                    <div class="p-2 rounded-lg bg-amber-500/10 text-amber-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
                         </svg>
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Receivables") }}</p>
-                        <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(outstanding_receivables) }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ __("Open invoices") }}</p>
+                    <div class="min-w-0 flex-1">
+                        <Tooltip :text="__('Total money owed by customers.')" position="top">
+                            <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Receivables") }}</p>
+                        </Tooltip>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(outstanding_receivables) }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 font-medium">{{ __("Open invoices") }}</p>
                     </div>
                 </Link>
 
                 <!-- Outstanding Payables -->
-                <Link :href="route('suppliers.index')" class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
-                    <Tooltip :text="__('Total money owed to suppliers.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-                        </svg>
-                    </Tooltip>
-                    <div class="p-2 rounded-md bg-red-500 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <Link :href="route('suppliers.index')" class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group">
+                    <div class="p-2 rounded-lg bg-red-500/10 text-red-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
                         </svg>
                     </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Payables") }}</p>
-                        <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(outstanding_payables) }}</p>
-                        <p class="text-xs text-gray-400 mt-1">{{ __("Open invoices") }}</p>
+                    <div class="min-w-0 flex-1">
+                        <Tooltip :text="__('Total money owed to suppliers.')" position="top">
+                            <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Payables") }}</p>
+                        </Tooltip>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(outstanding_payables) }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 font-medium">{{ __("Open invoices") }}</p>
                     </div>
                 </Link>
             </div>
@@ -200,19 +191,19 @@
             <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
                 <!-- Chart -->
-                <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
-                    <h3 class="text-base font-semibold text-gray-900 mb-4">{{ __("Sales vs Purchases vs Expenses") }}</h3>
+                <div class="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 transition-all">
+                    <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">{{ __("Sales vs Purchases vs Expenses") }}</h3>
                     <div class="h-[300px]">
                         <Line :data="chartData" :options="chartOptions" />
                     </div>
                 </div>
 
                 <!-- Needs Attention -->
-                <div class="bg-white rounded-lg shadow flex flex-col overflow-hidden">
-                    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
-                        <h3 class="text-base font-semibold text-gray-900">{{ __("Needs Attention") }}</h3>
+                <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden transition-all">
+                    <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
+                        <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{{ __("Needs Attention") }}</h3>
                         <span v-if="attentionCount > 0"
-                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400">
                             {{ attentionCount }}
                         </span>
                     </div>
@@ -221,15 +212,15 @@
 
                         <!-- Low Stock -->
                         <template v-if="low_stock_products?.length > 0">
-                            <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                 {{ __("Low Stock") }}
                             </p>
-                            <ul role="list" class="divide-y divide-gray-50">
+                            <ul role="list" class="divide-y divide-gray-50 dark:divide-gray-800">
                                 <li v-for="product in low_stock_products" :key="product.id"
-                                    class="px-5 py-3 hover:bg-gray-50 transition-colors">
+                                    class="px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                     <div class="flex items-center justify-between gap-3">
                                         <Link :href="route('products.index', { search: product.name })"
-                                              class="text-sm font-medium text-gray-900 hover:text-emerald-600 truncate">
+                                              class="text-sm font-medium text-gray-900 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 truncate">
                                             {{ product.name }}
                                         </Link>
                                         <span class="text-xs font-semibold text-red-500 flex-shrink-0">
@@ -242,24 +233,24 @@
 
                         <!-- Cheques -->
                         <template v-if="upcoming_cheques?.length > 0">
-                            <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                            <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                 {{ __("Cheques") }}
                             </p>
-                            <ul role="list" class="divide-y divide-gray-50">
+                            <ul role="list" class="divide-y divide-gray-50 dark:divide-gray-800">
                                 <li v-for="cheque in upcoming_cheques" :key="cheque.id"
-                                    class="px-5 py-3 hover:bg-gray-50 transition-colors">
+                                    class="px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                                     <div class="flex items-center justify-between gap-2">
                                         <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">
                                                 {{ cheque.payee?.name }}
                                             </p>
                                             <p class="text-xs font-semibold mt-0.5"
-                                               :class="cheque.type === 1 ? 'text-emerald-600' : 'text-red-600'">
+                                               :class="cheque.type === 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">
                                                 {{ formatCurrency(cheque.amount) }}
                                             </p>
                                         </div>
                                         <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold flex-shrink-0"
-                                              :class="isOverdue(cheque) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'">
+                                              :class="isOverdue(cheque) ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' : 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'">
                                             {{ isOverdue(cheque)
                                                 ? __('Overdue')
                                                 : __('Due in :days d', { days: daysUntilDue(cheque) }) }}
@@ -283,8 +274,8 @@
             </div>
 
             <!-- Zone 3: Tabbed Top Products / Top Customers -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="border-b border-gray-100 flex items-center justify-between px-6">
+            <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-all">
+                <div class="border-b border-gray-100 dark:border-gray-800 flex items-center justify-between px-6">
                     <nav class="flex gap-1 py-3" aria-label="Tabs">
                         <button
                             type="button"
@@ -292,8 +283,8 @@
                             :class="[
                                 'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
                                 activeTab === 'products'
-                                    ? 'bg-emerald-50 text-emerald-700'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
                             ]"
                         >
                             {{ __("Top Products") }}
@@ -304,61 +295,61 @@
                             :class="[
                                 'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
                                 activeTab === 'customers'
-                                    ? 'bg-emerald-50 text-emerald-700'
-                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
+                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800'
                             ]"
                         >
                             {{ __("Top Customers") }}
                         </button>
                     </nav>
-                    <span class="text-xs text-gray-400">{{ __("Last 30 days") }}</span>
+                    <span class="text-xs text-gray-400 dark:text-gray-500">{{ __("Last 30 days") }}</span>
                 </div>
 
                 <!-- Top Products tab -->
-                <ul v-show="activeTab === 'products'" role="list" class="divide-y divide-gray-100">
+                <ul v-show="activeTab === 'products'" role="list" class="divide-y divide-gray-100 dark:divide-gray-800">
                     <template v-if="top_products?.length > 0">
                         <li v-for="(item, index) in top_products" :key="item.product_id"
-                            class="px-6 py-4 flex items-center group hover:bg-gray-50 transition-colors">
-                            <span class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-gray-50 text-xs font-bold text-gray-400 ltr:mr-4 rtl:ml-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                            class="px-6 py-4 flex items-center group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                            <span class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-400 dark:text-gray-500 ltr:mr-4 rtl:ml-4 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/30 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                                 {{ index + 1 }}
                             </span>
                             <div class="min-w-0 flex-1">
                                 <Link :href="route('products.index', { search: item.product?.name })"
-                                      class="text-sm font-medium text-gray-900 hover:text-emerald-600 truncate block">
+                                      class="text-sm font-medium text-gray-900 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 truncate block">
                                     {{ item.product?.name }}
                                 </Link>
-                                <p class="text-xs text-gray-400">{{ item.total_quantity }} {{ __("sold") }}</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">{{ item.total_quantity }} {{ __("sold") }}</p>
                             </div>
-                            <p class="text-sm font-semibold text-indigo-600 ltr:ml-4 rtl:mr-4">
+                            <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 ltr:ml-4 rtl:mr-4">
                                 {{ formatCurrency(item.total_revenue, item.product?.currency) }}
                             </p>
                         </li>
                     </template>
-                    <li v-else class="py-12 text-center text-sm text-gray-400">
+                    <li v-else class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                         {{ __("No sales data available yet") }}
                     </li>
                 </ul>
 
                 <!-- Top Customers tab -->
-                <ul v-show="activeTab === 'customers'" role="list" class="divide-y divide-gray-100">
+                <ul v-show="activeTab === 'customers'" role="list" class="divide-y divide-gray-100 dark:divide-gray-800">
                     <template v-if="top_customers?.length > 0">
                         <li v-for="(item, index) in top_customers" :key="index"
-                            class="px-6 py-4 flex items-center group hover:bg-gray-50 transition-colors">
-                            <span class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-gray-50 text-xs font-bold text-gray-400 ltr:mr-4 rtl:ml-4 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                            class="px-6 py-4 flex items-center group hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                            <span class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-gray-50 dark:bg-gray-800 text-xs font-bold text-gray-400 dark:text-gray-500 ltr:mr-4 rtl:ml-4 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-900/30 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
                                 {{ index + 1 }}
                             </span>
                             <div class="min-w-0 flex-1">
                                 <Link :href="route('customers.index', { search: item.name })"
-                                      class="text-sm font-medium text-gray-900 hover:text-emerald-600 truncate block">
+                                      class="text-sm font-medium text-gray-900 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 truncate block">
                                     {{ item.name }}
                                 </Link>
                             </div>
-                            <p class="text-sm font-semibold text-emerald-600 ltr:ml-4 rtl:mr-4">
+                            <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 ltr:ml-4 rtl:mr-4">
                                 {{ formatCurrency(item.revenue) }}
                             </p>
                         </li>
                     </template>
-                    <li v-else class="py-12 text-center text-sm text-gray-400">
+                    <li v-else class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                         {{ __("No customer data available yet") }}
                     </li>
                 </ul>

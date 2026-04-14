@@ -14,7 +14,7 @@ defineProps({
 </script>
 
 <template>
-    <AppLayout title="Profile">
+    <AppLayout :title="__('Profile')">
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 Profile
@@ -35,9 +35,9 @@ defineProps({
             </div>
 
             <div v-if="$page.props.jetstream.canManageTwoFactorAuthentication">
-                <TwoFactorAuthenticationForm 
+                <TwoFactorAuthenticationForm
                     :requires-confirmation="confirmsTwoFactorAuthentication"
-                    class="mt-10 sm:mt-0" 
+                    class="mt-10 sm:mt-0"
                 />
 
                 <SectionBorder />

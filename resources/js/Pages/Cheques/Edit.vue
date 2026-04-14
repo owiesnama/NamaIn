@@ -3,7 +3,8 @@
     import { useForm } from "@inertiajs/vue3";
     import InputError from "@/Components/InputError.vue";
     import InputLabel from "@/Components/InputLabel.vue";
-    import SelectBox from "@/Shared/SelectBox.vue";
+    import TextInput from "@/Components/TextInput.vue";
+    import PrimaryButton from "@/Components/PrimaryButton.vue";
     import { ref, watch } from "vue";
     import axios from "axios";
 
@@ -28,6 +29,10 @@
 
     const invoicesList = ref(props.invoices || []);
     const isLoadingInvoices = ref(false);
+
+    const selectedBank = ref(props.banks.find(b => b.id === props.cheque.bank_id));
+    const selectedPayee = ref(props.payees.find(p => p.id === props.cheque.chequeable_id));
+    const selectedInvoice = ref(props.invoices?.find(i => i.id === props.cheque.invoice_id));
 
     watch(() => form.payee_id, (newPayeeId) => {
         if (!newPayeeId) {
@@ -66,155 +71,206 @@
 </script>
 
 <template>
-    <AppLayout title="Edit Cheque">
+    <AppLayout :title="__('Edit Cheque')">
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __("Edit Cheque") }}
             </h2>
         </template>
 
-        <div class="max-w-6xl mx-auto py-4">
-            <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6" role="alert">
-                <p class="font-bold">{{ __("Notice") }}</p>
-                <p>{{ __("This cheque can only be edited while in Drafted status.") }}</p>
+        <div class="max-w-4xl mx-auto py-8 px-4 sm:px-0">
+            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6 flex items-start gap-3" role="alert">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-blue-500 mt-0.5 shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                </svg>
+                <div>
+                    <p class="font-bold text-blue-800 dark:text-blue-300">{{ __("Notice") }}</p>
+                    <p class="text-sm text-blue-700 dark:text-blue-400">{{ __("This cheque can only be edited while in Drafted status.") }}</p>
+                </div>
             </div>
 
             <form @submit.prevent="submit">
                 <div
                     :class="isCredit(form) ? 'border-emerald-500' : 'border-red-500'"
-                    class="p-6 bg-white border-l-4 border-dashed rounded-lg rounded-l-none shadow-md rtl:border-l-0 rtl:border-r-4 rtl:rounded-l-lg rtl:rounded-r-none shadow-gray-200"
+                    class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 border-l-4 rtl:border-l-0 rtl:border-r-4 rounded-xl overflow-hidden shadow-none"
                 >
-                    <div class="flex items-center justify-between">
-                        <div class="mb-4">
-                            <InputLabel :value="__('Bank')" />
-                            <select
-                                v-model="form.bank_id"
-                                class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                            >
-                                <option value="">{{ __('Select Bank') }}</option>
-                                <option
-                                    v-for="bank in banks"
-                                    :key="bank.id"
-                                    :value="bank.id"
-                                >
-                                    {{ bank.name }}
-                                </option>
-                            </select>
-                            <InputError :message="form.errors.bank_id" class="mt-1" />
-                        </div>
-                        <div class="mb-4">
-                            <InputLabel :value="__('Cheque Number')" />
-                            <input
-                                v-model="form.reference_number"
-                                class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                type="text"
-                                :placeholder="__('Cheque Number')"
-                            />
-                            <InputError :message="form.errors.reference_number" class="mt-1" />
-                        </div>
-                        <div>
-                            <InputLabel :value="__('Due')" />
-                            <input
-                                v-model="form.due"
-                                class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                type="date"
-                                :placeholder="__('Due')"
-                            />
-                            <InputError :message="form.errors.due" class="mt-1" />
-                        </div>
-                    </div>
+                    <div class="p-6 sm:p-8">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <!-- Bank -->
+                            <div class="col-span-1">
+                                <InputLabel :value="__('Bank')" />
+                                <CustomSelect
+                                    v-model="selectedBank"
+                                    :options="banks"
+                                    :multiple="false"
+                                    :close-on-select="true"
+                                    :placeholder="__('Select Bank')"
+                                    label="name"
+                                    track-by="id"
+                                    class="w-full mt-1"
+                                    :select-label="''"
+                                    :deselect-label="''"
+                                    :selected-label="__('Selected')"
+                                    @update:model-value="form.bank_id = selectedBank?.id || ''"
+                                />
+                                <InputError :message="form.errors.bank_id" class="mt-1" />
+                            </div>
 
-                    <h2 class="mt-1 text-lg font-semibold text-gray-800">
-                        <div class="flex gap-4">
-                            <div class="flex-1">
+                            <!-- Cheque Number -->
+                            <div class="col-span-1">
+                                <InputLabel :value="__('Cheque Number')" />
+                                <TextInput
+                                    v-model="form.reference_number"
+                                    type="text"
+                                    class="w-full mt-1 text-sm"
+                                    :placeholder="__('Reference Number')"
+                                />
+                                <InputError :message="form.errors.reference_number" class="mt-1" />
+                            </div>
+
+                            <!-- Due Date -->
+                            <div class="col-span-1">
+                                <InputLabel :value="__('Due Date')" />
+                                <TextInput
+                                    v-model="form.due"
+                                    type="date"
+                                    class="w-full mt-1 text-sm rtl:text-right"
+                                />
+                                <InputError :message="form.errors.due" class="mt-1" />
+                            </div>
+                        </div>
+
+                        <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Payee -->
+                            <div>
                                 <InputLabel :value="__('Payee')" />
-                                <select
-                                    v-model="form.payee_id"
-                                    class="w-full px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                    name="payee"
+                                <CustomSelect
+                                    v-model="selectedPayee"
+                                    :options="payees"
+                                    :multiple="false"
+                                    :close-on-select="true"
+                                    :placeholder="__('Select Payee')"
+                                    label="name"
+                                    track-by="id"
+                                    class="w-full mt-1"
+                                    :select-label="''"
+                                    :deselect-label="''"
+                                    :selected-label="__('Selected')"
+                                    @update:model-value="form.payee_id = selectedPayee?.id || null"
                                 >
-                                    <option :value="null">{{ __('Select Payee') }}</option>
-                                    <option
-                                        v-for="payee in payees"
-                                        :key="payee.id + payee.type"
-                                        :value="payee.id"
-                                        v-text="payee.name + ' (' + payee.type_string + ')'"
-                                    ></option>
-                                </select>
+                                    <template #option="{ option }">
+                                        {{ option.name }} ({{ __(option.type_string) }})
+                                    </template>
+                                </CustomSelect>
                                 <InputError :message="form.errors.payee_id" class="mt-1" />
                                 <InputError :message="form.errors.payee_type" class="mt-1" />
                             </div>
 
-                            <div class="flex-1" v-if="form.payee_id">
+                            <!-- Invoice Link -->
+                            <div v-if="form.payee_id">
                                 <InputLabel :value="__('Link to Invoice')" />
-                                <select
-                                    v-model="form.invoice_id"
-                                    class="w-full px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                <CustomSelect
+                                    v-model="selectedInvoice"
+                                    :options="invoicesList"
+                                    :multiple="false"
+                                    :close-on-select="true"
+                                    :placeholder="isLoadingInvoices ? __('Loading...') : __('No Invoice')"
+                                    label="serial_number"
+                                    track-by="id"
+                                    class="w-full mt-1"
+                                    :select-label="''"
+                                    :deselect-label="''"
+                                    :selected-label="__('Selected')"
                                     :disabled="isLoadingInvoices"
+                                    @update:model-value="form.invoice_id = selectedInvoice?.id || null"
                                 >
-                                    <option :value="null">{{ isLoadingInvoices ? __('Loading...') : __('No Invoice') }}</option>
-                                    <option
-                                        v-for="invoice in invoicesList"
-                                        :key="invoice.id"
-                                        :value="invoice.id"
-                                    >
-                                        #{{ invoice.serial_number }} ({{ __('Remaining') }}: {{ invoice.remaining_balance }})
-                                    </option>
-                                </select>
+                                    <template #option="{ option }">
+                                        #{{ option.serial_number }} ({{ __('Remaining') }}: {{ option.remaining_balance }})
+                                    </template>
+                                </CustomSelect>
                                 <InputError :message="form.errors.invoice_id" class="mt-1" />
                             </div>
                         </div>
-                    </h2>
 
-                    <div class="mt-4">
-                        <InputLabel :value="__('Notes')" />
-                        <textarea
-                            v-model="form.notes"
-                            class="w-full px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                            rows="3"
-                            :placeholder="__('Notes')"
-                        ></textarea>
-                        <InputError :message="form.errors.notes" class="mt-1" />
-                    </div>
-
-                    <div class="mt-24 sm:flex sm:items-end sm:justify-between">
-                        <div>
-                            <InputLabel :value="__('Status')" />
-                            <SelectBox
-                                v-model="form.type"
-                                class="w-full mt-1 text-sm rounded-lg sm:w-36"
-                            >
-                                <option value="0" v-text="__('Payable') + ' (' + __('Outgoing') + ')'"></option>
-                                <option value="1" v-text="__('Receivable') + ' (' + __('Incoming') + ')'"></option>
-                            </SelectBox>
-                            <p class="mt-1 text-xs text-gray-500">
-                                {{ isCredit(form) ? __("You will receive money") : __("You will pay money") }}
-                            </p>
+                        <!-- Notes -->
+                        <div class="mt-8">
+                            <InputLabel :value="__('Notes')" />
+                            <textarea
+                                v-model="form.notes"
+                                rows="2"
+                                class="w-full mt-1 border-gray-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 rounded-lg shadow-none text-sm"
+                                :placeholder="__('Notes')"
+                            ></textarea>
+                            <InputError :message="form.errors.notes" class="mt-1" />
                         </div>
-                        <h3
-                            :class="isCredit(form) ? 'text-emerald-500' : 'text-red-500'"
-                            class="mt-4 font-bold sm:mt-0"
-                        >
-                            <input
-                                class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                v-model="form.amount"
-                                type="number"
-                                :placeholder="__('Amount')"
-                                step="0.01"
-                            />
-                            <InputError :message="form.errors.amount" class="mt-1" />
-                        </h3>
+
+                        <!-- Type and Amount -->
+                        <div class="mt-12 pt-8 border-t border-gray-100 dark:border-gray-800 flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                            <div class="flex-1">
+                                <InputLabel :value="__('Cheque Type')" />
+                                <div class="flex items-center gap-4 mt-2">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            v-model="form.type"
+                                            :value="1"
+                                            class="hidden"
+                                        />
+                                        <div
+                                            :class="form.type == 1 ? 'bg-emerald-500 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'"
+                                            class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent"
+                                        >
+                                            {{ __("Receivable") }}
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            v-model="form.type"
+                                            :value="0"
+                                            class="hidden"
+                                        />
+                                        <div
+                                            :class="form.type == 0 ? 'bg-red-500 text-white' : 'bg-gray-50 dark:bg-gray-800 text-gray-500'"
+                                            class="px-4 py-2 rounded-lg text-sm font-semibold transition-all border border-transparent"
+                                        >
+                                            {{ __("Payable") }}
+                                        </div>
+                                    </label>
+                                </div>
+                                <p class="mt-2 text-xs text-gray-500">
+                                    {{ isCredit(form) ? __("You will receive money (Incoming)") : __("You will pay money (Outgoing)") }}
+                                </p>
+                            </div>
+
+                            <div class="w-full md:w-48">
+                                <InputLabel :value="__('Amount')" />
+                                <div class="relative mt-1">
+                                    <TextInput
+                                        v-model="form.amount"
+                                        type="number"
+                                        step="0.01"
+                                        class="w-full pr-12 text-lg font-bold"
+                                        :class="isCredit(form) ? 'text-emerald-600 focus:border-emerald-500' : 'text-red-600 focus:border-red-500'"
+                                        :placeholder="__('0.00')"
+                                    />
+                                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 font-semibold uppercase">
+                                        $
+                                    </div>
+                                </div>
+                                <InputError :message="form.errors.amount" class="mt-1" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-8 text-right rtl:text-left">
-                    <button
-                        class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
-                        type="submit"
+                <div class="mt-8 flex justify-end">
+                    <PrimaryButton
+                        :class="{ 'opacity-25': form.processing }"
                         :disabled="form.processing"
                     >
                         {{ __("Update Cheque") }}
-                    </button>
+                    </PrimaryButton>
                 </div>
             </form>
         </div>

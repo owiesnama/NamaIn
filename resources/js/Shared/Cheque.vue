@@ -2,7 +2,6 @@
     import { useForm, Link } from "@inertiajs/vue3";
     import { computed, ref } from "vue";
     import InputLabel from "@/Components/InputLabel.vue";
-    import SelectBox from "./SelectBox.vue";
     import Modal from "@/Components/Modal.vue";
     import TextInput from "@/Components/TextInput.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
@@ -88,7 +87,7 @@
 <template>
     <div
         :class="cheque.type == 1 ? 'border-emerald-500' : 'border-red-500'"
-        class="p-6 bg-white border-l-4 border-dashed rounded-lg rounded-l-none shadow-md rtl:border-l-0 rtl:border-r-4 rtl:rounded-l-lg rtl:rounded-r-none shadow-gray-200 relative"
+        class="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 border-l-4 rtl:border-l-0 rtl:border-r-4 rounded-xl shadow-none transition-all relative"
     >
         <div class="absolute top-4 right-4 flex gap-2" v-if="isEditable">
             <Link :href="route('cheques.edit', cheque.id)" class="text-blue-500 hover:text-blue-700">
@@ -124,32 +123,41 @@
             class="mt-1 text-lg font-semibold text-gray-800"
             v-text="cheque.payee.name"
         ></h2>
-        <div class="flex items-center gap-2">
-            <span
-                class="text-sm text-gray-500 font-semibold"
-                v-text="__(statusLable(cheque.status))"
-            ></span>
-            <Link v-if="cheque.invoice_id" :href="route('invoices.show', cheque.invoice_id)" class="text-xs text-blue-500 underline">
-                {{ __("Invoice") }} #{{ cheque.invoice?.serial_number || cheque.invoice_id }}
-            </Link>
-        </div>
-
-        <div class="mt-24 sm:flex sm:items-end sm:justify-between">
-            <div>
-                <InputLabel :value="__('Status')" />
-                <SelectBox
-                    v-model="selectedStatus"
-                    class="w-full mt-1 text-sm rounded-lg sm:w-36"
-                    @change="handleStatusChange"
-                >
-                    <option
-                        v-for="(key, status) in chequeStatus"
-                        :key="key"
-                        :value="key"
-                        v-text="__(status)"
-                    ></option>
-                </SelectBox>
+            <div class="flex items-center gap-2">
+                <span
+                    class="text-sm text-gray-500 font-semibold"
+                    v-text="__(statusLable(selectedStatus))"
+                ></span>
+                <Link v-if="cheque.invoice_id" :href="route('invoices.show', cheque.invoice_id)" class="text-xs text-blue-500 underline">
+                    {{ __("Invoice") }} #{{ cheque.invoice?.serial_number || cheque.invoice_id }}
+                </Link>
             </div>
+
+            <div class="mt-24 sm:flex sm:items-end sm:justify-between">
+                <div>
+                    <InputLabel :value="__('Status')" />
+                    <VueMultiselect
+                        :model-value="{ id: selectedStatus, label: statusLable(selectedStatus) }"
+                        :options="Object.entries(chequeStatus).map(([label, id]) => ({ id, label }))"
+                        :multiple="false"
+                        :close-on-select="true"
+                        :placeholder="__('Select Status')"
+                        label="label"
+                        track-by="id"
+                        class="w-full mt-1 sm:w-48"
+                        :select-label="''"
+                        :deselect-label="''"
+                        :selected-label="__('Selected')"
+                        @update:model-value="option => handleStatusChange({ target: { value: option?.id } })"
+                    >
+                        <template #singleLabel="{ option }">
+                            {{ __(option.label) }}
+                        </template>
+                        <template #option="{ option }">
+                            {{ __(option.label) }}
+                        </template>
+                    </VueMultiselect>
+                </div>
 
             <div class="text-right">
                 <p v-if="cheque.cleared_amount > 0" class="text-xs text-gray-500">

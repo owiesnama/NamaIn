@@ -17,6 +17,12 @@ const selectedType = ref("customer"); // 'customer' or 'supplier'
 const selectedEntity = ref(null);
 const selectedInvoice = ref(null);
 
+const selectedEntityType = ref({ id: 'customer', label: 'Customer' });
+const selectedEntityObject = ref(null);
+const selectedInvoiceObject = ref(null);
+const selectedPaymentMethod = ref({ id: 'cash', label: 'Cash' });
+const selectedChequeBank = ref(null);
+
 const entities = computed(() => {
     return selectedType.value === "customer" ? props.customers : props.suppliers;
 });
@@ -84,7 +90,7 @@ const submit = () => {
 </script>
 
 <template>
-    <AppLayout title="Record Payment">
+    <AppLayout :title="__('Record Payment')">
         <h2 class="text-xl font-semibold text-gray-800 dark:text-white">
             {{ __("Record Payment") }}
         </h2>
@@ -98,59 +104,72 @@ const submit = () => {
                 <!-- Select Type -->
                 <div>
                     <InputLabel for="type" :value="__('Payment For')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                    <select
-                        v-model="selectedType"
-                        id="type"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
-                        required
-                        @change="selectedEntity = null; selectedInvoice = null"
+                    <CustomSelect
+                        v-model="selectedEntityType"
+                        :options="[{ id: 'customer', label: 'Customer' }, { id: 'supplier', label: 'Supplier' }]"
+                        :multiple="false"
+                        :close-on-select="true"
+                        :placeholder="__('Select Type')"
+                        label="label"
+                        track-by="id"
+                        class="w-full"
+                        :select-label="''"
+                        :deselect-label="''"
+                        :selected-label="__('Selected')"
+                        @update:model-value="selectedType = selectedEntityType?.id || 'customer'; selectedEntity = null; selectedInvoice = null; selectedEntityObject = null; selectedInvoiceObject = null"
                     >
-                        <option value="customer">{{ __("Customer") }}</option>
-                        <option value="supplier">{{ __("Supplier") }}</option>
-                    </select>
+                        <template #singleLabel="{ option }">
+                            {{ __(option.label) }}
+                        </template>
+                        <template #option="{ option }">
+                            {{ __(option.label) }}
+                        </template>
+                    </CustomSelect>
                 </div>
 
                 <!-- Select Customer/Supplier -->
                 <div>
                     <InputLabel for="entity" :value="selectedType === 'customer' ? __('Customer') : __('Supplier')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                    <select
-                        v-model="selectedEntity"
-                        id="entity"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
-                        required
-                        @change="selectedInvoice = null"
-                    >
-                        <option :value="null">{{ selectedType === 'customer' ? __("Select Customer") : __("Select Supplier") }}</option>
-                        <option
-                            v-for="entity in entities"
-                            :key="entity.id"
-                            :value="entity.id"
-                        >
-                            {{ entity.name }}
-                        </option>
-                    </select>
+                    <CustomSelect
+                        v-model="selectedEntityObject"
+                        :options="entities"
+                        :multiple="false"
+                        :close-on-select="true"
+                        :placeholder="selectedType === 'customer' ? __('Select Customer') : __('Select Supplier')"
+                        label="name"
+                        track-by="id"
+                        class="w-full"
+                        :select-label="''"
+                        :deselect-label="''"
+                        :selected-label="__('Selected')"
+                        @update:model-value="selectedEntity = selectedEntityObject?.id || null; selectedInvoice = null; selectedInvoiceObject = null"
+                    />
                 </div>
 
                 <!-- Select Invoice -->
                 <div class="sm:col-span-2">
                     <InputLabel for="invoice" :value="__('Invoice (Optional)')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                    <select
-                        v-model="selectedInvoice"
-                        id="invoice"
+                    <CustomSelect
+                        v-model="selectedInvoiceObject"
+                        :options="unpaidInvoices"
+                        :multiple="false"
+                        :close-on-select="true"
+                        :placeholder="!selectedEntity ? __('Select entity first') : __('General Payment (No Invoice)')"
+                        label="serial_number"
+                        track-by="id"
+                        class="w-full"
+                        :select-label="''"
+                        :deselect-label="''"
+                        :selected-label="__('Selected')"
                         :disabled="!selectedEntity"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white disabled:opacity-50"
+                        @update:model-value="selectedInvoice = selectedInvoiceObject?.id || null"
                     >
-                        <option :value="null">{{ __("General Payment (No Invoice)") }}</option>
-                        <option
-                            v-for="invoice in unpaidInvoices"
-                            :key="invoice.id"
-                            :value="invoice.id"
-                        >
-                            #{{ invoice.serial_number || invoice.id }} - {{
-                                formatCurrency(invoice.remaining_balance, invoice.currency)
+                        <template #option="{ option }">
+                            #{{ option.serial_number || option.id }} - {{
+                                formatCurrency(option.remaining_balance, option.currency)
                             }}
-                        </option>
-                    </select>
+                        </template>
+                    </CustomSelect>
                 </div>
 
                 <!-- Invoice Details -->
@@ -211,20 +230,27 @@ const submit = () => {
                         :value="__('Payment Method')"
                         class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500"
                     />
-                    <select
-                        v-model="form.payment_method"
-                        id="payment_method"
-                        class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
-                        required
+                    <CustomSelect
+                        v-model="selectedPaymentMethod"
+                        :options="Object.entries(payment_methods).map(([label, value]) => ({ id: value, label }))"
+                        :multiple="false"
+                        :close-on-select="true"
+                        :placeholder="__('Select Payment Method')"
+                        label="label"
+                        track-by="id"
+                        class="w-full"
+                        :select-label="''"
+                        :deselect-label="''"
+                        :selected-label="__('Selected')"
+                        @update:model-value="form.payment_method = selectedPaymentMethod?.id || 'cash'"
                     >
-                        <option
-                            v-for="(value, label) in payment_methods"
-                            :key="value"
-                            :value="value"
-                        >
-                            {{ __(label) }}
-                        </option>
-                    </select>
+                        <template #singleLabel="{ option }">
+                            {{ __(option.label) }}
+                        </template>
+                        <template #option="{ option }">
+                            {{ __(option.label) }}
+                        </template>
+                    </CustomSelect>
                     <InputError
                         class="mt-1"
                         :message="form.errors.payment_method"
@@ -260,21 +286,20 @@ const submit = () => {
                 <div v-if="form.payment_method === 'cheque'" class="sm:col-span-2 grid grid-cols-1 gap-6 sm:grid-cols-3 p-6 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
                     <div>
                         <InputLabel for="cheque_bank" :value="__('Select Bank')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                        <select
-                            v-model="form.cheque_bank_id"
-                            id="cheque_bank"
-                            class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
-                            required
-                        >
-                            <option :value="null">{{ __("Select Bank") }}</option>
-                            <option
-                                v-for="bank in banks"
-                                :key="bank.id"
-                                :value="bank.id"
-                            >
-                                {{ bank.name }}
-                            </option>
-                        </select>
+                        <VueMultiselect
+                            v-model="selectedChequeBank"
+                            :options="banks"
+                            :multiple="false"
+                            :close-on-select="true"
+                            :placeholder="__('Select Bank')"
+                            label="name"
+                            track-by="id"
+                            class="w-full"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            @update:model-value="form.cheque_bank_id = selectedChequeBank?.id || null"
+                        />
                         <InputError class="mt-1" :message="form.errors.cheque_bank_id" />
                     </div>
                     <div>

@@ -5,7 +5,7 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
-    import VueMultiselect from "vue-multiselect";
+    import CustomSelect from "../CustomSelect.vue";
 
     const props = defineProps({
         supplier: {
@@ -224,7 +224,7 @@
                                         for="categories"
                                         :value="__('Categories')"
                                     />
-                                    <VueMultiselect
+                                    <CustomSelect
                                         v-model="supplier.categories"
                                         :options="categories"
                                         :multiple="true"

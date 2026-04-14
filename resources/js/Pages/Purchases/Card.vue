@@ -28,8 +28,8 @@
     };
 </script>
 <template>
-    <div class="bg-white border-2 border-dashed rounded-lg ">
-        <div class="p-6 md:flex rtl:flex-row-reverse md:items-center md:justify-between">
+    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all">
+        <div class="p-6 md:flex rtl:flex-row-reverse md:items-center md:justify-between border-b border-gray-50 dark:border-gray-800">
             <div class="flex rtl:flex-row-reverse items-center gap-x-4">
 
                 <h2 v-text="formatCurrency(invoice.total, invoice.currency)" class="text-base font-semibold text-gray-800 sm:text-lg"></h2>

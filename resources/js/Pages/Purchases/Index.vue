@@ -18,6 +18,8 @@
         storages: Array
     });
 
+    const selectedStorage = ref(null);
+
     const showSidebar = ref(true);
 
     const filters = ref({
@@ -74,7 +76,7 @@
 </script>
 
 <template>
-    <AppLayout title="Purchases">
+    <AppLayout :title="__('Purchases')">
         <div class="w-full lg:flex lg:items-center lg:justify-between">
             <div>
                 <div class="flex items-center gap-x-3">
@@ -174,19 +176,20 @@
         >
             <template #title></template>
             <template #content>
-                <select
-                    id="storage"
-                    v-model="form.storage"
-                    class="border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
-                    name="storage"
-                >
-                    <option
-                        v-for="storage in storages"
-                        :key="storage.id"
-                        :value="storage.id"
-                        v-text="storage.name"
-                    ></option>
-                </select>
+                <VueMultiselect
+                    v-model="selectedStorage"
+                    :options="storages"
+                    :multiple="false"
+                    :close-on-select="true"
+                    :placeholder="__('Select Storage')"
+                    label="name"
+                    track-by="id"
+                    class="w-full"
+                    :select-label="''"
+                    :deselect-label="''"
+                    :selected-label="__('Selected')"
+                    @update:model-value="form.storage = selectedStorage?.id || null"
+                />
             </template>
             <template #footer>
                 <SecondaryButton @click="closeModal"> {{ __("Cancel") }}</SecondaryButton>

@@ -12,11 +12,13 @@ class DashboardController extends Controller
         $totalSales = $query->totalSales();
         $totalPurchase = $query->totalPurchase();
         $expensesThisMonth = $query->expensesThisMonth();
+        $totalInventoryValue = $query->totalInventoryValue();
 
         return inertia('Dashboard', [
             'total_sales' => $totalSales,
             'total_purchase' => $totalPurchase,
             'expenses_this_month' => $expensesThisMonth,
+            'total_inventory_value' => $totalInventoryValue,
             'outstanding_receivables' => $query->outstandingReceivables(),
             'outstanding_payables' => $query->outstandingPayables(),
             'gross_profit' => (float) $totalSales - (float) $totalPurchase - (float) $expensesThisMonth,

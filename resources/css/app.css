@@ -5,102 +5,176 @@
 @import "tailwindcss/utilities";
 
 
-/* Vue Multiselect Global Styling - Native Input Look */
+/* Vue Multiselect Global Styling - Flat & Simple with RTL/LTR Support */
 .multiselect {
-    @apply text-sm text-gray-700 dark:text-gray-300;
+    @apply text-sm text-gray-900 dark:text-gray-100;
     min-height: 42px;
+    direction: inherit;
 }
 
 .multiselect__tags {
-    @apply border-gray-200 rounded-lg dark:bg-gray-900 dark:border-gray-600 min-h-[42px] py-1.5 px-3 flex flex-wrap items-center !important;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    @apply border border-gray-300 rounded-md dark:bg-gray-900 dark:border-gray-700 min-h-[42px] py-2 flex flex-wrap items-center !important;
+    padding-inline-start: 0.75rem !important;
+    padding-inline-end: 2.5rem !important;
+    transition: border-color 0.15s ease;
+    box-shadow: none !important;
 }
 
 .multiselect__input {
-    @apply dark:bg-gray-900 dark:text-gray-300 text-sm p-0 m-0 !important;
+    @apply dark:bg-gray-900 dark:text-gray-100 text-sm p-0 m-0 !important;
     background: transparent !important;
     border: none !important;
     width: 100% !important;
-    min-height: 28px !important;
-    line-height: 28px !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    min-height: 26px !important;
+    line-height: 26px !important;
+    padding: 0 !important;
+    box-shadow: none !important;
 }
 
 .multiselect__single {
-    @apply dark:bg-gray-900 dark:text-gray-300 text-sm p-0 m-0 !important;
+    @apply dark:bg-gray-900 dark:text-gray-100 text-sm p-0 m-0 !important;
     background: transparent !important;
     border: none !important;
-    min-height: 28px !important;
-    line-height: 28px !important;
+    min-height: 26px !important;
+    line-height: 26px !important;
+    display: block !important;
     position: relative !important;
-    z-index: 10;
+    z-index: 10 !important;
 }
 
 .multiselect__input::placeholder {
-    @apply text-gray-400/70 dark:text-gray-500;
+    @apply text-gray-400 dark:text-gray-500;
 }
 
+/* Hide default placeholder completely - we handle it in our wrapper */
 .multiselect__placeholder {
-    @apply text-gray-400/70 dark:text-gray-500 m-0 p-0 leading-[28px] !important;
-    position: absolute !important;
-}
-
-.multiselect--active .multiselect__placeholder,
-.multiselect--has-values .multiselect__placeholder,
-.multiselect__single + .multiselect__placeholder {
     display: none !important;
 }
 
-/* Hide default arrow and search icon for more native look if desired,
-   but keeping a small subtle one often helps UX.
-   User asked for "native like", and native selects have arrows,
-   but native text inputs don't. Since this is often a search/tag input,
-   let's make the arrow very subtle or hide it. */
+/* Arrow/Select Icon - RTL/LTR Support */
 .multiselect__select {
-    display: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 40px !important;
+    height: 40px !important;
+    padding: 0 !important;
+    top: 1px !important;
+    transition: none !important;
+}
+
+/* Position arrow based on direction */
+[dir="ltr"] .multiselect__select,
+.multiselect__select {
+    right: 0 !important;
+    left: auto !important;
+}
+
+[dir="rtl"] .multiselect__select {
+    left: 0 !important;
+    right: auto !important;
+}
+
+.multiselect__select:before {
+    content: "" !important;
+    display: block !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-style: solid !important;
+    border-width: 5px 5px 0 5px !important;
+    border-color: #9ca3af transparent transparent transparent !important;
+    position: relative !important;
+    top: 0 !important;
+    margin: 0 !important;
+}
+
+.multiselect--active .multiselect__select:before {
+    border-width: 0 5px 5px 5px !important;
+    border-color: transparent transparent #9ca3af transparent !important;
+}
+
+.dark .multiselect__select:before {
+    border-color: #6b7280 transparent transparent transparent !important;
+}
+
+.dark .multiselect--active .multiselect__select:before {
+    border-color: transparent transparent #6b7280 transparent !important;
 }
 
 .multiselect--active .multiselect__tags {
-    @apply border-emerald-300 ring ring-emerald-200 ring-opacity-50 dark:border-emerald-500 !important;
+    @apply border-gray-400 dark:border-gray-600 !important;
+    box-shadow: none !important;
 }
 
 .multiselect__content-wrapper {
-    @apply border-gray-200 rounded-b-lg shadow-lg dark:bg-gray-900 dark:border-gray-600 !important;
+    @apply border border-gray-300 rounded-md shadow-sm dark:bg-gray-900 dark:border-gray-700 !important;
+    margin-top: 2px !important;
+    border-top: 0 !important;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 0 !important;
+}
+
+.multiselect__content {
+    @apply dark:bg-gray-900 !important;
 }
 
 .multiselect__option {
-    @apply py-2 px-3 text-sm !important;
+    @apply py-2 text-sm dark:text-gray-100 !important;
+    padding-inline-start: 0.75rem !important;
+    padding-inline-end: 0.75rem !important;
+    min-height: auto !important;
+    line-height: 1.5 !important;
 }
 
 .multiselect__option--highlight {
-    @apply bg-emerald-500 text-white !important;
+    @apply bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white !important;
 }
 
 .multiselect__option--selected {
-    @apply bg-gray-100 text-gray-900 font-semibold dark:bg-gray-800 dark:text-white !important;
+    @apply bg-gray-50 text-gray-900 font-medium dark:bg-gray-800 dark:text-white !important;
 }
 
 .multiselect__option--selected.multiselect__option--highlight {
-    @apply bg-red-400 text-white dark:bg-red-500 !important;
+    @apply bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-white !important;
 }
 
-/* Tags styling */
+/* Tags styling with RTL support */
 .multiselect__tag {
-    @apply bg-emerald-500 text-white text-xs font-semibold py-1 px-2 mr-2 my-0.5 rounded-md flex items-center !important;
+    @apply bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200 text-xs font-medium py-1 px-2 my-0.5 rounded flex items-center !important;
+    margin-inline-end: 0.5rem !important;
+    margin-inline-start: 0 !important;
 }
 
 .multiselect__tag-icon {
-    @apply ml-1 bg-transparent hover:bg-emerald-600 rounded-sm !important;
-    line-height: 14px !important;
+    @apply bg-transparent hover:bg-gray-300 dark:hover:bg-gray-600 rounded-sm !important;
+    margin-inline-start: 0.25rem !important;
+    margin-inline-end: 0 !important;
+    line-height: 16px !important;
     width: 18px !important;
     height: 18px !important;
 }
 
 .multiselect__tag-icon:after {
-    @apply text-white !important;
+    @apply text-gray-600 dark:text-gray-300 !important;
+}
+
+.multiselect__tag-icon:hover:after {
+    @apply text-gray-800 dark:text-gray-100 !important;
 }
 
 .multiselect__spinner {
     @apply dark:bg-gray-900 !important;
+    background: transparent !important;
+}
+
+/* Loading state spinner positioning with RTL support */
+[dir="ltr"] .multiselect__spinner,
+.multiselect__spinner {
+    right: 0 !important;
+    left: auto !important;
+}
+
+[dir="rtl"] .multiselect__spinner {
+    left: 0 !important;
+    right: auto !important;
 }

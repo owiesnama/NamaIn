@@ -46,7 +46,90 @@ class Product extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['expired_at'];
+    protected $appends = ['expired_at', 'average_cost', 'pending_sales', 'pending_purchases', 'available_qty'];
+
+    /**
+     * Get the average cost of this product across all storages.
+     */
+    public function getAverageCostAttribute(): float|int
+    {
+        $totalPurchasedQty = $this->transactions()
+            ->where('delivered', true)
+            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
+            ->sum('base_quantity');
+
+        if ($totalPurchasedQty <= 0) {
+            return $this->cost ?? 0;
+        }
+
+        $totalPurchasedCost = $this->transactions()
+            ->where('delivered', true)
+            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
+            ->sum(\DB::raw('base_quantity * unit_cost'));
+
+        return $totalPurchasedCost / $totalPurchasedQty;
+    }
+
+    /**
+     * Sum of unexecuted purchase invoice items.
+     */
+    public function pendingPurchaseQuantity(): float|int
+    {
+        return $this->transactions()
+            ->where('delivered', false)
+            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
+            ->sum('base_quantity');
+    }
+
+    /**
+     * Sum of unexecuted sales invoice items.
+     */
+    public function pendingSalesQuantity(): float|int
+    {
+        return $this->transactions()
+            ->where('delivered', false)
+            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Customer::class))
+            ->sum('base_quantity');
+    }
+
+    /**
+     * Quantity on hand minus pending sales.
+     */
+    public function availableQuantity(): float|int
+    {
+        return $this->quantityOnHand() - $this->pendingSalesQuantity();
+    }
+
+    /**
+     * Quantity on hand plus pending purchases.
+     */
+    public function expectedQuantity(): float|int
+    {
+        return $this->quantityOnHand() + $this->pendingPurchaseQuantity();
+    }
+
+    public function getPendingSalesAttribute(): float|int
+    {
+        return $this->pendingSalesQuantity();
+    }
+
+    public function getPendingPurchasesAttribute(): float|int
+    {
+        return $this->pendingPurchaseQuantity();
+    }
+
+    public function getAvailableQtyAttribute(): float|int
+    {
+        return $this->availableQuantity();
+    }
+
+    /**
+     * Transactions associated with this product.
+     */
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
 
     /**
      * @return array<string, string>

@@ -56,7 +56,7 @@ watch(
 </script>
 
 <template>
-    <AppLayout title="Payments">
+    <AppLayout :title="__('Payments')">
         <div class="w-full lg:flex lg:items-center lg:justify-between">
             <div>
                 <div class="flex items-center gap-x-3">
@@ -110,49 +110,49 @@ watch(
 
             <!-- Payments List -->
             <div class="flex-1 min-w-0 overflow-hidden">
-                <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all">
                     <div class="overflow-hidden">
-                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                            <thead class="bg-gray-50 dark:bg-gray-800">
+                        <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-800">
+                            <thead class="bg-gray-50/50 dark:bg-gray-800/50">
                                 <tr>
                                     <th
                                         scope="col"
-                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-start rtl:text-right text-gray-500 dark:text-gray-400"
+                                        class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-start rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                     >
                                         {{ __("Invoice") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-start rtl:text-right text-gray-500 dark:text-gray-400"
+                                        class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-start rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                     >
                                         {{ __("Related Party") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-start rtl:text-right text-gray-500 dark:text-gray-400"
+                                        class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-start rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                     >
                                         {{ __("Amount") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-start rtl:text-right text-gray-500 dark:text-gray-400"
+                                        class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-start rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                     >
                                         {{ __("Method") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-start rtl:text-right text-gray-500 dark:text-gray-400"
+                                        class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-start rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                     >
                                         {{ __("Date") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-8 py-3.5 whitespace-nowrap text-sm font-normal text-start rtl:text-right text-gray-500 dark:text-gray-400"
+                                        class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-start rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
                                     >
                                         {{ __("Recorded By") }}
                                     </th>
@@ -163,7 +163,7 @@ watch(
                                 </tr>
                             </thead>
                             <tbody
-                                class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900"
+                                class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900"
                             >
                                 <tr
                                     v-for="payment in payments.data"

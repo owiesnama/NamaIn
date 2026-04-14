@@ -87,7 +87,7 @@ const getBudgetColor = (budget) => {
 </script>
 
 <template>
-    <AppLayout title="Expenses">
+    <AppLayout :title="__('Expenses')">
         <section>
             <div class="w-full lg:flex lg:items-center lg:justify-between">
                 <div>
@@ -140,7 +140,7 @@ const getBudgetColor = (budget) => {
             </div>
 
             <div v-if="category_budgets && category_budgets.some(b => (b.spent / b.limit) >= 0.75)" class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div v-for="budget in category_budgets.filter(b => (b.spent / b.limit) >= 0.75)" :key="budget.id" class="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
+                <div v-for="budget in category_budgets.filter(b => (b.spent / b.limit) >= 0.75)" :key="budget.id" class="p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl transition-all">
                     <div class="flex justify-between items-center mb-2">
                         <span class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ budget.name }}</span>
                         <span class="text-xs font-medium" :class="budget.spent >= budget.limit ? 'text-red-500' : 'text-amber-500'">
@@ -168,12 +168,20 @@ const getBudgetColor = (budget) => {
                     <template #extra-filters>
                         <div class="space-y-2">
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Status") }}</label>
-                            <select v-model="filters.status" class="block w-full py-2 px-3 text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40">
-                                <option :value="null">{{ __("All Statuses") }}</option>
-                                <option value="pending">{{ __("Pending") }}</option>
-                                <option value="approved">{{ __("Approved") }}</option>
-                                <option value="rejected">{{ __("Rejected") }}</option>
-                            </select>
+                            <VueMultiselect
+                                :model-value="[{ id: 'pending', label: __('Pending') }, { id: 'approved', label: __('Approved') }, { id: 'rejected', label: __('Rejected') }].find(o => o.id === filters.status)"
+                                :options="[{ id: 'pending', label: __('Pending') }, { id: 'approved', label: __('Approved') }, { id: 'rejected', label: __('Rejected') }]"
+                                :multiple="false"
+                                :close-on-select="true"
+                                :placeholder="__('All Statuses')"
+                                label="label"
+                                track-by="id"
+                                class="w-full"
+                                :select-label="''"
+                                :deselect-label="''"
+                                :selected-label="__('Selected')"
+                                @update:model-value="option => filters.status = option?.id || null"
+                            />
                         </div>
 
                         <div class="space-y-2">
@@ -199,17 +207,27 @@ const getBudgetColor = (budget) => {
 
                         <div class="space-y-2">
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Created By") }}</label>
-                            <select v-model="filters.created_by" class="block w-full py-2 px-3 text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40">
-                                <option :value="null">{{ __("All Users") }}</option>
-                                <option v-for="user in users" :key="user.id" :value="user.id">{{ user.name }}</option>
-                            </select>
+                            <VueMultiselect
+                                :model-value="users.find(u => u.id == filters.created_by)"
+                                :options="users"
+                                :multiple="false"
+                                :close-on-select="true"
+                                :placeholder="__('All Users')"
+                                label="name"
+                                track-by="id"
+                                class="w-full"
+                                :select-label="''"
+                                :deselect-label="''"
+                                :selected-label="__('Selected')"
+                                @update:model-value="option => filters.created_by = option?.id || null"
+                            />
                         </div>
                     </template>
                 </FilterSidebar>
 
                 <div class="flex-1 overflow-hidden">
-                    <div v-if="spending_by_category && spending_by_category.length" class="mb-6 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm">
-                        <h3 class="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">{{ __("Spending by Category") }}</h3>
+                    <div v-if="spending_by_category && spending_by_category.length" class="mb-6 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl transition-all">
+                        <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">{{ __("Spending by Category") }}</h3>
                         <div class="flex flex-wrap gap-4">
                             <div v-for="item in spending_by_category" :key="item.name" class="flex items-center gap-2 px-3 py-1.5 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700">
                                 <span class="text-xs font-medium text-gray-600 dark:text-gray-400">{{ item.name }}:</span>
@@ -220,23 +238,23 @@ const getBudgetColor = (budget) => {
 
                     <div class="overflow-x-auto">
                         <div class="inline-block min-w-full align-middle">
-                            <div class="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
-                                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                    <thead class="bg-gray-50 dark:bg-gray-800">
+                            <div class="overflow-hidden border border-gray-200 dark:border-gray-700 rounded-xl transition-all">
+                                <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-800">
+                                    <thead class="bg-gray-50/50 dark:bg-gray-800/50">
                                         <tr>
-                                            <th scope="col" class="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            <th scope="col" class="py-3.5 px-4 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                                                 {{ __("Title") }}
                                             </th>
-                                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            <th scope="col" class="px-4 py-3.5 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                                                 {{ __("Amount") }}
                                             </th>
-                                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            <th scope="col" class="px-4 py-3.5 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                                                 {{ __("Status") }}
                                             </th>
-                                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            <th scope="col" class="px-4 py-3.5 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                                                 {{ __("Date") }}
                                             </th>
-                                            <th scope="col" class="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                            <th scope="col" class="px-4 py-3.5 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                                                 {{ __("Categories") }}
                                             </th>
                                             <th scope="col" class="relative py-3.5 px-4">
@@ -244,7 +262,7 @@ const getBudgetColor = (budget) => {
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                                    <tbody class="bg-white divide-y divide-gray-100 dark:divide-gray-800 dark:bg-gray-900">
                                         <tr v-for="expense in expenses.data" :key="expense.id" class="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" @click="router.visit(route('expenses.show', expense.id))">
                                             <td class="px-4 py-4 text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
                                                 <div class="flex items-center gap-2">

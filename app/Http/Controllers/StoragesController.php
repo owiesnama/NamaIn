@@ -17,13 +17,28 @@ class StoragesController extends Controller
             'storages_count' => Storage::count(),
             'storages' => Storage::filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
-                    $query->orderBy(in_array($sortBy, ['name', 'created_at']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
+                    $query->orderBy(in_array($sortBy, ['name', 'created_at']) ? $sortBy : 'name', request('sort_order', 'asc'));
                 }, function ($query) {
-                    $query->latest();
+                    $query->orderBy('name', 'asc');
                 })
                 ->withCount('stock')
-                ->paginate(parent::ELEMENTS_PER_PAGE)
-                ->withQueryString(),
+                ->get()
+                ->map(function ($storage) {
+                    $total_stock_value = 0;
+                    $total_quantity = 0;
+
+                    $storage->stock()->get()->each(function ($product) use (&$total_stock_value, &$total_quantity) {
+                        $total_stock_value += $product->pivot->quantity * $product->average_cost;
+                        $total_quantity += $product->pivot->quantity;
+                    });
+
+                    return [
+                        ...$storage->toArray(),
+                        'total_stock_value' => (float) $total_stock_value,
+                        'total_quantity' => (float) $total_quantity,
+                        'last_movement_date' => $storage->transactions()->latest()->value('created_at'),
+                    ];
+                }),
         ]);
     }
 
@@ -63,10 +78,13 @@ class StoragesController extends Controller
             ->whereHas('invoice', fn ($q) => $q->where('invocable_type', '!=', Customer::class))
             ->sum('base_quantity');
 
-        $total_stock_value = \DB::table('stocks')
-            ->join('products', 'stocks.product_id', '=', 'products.id')
-            ->where('stocks.storage_id', $storage->id)
-            ->sum(\DB::raw('stocks.quantity * products.cost'));
+        $total_stock_value = 0;
+        $storage->stock()->with(['transactions' => function ($query) {
+            $query->where('delivered', true)
+                ->whereHas('invoice', fn ($q) => $q->where('invocable_type', '!=', Customer::class));
+        }])->get()->each(function ($product) use (&$total_stock_value) {
+            $total_stock_value += $product->pivot->quantity * $product->average_cost;
+        });
 
         // Chart Data (Last 6 Months)
         $months = collect();

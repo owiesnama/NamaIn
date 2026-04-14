@@ -4,9 +4,10 @@
     import TextInput from "@/Components/TextInput.vue";
     import InputError from "@/Components/InputError.vue";
     import PurchaseProduct from "@/Models/PurchaseProduct";
-    import { ref, computed } from "vue";
+    import { ref, computed, watch } from "vue";
     import { router, useForm, Link } from "@inertiajs/vue3";
     import { debounce } from "lodash";
+    import QuickAddPartyModal from "@/Components/QuickAddPartyModal.vue";
 
     const props = defineProps({
         storages: Object,
@@ -15,6 +16,12 @@
         payment_methods: Object,
         banks: Array
     });
+
+    const localCustomers = ref([...props.customers]);
+
+    watch(() => props.customers, (newCustomers) => {
+        localCustomers.value = [...newCustomers];
+    }, { deep: true });
 
     const purchases = ref([new PurchaseProduct()]);
 
@@ -61,6 +68,16 @@
         });
     }, 300);
 
+    const showQuickAddModal = ref(false);
+
+    const selectedPaymentMethod = ref({ id: form.payment_method, label: Object.keys(props.payment_methods).find(key => props.payment_methods[key] === form.payment_method) });
+    const selectedChequeBank = ref(null);
+
+    const onCustomerCreated = (customer) => {
+        form.invocable = customer;
+        localCustomers.value.unshift(customer);
+    };
+
     const submit = () => {
         form.total = totalCost.value;
         form.products = purchases.value;
@@ -69,7 +86,7 @@
 </script>
 
 <template>
-    <AppLayout title="New Sales">
+    <AppLayout :title="__('New Sales')">
         <!-- Page Header -->
         <div class="flex items-center gap-3 mb-6">
             <Link
@@ -90,9 +107,9 @@
             <!-- Main Panel -->
             <div class="flex-1 min-w-0 space-y-4">
                 <!-- Customer Selector -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-sm">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 shadow-none">
                     <div class="flex items-center gap-2 mb-3">
-                        <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center flex-shrink-0">
+                        <div class="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-emerald-600 dark:text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>
@@ -100,24 +117,36 @@
                         <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __("Customer") }}</span>
                     </div>
                     <div class="max-w-sm" v-auto-animate>
-                        <VueMultiselect
+                        <CustomSelect
                             v-model="form.invocable"
-                            :options="customers"
+                            :options="localCustomers"
                             label="name"
                             track-by="id"
                             @search-change="searchCustomer"
-                            class="modern-select"
                             :placeholder="__('Search customer...')"
-                        />
+                        >
+                            <template #noResult>
+                                <div class="p-2 space-y-2 text-center">
+                                    <p class="text-sm text-gray-500">{{ __("No elements found. Consider changing the search query.") }}</p>
+                                    <button
+                                        type="button"
+                                        @click="showQuickAddModal = true"
+                                        class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm"
+                                    >
+                                        + {{ __("Add New Customer") }}
+                                    </button>
+                                </div>
+                            </template>
+                        </CustomSelect>
                         <InputError :message="form.errors.invocable" class="mt-1" />
                     </div>
                 </div>
 
                 <!-- Line Items -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-none overflow-hidden">
                     <!-- Items section header -->
                     <div class="flex items-center gap-2 px-5 py-4 border-b border-gray-100 dark:border-gray-700">
-                        <div class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
+                        <div class="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
                             </svg>
@@ -143,37 +172,40 @@
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
                                 <div class="md:col-span-4">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
-                                    <select
-                                        v-model="purchase.product"
-                                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white text-sm"
-                                        name="product[]"
-                                    >
-                                        <option value="" disabled>{{ __("Select Product") }}</option>
-                                        <option
-                                            v-for="product in products"
-                                            :key="'product-' + product.id"
-                                            :value="product.id"
-                                            v-text="product.name"
-                                        ></option>
-                                    </select>
+                                    <CustomSelect
+                                        v-model="purchase.selectedProduct"
+                                        :options="products"
+                                        :multiple="false"
+                                        :close-on-select="true"
+                                        :placeholder="__('Select Product')"
+                                        label="name"
+                                        track-by="id"
+                                        class="w-full"
+                                        :select-label="''"
+                                        :deselect-label="''"
+                                        :selected-label="__('Selected')"
+                                        @update:model-value="purchase.product = purchase.selectedProduct?.id || ''; purchase.unit = ''; purchase.selectedUnit = null"
+                                    />
                                     <InputError :message="form.errors[`products.${index}.product`]" class="mt-1" />
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Unit") }}</label>
-                                    <select
-                                        v-model="purchase.unit"
-                                        class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white text-sm"
-                                        name="units[]"
-                                    >
-                                        <option value="" disabled>{{ __("Unit") }}</option>
-                                        <option
-                                            v-for="unit in productUnits(purchase.product)"
-                                            :key="'unit-' + unit.id"
-                                            :value="unit.id"
-                                            v-text="unit.name"
-                                        ></option>
-                                    </select>
+                                    <CustomSelect
+                                        v-model="purchase.selectedUnit"
+                                        :options="productUnits(purchase.product) || []"
+                                        :multiple="false"
+                                        :close-on-select="true"
+                                        :placeholder="__('Unit')"
+                                        label="name"
+                                        track-by="id"
+                                        class="w-full"
+                                        :select-label="''"
+                                        :deselect-label="''"
+                                        :selected-label="__('Selected')"
+                                        :disabled="!purchase.product"
+                                        @update:model-value="purchase.unit = purchase.selectedUnit?.id || ''"
+                                    />
                                     <InputError :message="form.errors[`products.${index}.unit`]" class="mt-1" />
                                 </div>
 
@@ -233,13 +265,13 @@
                     </div>
 
                     <!-- Add row -->
-                    <div class="px-5 py-4 bg-gray-50/50 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700">
+                    <div class="px-5 py-4 bg-gray-50/30 dark:bg-gray-900/20 border-t border-gray-100 dark:border-gray-700">
                         <button
                             type="button"
                             @click="newRow"
                             class="inline-flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
                         >
-                            <span class="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+                            <span class="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
                                 </svg>
@@ -253,7 +285,7 @@
             <!-- Sidebar -->
             <div class="w-full lg:w-80 xl:w-96 flex flex-col gap-4 lg:sticky lg:top-4">
                 <!-- Summary Card -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-none overflow-hidden">
                     <div class="px-5 py-5 bg-emerald-600 dark:bg-emerald-700">
                         <p class="text-xs font-bold uppercase tracking-wider text-emerald-200 mb-1">{{ __("Invoice Total") }}</p>
                         <div class="flex items-baseline gap-2">
@@ -294,7 +326,7 @@
                 </div>
 
                 <!-- Payment Details -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-5">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-none p-5">
                     <h3 class="flex items-center gap-2 text-sm font-bold text-gray-700 dark:text-gray-300 mb-4">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -305,15 +337,27 @@
                     <div class="space-y-4">
                         <div>
                             <InputLabel for="payment_method" :value="__('Payment Method')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                            <select
-                                v-model="form.payment_method"
-                                id="payment_method"
-                                class="w-full px-3 py-2 bg-gray-50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-sm text-gray-900 dark:text-white"
+                            <CustomSelect
+                                v-model="selectedPaymentMethod"
+                                :options="Object.entries(payment_methods).map(([label, value]) => ({ id: value, label }))"
+                                :multiple="false"
+                                :close-on-select="true"
+                                :placeholder="__('Select Payment Method')"
+                                label="label"
+                                track-by="id"
+                                class="w-full"
+                                :select-label="''"
+                                :deselect-label="''"
+                                :selected-label="__('Selected')"
+                                @update:model-value="form.payment_method = selectedPaymentMethod?.id || 'credit'"
                             >
-                                <option v-for="(value, label) in payment_methods" :key="value" :value="value">
-                                    {{ __(label) }}
-                                </option>
-                            </select>
+                                <template #singleLabel="{ option }">
+                                    {{ __(option.label) }}
+                                </template>
+                                <template #option="{ option }">
+                                    {{ __(option.label) }}
+                                </template>
+                            </CustomSelect>
                             <InputError :message="form.errors.payment_method" class="mt-1" />
                         </div>
 
@@ -337,7 +381,7 @@
                                 v-model="form.payment_reference"
                                 type="text"
                                 class="block w-full"
-                                placeholder="Ref / Cheque #"
+                                :placeholder="__('Ref / Cheque #')"
                             />
                             <InputError :message="form.errors.payment_reference" class="mt-1" />
                         </div>
@@ -371,21 +415,20 @@
                         <div v-if="form.payment_method === 'cheque'" class="col-span-full space-y-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
                             <div>
                                 <InputLabel for="cheque_bank" :value="__('Select Bank')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                                <select
-                                    v-model="form.cheque_bank_id"
-                                    id="cheque_bank"
-                                    class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-sm text-gray-900 dark:text-white"
-                                    required
-                                >
-                                    <option :value="null">{{ __("Select Bank") }}</option>
-                                    <option
-                                        v-for="bank in banks"
-                                        :key="bank.id"
-                                        :value="bank.id"
-                                    >
-                                        {{ bank.name }}
-                                    </option>
-                                </select>
+                                <CustomSelect
+                                    v-model="selectedChequeBank"
+                                    :options="banks"
+                                    :multiple="false"
+                                    :close-on-select="true"
+                                    :placeholder="__('Select Bank')"
+                                    label="name"
+                                    track-by="id"
+                                    class="w-full"
+                                    :select-label="''"
+                                    :deselect-label="''"
+                                    :selected-label="__('Selected')"
+                                    @update:model-value="form.cheque_bank_id = selectedChequeBank?.id || null"
+                                />
                                 <InputError class="mt-1" :message="form.errors.cheque_bank_id" />
                             </div>
                             <div>
@@ -427,5 +470,12 @@
                 </div>
             </div>
         </form>
+
+        <QuickAddPartyModal
+            :show="showQuickAddModal"
+            type="customer"
+            @close="showQuickAddModal = false"
+            @created="onCustomerCreated"
+        />
     </AppLayout>
 </template>

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Support\Facades\DB;
 
 class Stock extends Pivot
 {
@@ -18,12 +19,34 @@ class Stock extends Pivot
     protected $appends = ['totalCost'];
 
     /**
+     * The average cost of this stock.
+     */
+    public function getAverageCostAttribute(): float|int
+    {
+        $totalPurchasedQty = $this->product->transactions()
+            ->where('delivered', true)
+            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
+            ->sum('base_quantity');
+
+        if ($totalPurchasedQty <= 0) {
+            return $this->product->cost ?? 0;
+        }
+
+        $totalPurchasedCost = $this->product->transactions()
+            ->where('delivered', true)
+            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
+            ->sum(DB::raw('base_quantity * unit_cost'));
+
+        return $totalPurchasedCost / $totalPurchasedQty;
+    }
+
+    /**
      * The total cost of this stock.
      */
     public function getTotalCostAttribute(): float|int
     {
         return $this->relationLoaded('product') || $this->product_id
-            ? $this->quantity * ($this->product?->cost ?? 0)
+            ? $this->quantity * $this->average_cost
             : 0;
     }
 
