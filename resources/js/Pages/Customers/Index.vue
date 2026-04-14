@@ -27,12 +27,26 @@
         importForm.post(route("customers.import"));
     };
 
+    const {
+        search: searchQS,
+        status: statusQS,
+        category: categoryQS,
+        sort_by: sortByQS,
+        sort_order: sortOrderQS
+    } = useQueryString([
+        "search",
+        "status",
+        "category",
+        "sort_by",
+        "sort_order",
+    ]);
+
     const filters = ref({
-        search: useQueryString("search").value,
-        status: useQueryString("status").value,
-        category: useQueryString("category").value,
-        sort_by: useQueryString("sort_by").value || "created_at",
-        sort_order: useQueryString("sort_order").value || "desc"
+        search: searchQS.value,
+        status: statusQS.value,
+        category: categoryQS.value,
+        sort_by: sortByQS.value || "created_at",
+        sort_order: sortOrderQS.value || "desc"
     });
 
     const resetFilters = () => {

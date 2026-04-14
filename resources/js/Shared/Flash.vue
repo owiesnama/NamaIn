@@ -46,24 +46,21 @@
     </div>
 </template>
 
-<script>
-export default {
-  data() {
-    return {
-      show: false,
-    }
-  },
-  watch: {
-    '$page.props.flash': {
-      handler() {
-        this.show = true;
+<script setup>
+import { ref, watch } from 'vue';
+import { usePage } from '@inertiajs/vue3';
 
-        setTimeout(() => {
-            this.show = false;
+const page = usePage();
+const show = ref(false);
+let timer = null;
+
+watch(() => page.props.flash, () => {
+    if (page.props.flash?.success) {
+        show.value = true;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+            show.value = false;
         }, 3000);
-      },
-      deep: true,
-    },
-  },
-}
+    }
+}, { deep: true });
 </script>

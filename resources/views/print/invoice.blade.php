@@ -11,7 +11,7 @@
             default                                  => 'badge-unpaid',
         };
 
-        $subtotal  = $deliveredRecords->sum(fn($r) => $r->price * $r->quantity);
+        $subtotal  = $invoice->subtotal;
         $discount  = (float) $invoice->discount;
         $total     = (float) $invoice->total;
         $paid      = (float) $invoice->paid_amount;
@@ -43,7 +43,7 @@
             </div>
             <div class="meta-item">
                 <div class="meta-label">{{ __('Date') }}</div>
-                <div class="meta-value">{{ \Carbon\Carbon::parse($invoice->getRawOriginal('created_at'))->format('Y-m-d') }}</div>
+                <div class="meta-value">{{ $invoice->created_at->format('Y-m-d') }}</div>
             </div>
             <div class="meta-item">
                 <div class="meta-label">{{ __('Payment Method') }}</div>
@@ -63,12 +63,12 @@
         <div class="section">
             <div class="section-title">{{ __('Bill To') }}</div>
             <div class="info-card" style="max-width: 320px;">
-                <strong>{{ $invoice->invocable->name }}</strong>
+                <strong>{{ $invoice->invocable?->name }}</strong>
                 <div class="sub">
-                    @if($invoice->invocable->address)
+                    @if($invoice->invocable?->address)
                         {{ $invoice->invocable->address }}<br>
                     @endif
-                    @if($invoice->invocable->phone_number)
+                    @if($invoice->invocable?->phone_number)
                         {{ $invoice->invocable->phone_number }}
                     @endif
                 </div>

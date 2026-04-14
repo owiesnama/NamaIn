@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Enums\PaymentMethod;
 use App\Traits\WithTrashScope;
-use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -34,6 +33,24 @@ class Payment extends BaseModel
         'receipt_path',
     ];
 
+    /**
+     * Direct columns to search against.
+     *
+     * @var array<string>
+     */
+    protected array $searchable = ['reference', 'notes'];
+
+    /**
+     * List of searchable model's relation attributes
+     *
+     * @var array<string>
+     */
+    protected array $searchableRelationsAttributes = [
+        'invoice.serial_number',
+        'invoice.invocable.name',
+        'payable.name',
+    ];
+
     protected static function booted(): void
     {
         static::creating(function (Payment $payment) {
@@ -44,33 +61,10 @@ class Payment extends BaseModel
         });
     }
 
-    public function scopeSearch($query, $searchTerm = ''): Builder
-    {
-        $like = config('database.default') === 'pgsql' ? 'ILIKE' : 'LIKE';
-
-        return $query->when($searchTerm,
-            fn ($query) => $query->where(function ($query) use ($searchTerm, $like) {
-                $query->where('payments.reference', $like, "%{$searchTerm}%")
-                    ->orWhere('payments.notes', $like, "%{$searchTerm}%")
-                    ->orWhereHas('invoice', function ($query) use ($searchTerm, $like) {
-                        $query->where('invoices.serial_number', $like, "%{$searchTerm}%");
-                    })
-                    ->orWhereHas('invoice', function ($query) use ($searchTerm, $like) {
-                        $query->whereHas('invocable', function ($query) use ($searchTerm, $like) {
-                            $query->where('name', $like, "%{$searchTerm}%");
-                        });
-                    })
-                    ->orWhereHas('payable', function ($query) use ($searchTerm, $like) {
-                        $query->where('name', $like, "%{$searchTerm}%");
-                    });
-            })
-        );
-    }
-
     /**
      * @var array<string>
      */
-    protected $appends = ['paid_at_human'];
+    protected $appends = ['paid_at_human', 'created_at_human'];
 
     /**
      * @return array<string, string>

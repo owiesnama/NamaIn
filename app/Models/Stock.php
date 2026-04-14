@@ -22,7 +22,9 @@ class Stock extends Pivot
      */
     public function getTotalCostAttribute(): float|int
     {
-        return $this->product ? $this->quantity * $this->product->cost : 0;
+        return $this->relationLoaded('product') || $this->product_id
+            ? $this->quantity * ($this->product?->cost ?? 0)
+            : 0;
     }
 
     /**

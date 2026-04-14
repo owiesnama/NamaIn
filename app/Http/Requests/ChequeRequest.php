@@ -25,11 +25,13 @@ class ChequeRequest extends FormRequest
         return [
             'payee_id' => 'required|integer',
             'payee_type' => 'required|string',
+            'invoice_id' => 'nullable|integer|exists:invoices,id',
             'type' => 'required|in:1,0',
             'due' => 'required|date',
             'bank_id' => 'required|exists:banks,id',
             'reference_number' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0.01',
+            'notes' => 'nullable|string',
         ];
     }
 }

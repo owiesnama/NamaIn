@@ -28,7 +28,7 @@ class Storage extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['stockCount'];
+    protected $appends = ['created_at_human'];
 
     /**
      * Stock for this storage
@@ -45,7 +45,7 @@ class Storage extends BaseModel
      */
     public function quantityOf(Product|int $product): int
     {
-        $productId = is_int($product) ?: $product->id;
+        $productId = is_int($product) ? $product : $product->id;
 
         return (int) $this->stock()->find($productId)?->pivot?->quantity ?: 0;
     }

@@ -1,7 +1,7 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { Link } from "@inertiajs/vue3";
-    import { computed } from "vue";
+    import { computed, ref } from "vue";
     import {
         Chart as ChartJS,
         CategoryScale,
@@ -9,34 +9,38 @@
         PointElement,
         LineElement,
         Title,
-        Tooltip,
         Legend,
-        BarElement,
+        Tooltip as ChartTooltip,
     } from 'chart.js';
     import { Line } from 'vue-chartjs';
+    import Tooltip from "@/Components/Tooltip.vue";
 
     ChartJS.register(
         CategoryScale,
         LinearScale,
         PointElement,
         LineElement,
-        BarElement,
         Title,
-        Tooltip,
+        ChartTooltip,
         Legend
     );
 
     const props = defineProps([
         "total_sales",
         "total_purchase",
+        "expenses_this_month",
         "outstanding_receivables",
+        "outstanding_payables",
+        "gross_profit",
         "payments_this_month",
-        "transactions",
-        "recent_payments",
         "top_products",
+        "top_customers",
         "low_stock_products",
+        "upcoming_cheques",
         "monthly_stats",
     ]);
+
+    const activeTab = ref('products');
 
     const chartData = computed(() => ({
         labels: props.monthly_stats.labels,
@@ -46,14 +50,24 @@
                 backgroundColor: '#10b981',
                 borderColor: '#10b981',
                 data: props.monthly_stats.sales,
-                tension: 0.3
+                tension: 0.3,
+                fill: false,
             },
             {
                 label: __('Purchases'),
                 backgroundColor: '#6366f1',
                 borderColor: '#6366f1',
                 data: props.monthly_stats.purchases,
-                tension: 0.3
+                tension: 0.3,
+                fill: false,
+            },
+            {
+                label: __('Expenses'),
+                backgroundColor: '#ef4444',
+                borderColor: '#ef4444',
+                data: props.monthly_stats.expenses,
+                tension: 0.3,
+                fill: false,
             }
         ]
     }));
@@ -62,16 +76,12 @@
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-            legend: {
-                position: 'top',
-            },
+            legend: { position: 'top' },
         },
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: {
-                    callback: (value) => formatCurrency(value)
-                }
+                ticks: { callback: (value) => formatCurrency(value) }
             }
         }
     };
@@ -86,264 +96,274 @@
         }).format(amount || 0);
     };
 
-    const quantityForHumans = (transaction) => {
-        if (!transaction.unit) {
-            return `${transaction.quantity} <strong>(Base unit)</strong>`;
-        }
-        return `${transaction.quantity} <storng>(${transaction.unit?.name})</storng>`;
-    };
+    const isOverdue = (cheque) => new Date(cheque.due) < new Date();
+
+    const daysUntilDue = (cheque) => Math.ceil((new Date(cheque.due) - new Date()) / (1000 * 60 * 60 * 24));
+
+    const attentionCount = computed(() =>
+        (props.low_stock_products?.length || 0) + (props.upcoming_cheques?.length || 0)
+    );
 </script>
 
 <template>
     <AppLayout title="Dashboard">
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                {{ __("Dashboard") }}
-            </h2>
-        </template>
+        <div class="space-y-6">
 
-        <div class="space-y-8">
-            <!-- Stats -->
+            <!-- Zone 1: 4 Key Numbers -->
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+                <!-- Gross Profit -->
+                <div class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6">
+                    <Tooltip :text="__('Net result: Sales minus purchases and expenses over the last 30 days.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </Tooltip>
+                    <div class="flex items-center">
+                        <div class="p-2 rounded-md ltr:mr-4 rtl:ml-4 flex-shrink-0 transition-colors"
+                             :class="gross_profit >= 0 ? 'bg-emerald-500' : 'bg-red-500'">
+                            <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+                            </svg>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p class="text-sm font-medium text-gray-500 truncate">{{ __("Gross Profit") }}</p>
+                            <p class="text-2xl font-semibold mt-1" :class="gross_profit >= 0 ? 'text-gray-900' : 'text-red-600'">
+                                {{ formatCurrency(gross_profit) }}
+                            </p>
+                            <p class="text-xs text-gray-400 mt-1">
+                                {{ __("Exp") }}: {{ formatCurrency(expenses_this_month) }} &middot; {{ __("Pmts") }}: {{ formatCurrency(payments_this_month) }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Total Sales -->
-                <Link :href="route('sales.index')" class="relative px-4 py-5 overflow-hidden bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
+                <Link :href="route('sales.index')" class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
+                    <Tooltip :text="__('Total revenue from sales over the last 30 days.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </Tooltip>
                     <div class="p-2 rounded-md bg-emerald-500 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Total Sales") }}</p>
-                        <dd class="flex items-baseline mt-1">
-                            <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(total_sales) }}</p>
-                        </dd>
-                    </div>
-                </Link>
-
-                <!-- Total Purchase -->
-                <Link :href="route('purchases.index')" class="relative px-4 py-5 overflow-hidden bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
-                    <div class="p-2 bg-indigo-500 rounded-md ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Total Purchase") }}</p>
-                        <dd class="flex items-baseline mt-1">
-                            <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(total_purchase) }}</p>
-                        </dd>
-                    </div>
-                </Link>
-
-                <!-- Outstanding Receivables -->
-                <Link :href="route('customers.index')" class="relative px-4 py-5 overflow-hidden bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
-                    <div class="p-2 bg-red-500 rounded-md ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
-                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Outstanding Receivables") }}</p>
-                        <dd class="flex items-baseline mt-1">
-                            <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(outstanding_receivables) }}</p>
-                        </dd>
-                    </div>
-                </Link>
-
-                <!-- Payments This Month -->
-                <Link :href="route('payments.index')" class="relative px-4 py-5 overflow-hidden bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
-                    <div class="p-2 bg-blue-500 rounded-md ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
                         <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
                         </svg>
                     </div>
                     <div>
-                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Payments This Month") }}</p>
-                        <dd class="flex items-baseline mt-1">
-                            <p class="text-2xl font-semibold text-gray-900">{{ formatCurrency(payments_this_month) }}</p>
-                        </dd>
+                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Total Sales") }}</p>
+                        <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(total_sales) }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ __("Last 30 days") }}</p>
+                    </div>
+                </Link>
+
+                <!-- Outstanding Receivables -->
+                <Link :href="route('customers.index')" class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
+                    <Tooltip :text="__('Total money owed by customers.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </Tooltip>
+                    <div class="p-2 rounded-md bg-amber-500 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Receivables") }}</p>
+                        <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(outstanding_receivables) }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ __("Open invoices") }}</p>
+                    </div>
+                </Link>
+
+                <!-- Outstanding Payables -->
+                <Link :href="route('suppliers.index')" class="relative px-4 py-5 bg-white rounded-lg shadow sm:p-6 flex items-center hover:bg-gray-50 transition-colors group">
+                    <Tooltip :text="__('Total money owed to suppliers.')" position="bottom" class="absolute top-2 ltr:right-2 rtl:left-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 text-gray-300 hover:text-gray-400 transition-colors">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                        </svg>
+                    </Tooltip>
+                    <div class="p-2 rounded-md bg-red-500 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                        <svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 truncate">{{ __("Payables") }}</p>
+                        <p class="text-2xl font-semibold text-gray-900 mt-1">{{ formatCurrency(outstanding_payables) }}</p>
+                        <p class="text-xs text-gray-400 mt-1">{{ __("Open invoices") }}</p>
                     </div>
                 </Link>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                <!-- Main Chart (2/3 width) -->
-                <div class="lg:col-span-2">
-                    <div class="p-6 bg-white rounded-lg shadow h-full">
-                        <h3 class="mb-4 text-base font-semibold leading-6 text-gray-900">
-                            {{ __("Sales vs Purchases") }}
-                        </h3>
-                        <div class="h-[350px]">
-                            <Line :data="chartData" :options="chartOptions" />
-                        </div>
+            <!-- Zone 2: Chart + Needs Attention -->
+            <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+                <!-- Chart -->
+                <div class="lg:col-span-2 bg-white rounded-lg shadow p-6">
+                    <h3 class="text-base font-semibold text-gray-900 mb-4">{{ __("Sales vs Purchases vs Expenses") }}</h3>
+                    <div class="h-[300px]">
+                        <Line :data="chartData" :options="chartOptions" />
                     </div>
                 </div>
 
-                <!-- Actionable Insights (1/3 width) -->
-                <div class="space-y-8">
-                    <!-- Low Stock Alerts -->
-                    <div class="bg-white rounded-lg shadow flex flex-col h-full overflow-hidden">
-                        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                            <h3 class="text-base font-semibold text-gray-900">{{ __("Low Stock Alerts") }}</h3>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 ltr:ml-auto rtl:mr-auto">
-                                {{ low_stock_products?.length || 0 }}
-                            </span>
-                        </div>
-                        <div class="flex-grow overflow-y-auto max-h-[350px]">
-                            <ul v-if="low_stock_products?.length > 0" role="list" class="divide-y divide-gray-100">
-                                <li v-for="product in low_stock_products" :key="product.id" class="px-6 py-4 hover:bg-gray-50 transition-colors">
-                                    <div class="flex items-center justify-between">
-                                        <div class="min-w-0 flex-1">
-                                            <p class="text-sm font-medium text-gray-900 truncate">{{ product.name }}</p>
-                                            <p class="text-xs text-red-500 font-semibold">
-                                                {{ __("Only") }} {{ product.stock.reduce((acc, s) => acc + s.pivot.quantity, 0) }} {{ __("left") }}
-                                            </p>
-                                        </div>
-                                        <Link :href="route('products.index', { search: product.name })" class="ml-4 text-xs font-semibold text-emerald-600 hover:text-emerald-500">
-                                            {{ __("Restock") }}
+                <!-- Needs Attention -->
+                <div class="bg-white rounded-lg shadow flex flex-col overflow-hidden">
+                    <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-shrink-0">
+                        <h3 class="text-base font-semibold text-gray-900">{{ __("Needs Attention") }}</h3>
+                        <span v-if="attentionCount > 0"
+                              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                            {{ attentionCount }}
+                        </span>
+                    </div>
+
+                    <div class="flex-grow overflow-y-auto">
+
+                        <!-- Low Stock -->
+                        <template v-if="low_stock_products?.length > 0">
+                            <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                {{ __("Low Stock") }}
+                            </p>
+                            <ul role="list" class="divide-y divide-gray-50">
+                                <li v-for="product in low_stock_products" :key="product.id"
+                                    class="px-5 py-3 hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <Link :href="route('products.index', { search: product.name })"
+                                              class="text-sm font-medium text-gray-900 hover:text-emerald-600 truncate">
+                                            {{ product.name }}
                                         </Link>
+                                        <span class="text-xs font-semibold text-red-500 flex-shrink-0">
+                                            {{ product.stock.reduce((a, s) => a + s.pivot.quantity, 0) }} {{ __("left") }}
+                                        </span>
                                     </div>
                                 </li>
                             </ul>
-                            <div v-else class="flex flex-col items-center justify-center py-12 px-4 text-center">
-                                <svg class="w-12 h-12 text-gray-300 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <p class="text-sm text-gray-500 font-medium">{{ __("All products are well-stocked") }}</p>
-                            </div>
+                        </template>
+
+                        <!-- Cheques -->
+                        <template v-if="upcoming_cheques?.length > 0">
+                            <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+                                {{ __("Cheques") }}
+                            </p>
+                            <ul role="list" class="divide-y divide-gray-50">
+                                <li v-for="cheque in upcoming_cheques" :key="cheque.id"
+                                    class="px-5 py-3 hover:bg-gray-50 transition-colors">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div class="min-w-0 flex-1">
+                                            <p class="text-sm font-medium text-gray-900 truncate">
+                                                {{ cheque.payee?.name }}
+                                            </p>
+                                            <p class="text-xs font-semibold mt-0.5"
+                                               :class="cheque.type === 1 ? 'text-emerald-600' : 'text-red-600'">
+                                                {{ formatCurrency(cheque.amount) }}
+                                            </p>
+                                        </div>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold flex-shrink-0"
+                                              :class="isOverdue(cheque) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'">
+                                            {{ isOverdue(cheque)
+                                                ? __('Overdue')
+                                                : __('Due in :days d', { days: daysUntilDue(cheque) }) }}
+                                        </span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </template>
+
+                        <!-- All clear -->
+                        <div v-if="attentionCount === 0"
+                             class="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
+                            <svg class="w-9 h-9 text-emerald-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-sm font-medium text-gray-500">{{ __("All clear") }}</p>
                         </div>
+
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                <!-- Top Selling Products -->
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100">
-                        <h3 class="text-base font-semibold text-gray-900">{{ __("Top Selling Products (Last 30 Days)") }}</h3>
-                    </div>
-                    <ul v-if="top_products?.length > 0" role="list" class="divide-y divide-gray-100">
-                        <li v-for="(item, index) in top_products" :key="item.product_id" class="px-6 py-4 flex items-center group hover:bg-gray-50 transition-colors">
-                            <span class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-xs font-bold text-gray-500 ltr:mr-4 rtl:ml-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
-                                #{{ index + 1 }}
+            <!-- Zone 3: Tabbed Top Products / Top Customers -->
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <div class="border-b border-gray-100 flex items-center justify-between px-6">
+                    <nav class="flex gap-1 py-3" aria-label="Tabs">
+                        <button
+                            type="button"
+                            @click="activeTab = 'products'"
+                            :class="[
+                                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                                activeTab === 'products'
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                            ]"
+                        >
+                            {{ __("Top Products") }}
+                        </button>
+                        <button
+                            type="button"
+                            @click="activeTab = 'customers'"
+                            :class="[
+                                'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                                activeTab === 'customers'
+                                    ? 'bg-emerald-50 text-emerald-700'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                            ]"
+                        >
+                            {{ __("Top Customers") }}
+                        </button>
+                    </nav>
+                    <span class="text-xs text-gray-400">{{ __("Last 30 days") }}</span>
+                </div>
+
+                <!-- Top Products tab -->
+                <ul v-show="activeTab === 'products'" role="list" class="divide-y divide-gray-100">
+                    <template v-if="top_products?.length > 0">
+                        <li v-for="(item, index) in top_products" :key="item.product_id"
+                            class="px-6 py-4 flex items-center group hover:bg-gray-50 transition-colors">
+                            <span class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-gray-50 text-xs font-bold text-gray-400 ltr:mr-4 rtl:ml-4 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors">
+                                {{ index + 1 }}
                             </span>
                             <div class="min-w-0 flex-1">
-                                <Link :href="route('products.index', { search: item.product?.name })" class="text-sm font-medium text-gray-900 truncate hover:text-indigo-600">
+                                <Link :href="route('products.index', { search: item.product?.name })"
+                                      class="text-sm font-medium text-gray-900 hover:text-emerald-600 truncate block">
                                     {{ item.product?.name }}
                                 </Link>
-                                <p class="text-xs text-gray-500">{{ item.total_quantity }} {{ __("Sold") }}</p>
+                                <p class="text-xs text-gray-400">{{ item.total_quantity }} {{ __("sold") }}</p>
                             </div>
-                            <div class="ltr:text-right rtl:text-left">
-                                <p class="text-sm font-semibold text-indigo-600">{{ formatCurrency(item.total_revenue, item.product?.currency) }}</p>
-                                <p class="text-[10px] text-gray-400 uppercase tracking-wider">{{ __("Revenue") }}</p>
-                            </div>
+                            <p class="text-sm font-semibold text-indigo-600 ltr:ml-4 rtl:mr-4">
+                                {{ formatCurrency(item.total_revenue, item.product?.currency) }}
+                            </p>
                         </li>
-                    </ul>
-                    <div v-else class="py-12 text-center text-sm text-gray-500">
+                    </template>
+                    <li v-else class="py-12 text-center text-sm text-gray-400">
                         {{ __("No sales data available yet") }}
-                    </div>
-                </div>
+                    </li>
+                </ul>
 
-                <!-- Recent Payments -->
-                <div class="bg-white rounded-lg shadow overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-                        <h3 class="text-base font-semibold text-gray-900">{{ __("Recent Payments") }}</h3>
-                        <Link :href="route('payments.index')" class="text-xs font-medium text-emerald-600 hover:text-emerald-700">
-                            {{ __("View All") }}
-                        </Link>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table v-if="recent_payments?.length > 0" class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Party") }}</th>
-                                    <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Amount") }}</th>
-                                    <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Date") }}</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-100">
-                                <tr v-for="payment in recent_payments" :key="payment.id" class="hover:bg-gray-50 transition-colors group">
-                                    <td class="px-6 py-3 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900">
-                                            <Link v-if="payment.invoice?.invocable"
-                                                  :href="payment.invoice.invocable_type.includes('Customer') ? route('customers.index', { search: payment.invoice.invocable.name }) : route('suppliers.index', { search: payment.invoice.invocable.name })"
-                                                  class="hover:text-emerald-600">
-                                                {{ payment.invoice.invocable.name }}
-                                            </Link>
-                                            <span v-else>-</span>
-                                        </div>
-                                        <div class="text-xs text-gray-500">
-                                            <Link v-if="payment.invoice" :href="route('invoices.show', payment.invoice.id)" class="hover:underline">
-                                                #{{ payment.invoice.serial_number || payment.invoice.id }}
-                                            </Link>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-3 whitespace-nowrap">
-                                        <span class="text-sm font-semibold text-emerald-600">{{ formatCurrency(payment.amount, payment.currency) }}</span>
-                                    </td>
-                                    <td class="px-6 py-3 whitespace-nowrap text-xs text-gray-500">
-                                        {{ payment.paid_at_human || '-' }}
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <div v-else class="py-12 text-center text-sm text-gray-500">
-                            {{ __("No recent payments found") }}
-                        </div>
-                    </div>
-                </div>
+                <!-- Top Customers tab -->
+                <ul v-show="activeTab === 'customers'" role="list" class="divide-y divide-gray-100">
+                    <template v-if="top_customers?.length > 0">
+                        <li v-for="(item, index) in top_customers" :key="index"
+                            class="px-6 py-4 flex items-center group hover:bg-gray-50 transition-colors">
+                            <span class="flex-shrink-0 w-7 h-7 flex items-center justify-center rounded-full bg-gray-50 text-xs font-bold text-gray-400 ltr:mr-4 rtl:ml-4 group-hover:bg-emerald-50 group-hover:text-emerald-600 transition-colors">
+                                {{ index + 1 }}
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <Link :href="route('customers.index', { search: item.name })"
+                                      class="text-sm font-medium text-gray-900 hover:text-emerald-600 truncate block">
+                                    {{ item.name }}
+                                </Link>
+                            </div>
+                            <p class="text-sm font-semibold text-emerald-600 ltr:ml-4 rtl:mr-4">
+                                {{ formatCurrency(item.revenue) }}
+                            </p>
+                        </li>
+                    </template>
+                    <li v-else class="py-12 text-center text-sm text-gray-400">
+                        {{ __("No customer data available yet") }}
+                    </li>
+                </ul>
             </div>
 
-            <!-- Recent Transactions Table -->
-            <div class="bg-white rounded-lg shadow overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100">
-                    <h3 class="text-base font-semibold text-gray-900">
-                        {{ __("Recent Inventory Activity") }}
-                    </h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table v-if="transactions?.length > 0" class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                                <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Product") }}</th>
-                                <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Storage") }}</th>
-                                <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Quantity") }}</th>
-                                <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Type") }}</th>
-                                <th class="px-6 py-3 text-start text-[10px] font-bold text-gray-500 uppercase tracking-wider">{{ __("Date") }}</th>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100">
-                            <tr v-for="transaction in transactions" :key="transaction.id" class="hover:bg-gray-50 transition-colors group">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    <Link :href="route('products.index', { search: transaction.product.name })" class="hover:text-indigo-600">
-                                        {{ transaction.product.name }}
-                                    </Link>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    <Link :href="route('storages.index', { search: transaction.storage.name })" class="hover:text-indigo-600">
-                                        {{ transaction.storage.name }}
-                                    </Link>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" v-html="quantityForHumans(transaction)"></td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                          :class="{
-                                              'bg-emerald-100 text-emerald-800': transaction.type === 'Sales',
-                                              'bg-indigo-100 text-indigo-800': transaction.type === 'Purchases',
-                                              'bg-gray-100 text-gray-800': !['Sales', 'Purchases'].includes(transaction.type)
-                                          }">
-                                        {{ __(transaction.type) }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {{ transaction.created_at || '-' }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <div v-else class="py-12 text-center text-sm text-gray-500">
-                        {{ __("No recent transactions found") }}
-                    </div>
-                </div>
-            </div>
         </div>
     </AppLayout>
 </template>

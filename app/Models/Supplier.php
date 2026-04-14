@@ -39,7 +39,7 @@ class Supplier extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['account_balance'];
+    protected $appends = ['created_at_human'];
 
     /**
      * Cheque wrote to this supplier.

@@ -100,7 +100,7 @@
                         <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __("Customer") }}</span>
                     </div>
                     <div class="max-w-sm" v-auto-animate>
-                        <v-select
+                        <VueMultiselect
                             v-model="form.invocable"
                             :options="customers"
                             label="name"

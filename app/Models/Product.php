@@ -115,6 +115,6 @@ class Product extends BaseModel
      */
     public function getExpiredAtAttribute(): int
     {
-        return $this->attributes['expire_date'] ? now()->diffInDays($this->attributes['expire_date'], false) : 0;
+        return isset($this->attributes['expire_date']) && $this->attributes['expire_date'] ? now()->diffInDays($this->attributes['expire_date'], false) : 0;
     }
 }

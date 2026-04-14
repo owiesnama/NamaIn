@@ -42,7 +42,7 @@ class Customer extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['account_balance'];
+    protected $appends = ['created_at_human'];
 
     /**
      * The cheques that belongs to this customer.
@@ -161,8 +161,8 @@ class Customer extends BaseModel
     {
         return $query->whereHas('invoices', function ($q) {
             $q->whereIn('payment_status', [PaymentStatus::Unpaid, PaymentStatus::PartiallyPaid]);
-        })->get()->filter(function ($customer) {
-            return $customer->credit_limit > 0 && $customer->account_balance > $customer->credit_limit;
+        })->where(function ($query) {
+            $query->where('credit_limit', '>', 0);
         });
     }
 }

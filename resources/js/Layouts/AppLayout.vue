@@ -1,6 +1,6 @@
 <script setup>
     import { computed, ref } from "vue";
-    import { router, Head, Link } from "@inertiajs/vue3";
+    import { router, Head, Link, usePage } from "@inertiajs/vue3";
     import ApplicationLogo from "@/Components/ApplicationLogo.vue";
     import Banner from "@/Components/Banner.vue";
     import Dropdown from "@/Components/Dropdown.vue";
@@ -14,19 +14,8 @@
     });
     const showingSidebar = ref(false);
     const direction = computed(() => {
-        return preferences("language", "en") == "en" ? "ltr" : "rtl";
+        return usePage().props.locale === "ar" ? "rtl" : "ltr";
     });
-    const switchToTeam = (team) => {
-        router.put(
-            route("current-team.update"),
-            {
-                team_id: team.id,
-            },
-            {
-                preserveState: false,
-            }
-        );
-    };
 
     const logout = () => {
         router.post(route("logout"));
@@ -249,7 +238,7 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
+                                        d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
                                     />
                                 </svg>
 
@@ -299,13 +288,38 @@
                                     <path
                                         stroke-linecap="round"
                                         stroke-linejoin="round"
-                                        d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
+                                        d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"
                                     />
                                 </svg>
 
                                 <span
                                     class="mx-2 text-sm font-medium"
                                     v-text="__('Payments')"
+                                ></span>
+                            </NavLink>
+
+                            <NavLink
+                                :href="route('expenses.index')"
+                                :active="route().current('expenses.index')"
+                            >
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke-width="1.5"
+                                    stroke="currentColor"
+                                    class="w-5 h-5"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+
+                                <span
+                                    class="mx-2 text-sm font-medium"
+                                    v-text="__('Expenses')"
                                 ></span>
                             </NavLink>
                         </div>
@@ -330,138 +344,6 @@
                             <div class="flex items-center">
                                 <div class="flex items-center">
                                     <div class="relative">
-                                        <!-- Teams Dropdown
-                                        <Dropdown
-                                            align="right"
-                                            width="60"
-                                        >
-                                            <template #trigger>
-                                                <span
-                                                    class="inline-flex rounded-md"
-                                                >
-                                                    <button
-                                                        type="button"
-                                                        class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-transparent rounded-md hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:bg-gray-50 active:bg-gray-50"
-                                                    >
-                                                        <svg
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 24 24"
-                                                            fill="currentColor"
-                                                            class="w-5 h-5"
-                                                        >
-                                                            <path
-                                                                fill-rule="evenodd"
-                                                                d="M5.25 9a6.75 6.75 0 0113.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 01-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 11-7.48 0 24.585 24.585 0 01-4.831-1.244.75.75 0 01-.298-1.205A8.217 8.217 0 005.25 9.75V9zm4.502 8.9a2.25 2.25 0 104.496 0 25.057 25.057 0 01-4.496 0z"
-                                                                clip-rule="evenodd"
-                                                            />
-                                                        </svg>
-                                                    </button>
-                                                </span>
-                                            </template>
-
-                                            <template #content>
-                                                <div class="w-64 sm:w-80">
-                                                    <a
-                                                        href="#"
-                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700"
-                                                    >
-                                                        <img
-                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
-                                                            alt="avatar"
-                                                        />
-                                                        <p
-                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
-                                                        >
-                                                            <span
-                                                                class="font-bold"
-                                                                href="#"
-                                                                >Sara
-                                                                Salah</span
-                                                            >
-                                                            replied on the
-                                                            <span
-                                                                class="text-emerald-500 hover:underline"
-                                                                href="#"
-                                                                >Upload
-                                                                Image</span
-                                                            >
-                                                            artical . 2m
-                                                        </p>
-                                                    </a>
-                                                    <a
-                                                        href="#"
-                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700"
-                                                    >
-                                                        <img
-                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=634&q=80"
-                                                            alt="avatar"
-                                                        />
-                                                        <p
-                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
-                                                        >
-                                                            <span
-                                                                class="font-bold"
-                                                                href="#"
-                                                                >Slick Net</span
-                                                            >
-                                                            start following you
-                                                            . 45m
-                                                        </p>
-                                                    </a>
-                                                    <a
-                                                        href="#"
-                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform border-b border-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 dark:border-gray-700"
-                                                    >
-                                                        <img
-                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1450297350677-623de575f31c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80"
-                                                            alt="avatar"
-                                                        />
-                                                        <p
-                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
-                                                        >
-                                                            <span
-                                                                class="font-bold"
-                                                                href="#"
-                                                                >Jane Doe</span
-                                                            >
-                                                            Like Your reply on
-                                                            <span
-                                                                class="text-emerald-500 hover:underline"
-                                                                href="#"
-                                                                >Test with
-                                                                TDD</span
-                                                            >
-                                                            artical . 1h
-                                                        </p>
-                                                    </a>
-                                                    <a
-                                                        href="#"
-                                                        class="flex items-center px-4 py-3 transition-colors duration-300 transform hover:bg-gray-100 dark:hover:bg-gray-700"
-                                                    >
-                                                        <img
-                                                            class="flex-shrink-0 object-cover w-8 h-8 mx-1 rounded-full"
-                                                            src="https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=398&q=80"
-                                                            alt="avatar"
-                                                        />
-                                                        <p
-                                                            class="mx-2 text-sm text-gray-600 dark:text-white"
-                                                        >
-                                                            <span
-                                                                class="font-bold"
-                                                                href="#"
-                                                                >Abigail
-                                                                Bennett</span
-                                                            >
-                                                            start following you
-                                                            . 3h
-                                                        </p>
-                                                    </a>
-                                                </div>
-                                            </template>
-                                        </Dropdown> -->
                                     </div>
 
                                     <!-- Preferences Dropdown -->

@@ -50,7 +50,21 @@ test('it generates a pdf statement', function () {
     $startDate = now()->subMonth()->toDateTimeString();
     $endDate = now()->toDateTimeString();
 
-    $result = $service->generatePdf($supplier, $startDate, $endDate);
+    $result = $service->generatePdf($supplier, [
+        'invoices' => collect([$invoice]),
+        'payments' => collect([]),
+        'opening_balance' => 0,
+        'activities' => collect([[
+            'date' => $invoice->created_at,
+            'description' => 'Invoice #'.$invoice->id,
+            'debit' => 1000.0,
+            'credit' => 0.0,
+            'running_balance' => 1000.0,
+        ]]),
+        'total_debits' => 1000.0,
+        'total_credits' => 0.0,
+        'closing_balance' => 1000.0,
+    ], $startDate, $endDate);
 
     expect($result)->toBe('PDF_CONTENT');
 });

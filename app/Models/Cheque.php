@@ -7,24 +7,28 @@ use App\Filters\Filters;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Cheque extends BaseModel
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'chequeable_id',
         'chequeable_type',
+        'invoice_id',
         'amount',
+        'cleared_amount',
         'type',
         'due',
         'bank',
         'bank_id',
         'reference_number',
         'status',
+        'notes',
     ];
 
     /**
@@ -88,9 +92,39 @@ class Cheque extends BaseModel
         return $this->morphTo('payee', 'chequeable_type', 'chequeable_id');
     }
 
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(Bank::class, 'bank_id');
+    }
+
+    public function scopeReceivable(Builder $query): Builder
+    {
+        return $query->where('type', 1);
+    }
+
+    public function scopePayable(Builder $query): Builder
+    {
+        return $query->where('type', 0);
+    }
+
+    public function isReceivable(): bool
+    {
+        return $this->type === 1;
+    }
+
+    public function isPayable(): bool
+    {
+        return $this->type === 0;
+    }
+
+    public function isEditable(): bool
+    {
+        return $this->status === ChequeStatus::Drafted;
     }
 
     /**
@@ -135,6 +169,8 @@ class Cheque extends BaseModel
             'due' => Carbon::parse($attributes['due']),
             'bank_id' => $attributes['bank_id'],
             'reference_number' => $attributes['reference_number'],
+            'invoice_id' => $attributes['invoice_id'] ?? null,
+            'notes' => $attributes['notes'] ?? null,
             'status' => ChequeStatus::Drafted,
         ])->save();
 

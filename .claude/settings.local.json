@@ -17,7 +17,15 @@
       "Bash($PHP artisan:*)",
       "Bash(curl:*)",
       "Bash(ls -lh cairo-*.woff2)",
-      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84/php.exe artisan:*)"
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84/php.exe artisan:*)",
+      "Bash(xargs grep:*)",
+      "mcp__laravel-boost__database-schema",
+      "Bash(grep:*)",
+      "mcp__laravel-boost__application-info",
+      "Read(//usr/local/**)",
+      "Read(//c/Users/Owiesnama/.config/herd/bin/**)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84.bat:*)",
+      "Bash(wc -l resources/js/**/*.vue)"
     ]
   },
   "enableAllProjectMcpServers": true,

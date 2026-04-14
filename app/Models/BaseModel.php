@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Filters\Filters;
-use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
@@ -63,8 +62,8 @@ abstract class BaseModel extends Model
     /**
      * Get created_at formatted in a readable way.
      */
-    public function getCreatedAtAttribute($value): string
+    public function getCreatedAtHumanAttribute(): string
     {
-        return Carbon::parse($value)->locale(app()->getLocale() ?: 'en')->diffForHumans();
+        return $this->created_at?->locale(app()->getLocale() ?: 'en')->diffForHumans() ?? '';
     }
 }

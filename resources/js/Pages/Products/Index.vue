@@ -5,7 +5,7 @@
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import Pagination from "@/Shared/Pagination.vue";
-    import ProdcutForm from "@/Components/Products/ProdcutForm.vue";
+    import ProductForm from "@/Components/Products/ProductForm.vue";
     import { useQueryString } from "@/Composables/useQueryString";
     import FileUploadButton from "@/Shared/FileUploadButton.vue";
     import DeleteProduct from "@/Components/Products/DeleteProduct.vue";
@@ -140,7 +140,7 @@
                         </a>
                     </div>
 
-                    <ProdcutForm :categories="categories"></ProdcutForm>
+                    <ProductForm :categories="categories"></ProductForm>
                 </div>
             </div>
 
@@ -192,7 +192,7 @@
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                <tr v-for="product in products.data" :key="product.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <tr v-for="product in products.data" :key="product.id" @click="router.visit(route('products.show', product.id))" class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ product.id }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm font-semibold text-gray-900 dark:text-white">{{ product.name }}</div>
@@ -225,8 +225,17 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
                                         <div class="flex items-center justify-end gap-x-3">
-                                            <ProdcutForm :product="product" :categories="categories" />
-                                            <DeleteProduct :product="product" />
+                                            <Link @click.stop :href="route('products.show', product.id)" class="p-1.5 text-gray-500 hover:text-emerald-600 dark:text-gray-400 dark:hover:text-emerald-400 transition-colors" :title="__('Dashboard')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0h.5m-1.5 0h-10.5m.5 0h-1.5m1.5 0l1-3m0 0h.5" />
+                                                </svg>
+                                            </Link>
+                                            <div @click.stop>
+                                                <ProductForm :product="product" :categories="categories" />
+                                            </div>
+                                            <div @click.stop>
+                                                <DeleteProduct :product="product" />
+                                            </div>
                                         </div>
                                     </td>
                                 </tr>

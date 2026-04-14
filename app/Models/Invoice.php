@@ -101,17 +101,21 @@ class Invoice extends BaseModel
     public static function purchase(Collection $attributes): Invoice
     {
         $invoice = static::createInvoice($attributes);
-        $invoice->addTransaction(collect($attributes->get('products'))
-            ->map(function ($prodcut) {
-                $prodcut['product_id'] = $prodcut['product'];
-                $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
-                $prodcut['base_quantity'] = $prodcut['quantity'];
-                if ($unitId) {
-                    $prodcut['base_quantity'] = Unit::find($unitId)->conversion_factor * $prodcut['quantity'];
-                }
+        $products = collect($attributes->get('products'));
+        $unitIds = $products->pluck('unit')->filter()->unique();
+        $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
 
-                return $prodcut;
-            }));
+        $invoice->addTransaction($products->map(function ($product) use ($units) {
+            $product['product_id'] = $product['product'];
+            $unitId = $product['unit_id'] = $product['unit'] ?? null;
+            $product['base_quantity'] = $product['quantity'];
+
+            if ($unitId && isset($units[$unitId])) {
+                $product['base_quantity'] = $units[$unitId]->conversion_factor * $product['quantity'];
+            }
+
+            return $product;
+        }));
 
         return $invoice;
     }
@@ -122,15 +126,20 @@ class Invoice extends BaseModel
     public static function sale(Collection $attributes): Invoice
     {
         $invoice = static::createInvoice($attributes);
-        $invoice->addTransaction(collect($attributes->get('products'))->map(function ($prodcut) {
-            $prodcut['product_id'] = $prodcut['product'];
-            $prodcut['base_quantity'] = $prodcut['quantity'];
-            $unitId = $prodcut['unit_id'] = $prodcut['unit'] ?? null;
-            if ($unitId) {
-                $prodcut['base_quantity'] = Unit::find($unitId)->conversion_factor * $prodcut['quantity'];
+        $products = collect($attributes->get('products'));
+        $unitIds = $products->pluck('unit')->filter()->unique();
+        $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
+
+        $invoice->addTransaction($products->map(function ($product) use ($units) {
+            $product['product_id'] = $product['product'];
+            $product['base_quantity'] = $product['quantity'];
+            $unitId = $product['unit_id'] = $product['unit'] ?? null;
+
+            if ($unitId && isset($units[$unitId])) {
+                $product['base_quantity'] = $units[$unitId]->conversion_factor * $product['quantity'];
             }
 
-            return $prodcut;
+            return $product;
         }));
 
         return $invoice;
@@ -163,8 +172,7 @@ class Invoice extends BaseModel
      */
     public function addTransaction(mixed $products): void
     {
-        $this->fresh()
-            ->transactions()
+        $this->transactions()
             ->createMany($products);
     }
 
@@ -185,6 +193,14 @@ class Invoice extends BaseModel
     public function scopeForCustomer(Builder $builder): Builder
     {
         return $builder->where('invocable_type', Customer::class);
+    }
+
+    /**
+     * Scope for invoices belonging to a supplier.
+     */
+    public function scopeForSupplier(Builder $builder): Builder
+    {
+        return $builder->where('invocable_type', Supplier::class);
     }
 
     /**
@@ -213,6 +229,14 @@ class Invoice extends BaseModel
     }
 
     /**
+     * Get the subtotal for this invoice.
+     */
+    public function getSubtotalAttribute(): float
+    {
+        return $this->transactions()->sum(\DB::raw('price * quantity'));
+    }
+
+    /**
      * Check if invoice is fully paid.
      */
     public function getIsFullyPaidAttribute(): bool
@@ -233,6 +257,8 @@ class Invoice extends BaseModel
         ?string $paidAt = null
     ): Payment {
         $payment = $this->payments()->create([
+            'payable_id' => $this->invocable_id,
+            'payable_type' => $this->invocable_type,
             'amount' => $amount,
             'payment_method' => $method,
             'reference' => $reference,

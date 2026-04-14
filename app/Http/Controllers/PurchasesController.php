@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ChequeStatus;
+use App\Actions\CreateChequeAction;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Filters\InvoiceFilter;
 use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Bank;
-use App\Models\Cheque;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
@@ -26,7 +25,7 @@ class PurchasesController extends Controller
                 }, function ($query) {
                     $query->latest();
                 })
-                ->with(['transactions', 'invocable'])
+                ->with(['transactions.product', 'transactions.unit', 'invocable'])
                 ->paginate(10)
                 ->withQueryString(),
             'storages' => Storage::all(),
@@ -40,11 +39,11 @@ class PurchasesController extends Controller
             'products' => Product::with('units')->get(),
             'suppliers' => Supplier::search(request('supplier'))->latest()->limit(10)->get(),
             'payment_methods' => PaymentMethod::casesWithLabels(),
-            'banks' => \App\Models\Bank::all(),
+            'banks' => Bank::all(),
         ]);
     }
 
-    public function store(CreateInvoiceRequest $request)
+    public function store(CreateInvoiceRequest $request, CreateChequeAction $createCheque)
     {
         $invoice = Invoice::purchase(collect($request->all()));
         $invoice->save();
@@ -81,16 +80,13 @@ class PurchasesController extends Controller
 
             // Handle cheque creation
             if ($request->payment_method === PaymentMethod::Cheque->value) {
-                Cheque::create([
-                    'chequeable_id' => $invoice->invocable->id,
-                    'chequeable_type' => get_class($invoice->invocable),
+                $createCheque->execute($invoice->invocable, [
                     'amount' => $request->initial_payment_amount,
-                    'type' => 2, // 2 for Credit (Supplier)
+                    'type' => 0, // Payable
                     'due' => $request->cheque_due_date,
-                    'bank' => Bank::find($request->cheque_bank_id)?->name ?? 'Unknown',
                     'bank_id' => $request->cheque_bank_id,
                     'reference_number' => $request->cheque_number,
-                    'status' => ChequeStatus::Drafted,
+                    'invoice_id' => $invoice->id,
                 ]);
             }
         }

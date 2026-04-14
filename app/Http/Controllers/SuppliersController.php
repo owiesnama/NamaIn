@@ -5,18 +5,31 @@ namespace App\Http\Controllers;
 use App\Actions\SyncCategoriesAction;
 use App\Exports\SupplierExport;
 use App\Filters\SupplierFilter;
+use App\Http\Controllers\Traits\HasPartyFeatures;
 use App\Http\Requests\SupplierRequest;
 use App\Imports\SupplierImport;
 use App\Models\Category;
-use App\Models\Payment;
 use App\Models\Supplier;
-use App\Models\Transaction;
+use App\Queries\PartyAccountQuery;
+use App\Queries\StatementQuery;
 use App\Services\StatementService;
-use Maatwebsite\Excel\Facades\Excel;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SuppliersController extends Controller
 {
+    use HasPartyFeatures;
+
+    protected string $model = Supplier::class;
+
+    protected string $inertiaFolder = 'Suppliers';
+
+    protected string $importClass = SupplierImport::class;
+
+    protected string $exportClass = SupplierExport::class;
+
+    protected array $importHeaders = ['name', 'address', 'phone_number', 'opening_balance'];
+
+    protected array $importSampleData = ['Example Supplier', 'Supplier Address 123', '0123456789', '1000'];
+
     public function index(SupplierFilter $filter)
     {
         return inertia('Suppliers/Index', [
@@ -35,7 +48,7 @@ class SuppliersController extends Controller
 
     public function store(SupplierRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $supplier = Supplier::create($request->all());
+        $supplier = Supplier::create($request->validated());
 
         $syncCategories->execute($supplier, $request->get('categories', []));
 
@@ -45,7 +58,7 @@ class SuppliersController extends Controller
 
     public function update(Supplier $supplier, SupplierRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $supplier->update($request->all());
+        $supplier->update($request->validated());
 
         $syncCategories->execute($supplier, $request->get('categories', []));
 
@@ -59,106 +72,18 @@ class SuppliersController extends Controller
         return back()->with('success', 'Supplier Deleted successfully');
     }
 
-    public function import()
+    public function account(Supplier $supplier, PartyAccountQuery $query)
     {
-        Excel::import(new SupplierImport, request()->file('file'));
-
-        return back()->with('success', 'Imported successfully');
+        return $this->handleAccount($supplier, $query);
     }
 
-    public function importSample(): BinaryFileResponse
+    public function statement(Supplier $supplier, StatementQuery $query)
     {
-        $filePath = storage_path('app/public/supplier_import_sample.csv');
-        $headers = ['name', 'address', 'phone_number', 'opening_balance'];
-
-        $handle = fopen($filePath, 'w');
-        fputcsv($handle, $headers);
-        fputcsv($handle, ['Example Supplier', 'Supplier Address 123', '0123456789', '1000']);
-        fclose($handle);
-
-        return response()->download($filePath)->deleteFileAfterSend();
-    }
-
-    public function export()
-    {
-        return Excel::download(new SupplierExport, 'suppliers.xlsx');
-    }
-
-    /**
-     * Show supplier account with balance and invoices, payments and transactions.
-     */
-    public function account(Supplier $supplier)
-    {
-        $invoices = $supplier->invoices()
-            ->latest()
-            ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'invoices_page')
-            ->withQueryString();
-
-        $payments = Payment::whereHas('invoice', function ($query) use ($supplier) {
-            $query->where('invocable_id', $supplier->id)
-                ->where('invocable_type', Supplier::class);
-        })
-            ->with('invoice')
-            ->latest()
-            ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'payments_page')
-            ->withQueryString();
-
-        $transactions = Transaction::whereHas('invoice', function ($query) use ($supplier) {
-            $query->where('invocable_id', $supplier->id)
-                ->where('invocable_type', Supplier::class);
-        })
-            ->with(['product', 'invoice'])
-            ->latest()
-            ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'transactions_page')
-            ->withQueryString();
-
-        return inertia('Suppliers/Account', [
-            'supplier' => $supplier,
-            'account_balance' => $supplier->account_balance,
-            'invoices' => $invoices,
-            'payments' => $payments,
-            'transactions' => $transactions,
-        ]);
-    }
-
-    /**
-     * Get supplier statement for a date range.
-     */
-    public function statement(Supplier $supplier)
-    {
-        $startDate = request('start_date', now()->subMonth());
-        $endDate = request('end_date', now());
-
-        $invoices = $supplier->invoices()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->with('payments')
-            ->get();
-
-        $payments = $supplier->getPaymentHistory()
-            ->whereBetween('paid_at', [$startDate, $endDate]);
-
-        return inertia('Suppliers/Statement', [
-            'supplier' => $supplier,
-            'invoices' => $invoices,
-            'payments' => $payments,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'opening_balance' => $supplier->calculateAccountBalance($startDate),
-        ]);
+        return $this->handleStatement($supplier, $query);
     }
 
     public function printStatement(Supplier $supplier, StatementService $statementService)
     {
-        $startDate = request('start_date', now()->subMonth()->toDateTimeString());
-        $endDate = request('end_date', now()->toDateTimeString());
-
-        $pdf = $statementService->generatePdf($supplier, $startDate, $endDate);
-
-        $headers = [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "inline; filename='statement-{$supplier->name}.pdf'",
-        ];
-
-        return response(content: $pdf, headers: $headers);
+        return $this->handlePrintStatement($supplier, $statementService);
     }
 }

@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\ClearCheque;
 use App\Enums\ChequeStatus;
+use App\Http\Requests\UpdateChequeStatusRequest;
 use App\Models\Cheque;
-use Illuminate\Validation\Rules\Enum;
 
 class ChequeStatusController extends Controller
 {
-    public function update(Cheque $cheque)
+    public function update(Cheque $cheque, ClearCheque $clearCheque, UpdateChequeStatusRequest $request)
     {
-        request()->validate(['status' => ['required', new Enum(ChequeStatus::class)]]);
+        $status = ChequeStatus::from($request->validated('status'));
 
-        $cheque->status = ChequeStatus::from(request('status'));
-
-        $cheque->save();
+        if ($status === ChequeStatus::Cleared || $status === ChequeStatus::PartiallyCleared) {
+            $clearCheque->execute($cheque, $request->validated('cleared_amount'));
+        } else {
+            $cheque->status = $status;
+            $cheque->save();
+        }
 
         return back()->with('success', 'Cheque status updated');
     }

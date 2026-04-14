@@ -8,17 +8,23 @@
                 <div
                     v-if="link.url === null"
                     class="px-4 py-2.5 cursor-not-allowed mb-1 mr-1 text-sm leading-4 text-gray-400 border rounded-md"
-                    v-html="link.label"
-                ></div>
+                >
+                    <span v-if="link.label.includes('Previous')">&laquo;</span>
+                    <span v-else-if="link.label.includes('Next')">&raquo;</span>
+                    <span v-else>{{ link.label }}</span>
+                </div>
 
                 <Link
                     v-else
-                    class="px-4 py-2.5 hover:bg-gray-100 mb-1 mr-1 text-sm leading-4 border rounded-md focus:border-primary focus:text-primary"
-                    :class="{ 'bg-white': link.active }"
+                    class="px-4 py-2.5 hover:bg-gray-100 mb-1 mr-1 text-sm leading-4 border rounded-md focus:border-emerald-500 focus:text-emerald-500"
+                    :class="{ 'bg-emerald-600 text-white': link.active, 'bg-white': !link.active }"
                     :href="link.url"
                     :preserve-state="true"
-                    v-html="link.label"
-                />
+                >
+                    <span v-if="link.label.includes('Previous')">&laquo;</span>
+                    <span v-else-if="link.label.includes('Next')">&raquo;</span>
+                    <span v-else>{{ link.label }}</span>
+                </Link>
             </template>
         </div>
     </div>

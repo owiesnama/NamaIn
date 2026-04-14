@@ -27,6 +27,14 @@ class ChequesController extends Controller
 
     public function create()
     {
+        return inertia('Cheques/Create', [
+            'payees' => $this->getPayees(),
+            'banks' => Bank::orderBy('name')->get(),
+        ]);
+    }
+
+    private function getPayees()
+    {
         $customers = Customer::all()->map(fn ($c) => [
             'id' => $c->id,
             'name' => $c->name,
@@ -41,25 +49,98 @@ class ChequesController extends Controller
             'type_string' => 'Supplier',
         ]);
 
-        $payees = $customers->concat($suppliers);
+        return $customers->concat($suppliers);
+    }
 
-        return inertia('Cheques/Create', [
-            'payees' => $payees,
-            'banks' => Bank::orderBy('name')->get(),
-        ]);
+    public function payeeInvoices()
+    {
+        return response()->json(
+            $this->getPayeeInvoices(request('payee_id'), request('payee_type'))
+        );
+    }
+
+    protected function getPayeeInvoices($id, $type)
+    {
+        $model = ($type === 'Customer' || $type === Customer::class) ? Customer::find($id) : Supplier::find($id);
+
+        if (! $model) {
+            return [];
+        }
+
+        return $model->invoices()
+            ->outstanding()
+            ->get()
+            ->map(fn ($i) => [
+                'id' => $i->id,
+                'serial_number' => $i->serial_number,
+                'remaining_balance' => $i->remaining_balance,
+                'total' => $i->total - $i->discount,
+            ]);
     }
 
     public function store(ChequeRequest $request)
     {
-        Cheque::forPayee($request->get('payee_id'), $request->get('payee_type'))
+        $validated = $request->validated();
+
+        Cheque::forPayee($validated['payee_id'], $validated['payee_type'])
             ->register([
-                'type' => $request->get('type'),
-                'amount' => $request->get('amount'),
-                'bank_id' => $request->get('bank_id'),
-                'due' => $request->get('due'),
-                'reference_number' => $request->get('reference_number'),
+                'type' => $validated['type'],
+                'amount' => $validated['amount'],
+                'bank_id' => $validated['bank_id'],
+                'due' => $validated['due'],
+                'reference_number' => $validated['reference_number'],
+                'invoice_id' => $validated['invoice_id'] ?? null,
+                'notes' => $validated['notes'] ?? null,
             ]);
 
         return redirect()->route('cheques.index')->with('success', 'New cheque has been registered');
+    }
+
+    public function edit(Cheque $cheque)
+    {
+        if (! $cheque->isEditable()) {
+            return redirect()->route('cheques.index')->with('error', 'This cheque can only be modified while in Drafted status.');
+        }
+
+        return inertia('Cheques/Edit', [
+            'cheque' => $cheque,
+            'payees' => $this->getPayees(),
+            'banks' => Bank::orderBy('name')->get(),
+            'invoices' => $this->getPayeeInvoices($cheque->chequeable_id, $cheque->chequeable_type),
+        ]);
+    }
+
+    public function update(Cheque $cheque, ChequeRequest $request)
+    {
+        if (! $cheque->isEditable()) {
+            abort(403, 'This cheque can only be modified while in Drafted status.');
+        }
+
+        $validated = $request->validated();
+
+        $cheque->update([
+            'chequeable_id' => $validated['payee_id'],
+            'chequeable_type' => $validated['payee_type'],
+            'invoice_id' => $validated['invoice_id'] ?? null,
+            'type' => $validated['type'],
+            'amount' => $validated['amount'],
+            'bank_id' => $validated['bank_id'],
+            'due' => $validated['due'],
+            'reference_number' => $validated['reference_number'],
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        return redirect()->route('cheques.index')->with('success', 'Cheque has been updated');
+    }
+
+    public function destroy(Cheque $cheque)
+    {
+        if ($cheque->status !== ChequeStatus::Drafted && $cheque->status !== ChequeStatus::Cancelled) {
+            return redirect()->route('cheques.index')->with('error', 'Only Drafted or Cancelled cheques can be deleted.');
+        }
+
+        $cheque->delete();
+
+        return redirect()->route('cheques.index')->with('success', 'Cheque has been deleted');
     }
 }

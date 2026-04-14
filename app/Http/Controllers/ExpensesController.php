@@ -2,28 +2,34 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\StoreExpense;
+use App\Actions\UpdateExpense;
+use App\Exports\ExpenseExport;
+use App\Filters\ExpenseFilter;
+use App\Http\Requests\ExpenseRequest;
 use App\Models\Category;
 use App\Models\Expense;
-use Illuminate\Http\Request;
+use App\Models\User;
+use App\Queries\ExpenseIndexQuery;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ExpensesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(ExpenseFilter $filter, ExpenseIndexQuery $query)
     {
         return inertia('Expenses/Index', [
-            'expenses' => Expense::latest()
+            'expenses' => Expense::filter($filter)
                 ->with(['categories', 'createdBy'])
+                ->latest()
                 ->paginate(10)
                 ->withQueryString(),
+            'categories' => Category::ofType('expense')->get(),
+            'users' => User::select('id', 'name')->get(),
+            'category_budgets' => $query->categoryBudgets(),
+            'spending_by_category' => $query->spendingByCategory($filter),
         ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return inertia('Expenses/Create', [
@@ -31,103 +37,44 @@ class ExpensesController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(ExpenseRequest $request, StoreExpense $action)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
-            'expensed_at' => 'required|date',
-            'category_ids' => 'nullable|array',
-            'category_ids.*' => 'exists:categories,id',
-            'notes' => 'nullable|string|max:1000',
-        ]);
+        $action->handle($request);
 
-        $expense = Expense::create([
-            'title' => $request->title,
-            'amount' => $request->amount,
-            'expensed_at' => $request->expensed_at,
-            'notes' => $request->notes,
-        ]);
-
-        if ($request->category_ids) {
-            $expense->categories()->sync($request->category_ids);
-            // Ensure these categories are marked as 'expense' type
-            Category::whereIn('id', $request->category_ids)->update(['type' => 'expense']);
-        }
-
-        return redirect()
-            ->route('expenses.index')
-            ->with('success', 'Expense recorded successfully');
+        return redirect()->route('expenses.index')->with('success', 'Expense recorded successfully');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Expense $expense)
     {
-        $expense->load(['categories', 'createdBy']);
-
         return inertia('Expenses/Show', [
-            'expense' => $expense,
+            'expense' => $expense->load(['categories', 'createdBy']),
         ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Expense $expense)
     {
-        $expense->load('categories');
-
         return inertia('Expenses/Edit', [
-            'expense' => $expense,
+            'expense' => $expense->load('categories'),
             'categories' => Category::ofType('expense')->get(),
         ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Expense $expense)
+    public function update(ExpenseRequest $request, Expense $expense, UpdateExpense $action)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0.01',
-            'expensed_at' => 'required|date',
-            'category_ids' => 'nullable|array',
-            'category_ids.*' => 'exists:categories,id',
-            'notes' => 'nullable|string|max:1000',
-        ]);
+        $action->handle($request, $expense);
 
-        $expense->update([
-            'title' => $request->title,
-            'amount' => $request->amount,
-            'expensed_at' => $request->expensed_at,
-            'notes' => $request->notes,
-        ]);
-
-        $expense->categories()->sync($request->category_ids ?? []);
-
-        // Ensure these categories are marked as 'expense' type
-        Category::whereIn('id', $request->category_ids ?? [])->update(['type' => 'expense']);
-
-        return redirect()
-            ->route('expenses.index')
-            ->with('success', 'Expense updated successfully');
+        return redirect()->route('expenses.index')->with('success', 'Expense updated successfully');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Expense $expense)
     {
         $expense->delete();
 
-        return redirect()
-            ->route('expenses.index')
-            ->with('success', 'Expense deleted successfully');
+        return back()->with('success', 'Expense deleted successfully');
+    }
+
+    public function export(ExpenseFilter $filter)
+    {
+        return Excel::download(new ExpenseExport($filter), 'expenses.xlsx');
     }
 }

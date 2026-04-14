@@ -20,12 +20,6 @@
             return ! transaction.delivered;
         });
     });
-    let quantityForHumans = (transaction) => {
-        if (!transaction.unit) {
-            return `${transaction.quantity} <strong>(Base unit)</strong>`;
-        }
-        return `${transaction.quantity} <storng>(${transaction.unit?.name})</storng>`;
-    };
 </script>
 <template>
     <div class="flex flex-col">
@@ -81,18 +75,21 @@
                             >
                                 <td
                                     class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                    v-text="record.product.name"
+                                    v-text="record.product?.name"
                                 ></td>
 
-                                <th
+                                <td
                                     class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                    v-html="quantityForHumans(record)"
-                                ></th>
+                                >
+                                    {{ record.quantity }}
+                                    <strong v-if="record.unit">({{ record.unit?.name }})</strong>
+                                    <strong v-else>({{ __('Base unit') }})</strong>
+                                </td>
 
-                                <th
+                                <td
                                     class="px-8 py-3 text-sm text-left rtl:text-right text-emerald-500 whitespace-nowrap"
                                     v-text="record.price"
-                                ></th>
+                                ></td>
 
                                 <td
                                     class="px-8 py-3 text-sm font-semibold text-left rtl:text-right text-emerald-500 whitespace-nowrap"
@@ -118,18 +115,21 @@
                                 >
                                     <td
                                         class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                        v-text="record.product.name"
+                                        v-text="record.product?.name"
                                     ></td>
 
-                                    <th
+                                    <td
                                         class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
-                                        v-html="quantityForHumans(record)"
-                                    ></th>
+                                    >
+                                        {{ record.quantity }}
+                                        <strong v-if="record.unit">({{ record.unit?.name }})</strong>
+                                        <strong v-else>({{ __('Base unit') }})</strong>
+                                    </td>
 
-                                    <th
+                                    <td
                                         class="px-8 py-3 text-sm text-left rtl:text-right text-emerald-500 whitespace-nowrap"
                                         v-text="record.price"
-                                    ></th>
+                                    ></td>
 
                                     <td
                                         class="px-8 py-3 text-sm font-semibold text-left rtl:text-right text-emerald-500 whitespace-nowrap"

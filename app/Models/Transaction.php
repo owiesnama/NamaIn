@@ -18,11 +18,6 @@ class Transaction extends BaseModel
     use HasFactory, SoftDeletes, WithTrashScope;
 
     /**
-     * @var array<string>
-     */
-    public $with = ['product', 'unit', 'storage'];
-
-    /**
      * @var bool
      */
     protected static $unguarded = false;
@@ -53,7 +48,7 @@ class Transaction extends BaseModel
     /**
      * @var array<string>
      */
-    protected $appends = ['type'];
+    protected $appends = ['type', 'created_at_human'];
 
     /**
      * The invoice for this transaction.
@@ -173,8 +168,8 @@ class Transaction extends BaseModel
      */
     public function scopeDelivered(Builder $builder, ?Carbon $datetime = null): Builder
     {
-        return $builder->where('delivered', true)
-            ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
+        return $builder->where($this->getTable().'.delivered', true)
+            ->when($datetime, fn ($query) => $query->where($this->getTable().'.created_at', '>', $datetime));
     }
 
     /**

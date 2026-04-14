@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InvoiceStatus;
+use App\Http\Requests\StockRequest;
 use App\Models\Invoice;
 use App\Models\Storage;
 use App\Models\Transaction;
@@ -11,9 +12,11 @@ use Illuminate\Validation\ValidationException;
 
 class StockController extends Controller
 {
-    public function add(Storage $storage)
+    private const LOW_STOCK_CACHE_KEY = 'low_stock_products';
+
+    public function add(Storage $storage, StockRequest $request)
     {
-        $invoice = Invoice::find(request('invoice'));
+        $invoice = Invoice::findOrFail($request->validated('invoice'));
 
         $invoice->transactions->each(
             function (Transaction $transaction) use ($storage) {
@@ -23,14 +26,14 @@ class StockController extends Controller
 
         $invoice->markAs(InvoiceStatus::Delivered);
 
-        Cache::forget('low_stock_products');
+        Cache::forget(self::LOW_STOCK_CACHE_KEY);
 
         return back()->with('success', "Invoice items has being added to storage: {$storage->name} ");
     }
 
-    public function deduct(Storage $storage)
+    public function deduct(Storage $storage, StockRequest $request)
     {
-        $invoice = Invoice::find(request('invoice'));
+        $invoice = Invoice::findOrFail($request->validated('invoice'));
         $this->stockAvailableFor($invoice, $storage);
         $invoiceStatus = InvoiceStatus::Delivered;
 
@@ -53,9 +56,9 @@ class StockController extends Controller
 
         $invoice->markAs($invoiceStatus);
 
-        Cache::forget('low_stock_products');
+        Cache::forget(self::LOW_STOCK_CACHE_KEY);
 
-        return back()->with('flash', ['success' => "Invoice items has being deducted from storage: {$storage->name} "]);
+        return back()->with('success', "Invoice items has being deducted from storage: {$storage->name} ");
     }
 
     private function stockAvailableFor($invoice, $storage)
@@ -64,7 +67,7 @@ class StockController extends Controller
             ->transactions
             ->filter(
                 fn ($record) => $storage->hasStockFor($record->product_id, $record->base_quantity)
-            )->count() == 0
+            )->count() === 0
         ) {
             throw ValidationException::withMessages(
                 ['storage' => __('No stock available for any of the items on the invoice.')]

@@ -5,18 +5,31 @@ namespace App\Http\Controllers;
 use App\Actions\SyncCategoriesAction;
 use App\Exports\CustomerExport;
 use App\Filters\CustomerFilter;
+use App\Http\Controllers\Traits\HasPartyFeatures;
 use App\Http\Requests\CustomerRequest;
 use App\Imports\CustomerImport;
 use App\Models\Category;
 use App\Models\Customer;
-use App\Models\Payment;
-use App\Models\Transaction;
+use App\Queries\PartyAccountQuery;
+use App\Queries\StatementQuery;
 use App\Services\StatementService;
-use Maatwebsite\Excel\Facades\Excel;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class CustomersController extends Controller
 {
+    use HasPartyFeatures;
+
+    protected string $model = Customer::class;
+
+    protected string $inertiaFolder = 'Customers';
+
+    protected string $importClass = CustomerImport::class;
+
+    protected string $exportClass = CustomerExport::class;
+
+    protected array $importHeaders = ['name', 'address', 'phone_number', 'credit_limit', 'opening_balance'];
+
+    protected array $importSampleData = ['Example Customer', 'Customer Address 123', '0123456789', '5000', '1000'];
+
     public function index(CustomerFilter $filter)
     {
         return inertia('Customers/Index', [
@@ -35,7 +48,7 @@ class CustomersController extends Controller
 
     public function store(CustomerRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $customer = Customer::create($request->all());
+        $customer = Customer::create($request->validated());
 
         $syncCategories->execute($customer, $request->get('categories', []));
 
@@ -45,7 +58,7 @@ class CustomersController extends Controller
 
     public function update(Customer $customer, CustomerRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $customer->update($request->all());
+        $customer->update($request->validated());
 
         $syncCategories->execute($customer, $request->get('categories', []));
 
@@ -57,114 +70,21 @@ class CustomersController extends Controller
         $this->authorize('delete', $customer);
         $customer->delete();
 
-        return back()->with('success', 'Storage Deleted successfully');
+        return back()->with('success', 'Customer Deleted successfully');
     }
 
-    /**
-     * Show customer account with balance and invoices, payments and transactions.
-     */
-    public function account(Customer $customer)
+    public function account(Customer $customer, PartyAccountQuery $query)
     {
-        $invoices = $customer->invoices()
-            ->latest()
-            ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'invoices_page')
-            ->withQueryString();
-
-        $payments = Payment::where(function ($query) use ($customer) {
-            $query->whereHas('invoice', function ($query) use ($customer) {
-                $query->where('invocable_id', $customer->id)
-                    ->where('invocable_type', Customer::class);
-            })->orWhere(function ($query) use ($customer) {
-                $query->where('payable_id', $customer->id)
-                    ->where('payable_type', Customer::class);
-            });
-        })
-            ->with('invoice')
-            ->orderBy('paid_at', 'desc')
-            ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'payments_page')
-            ->withQueryString();
-
-        $transactions = Transaction::whereHas('invoice', function ($query) use ($customer) {
-            $query->where('invocable_id', $customer->id)
-                ->where('invocable_type', Customer::class);
-        })
-            ->with(['product', 'invoice'])
-            ->latest()
-            ->paginate(parent::ELEMENTS_PER_PAGE, ['*'], 'transactions_page')
-            ->withQueryString();
-
-        return inertia('Customers/Account', [
-            'customer' => $customer,
-            'account_balance' => $customer->account_balance,
-            'invoices' => $invoices,
-            'payments' => $payments,
-            'transactions' => $transactions,
-        ]);
+        return $this->handleAccount($customer, $query);
     }
 
-    /**
-     * Get customer statement for a date range.
-     */
-    public function statement(Customer $customer)
+    public function statement(Customer $customer, StatementQuery $query)
     {
-        $startDate = request('start_date', now()->subMonth());
-        $endDate = request('end_date', now());
-
-        $invoices = $customer->invoices()
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->with('payments')
-            ->get();
-
-        $payments = $customer->getPaymentHistory()
-            ->whereBetween('paid_at', [$startDate, $endDate]);
-
-        return inertia('Customers/Statement', [
-            'customer' => $customer,
-            'invoices' => $invoices,
-            'payments' => $payments,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'opening_balance' => $customer->calculateAccountBalance($startDate),
-        ]);
+        return $this->handleStatement($customer, $query);
     }
 
     public function printStatement(Customer $customer, StatementService $statementService)
     {
-        $startDate = request('start_date', now()->subMonth()->toDateTimeString());
-        $endDate = request('end_date', now()->toDateTimeString());
-
-        $pdf = $statementService->generatePdf($customer, $startDate, $endDate);
-
-        $headers = [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "inline; filename='statement-{$customer->name}.pdf'",
-        ];
-
-        return response(content: $pdf, headers: $headers);
-    }
-
-    public function import()
-    {
-        Excel::import(new CustomerImport, request()->file('file'));
-
-        return back()->with('success', 'Imported successfully');
-    }
-
-    public function importSample(): BinaryFileResponse
-    {
-        $filePath = storage_path('app/public/customer_import_sample.csv');
-        $headers = ['name', 'address', 'phone_number', 'credit_limit', 'opening_balance'];
-
-        $handle = fopen($filePath, 'w');
-        fputcsv($handle, $headers);
-        fputcsv($handle, ['Example Customer', 'Customer Address 123', '0123456789', '5000', '1000']);
-        fclose($handle);
-
-        return response()->download($filePath)->deleteFileAfterSend();
-    }
-
-    public function export()
-    {
-        return Excel::download(new CustomerExport, 'customers.xlsx');
+        return $this->handlePrintStatement($customer, $statementService);
     }
 }

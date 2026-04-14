@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ChequeStatus;
+use App\Actions\CreateChequeAction;
 use App\Enums\PaymentMethod;
 use App\Filters\PaymentFilter;
 use App\Http\Requests\PaymentRequest;
 use App\Models\Bank;
-use App\Models\Cheque;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
@@ -49,7 +48,7 @@ class PaymentsController extends Controller
         ]);
     }
 
-    public function store(PaymentRequest $request)
+    public function store(PaymentRequest $request, CreateChequeAction $createCheque)
     {
         $metadata = null;
         $receiptPath = null;
@@ -93,27 +92,19 @@ class PaymentsController extends Controller
                 ? $invoice->invocable
                 : $payment->payable;
 
-            Cheque::create([
-                'chequeable_id' => $payee->id,
-                'chequeable_type' => get_class($payee),
+            $createCheque->execute($payee, [
                 'amount' => $request->amount,
-                'type' => $payee instanceof Supplier ? 2 : 1, // 1 for Debit (Customer), 2 for Credit (Supplier)
+                'type' => $payee instanceof Supplier ? 0 : 1, // 1 for Receivable (Customer), 0 for Payable (Supplier)
                 'due' => $request->cheque_due_date,
-                'bank' => $this->bankName($request->cheque_bank_id),
                 'bank_id' => $request->cheque_bank_id,
                 'reference_number' => $request->cheque_number,
-                'status' => ChequeStatus::Drafted,
+                'invoice_id' => $request->invoice_id,
             ]);
         }
 
         return redirect()
             ->route('payments.index')
             ->with('success', 'Payment recorded successfully');
-    }
-
-    protected function bankName($bankId)
-    {
-        return Bank::find($bankId)?->name ?? 'Unknown';
     }
 
     public function show(Payment $payment)

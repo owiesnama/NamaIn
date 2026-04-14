@@ -2,34 +2,6 @@
     @php
         $currency = preference('currency', 'USD');
         $logo     = preference('logo', '/images/logo.svg');
-
-        // Build sorted activity list
-        $activities = collect();
-
-        foreach($invoices as $invoice) {
-            $activities->push([
-                'date'        => \Carbon\Carbon::parse($invoice->getRawOriginal('created_at')),
-                'description' => __('Invoice') . ' #' . ($invoice->serial_number ?: $invoice->id),
-                'debit'       => (float) $invoice->total,
-                'credit'      => 0,
-                'type'        => 'invoice',
-            ]);
-        }
-
-        foreach($payments as $payment) {
-            $activities->push([
-                'date'        => $payment->paid_at,
-                'description' => __('Payment') . ' — ' . __($payment->payment_method->label()),
-                'debit'       => 0,
-                'credit'      => (float) $payment->amount,
-                'type'        => 'payment',
-            ]);
-        }
-
-        $activities    = $activities->sortBy('date')->values();
-        $totalDebits   = $activities->sum('debit');
-        $totalCredits  = $activities->sum('credit');
-        $closingBalance = $opening_balance + $totalDebits - $totalCredits;
     @endphp
 
     <div class="page">
@@ -46,12 +18,12 @@
         <div class="meta-strip">
             <div class="meta-item">
                 <div class="meta-label">{{ __('Account') }}</div>
-                <div class="meta-value">{{ $customer->name }}</div>
+                <div class="meta-value">{{ $party->name }}</div>
             </div>
-            @if($customer->phone_number)
+            @if($party->phone_number)
                 <div class="meta-item">
                     <div class="meta-label">{{ __('Phone') }}</div>
-                    <div class="meta-value">{{ $customer->phone_number }}</div>
+                    <div class="meta-value">{{ $party->phone_number }}</div>
                 </div>
             @endif
             <div class="meta-item">
@@ -64,9 +36,9 @@
             </div>
         </div>
 
-        @if($customer->address)
+        @if($party->address)
             <div style="padding: 8px 32px; font-size: 10px; color: #6b7280; background: #fafafa; border-bottom: 1px solid #e5e7eb;">
-                {{ $customer->address }}
+                {{ $party->address }}
             </div>
         @endif
 
@@ -79,20 +51,20 @@
             </div>
             <div class="stat-card danger">
                 <div class="stat-label">{{ __('Total Invoiced') }}</div>
-                <div class="stat-value">{{ number_format($totalDebits, 2) }}</div>
+                <div class="stat-value">{{ number_format($total_debits, 2) }}</div>
                 <div style="font-size: 8px; color: #9ca3af; margin-top: 2px;">{{ $currency }}</div>
             </div>
             <div class="stat-card accent">
                 <div class="stat-label">{{ __('Total Paid') }}</div>
-                <div class="stat-value">{{ number_format($totalCredits, 2) }}</div>
+                <div class="stat-value">{{ number_format($total_credits, 2) }}</div>
                 <div style="font-size: 8px; color: #9ca3af; margin-top: 2px;">{{ $currency }}</div>
             </div>
-            <div class="stat-card {{ $closingBalance > 0 ? 'danger' : 'accent' }}">
+            <div class="stat-card {{ $closing_balance > 0 ? 'danger' : 'accent' }}">
                 <div class="stat-label">{{ __('Closing Balance') }}</div>
-                <div class="stat-value">{{ number_format(abs($closingBalance), 2) }}</div>
+                <div class="stat-value">{{ number_format(abs($closing_balance), 2) }}</div>
                 <div style="font-size: 8px; color: #9ca3af; margin-top: 2px;">
                     {{ $currency }}
-                    @if($closingBalance < 0) ({{ __('credit') }}) @endif
+                    @if($closing_balance < 0) ({{ __('credit') }}) @endif
                 </div>
             </div>
         </div>
@@ -100,8 +72,6 @@
         {{-- ── Ledger ───────────────────────────────────── --}}
         <div class="section" style="padding-top: 0;">
             <div class="section-title">{{ __('Transaction History') }}</div>
-
-            @php $runningBalance = $opening_balance; @endphp
 
             <table class="table-ledger">
                 <thead>
@@ -126,10 +96,6 @@
                     </tr>
 
                     @foreach($activities as $activity)
-                        @php
-                            $runningBalance += $activity['debit'];
-                            $runningBalance -= $activity['credit'];
-                        @endphp
                         <tr>
                             <td class="no-wrap text-gray-500">{{ \Carbon\Carbon::parse($activity['date'])->format('Y-m-d') }}</td>
                             <td>{{ $activity['description'] }}</td>
@@ -140,7 +106,7 @@
                                 {{ $activity['credit'] > 0 ? number_format($activity['credit'], 2) . ' ' . $currency : '' }}
                             </td>
                             <td class="text-end no-wrap font-semibold">
-                                {{ number_format($runningBalance, 2) }} {{ $currency }}
+                                {{ number_format($activity['running_balance'], 2) }} {{ $currency }}
                             </td>
                         </tr>
                     @endforeach
@@ -148,9 +114,9 @@
                 <tfoot>
                     <tr>
                         <td colspan="2" class="text-end">{{ __('Totals') }}</td>
-                        <td class="text-end no-wrap text-red">{{ number_format($totalDebits, 2) }} {{ $currency }}</td>
-                        <td class="text-end no-wrap text-emerald">{{ number_format($totalCredits, 2) }} {{ $currency }}</td>
-                        <td class="text-end no-wrap">{{ number_format($closingBalance, 2) }} {{ $currency }}</td>
+                        <td class="text-end no-wrap text-red">{{ number_format($total_debits, 2) }} {{ $currency }}</td>
+                        <td class="text-end no-wrap text-emerald">{{ number_format($total_credits, 2) }} {{ $currency }}</td>
+                        <td class="text-end no-wrap">{{ number_format($closing_balance, 2) }} {{ $currency }}</td>
                     </tr>
                 </tfoot>
             </table>

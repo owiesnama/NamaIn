@@ -20,3 +20,4 @@ Artisan::command('cheques:notify-for-due', function () {
 });
 
 Schedule::command('cheques:notify-for-due')->daily();
+Schedule::command('expenses:generate-recurring')->daily();

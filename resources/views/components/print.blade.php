@@ -1,5 +1,9 @@
+@php
+    $lang = once(fn() => preference('language', 'ar'));
+    $dir = $lang == 'ar' ? 'rtl' : 'ltr';
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ preference('language', 'ar') == 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $dir }}">
 
 <head>
     <meta charset="utf-8">
@@ -35,8 +39,6 @@
 
         /* ── Reset ──────────────────────────────────────── */
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-        html { direction: {{ preference('language', 'ar') == 'ar' ? 'rtl' : 'ltr' }}; }
 
         body {
             font-family: 'Cairo', sans-serif;

@@ -4,34 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Invoice;
 use App\Models\Storage;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
-use Spatie\Browsershot\Browsershot;
+use App\Services\InvoicePrintService;
 
 class InvoicesController extends Controller
 {
-    public function print(Invoice $invoice)
+    public function print(Invoice $invoice, InvoicePrintService $service)
     {
-        $invoice->load(['invocable', 'transactions', 'payments']);
-
-        $deliveredRecords = $invoice->transactions->filter(fn ($t) => $t->delivered);
-        $remainingRecords = $invoice->transactions->filter(fn ($t) => ! $t->delivered);
-
-        $renderer = new ImageRenderer(
-            new RendererStyle(80),
-            new SvgImageBackEnd
-        );
-        $writer = new Writer($renderer);
-        $qrCode = $writer->writeString(route('invoices.show', $invoice));
-
-        $pdf = Browsershot::html(
-            view('print.invoice', [
-                'invoice' => $invoice,
-                'qr' => $qrCode,
-            ])->with(compact('deliveredRecords', 'remainingRecords'))->render()
-        )->noSandbox()->disableJavascript()->format('A4')->pdf();
+        $pdf = $service->generatePdf($invoice);
 
         $headers = [
             'Content-Type' => 'application/pdf',
@@ -43,10 +22,10 @@ class InvoicesController extends Controller
 
     public function show(Invoice $invoice)
     {
-        $invoice->load(['transactions', 'invocable', 'payments']);
+        $invoice->load(['transactions.product', 'transactions.unit', 'invocable', 'payments']);
 
         return inertia('Invoice', [
-            'storages' => Storage::all(),
+            'storages' => Storage::limit(20)->get(),
             'invoice' => $invoice,
         ]);
     }

@@ -11,6 +11,9 @@ import VueMultiselect from 'vue-multiselect'
 import "vue-multiselect/dist/vue-multiselect.css"
 
 
+import { translate } from "./Plugins/translations";
+window.__ = translate;
+
 const appName =
     window.document.getElementsByTagName("title")[0]?.innerText || "Laravel";
 
@@ -31,7 +34,7 @@ createInertiaApp({
             .use(ZiggyVue, Ziggy)
             .use(translations)
             .use(preferences)
-            .component('v-select', VueMultiselect)
+            .component('VueMultiselect', VueMultiselect)
             .mount(el);
     }
 });

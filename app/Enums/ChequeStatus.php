@@ -5,19 +5,23 @@ namespace App\Enums;
 enum ChequeStatus: string
 {
     case Drafted = 'drafted';
-    case Desirved = 'desirved';
+    case Issued = 'issued';
+    case Deposited = 'deposited';
+    case Cleared = 'cleared';
+    case PartiallyCleared = 'partially_cleared';
     case Returned = 'returned';
-    case Paid = 'paid';
-    case PartialyPaid = 'partialy_paid';
+    case Cancelled = 'cancelled';
 
     public static function casesWithLabels()
     {
         return [
             'Drafted' => self::Drafted,
-            'Desirved' => self::Desirved,
-            'Paid' => self::Paid,
-            'Partialy Paid' => self::PartialyPaid,
+            'Issued' => self::Issued,
+            'Deposited' => self::Deposited,
+            'Cleared' => self::Cleared,
+            'Partially Cleared' => self::PartiallyCleared,
             'Returned' => self::Returned,
+            'Cancelled' => self::Cancelled,
         ];
     }
 }

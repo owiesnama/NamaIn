@@ -53,6 +53,7 @@ class GlobalSearchController extends Controller
 
         $invoices = Invoice::search($search)
             ->take(5)
+            ->with('invocable')
             ->get()
             ->map(fn ($invoice) => [
                 'type' => 'Invoice',

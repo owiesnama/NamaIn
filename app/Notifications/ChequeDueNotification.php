@@ -2,13 +2,10 @@
 
 namespace App\Notifications;
 
-use App\Channels\MazinHost\Channel;
 use App\Models\Cheque;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
-use NotificationChannels\Twilio\TwilioChannel;
-use NotificationChannels\Twilio\TwilioSmsMessage;
 
 class ChequeDueNotification extends Notification
 {
@@ -19,9 +16,7 @@ class ChequeDueNotification extends Notification
      *
      * @return void
      */
-    public function __construct(public Cheque $cheque)
-    {
-    }
+    public function __construct(public Cheque $cheque) {}
 
     public function messageContent($notifiable)
     {
@@ -45,12 +40,26 @@ class ChequeDueNotification extends Notification
      */
     public function via($notifiable)
     {
-        return [Channel::class];
+        return ['mail'];
     }
 
-    public function toMazinHost(){
-        
+    public function toMail($notifiable): MailMessage
+    {
+        $direction = $this->cheque->isReceivable() ? 'Receivable' : 'Payable';
+
+        return (new MailMessage)
+            ->subject("Cheque Due Notification: #{$this->cheque->reference_number}")
+            ->line('This is a reminder that a cheque is due.')
+            ->line("Reference Number: #{$this->cheque->reference_number}")
+            ->line("Direction: {$direction}")
+            ->line("Payee: {$this->cheque->payee->name}")
+            ->line("Amount: {$this->cheque->amount_formated}")
+            ->line("Due Date: {$this->cheque->due->format('d-m-Y')}")
+            ->line('Current Status: '.__(str($this->cheque->status->value)->title()->replace('_', ' ')))
+            ->action('View Cheque', route('cheques.index', ['search' => $this->cheque->reference_number]))
+            ->line('Thank you for using our application!');
     }
+
     /**
      * Get the array representation of the notification.
      *

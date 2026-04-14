@@ -4,23 +4,60 @@
     import InputError from "@/Components/InputError.vue";
     import InputLabel from "@/Components/InputLabel.vue";
     import SelectBox from "@/Shared/SelectBox.vue";
+    import { ref, watch } from "vue";
+    import axios from "axios";
 
     defineProps({
         payees: Object,
         banks: Object
     });
+
     let cheque = useForm({
         type: 1,
         payee_id: null,
         payee_type: "",
+        invoice_id: null,
         bank_id: "",
         reference_number: "",
         amount: 0.0,
-        due: null
+        due: null,
+        notes: ""
     });
+
+    const invoices = ref([]);
+    const isLoadingInvoices = ref(false);
+
+    watch(() => cheque.payee_id, (newPayeeId) => {
+        if (!newPayeeId) {
+            invoices.value = [];
+            cheque.invoice_id = null;
+            return;
+        }
+
+        const payee = props.payees.find(p => p.id === newPayeeId);
+        cheque.payee_type = payee?.type || "";
+
+        fetchInvoices(newPayeeId, cheque.payee_type);
+    });
+
+    const fetchInvoices = async (payeeId, payeeType) => {
+        isLoadingInvoices.value = true;
+        try {
+            const response = await axios.get(route('cheques.payee-invoices'), {
+                params: { payee_id: payeeId, payee_type: payeeType }
+            });
+            invoices.value = response.data;
+        } catch (error) {
+            console.error("Failed to fetch invoices", error);
+        } finally {
+            isLoadingInvoices.value = false;
+        }
+    };
+
     const isCredit = (cheque) => {
         return cheque.type == 1;
     };
+
     const submit = () => {
         cheque.post(route("cheques.store"));
     };
@@ -84,24 +121,58 @@
                     </div>
                 </div>
                 <h2 class="mt-1 text-lg font-semibold text-gray-800">
-                    <InputLabel :value="__('Payee')" />
-                    <select
-                        v-model="cheque.payee_id"
-                        @change="cheque.payee_type = payees.find(p => p.id === cheque.payee_id)?.type"
-                        class="px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                        name="payee"
-                    >
-                        <option :value="null">{{ __('Select Payee') }}</option>
-                        <option
-                            v-for="payee in payees"
-                            :key="payee.id + payee.type"
-                            :value="payee.id"
-                            v-text="payee.name + ' (' + payee.type_string + ')'"
-                        ></option>
-                    </select>
-                    <InputError :message="cheque.errors.payee_id" class="mt-1" />
-                    <InputError :message="cheque.errors.payee_type" class="mt-1" />
+                    <div class="flex gap-4">
+                        <div class="flex-1">
+                            <InputLabel :value="__('Payee')" />
+                            <select
+                                v-model="cheque.payee_id"
+                                class="w-full px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                name="payee"
+                            >
+                                <option :value="null">{{ __('Select Payee') }}</option>
+                                <option
+                                    v-for="payee in payees"
+                                    :key="payee.id + payee.type"
+                                    :value="payee.id"
+                                    v-text="payee.name + ' (' + payee.type_string + ')'"
+                                ></option>
+                            </select>
+                            <InputError :message="cheque.errors.payee_id" class="mt-1" />
+                            <InputError :message="cheque.errors.payee_type" class="mt-1" />
+                        </div>
+
+                        <div class="flex-1" v-if="cheque.payee_id">
+                            <InputLabel :value="__('Link to Invoice')" />
+                            <select
+                                v-model="cheque.invoice_id"
+                                class="w-full px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                :disabled="isLoadingInvoices"
+                            >
+                                <option :value="null">{{ isLoadingInvoices ? __('Loading...') : __('No Invoice') }}</option>
+                                <option
+                                    v-for="invoice in invoices"
+                                    :key="invoice.id"
+                                    :value="invoice.id"
+                                >
+                                    #{{ invoice.serial_number }} ({{ __('Remaining') }}: {{ invoice.remaining_balance }})
+                                </option>
+                            </select>
+                            <InputError :message="cheque.errors.invoice_id" class="mt-1" />
+                        </div>
+                    </div>
                 </h2>
+
+                <div class="mt-4">
+                    <InputLabel :value="__('Notes')" />
+                    <textarea
+                        v-model="cheque.notes"
+                        class="w-full px-3 border border-gray-200 rounded focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                        rows="3"
+                        :placeholder="__('Notes')"
+                    ></textarea>
+                    <InputError :message="cheque.errors.notes" class="mt-1" />
+                </div>
+
                 <div class="mt-24 sm:flex sm:items-end sm:justify-between">
                     <div>
                         <InputLabel :value="__('Status')" />
@@ -109,9 +180,12 @@
                             v-model="cheque.type"
                             class="w-full mt-1 text-sm rounded-lg sm:w-36"
                         >
-                            <option value="0" v-text="__('Debit')"></option>
-                            <option value="1" v-text="__('Credit')"></option>
+                            <option value="0" v-text="__('Payable') + ' (' + __('Outgoing') + ')'"></option>
+                            <option value="1" v-text="__('Receivable') + ' (' + __('Incoming') + ')'"></option>
                         </SelectBox>
+                        <p class="mt-1 text-xs text-gray-500">
+                            {{ isCredit(cheque) ? __("You will receive money") : __("You will pay money") }}
+                        </p>
                     </div>
                     <h3
                         :class="

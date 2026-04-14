@@ -158,7 +158,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = 1"
                         >
-                            {{ __("Credit") }}
+                            {{ __("Receivable") }}
                         </button>
 
                         <button
@@ -170,7 +170,7 @@
                             class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
                             @click="filters.type = 0"
                         >
-                            {{ __("Debit") }}
+                            {{ __("Payable") }}
                         </button>
                     </div>
 
