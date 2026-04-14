@@ -5,7 +5,7 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
-    import CustomSelect from "./CustomSelect.vue";
+    import CustomSelect from "../CustomSelect.vue";
 
     const props = defineProps({
         customer: {
