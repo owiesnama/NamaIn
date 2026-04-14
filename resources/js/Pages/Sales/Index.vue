@@ -42,6 +42,8 @@
         { label: __("Total Amount"), value: "total" },
     ];
 
+    const deductingFromStorage = ref(false);
+
     let form = useForm({
         invoice: null,
         storage: null
