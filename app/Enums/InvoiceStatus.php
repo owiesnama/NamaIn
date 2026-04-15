@@ -7,6 +7,8 @@ enum InvoiceStatus: string
     case Delivered = 'delivered';
     case PartiallyDelivered = 'partially_delivered';
     case Initial = 'initial';
+    case Returned = 'returned';
+    case Pending = 'pending';
 
     public static function casesWithLabels(): array
     {
@@ -14,6 +16,8 @@ enum InvoiceStatus: string
             'Delivered' => self::Delivered,
             'Partially Delivered' => self::PartiallyDelivered,
             'Initial' => self::Initial,
+            'Returned' => self::Returned,
+            'Pending' => self::Pending,
         ];
     }
 
@@ -23,6 +27,8 @@ enum InvoiceStatus: string
             self::Delivered => 'Delivered',
             self::PartiallyDelivered => 'Partially Delivered',
             self::Initial => 'Initial',
+            self::Returned => 'Returned',
+            self::Pending => 'Pending',
         };
     }
 }

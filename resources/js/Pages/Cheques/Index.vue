@@ -1,46 +1,72 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { router, Link, usePage } from "@inertiajs/vue3";
-    import TextInput from "@/Components/TextInput.vue";
+    import { router, Link } from "@inertiajs/vue3";
     import Cheque from "@/Shared/Cheque.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import { watch, reactive, ref, onMounted, computed } from "vue";
+    import { watch, ref, onMounted } from "vue";
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
-    import Dropdown from "@/Components/Dropdown.vue";
+    import FilterSidebar from "@/Shared/FilterSidebar.vue";
+    import TextInput from "@/Components/TextInput.vue";
+    import VueMultiselect from "vue-multiselect";
+    import "vue-multiselect/dist/vue-multiselect.css";
 
     const props = defineProps({
         initialCheques: Object,
-        status: Object
+        status: Object,
+        summary: Object
     });
+
+    const showSidebar = ref(true);
+
+    const formatCurrency = (amount, currency = null) => {
+        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : 'SDG';
+
+        return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
+            style: 'currency',
+            currency: validCurrency,
+        }).format(amount || 0);
+    };
+
     let landMark = ref(null);
     let cheques = ref(props.initialCheques.data);
 
-    let filters = reactive({
-        search: useQueryString("search"),
-        type: useQueryString("type"),
-        status: useQueryString("status"),
-        due: useQueryString("due")
+    let filters = ref({
+        search: useQueryString("search").value,
+        type: useQueryString("type").value,
+        status: useQueryString("status").value,
+        due: useQueryString("due").value,
+        sort_by: useQueryString("sort_by").value || "due",
+        sort_order: useQueryString("sort_order").value || "asc"
     });
-    const getStatusLabel = computed(() => {
-        let [status] = Object
-            .entries(props.status)
-            .filter(([, value]) => filters.status === value)[0];
 
-        return __(status);
-    });
-    const initialUrl = usePage().url;
+    const sortByOptions = [
+        { label: __("Due Date"), value: "due" },
+        { label: __("Amount"), value: "amount" },
+        { label: __("Reference Number"), value: "reference_number" },
+        { label: __("Date Registered"), value: "created_at" },
+    ];
+
+    const resetFilters = () => {
+        filters.value = {
+            search: null,
+            type: null,
+            status: null,
+            due: null,
+            sort_by: "due",
+            sort_order: "asc"
+        };
+    };
 
     const loadMore = () => {
         if (!props.initialCheques.next_page_url) return;
         router.get(
             props.initialCheques.next_page_url,
-            { ...filters },
+            { ...filters.value },
             {
                 preserveState: true,
                 preserveScroll: true,
                 onSuccess() {
-                    window.history.replaceState({}, "", initialUrl);
                     cheques.value = [
                         ...cheques.value,
                         ...props.initialCheques.data
@@ -60,6 +86,7 @@
     onMounted(() => {
         observer.observe(landMark.value);
     });
+
     watch(
         filters,
         debounce(function(watchedFitlers) {
@@ -69,172 +96,204 @@
                 {
                     preserveState: true,
                     onSuccess() {
-                        window.history.replaceState({}, "", initialUrl);
                         cheques.value = [...props.initialCheques.data];
                     }
                 }
             );
-        }, 300)
+        }, 300),
+        { deep: true }
     );
 </script>
 
 <template>
     <AppLayout :title="__('Cheques')">
-        <section>
-            <div class="w-full lg:flex lg:items-end lg:justify-between">
-                <div>
-                    <div class="flex items-center gap-x-3">
-                        <h2
-                            class="text-xl font-semibold text-gray-800 dark:text-white"
-                        >
-                            {{ __("Cheques") }}
-                        </h2>
+        <div class="w-full lg:flex lg:items-center lg:justify-between">
+            <div>
+                <div class="flex items-center gap-x-3">
+                    <h2
+                        class="text-xl font-semibold text-gray-800 dark:text-white"
+                    >
+                        {{ __("Cheques") }}
+                    </h2>
 
-                        <span
-                            class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                        >{{ initialCheques.total }} {{ __("Cheque") }}</span
-                        >
+                    <span
+                        class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
+                    >{{ initialCheques.total }} {{ __("Cheque") }}</span
+                    >
+                </div>
+            </div>
+
+            <div
+                class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0"
+            >
+                <button
+                    @click="showSidebar = !showSidebar"
+                    :class="[
+                        'inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors',
+                        showSidebar ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20' : ''
+                    ]"
+                    :title="__('Filters')"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
+                    </svg>
+                </button>
+
+                <Link
+                    :href="route('cheques.create')"
+                    class="w-full px-5 py-2.5 block text-center text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
+                >
+                    + {{ __("Register Cheque") }}
+                </Link>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="grid grid-cols-1 gap-5 mt-6 sm:grid-cols-3">
+            <!-- Total Receivable -->
+            <div
+                @click="filters.type = 1"
+                class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group cursor-pointer"
+            >
+                <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1 px-4">
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate">{{ __("Receivable") }}</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(summary.total_receivable) }}</p>
+                </div>
+            </div>
+
+            <!-- Total Payable -->
+            <div
+                @click="filters.type = 0"
+                class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group cursor-pointer"
+            >
+                <div class="p-2 rounded-lg bg-red-500/10 text-red-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15" />
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1 px-4">
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate">{{ __("Payable") }}</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(summary.total_payable) }}</p>
+                </div>
+            </div>
+
+            <!-- Overdue Count -->
+            <div
+                @click="filters.due = new Date().toISOString().split('T')[0]"
+                class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group cursor-pointer"
+            >
+                <div class="p-2 rounded-lg bg-amber-500/10 text-amber-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="min-w-0 flex-1 px-4">
+                    <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate">{{ __("Overdue") }}</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ summary.overdue_count }} {{ __("Cheques") }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
+            <FilterSidebar
+                v-if="showSidebar"
+                v-model:filters="filters"
+                :sort-by-options="sortByOptions"
+                :all-label="__('All Cheques')"
+                @reset="resetFilters"
+            >
+                <template #extra-filters>
+                    <!-- Cheque Type -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Type") }}</label>
+                        <div class="flex bg-gray-50 border border-gray-200 divide-x rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse overflow-hidden h-9">
+                            <button
+                                @click="filters.type = null"
+                                :class="[
+                                    'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                                    filters.type === null || filters.type === '' ? 'bg-gray-100 dark:bg-gray-700' : 'text-gray-600'
+                                ]"
+                            >
+                                {{ __("All") }}
+                            </button>
+                            <button
+                                @click="filters.type = 1"
+                                :class="[
+                                    'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                                    filters.type == 1 ? 'bg-gray-100 dark:bg-gray-700' : 'text-gray-600'
+                                ]"
+                            >
+                                {{ __("Receivable") }}
+                            </button>
+                            <button
+                                @click="filters.type = 0"
+                                :class="[
+                                    'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                                    filters.type === 0 || filters.type === '0' ? 'bg-gray-100 dark:bg-gray-700' : 'text-gray-600'
+                                ]"
+                            >
+                                {{ __("Payable") }}
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="flex items-center mt-4 gap-x-4">
-                        <div class="relative flex items-center">
-                            <span class="absolute">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="w-5 h-5 mx-3 text-gray-400 dark:text-gray-600"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                                    />
-                                </svg>
-                            </span>
-
-                            <input
-                                v-model="filters.search"
-                                type="text"
-                                class="block w-full py-2 pr-5 text-gray-700 bg-white border border-gray-200 rounded-lg md:w-80 placeholder-gray-400/70 pl-11 rtl:pr-11 rtl:pl-5 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 dark:focus:border-emerald-300 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
-                                :placeholder="__('Search here') + '...'"
-                            />
-                        </div>
+                    <!-- Due Before -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Due Before") }}</label>
                         <TextInput
                             v-model="filters.due"
                             type="date"
-                            class="text-gray-700 rtl:text-right"
-                            :placeholder="__('Due before') + '..'"
+                            class="block w-full text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         />
                     </div>
-                </div>
 
-                <div
-                    class="mt-4 sm:flex sm:items-center sm:justify-between sm:gap-x-4 lg:mt-0"
-                >
-                    <div
-                        class="flex overflow-hidden bg-white border divide-x rounded-lg md:w-auto sm:w-1/2 dark:bg-gray-900 rtl:flex-row-reverse dark:border-gray-700 dark:divide-gray-700"
-                    >
-                        <button
-                            :class="
-                                filters.type === '' || filters.type === null
-                                    ? 'bg-gray-100'
-                                    : 'hover:bg-gray-100'
-                            "
-                            class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
-                            @click="filters.type = ''"
+                    <!-- Status Filter -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Status") }}</label>
+                        <VueMultiselect
+                            v-model="filters.status"
+                            :options="Object.values(status)"
+                            :multiple="true"
+                            :close-on-select="false"
+                            :placeholder="__('Filter by status')"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            class="text-xs custom-multiselect"
                         >
-                            {{ __("All") }}
-                        </button>
-
-                        <button
-                            :class="
-                                filters.type == 1
-                                    ? 'bg-gray-100'
-                                    : 'hover:bg-gray-100'
-                            "
-                            class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
-                            @click="filters.type = 1"
-                        >
-                            {{ __("Receivable") }}
-                        </button>
-
-                        <button
-                            :class="
-                                filters.type === 0
-                                    ? 'bg-gray-100'
-                                    : 'hover:bg-gray-100'
-                            "
-                            class="px-5 w-1/3 md:w-auto shrink-0 py-2.5 text-xs font-semibold text-gray-600 transition-colors duration-200 sm:text-sm"
-                            @click="filters.type = 0"
-                        >
-                            {{ __("Payable") }}
-                        </button>
+                            <template #noResult>
+                                <span class="text-xs text-gray-500">{{ __("No status found") }}</span>
+                            </template>
+                        </VueMultiselect>
                     </div>
+                </template>
+            </FilterSidebar>
 
-                    <Dropdown
-                        align="left"
-                        width="48"
-                    >
-                        <template #trigger>
-                            <button
-                                type="button"
-                                class="inline-flex rtl items-center justify-center w-full px-3 py-2 mt-4 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg sm:w-auto sm:mt-0 gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="w-6 h-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z"
-                                    />
-                                </svg>
-
-                                {{ filters.status ? getStatusLabel : __("Status") }}
-                            </button>
-                        </template>
-
-                        <template #content>
-                            <button
-                                v-for="(key, value) in status"
-                                :key="key"
-                                @click="filters.status = key"
-                                class="block rtl:text-right w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100"
-                                v-text="__(value)"
-                            ></button>
-                        </template>
-                    </Dropdown>
-
-                    <Link
-                        as="button"
-                        :href="route('cheques.create')"
-                        class="w-full px-5 py-2.5 mt-3 text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
-                        @click="show = true"
-                    >
-                        + {{ __("Add New Cheque") }}
-                    </Link>
+            <div class="flex-1 min-w-0">
+                <div v-if="cheques.length">
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <Cheque
+                            v-for="cheque in cheques"
+                            :key="cheque.id + '-' + cheque.status"
+                            :cheque="cheque"
+                            :cheque-status="status"
+                        />
+                    </div>
+                    <div
+                        ref="landMark"
+                        class="w-full h-12"
+                    ></div>
                 </div>
+                <EmptySearch
+                    v-else
+                    :data="cheques"
+                />
             </div>
-
-            <div class="grid grid-cols-1 gap-6 mt-8 md:grid-cols-2" v-auto-animate>
-                <Cheque
-                    v-for="cheque in cheques"
-                    :key="cheque.id + (new Date).valueOf()"
-                    :cheque="cheque"
-                    :cheque-status="status"
-                ></Cheque>
-            </div>
-            <div ref="landMark"></div>
-
-            <EmptySearch :data="cheques"></EmptySearch>
-        </section>
+        </div>
     </AppLayout>
 </template>

@@ -24,8 +24,6 @@ class Customer extends BaseModel
      */
     protected array $searchable = ['name', 'address', 'phone_number'];
 
-    protected $fillable = ['name', 'address', 'phone_number', 'credit_limit', 'opening_balance'];
-
     /**
      * @return array<string, string>
      */
@@ -105,7 +103,7 @@ class Customer extends BaseModel
                 ->where('paid_at', '<', $asOfDate)
                 ->sum('amount');
 
-            return (float) ($totalInvoiced - $totalPaidOnInvoices - $totalDirectPayments + $this->opening_balance);
+            return (float) ($totalInvoiced - $totalPaidOnInvoices - $totalDirectPayments - $this->opening_balance);
         }
 
         $invoiceBalance = (float) $this->invoices()
@@ -114,7 +112,7 @@ class Customer extends BaseModel
         $directPayments = (float) $this->payments()
             ->sum('amount');
 
-        return $invoiceBalance - $directPayments + (float) $this->opening_balance;
+        return $invoiceBalance - $directPayments - (float) $this->opening_balance;
     }
 
     /**

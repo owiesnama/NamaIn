@@ -17,11 +17,21 @@ class ChequesController extends Controller
         return inertia('Cheques/Index', [
             'initialCheques' => Cheque::with('payee')
                 ->filter($filter)
-                ->orderBy('type')
-                ->oldest('due')
-                ->orderBy('created_at')
-                ->paginate(10),
+                ->when(request('sort_by'), function ($query, $sortBy) {
+                    $query->orderBy(in_array($sortBy, ['id', 'amount', 'due', 'reference_number', 'created_at']) ? $sortBy : 'due', request('sort_order', 'asc'));
+                }, function ($query) {
+                    $query->orderBy('type')
+                        ->oldest('due')
+                        ->orderBy('created_at');
+                })
+                ->paginate(10)
+                ->withQueryString(),
             'status' => ChequeStatus::casesWithLabels(),
+            'summary' => [
+                'total_receivable' => Cheque::receivable()->whereNotIn('status', [ChequeStatus::Cleared, ChequeStatus::Cancelled])->sum('amount'),
+                'total_payable' => Cheque::payable()->whereNotIn('status', [ChequeStatus::Cleared, ChequeStatus::Cancelled])->sum('amount'),
+                'overdue_count' => Cheque::overdue()->count(),
+            ],
         ]);
     }
 

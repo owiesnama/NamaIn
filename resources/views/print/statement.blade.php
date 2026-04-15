@@ -1,6 +1,6 @@
 <x-print>
     @php
-        $currency = preference('currency', 'USD');
+        $currency = preference('currency', 'SDG');
         $logo     = preference('logo', '/images/logo.svg');
     @endphp
 

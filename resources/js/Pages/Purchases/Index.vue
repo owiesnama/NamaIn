@@ -2,25 +2,66 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import Pagination from "@/Shared/Pagination.vue";
     import { Link, useForm, router } from "@inertiajs/vue3";
-    import { watch, ref } from "vue";
+    import { watch, ref, computed } from "vue";
     import DialogModal from "@/Components/DialogModal.vue";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import SecondaryButton from "@/Components/SecondaryButton.vue";
     import Card from "@/Pages/Purchases/Card.vue";
     import Dropdown from "@/Components/Dropdown.vue";
+    import DropdownLink from "@/Components/DropdownLink.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import { useQueryString } from "@/Composables/useQueryString";
     import { debounce } from "lodash";
+    import axios from "axios";
+    import VueMultiselect from "vue-multiselect";
+
+    import CustomSelect from "@/Components/CustomSelect.vue";
 
     defineProps({
         invoices: Object,
         storages: Array
     });
 
+    const isRtl = computed(() => document.documentElement.dir === 'rtl' || document.documentElement.lang === 'ar');
+
     const selectedStorage = ref(null);
+    const showInvoiceSelector = ref(false);
 
     const showSidebar = ref(true);
+
+    const invoicesToReturn = ref([]);
+    const searchingInvoices = ref(false);
+    const searchReturnQuery = ref("");
+
+    const selectedInvoiceForReturn = ref(null);
+
+    const searchInvoicesForReturn = debounce(async (query = "") => {
+        searchingInvoices.value = true;
+        try {
+            const response = await axios.get(route('invoices.search-for-return'), {
+                params: {
+                    type: 'purchase',
+                    search: query
+                }
+            });
+            invoicesToReturn.value = response.data;
+        } catch (error) {
+            console.error(error);
+        } finally {
+            searchingInvoices.value = false;
+        }
+    }, 500);
+
+    watch(searchReturnQuery, (newQuery) => {
+        searchInvoicesForReturn(newQuery);
+    });
+
+    watch(showInvoiceSelector, (value) => {
+        if (value) {
+            searchInvoicesForReturn("");
+        }
+    });
 
     const filters = ref({
         search: useQueryString("search").value,
@@ -73,6 +114,12 @@
             onFinish: () => closeModal()
         }).then();
     };
+
+    const handleInvoiceSelect = (invoice) => {
+        if (invoice && invoice.return_url) {
+            router.visit(invoice.return_url);
+        }
+    };
 </script>
 
 <template>
@@ -109,32 +156,28 @@
                     </svg>
                 </button>
 
-                <div class="flex">
+                <div class="flex items-stretch">
                     <Link
-                        class="w-full px-5 py-2.5 block text-center text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-lg rounded-l-none sm:mt-0 bg-emerald-500 shrink-0 sm:w-auto hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600"
+                        class="px-5 py-2.5 flex items-center justify-center text-sm tracking-wide text-white transition-colors font-bold duration-200 rounded-s-lg bg-emerald-500 shrink-0 hover:bg-emerald-600 dark:hover:bg-emerald-500 dark:bg-emerald-600 border-e border-emerald-400"
                         :href="route('purchases.create')"
                     >
                         + {{ __("Add New Invoice") }}
                     </Link>
-                    <Dropdown align="left">
+                    <Dropdown :align="isRtl ? 'left' : 'right'" width="48">
                         <template #trigger>
                             <button
-                                class="inline-flex items-center justify-center w-full px-1 py-2 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg sm:w-auto gap-x-2 rounded-r-none focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none dark:bg-gray-900 dark:border-gray-700">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                     viewBox="0 0 32 32" version="1.1" class="w-6 h-6 fill-gray-400">
-                                    <g id="SVGRepo_iconCarrier">
-                                        <path
-                                            d="M12.15 28.012v-0.85c0.019-0.069 0.050-0.131 0.063-0.2 0.275-1.788 1.762-3.2 3.506-3.319 1.95-0.137 3.6 0.975 4.137 2.787 0.069 0.238 0.119 0.488 0.181 0.731v0.85c-0.019 0.056-0.050 0.106-0.056 0.169-0.269 1.65-1.456 2.906-3.081 3.262-0.125 0.025-0.25 0.063-0.375 0.094h-0.85c-0.056-0.019-0.113-0.050-0.169-0.056-1.625-0.262-2.862-1.419-3.237-3.025-0.037-0.156-0.081-0.3-0.119-0.444zM20.038 3.988l-0 0.85c-0.019 0.069-0.050 0.131-0.056 0.2-0.281 1.8-1.775 3.206-3.538 3.319-1.944 0.125-3.588-1-4.119-2.819-0.069-0.231-0.119-0.469-0.175-0.7v-0.85c0.019-0.056 0.050-0.106 0.063-0.162 0.3-1.625 1.244-2.688 2.819-3.194 0.206-0.069 0.425-0.106 0.637-0.162h0.85c0.056 0.019 0.113 0.050 0.169 0.056 1.631 0.269 2.863 1.419 3.238 3.025 0.038 0.15 0.075 0.294 0.113 0.437zM20.037 15.575v0.85c-0.019 0.069-0.050 0.131-0.063 0.2-0.281 1.794-1.831 3.238-3.581 3.313-1.969 0.087-3.637-1.1-4.106-2.931-0.050-0.194-0.094-0.387-0.137-0.581v-0.85c0.019-0.069 0.050-0.131 0.063-0.2 0.275-1.794 1.831-3.238 3.581-3.319 1.969-0.094 3.637 1.1 4.106 2.931 0.050 0.2 0.094 0.394 0.137 0.588z" />
-                                    </g>
+                                class="px-2 py-2.5 bg-emerald-500 text-white rounded-e-lg hover:bg-emerald-600 transition-colors duration-200 focus:outline-none h-full flex items-center justify-center"
+                                :title="__('More Actions')"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
                                 </svg>
                             </button>
                         </template>
-
                         <template #content>
-                            <button
-                                class="block rtl:text-right w-full px-4 py-2 text-sm leading-5 text-left text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
-                                v-text="__('Return Invoice')"
-                            ></button>
+                            <DropdownLink as="button" @click="showInvoiceSelector = true">
+                                {{ __("Create Return") }}
+                            </DropdownLink>
                         </template>
                     </Dropdown>
                 </div>
@@ -202,6 +245,53 @@
                 >
                     {{ __("Confirm") }}
                 </PrimaryButton>
+            </template>
+        </DialogModal>
+
+        <DialogModal :show="showInvoiceSelector" @close="showInvoiceSelector = false">
+            <template #title>
+                {{ __("Search Invoice to Return") }}
+            </template>
+            <template #content>
+                <div class="mt-4">
+                    <CustomSelect
+                        v-model="selectedInvoiceForReturn"
+                        :options="invoicesToReturn"
+                        label="serial_number"
+                        track-by="id"
+                        remote
+                        :placeholder="__('Search by Serial Number or Supplier Name...')"
+                        @search-change="searchInvoicesForReturn"
+                        @update:model-value="handleInvoiceSelect"
+                    >
+                        <template #option="{ option }">
+                            <div class="flex items-center justify-between w-full">
+                                <div>
+                                    <div class="font-medium text-gray-900 dark:text-gray-100">
+                                        #{{ option.serial_number }}
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        {{ option.invocable_name }} • {{ option.date }}
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="font-bold text-emerald-600">
+                                        {{ option.total }}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </CustomSelect>
+
+                    <div v-if="searchingInvoices" class="mt-4 text-center">
+                        <span class="text-sm text-gray-500">{{ __("Searching...") }}</span>
+                    </div>
+                </div>
+            </template>
+            <template #footer>
+                <SecondaryButton @click="showInvoiceSelector = false">
+                    {{ __("Close") }}
+                </SecondaryButton>
             </template>
         </DialogModal>
     </AppLayout>

@@ -14,10 +14,8 @@ enum PaymentMethod: string
     {
         return [
             'Cash' => self::Cash,
-            'Credit' => self::Credit,
             'Cheque' => self::Cheque,
             'Bank Transfer' => self::BankTransfer,
-            'Mixed' => self::Mixed,
         ];
     }
 

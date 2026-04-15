@@ -160,7 +160,7 @@ test('product export-import roundtrip works', function () {
     Product::factory()->create([
         'name' => $productName,
         'cost' => 123.45,
-        'currency' => 'USD',
+        'currency' => 'SDG',
     ]);
 
     // Test CSV import that matches export format

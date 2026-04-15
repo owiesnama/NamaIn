@@ -15,7 +15,7 @@
         invoicesHeadline: preferences('invoicesHeadline'),
         alerts: alertsToggle.value,
         language: preferences('language', 'en'),
-        currency: preferences('currency', 'USD'),
+        currency: preferences('currency', 'SDG'),
         pecentage: preferences('pecentage', 60),
     });
 
@@ -237,7 +237,7 @@
                 />
             </div>
 
-            <!-- currency -->
+            <!-- currency (System Wide SDG) -->
             <div class="col-span-6 sm:col-span-4">
                 <InputLabel
                     for="currency"
@@ -248,23 +248,11 @@
                         id="currency"
                         v-model="form.currency"
                         type="text"
-                        class="block w-full uppercase"
+                        class="block w-full uppercase bg-gray-50"
                         maxlength="3"
-                        required
-                        :placeholder="__('USD')"
+                        readonly
+                        :placeholder="__('SDG')"
                     />
-                    <div class="flex gap-x-1">
-                        <button
-                            v-for="curr in ['USD', 'EUR', 'SDG']"
-                            :key="curr"
-                            type="button"
-                            @click="form.currency = curr"
-                            class="px-3 py-2 text-xs font-medium border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                            :class="form.currency === curr ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white text-gray-600'"
-                        >
-                            {{ curr }}
-                        </button>
-                    </div>
                 </div>
                 <InputError
                     :message="form.errors.currency"

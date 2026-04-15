@@ -22,7 +22,8 @@ class InvoiceObserver
             Customer::class => 'SA',
             Supplier::class => 'SU',
         ];
-        $prefix = 'INV';
+
+        $prefix = $invoice->is_inverse ? 'RET' : 'INV';
         $typePerfix = $lookup[$invoice->invocable_type];
         $date = now()->format('y');
         $serialNumber = "{$prefix}-{$typePerfix}-{$date}-{$invoice->id}";

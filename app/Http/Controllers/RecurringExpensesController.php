@@ -36,9 +36,7 @@ class RecurringExpensesController extends Controller
      */
     public function store(RecurringExpenseRequest $request)
     {
-        $validated = $request->validated();
-
-        $recurringExpense = RecurringExpense::create(array_merge($validated, [
+        $recurringExpense = RecurringExpense::create(array_merge($request->safe()->except('category_ids'), [
             'created_by' => auth()->id(),
         ]));
 
@@ -69,9 +67,7 @@ class RecurringExpensesController extends Controller
      */
     public function update(RecurringExpenseRequest $request, RecurringExpense $recurringExpense)
     {
-        $validated = $request->validated();
-
-        $recurringExpense->update($validated);
+        $recurringExpense->update($request->safe()->except('category_ids'));
 
         $recurringExpense->categories()->sync($request->category_ids ?? []);
 

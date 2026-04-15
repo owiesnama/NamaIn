@@ -54,7 +54,7 @@ class SuppliersController extends Controller
 
     public function store(SupplierRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $supplier = Supplier::create($request->validated());
+        $supplier = Supplier::create($request->safe()->except('categories'));
 
         $syncCategories->execute($supplier, $request->get('categories', []));
 
@@ -71,7 +71,7 @@ class SuppliersController extends Controller
 
     public function update(Supplier $supplier, SupplierRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $supplier->update($request->validated());
+        $supplier->update($request->safe()->except('categories'));
 
         $syncCategories->execute($supplier, $request->get('categories', []));
 

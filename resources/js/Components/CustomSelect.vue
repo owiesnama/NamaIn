@@ -43,6 +43,10 @@ const props = defineProps({
     tagPlaceholder: {
         type: String,
         default: 'Press enter to create a tag'
+    },
+    remote: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -71,6 +75,11 @@ const displayValue = computed(() => {
 
 const filteredOptions = computed(() => {
     let options = props.options;
+
+    if (props.remote) {
+        return options;
+    }
+
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase();
         options = props.options.filter(option => {

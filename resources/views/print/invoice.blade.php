@@ -1,6 +1,6 @@
 <x-print>
     @php
-        $currency = $invoice->currency ?: preference('currency', 'USD');
+        $currency = $invoice->currency ?: preference('currency', 'SDG');
         $logo     = preference('logo', '/images/logo.svg');
         $isPaid   = $invoice->payment_status === \App\Enums\PaymentStatus::Paid;
 

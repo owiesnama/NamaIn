@@ -24,7 +24,7 @@ const form = useForm({
 });
 
 const formatCurrency = (amount) => {
-    const validCurrency = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD');
+    const validCurrency = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
 
     return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
         style: 'currency',

@@ -89,8 +89,8 @@
         };
     };
 
-    const formatCurrency = (amount, currency = 'USD') => {
-        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD');
+    const formatCurrency = (amount, currency = 'SDG') => {
+        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
         return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
             style: 'currency',
             currency: validCurrency,

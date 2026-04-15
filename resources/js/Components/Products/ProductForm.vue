@@ -26,7 +26,7 @@
         name: props.product?.name,
         cost: props.product?.cost ? String(props.product?.cost) : "",
         expire_date: props.product?.expire_date,
-        currency: props.product?.currency || preferences("currency") || "$",
+        currency: props.product?.currency || preferences("currency") || "SDG",
         alert_quantity: props.product?.alert_quantity || "",
         categories: props.product?.categories || [],
         units: props.product?.units?.length
@@ -178,27 +178,19 @@
                                                 <TextInput
                                                     id="cost"
                                                     v-model="product.cost"
-                                                    type="text"
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
                                                     class="block w-full mt-1"
                                                     required
                                                 />
-                                                <TextInput
-                                                    id="currency"
-                                                    v-model="product.currency"
-                                                    type="text"
-                                                    class="block w-20 mt-1 uppercase"
-                                                    maxlength="3"
-                                                    required
-                                                    :placeholder="__('USD')"
-                                                />
+                                                <div class="block w-20 mt-1 uppercase bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500 text-center font-bold">
+                                                    {{ product.currency }}
+                                                </div>
                                             </div>
                                             <InputError
                                                 class="mt-2"
                                                 :message="product.errors.cost"
-                                            />
-                                            <InputError
-                                                class="mt-2"
-                                                :message="product.errors.currency"
                                             />
                                         </div>
 
@@ -231,6 +223,7 @@
                                                 id="alert_quantity"
                                                 v-model="product.alert_quantity"
                                                 type="number"
+                                                min="0"
                                                 class="block w-full mt-1"
                                                 :placeholder="__('3')"
                                             />

@@ -2,14 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Support\Facades\DB;
 
 class Stock extends Pivot
 {
-    use HasFactory;
+    protected $guarded = [];
+
+    protected static function booted(): void
+    {
+        // No parent::booted() because Pivot doesn't have it, but we want to unguard it
+        static::unguard();
+    }
 
     /**
      * Attribute to append to this stock.

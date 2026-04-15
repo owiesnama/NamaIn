@@ -21,7 +21,7 @@ class ExpenseFactory extends Factory
         return [
             'title' => $this->faker->sentence(3),
             'amount' => $this->faker->randomFloat(2, 10, 1000),
-            'currency' => 'USD',
+            'currency' => 'SDG',
             'expensed_at' => now(),
             'created_by' => User::factory(),
         ];

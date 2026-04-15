@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->string('payment_method')->default('credit')->after('status');
+            $table->string('payment_method')->default('cash')->after('status');
             $table->string('payment_status')->default('unpaid')->after('payment_method');
             $table->decimal('paid_amount', 15, 2)->default(0)->after('payment_status');
             $table->decimal('discount', 15, 2)->default(0)->after('paid_amount');

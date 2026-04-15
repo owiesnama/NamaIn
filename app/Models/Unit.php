@@ -16,7 +16,6 @@ class Unit extends BaseModel
      *
      * @var array<string>
      */
-    protected $fillable = ['product_id', 'name', 'conversion_factor'];
 
     /**
      * The product associated with this unit.

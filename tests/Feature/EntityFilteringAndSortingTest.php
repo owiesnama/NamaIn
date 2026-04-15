@@ -30,8 +30,8 @@ test('can filter customers by category', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
-        ->has('customers.data', 1)
-        ->where('customers.data.0.name', 'VIP Customer')
+        ->has('customers', 1)
+        ->where('customers.0.name', 'VIP Customer')
     );
 });
 
@@ -43,8 +43,8 @@ test('can sort customers by name', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
-        ->where('customers.data.0.name', 'Apple')
-        ->where('customers.data.1.name', 'Zebra')
+        ->where('customers.0.name', 'Apple')
+        ->where('customers.1.name', 'Zebra')
     );
 });
 
@@ -59,8 +59,8 @@ test('can filter suppliers by category', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
-        ->has('suppliers.data', 1)
-        ->where('suppliers.data.0.name', 'Main Supplier')
+        ->has('suppliers', 1)
+        ->where('suppliers.0.name', 'Main Supplier')
     );
 });
 
@@ -72,7 +72,7 @@ test('can sort storages by name', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
-        ->where('storages.data.0.name', 'Warehouse A')
-        ->where('storages.data.1.name', 'Warehouse B')
+        ->where('storages.0.name', 'Warehouse A')
+        ->where('storages.1.name', 'Warehouse B')
     );
 });

@@ -25,7 +25,7 @@ test('can create customer with opening balance', function () {
     ]);
 
     $customer = Customer::where('name', 'John Doe')->first();
-    expect($customer->calculateAccountBalance())->toBe(500.50);
+    expect($customer->calculateAccountBalance())->toBe(-500.50);
 });
 
 test('cannot update customer opening balance', function () {
@@ -62,7 +62,7 @@ test('can create supplier with opening balance', function () {
     ]);
 
     $supplier = Supplier::where('name', 'Jane Supplier')->first();
-    expect($supplier->calculateAccountBalance())->toBe(750.25);
+    expect($supplier->calculateAccountBalance())->toBe(-750.25);
 });
 
 test('cannot update supplier opening balance', function () {

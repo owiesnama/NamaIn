@@ -9,7 +9,10 @@ class Category extends BaseModel
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'type', 'budget_limit'];
+    protected static function booted(): void
+    {
+        static::unguard();
+    }
 
     /**
      * @return array<string, string>

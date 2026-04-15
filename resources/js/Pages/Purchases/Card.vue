@@ -1,4 +1,5 @@
 <script setup>
+    import { Link } from "@inertiajs/vue3";
     import Transactions from "@/Shared/Transactions.vue";
 
     const props = defineProps({
@@ -19,7 +20,7 @@
     const formatCurrency = (amount, currency = null) => {
         const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
             (props.invoice?.currency && /^[A-Z]{3}$/.test(props.invoice.currency) ? props.invoice.currency :
-            (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD'));
+            (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG'));
 
         return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
             style: 'currency',
@@ -68,6 +69,17 @@
                                   d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
                         </svg>
                     </button>
+
+                    <Link
+                        v-if="invoice.can_be_inversed"
+                        :href="route(invoice.invocable_type === 'App\\Models\\Customer' ? 'sales.return' : 'purchases.return', invoice)"
+                        class="p-2 text-gray-600 transition-colors duration-200 rounded-lg hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 focus:outline-none"
+                        :title="__('Return Items')"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+                        </svg>
+                    </Link>
                 </div>
             </div>
         </div>

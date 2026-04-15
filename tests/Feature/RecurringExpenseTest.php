@@ -92,7 +92,7 @@ test('it can create a recurring expense template', function () {
     $response = $this->actingAs($user)->post(route('recurring-expenses.store'), [
         'title' => 'Office Rent',
         'amount' => 1200.50,
-        'currency' => 'USD',
+        'currency' => 'SDG',
         'frequency' => 'monthly',
         'starts_at' => now()->format('Y-m-d'),
         'category_ids' => [$category->id],

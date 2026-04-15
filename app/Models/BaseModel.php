@@ -4,11 +4,21 @@ namespace App\Models;
 
 use App\Filters\Filters;
 use Illuminate\Contracts\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseModel extends Model
 {
+    use HasFactory;
+
+    /**
+     * Bootstrap the model and its traits.
+     */
+    protected static function booted(): void
+    {
+        static::unguard();
+    }
+
     /**
      * Direct columns to search against.
      *

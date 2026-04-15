@@ -166,7 +166,7 @@ class ProductsController extends Controller
 
     public function store(ProductRequest $request)
     {
-        $product = Product::create($request->all());
+        $product = Product::create($request->safe()->except(['units', 'categories']));
         $product->units()->createMany($request->get('units'));
 
         $type = 'product';
@@ -183,7 +183,7 @@ class ProductsController extends Controller
 
     public function update(Product $product, ProductRequest $request)
     {
-        $product->update($request->all());
+        $product->update($request->safe()->except(['units', 'categories']));
         $product->units()->delete();
         $product->units()->createMany($request->get('units'));
 
@@ -222,7 +222,7 @@ class ProductsController extends Controller
 
         $handle = fopen($filePath, 'w');
         fputcsv($handle, $headers);
-        fputcsv($handle, ['Example Product', '100', 'USD', '2026-12-31', 'Box', '10', 'Category1,Category2']);
+        fputcsv($handle, ['Example Product', '100', 'SDG', '2026-12-31', 'Box', '10', 'Category1,Category2']);
         fclose($handle);
 
         return response()->download($filePath)->deleteFileAfterSend();

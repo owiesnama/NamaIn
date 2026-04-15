@@ -12,7 +12,7 @@ defineProps({
 const form = useForm({
     title: "",
     amount: 0,
-    currency: preferences('currency') || "USD",
+    currency: preferences('currency') || "SDG",
     notes: "",
     frequency: "monthly",
     starts_at: new Date().toISOString().substr(0, 10),

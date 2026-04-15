@@ -33,6 +33,8 @@ test('storage dashboard displays correctly', function () {
         'quantity' => 10,
         'base_quantity' => 10,
         'price' => 100,
+        'unit_cost' => 100,
+        'delivered' => true,
     ]);
 
     // Create a Sale transaction for this storage

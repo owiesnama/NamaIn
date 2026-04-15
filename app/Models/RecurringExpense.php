@@ -13,31 +13,26 @@ class RecurringExpense extends BaseModel
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'title',
-        'amount',
-        'currency',
-        'notes',
-        'frequency',
-        'starts_at',
-        'ends_at',
-        'last_generated_at',
-        'is_active',
-        'created_by',
-    ];
-
-    protected $casts = [
-        'amount' => 'decimal:2',
-        'starts_at' => 'date',
-        'ends_at' => 'date',
-        'last_generated_at' => 'datetime',
-        'is_active' => 'boolean',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'amount' => 'decimal:2',
+            'starts_at' => 'date',
+            'ends_at' => 'date',
+            'last_generated_at' => 'datetime',
+            'is_active' => 'boolean',
+        ];
+    }
 
     protected static function booted(): void
     {
+        parent::booted();
+
         static::creating(function (RecurringExpense $recurringExpense) {
-            $recurringExpense->currency = $recurringExpense->currency ?? preference('currency', 'USD');
+            $recurringExpense->currency = $recurringExpense->currency ?? preference('currency', 'SDG');
             $recurringExpense->created_by = $recurringExpense->created_by ?? auth()->id();
         });
     }

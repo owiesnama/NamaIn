@@ -17,20 +17,12 @@ class Transaction extends BaseModel
 {
     use HasFactory, SoftDeletes, WithTrashScope;
 
-    /**
-     * @var bool
-     */
-    protected static $unguarded = false;
-
-    /**
-     * @var array<string>
-     */
-    protected $fillable = ['product_id', 'storage_id', 'invoice_id', 'quantity', 'base_quantity', 'unit_id', 'price', 'unit_cost', 'description', 'delivered', 'created_at', 'currency'];
-
     protected static function booted(): void
     {
+        parent::booted();
+
         static::creating(function (Transaction $transaction) {
-            $transaction->currency = $transaction->currency ?? $transaction->invoice?->currency ?? preference('currency', '$');
+            $transaction->currency = $transaction->currency ?? $transaction->invoice?->currency ?? preference('currency', 'SDG');
         });
     }
 
@@ -119,9 +111,11 @@ class Transaction extends BaseModel
     /**
      * Deduct this transaction from the storage
      */
-    public function deduct(): Transaction
+    public function deduct(?Storage $storage = null): Transaction
     {
-        $this->storage()->first()->deductStock([
+        $storage = $storage ?? $this->storage()->first();
+
+        $storage->deductStock([
             'product' => $this->product_id,
             'quantity' => $this->base_quantity,
         ]);
@@ -132,14 +126,16 @@ class Transaction extends BaseModel
     /**
      * add this transaction to the storage.
      */
-    public function add(): Transaction
+    public function add(?Storage $storage = null): Transaction
     {
         if ($this->getTypeAttribute() === 'Purchases') {
             $this->unit_cost = $this->product?->cost;
             $this->save();
         }
 
-        $this->storage()->first()->addStock([
+        $storage = $storage ?? $this->storage()->first();
+
+        $storage->addStock([
             'product' => $this->product_id,
             'quantity' => $this->base_quantity,
         ]);
@@ -186,6 +182,17 @@ class Transaction extends BaseModel
     }
 
     /**
+     * Split this transaction into two: one for given quantity, another for remaining.
+     */
+    public function split(float|int $remaining): void
+    {
+        $this->base_quantity -= $remaining;
+        $this->save();
+
+        $this->replicateForRemaining($remaining);
+    }
+
+    /**
      * Replicate a transaction on the invoice for the remaining quantity.
      */
     public function replicateForRemaining($remaining): void
@@ -195,5 +202,27 @@ class Transaction extends BaseModel
         $newTransaction->quantity = $this->unit ? ($remaining / $this->unit->conversion_factor) : $remaining;
         $newTransaction->base_quantity = $this->unit ? ($remaining * $this->unit->conversion_factor) : $remaining;
         $newTransaction->save();
+    }
+
+    /**
+     * Reverse this transaction (inventory adjustment).
+     */
+    public function reverse(): void
+    {
+        $storage = $this->storage;
+
+        if ($this->invoice?->invocable_type === Customer::class) {
+            // Sales return: Add stock back
+            $storage->addStock([
+                'product' => $this->product_id,
+                'quantity' => $this->base_quantity,
+            ]);
+        } else {
+            // Purchase return: Deduct stock
+            $storage->deductStock([
+                'product' => $this->product_id,
+                'quantity' => $this->base_quantity,
+            ]);
+        }
     }
 }

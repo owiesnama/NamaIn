@@ -1,6 +1,6 @@
 <script setup>
     import { useForm, Link } from "@inertiajs/vue3";
-    import { computed, ref } from "vue";
+    import { computed, ref, watch } from "vue";
     import InputLabel from "@/Components/InputLabel.vue";
     import Modal from "@/Components/Modal.vue";
     import TextInput from "@/Components/TextInput.vue";
@@ -21,6 +21,17 @@
         return new Date(props.cheque.due) <= new Date();
     });
 
+    const isOverdue = computed(() => {
+        return isBeyondDue.value && props.cheque.status !== 'cleared' && props.cheque.status !== 'cancelled';
+    });
+
+    const nextStatus = computed(() => {
+        if (props.cheque.status === 'drafted') return 'issued';
+        if (props.cheque.status === 'issued') return 'deposited';
+        if (props.cheque.status === 'deposited') return 'cleared';
+        return null;
+    });
+
     const isEditable = computed(() => props.cheque.status === 'drafted');
 
     const form = useForm({
@@ -30,6 +41,14 @@
 
     const showConfirmationModal = ref(false);
     const selectedStatus = ref(props.cheque.status);
+
+    watch(
+        () => props.cheque.status,
+        (newStatus) => {
+            selectedStatus.value = newStatus;
+            form.status = newStatus;
+        }
+    );
 
     const statusLable = (status) =>
         Object.keys(props.chequeStatus).find(
@@ -74,38 +93,55 @@
     const confirmationMessage = computed(() => {
         const amount = form.cleared_amount || props.cheque.amount;
         if (props.cheque.invoice_id) {
-            return `Clearing this cheque will record a payment of ${amount} against Invoice #${props.cheque.invoice?.serial_number || props.cheque.invoice_id}. The invoice's remaining balance will decrease by ${amount}. Continue?`;
+            return __("Clearing this cheque will record a payment of :amount against Invoice #:serial. The invoice's remaining balance will decrease by :amount. Continue?", {
+                amount: amount,
+                serial: props.cheque.invoice?.serial_number || props.cheque.invoice_id
+            });
         }
 
         if (props.cheque.type == 1) { // Receivable
-            return `Clearing this cheque will record an incoming payment of ${amount} from ${props.cheque.payee.name}. Their outstanding balance will decrease by ${amount}. Continue?`;
+            return __("Clearing this cheque will record an incoming payment of :amount from :name. Their outstanding balance will decrease by :amount. Continue?", {
+                amount: amount,
+                name: props.cheque.payee.name
+            });
         }
 
-        return `Clearing this cheque will record an outgoing payment of ${amount} to ${props.cheque.payee.name}. Your outstanding payable to them will decrease by ${amount}. Continue?`;
+        return __("Clearing this cheque will record an outgoing payment of :amount to :name. Your outstanding payable to them will decrease by :amount. Continue?", {
+            amount: amount,
+            name: props.cheque.payee.name
+        });
     });
 </script>
 <template>
     <div
-        :class="cheque.type == 1 ? 'border-emerald-500' : 'border-red-500'"
-        class="p-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 border-l-4 rtl:border-l-0 rtl:border-r-4 rounded-xl shadow-none transition-all relative"
+        :class="[
+            cheque.type == 1 ? 'border-emerald-500' : 'border-red-500',
+            isOverdue ? 'bg-red-50/50 dark:bg-red-900/10 ring-1 ring-red-500/20 shadow-sm' : 'bg-white dark:bg-gray-900'
+        ]"
+        class="p-6 border border-gray-200 dark:border-gray-700 border-l-4 rtl:border-l-0 rtl:border-r-4 rounded-xl shadow-none transition-all relative"
     >
-        <div class="absolute top-4 right-4 flex gap-2" v-if="isEditable">
-            <Link :href="route('cheques.edit', cheque.id)" class="text-blue-500 hover:text-blue-700">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                </svg>
-            </Link>
-            <Link :href="route('cheques.destroy', cheque.id)" method="delete" as="button" class="text-red-500 hover:text-red-700" v-if="cheque.status === 'drafted' || cheque.status === 'cancelled'">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                </svg>
-            </Link>
+        <div class="absolute top-4 right-4 rtl:right-auto rtl:left-4 flex items-center gap-2">
+            <span v-if="isOverdue" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 uppercase tracking-wider">
+                {{ __("Overdue") }}
+            </span>
+            <div v-if="isEditable" class="flex gap-2">
+                <Link :href="route('cheques.edit', cheque.id)" class="text-blue-500 hover:text-blue-700">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                </Link>
+                <Link :href="route('cheques.destroy', cheque.id)" method="delete" as="button" class="text-red-500 hover:text-red-700" v-if="cheque.status === 'drafted' || cheque.status === 'cancelled'">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                </Link>
+            </div>
         </div>
 
         <div class="flex items-center justify-between">
             <div>
                 <InputLabel :value="'#' + cheque.reference_number" />
-                <InputLabel :value="'#' + cheque.bank" />
+                <InputLabel :value="cheque.bank" />
             </div>
 
             <p
@@ -136,27 +172,38 @@
             <div class="mt-24 sm:flex sm:items-end sm:justify-between">
                 <div>
                     <InputLabel :value="__('Status')" />
-                    <VueMultiselect
-                        :model-value="{ id: selectedStatus, label: statusLable(selectedStatus) }"
-                        :options="Object.entries(chequeStatus).map(([label, id]) => ({ id, label }))"
-                        :multiple="false"
-                        :close-on-select="true"
-                        :placeholder="__('Select Status')"
-                        label="label"
-                        track-by="id"
-                        class="w-full mt-1 sm:w-48"
-                        :select-label="''"
-                        :deselect-label="''"
-                        :selected-label="__('Selected')"
-                        @update:model-value="option => handleStatusChange({ target: { value: option?.id } })"
-                    >
-                        <template #singleLabel="{ option }">
-                            {{ __(option.label) }}
-                        </template>
-                        <template #option="{ option }">
-                            {{ __(option.label) }}
-                        </template>
-                    </VueMultiselect>
+                    <div class="flex items-center gap-2 mt-1">
+                        <VueMultiselect
+                            :model-value="{ id: selectedStatus, label: statusLable(selectedStatus) }"
+                            :options="Object.entries(chequeStatus).map(([label, id]) => ({ id, label }))"
+                            :multiple="false"
+                            :close-on-select="true"
+                            :placeholder="__('Select Status')"
+                            label="label"
+                            track-by="id"
+                            class="w-full sm:w-48"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            @update:model-value="option => handleStatusChange({ target: { value: option?.id } })"
+                        >
+                            <template #singleLabel="{ option }">
+                                {{ __(option.label) }}
+                            </template>
+                            <template #option="{ option }">
+                                {{ __(option.label) }}
+                            </template>
+                        </VueMultiselect>
+
+                        <button
+                            v-if="nextStatus"
+                            @click="handleStatusChange({ target: { value: nextStatus } })"
+                            class="inline-flex items-center px-3 py-2 text-xs font-semibold text-emerald-600 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 transition-colors shrink-0"
+                            :title="__('Move to') + ' ' + __(statusLable(nextStatus))"
+                        >
+                            {{ __("Mark as") }} {{ __(statusLable(nextStatus)) }}
+                        </button>
+                    </div>
                 </div>
 
             <div class="text-right">

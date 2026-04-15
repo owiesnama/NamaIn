@@ -16,7 +16,7 @@ return [
 
     'fallback_locale' => 'en',
 
-    'faker_locale' => 'en_US',
+    'faker_locale' => 'ar_SA',
 
     'cipher' => 'AES-256-CBC',
 
@@ -36,7 +36,7 @@ return [
     'admins' => [
         'owiesnama@gmail.com',
         'bakri@elnama.net',
-        'anas@elnama.net'
+        'anas@elnama.net',
     ],
 
     'cheques_notify_before_days' => 1,

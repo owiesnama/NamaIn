@@ -19,11 +19,6 @@ class Storage extends BaseModel
      */
     protected array $searchable = ['name', 'address'];
 
-    protected $fillable = [
-        'name',
-        'address',
-    ];
-
     /**
      * The attributes to be appended to this
      *

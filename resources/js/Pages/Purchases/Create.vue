@@ -45,7 +45,7 @@
         total: 0,
         products: purchases.value,
         invocable: null,
-        payment_method: 'credit',
+        payment_method: 'cash',
         discount: 0,
         initial_payment_amount: 0,
         payment_reference: '',
@@ -70,7 +70,7 @@
 
     const showQuickAddModal = ref(false);
 
-    const selectedPaymentMethod = ref({ id: form.payment_method, label: Object.keys(props.payment_methods).find(key => props.payment_methods[key] === form.payment_method) });
+    const selectedPaymentMethod = ref({ id: 'cash', label: 'Cash' });
     const selectedChequeBank = ref(null);
 
     const onSupplierCreated = (supplier) => {
@@ -227,6 +227,8 @@
                                     <TextInput
                                         v-model="purchase.quantity"
                                         type="number"
+                                        min="0.01"
+                                        step="0.01"
                                         class="block w-full"
                                         required
                                     />
@@ -238,6 +240,8 @@
                                     <TextInput
                                         v-model="purchase.price"
                                         type="number"
+                                        min="0"
+                                        step="0.01"
                                         class="block w-full"
                                         required
                                     />
@@ -303,7 +307,7 @@
                         <p class="text-xs font-bold uppercase tracking-wider text-emerald-200 mb-1">{{ __("Invoice Total") }}</p>
                         <div class="flex items-baseline gap-2">
                             <span class="text-4xl font-black text-white tabular-nums">{{ netTotal.toFixed(2) }}</span>
-                            <span class="text-sm font-medium text-emerald-200">{{ (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'USD' }}</span>
+                            <span class="text-sm font-medium text-emerald-200">{{ (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'SDG' }}</span>
                         </div>
                     </div>
                     <div class="px-5 py-4 space-y-2.5 border-b border-gray-100 dark:border-gray-700">
@@ -362,7 +366,7 @@
                                 :select-label="''"
                                 :deselect-label="''"
                                 :selected-label="__('Selected')"
-                                @update:model-value="form.payment_method = selectedPaymentMethod?.id || 'credit'"
+                                @update:model-value="form.payment_method = selectedPaymentMethod?.id || 'cash'"
                             >
                                 <template #singleLabel="{ option }">
                                     {{ __(option.label) }}
@@ -377,12 +381,12 @@
                         <div class="grid grid-cols-2 gap-3">
                             <div>
                                 <InputLabel for="discount" :value="__('Discount')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                                <TextInput id="discount" v-model="form.discount" type="number" step="0.01" class="block w-full" />
+                                <TextInput id="discount" v-model="form.discount" type="number" min="0" step="0.01" class="block w-full" />
                                 <InputError :message="form.errors.discount" class="mt-1" />
                             </div>
                             <div>
                                 <InputLabel for="initial_payment" :value="__('Payment')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                                <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" step="0.01" class="block w-full" />
+                                <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" min="0" step="0.01" class="block w-full" />
                                 <InputError :message="form.errors.initial_payment_amount" class="mt-1" />
                             </div>
                         </div>

@@ -89,7 +89,7 @@
 
     const formatCurrency = (amount, currency = null) => {
         const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-            (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD');
+            (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
 
         return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
             style: 'currency',

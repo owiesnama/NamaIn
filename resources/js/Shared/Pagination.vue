@@ -11,7 +11,7 @@
                 >
                     <span v-if="link.label.includes('Previous')">&laquo;</span>
                     <span v-else-if="link.label.includes('Next')">&raquo;</span>
-                    <span v-else>{{ link.label }}</span>
+                    <span v-html="link.label"></span>
                 </div>
 
                 <Link
@@ -23,7 +23,7 @@
                 >
                     <span v-if="link.label.includes('Previous')">&laquo;</span>
                     <span v-else-if="link.label.includes('Next')">&raquo;</span>
-                    <span v-else>{{ link.label }}</span>
+                    <span v-html="link.label"></span>
                 </Link>
             </template>
         </div>

@@ -30,7 +30,7 @@ class InvoiceFactory extends Factory
             'invocable_id' => Customer::factory(),
             'invocable_type' => Customer::class,
             'serial_number' => $this->faker->unique()->numerify('INV-#####'),
-            'currency' => 'USD',
+            'currency' => 'SDG',
             'status' => $this->faker->randomElement(InvoiceStatus::cases()),
         ];
     }

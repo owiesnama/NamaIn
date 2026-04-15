@@ -43,8 +43,8 @@ const filters = ref({
     type: props.filters.type || 'All'
 });
 
-const formatCurrency = (amount, currency = 'USD') => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD');
+const formatCurrency = (amount, currency = 'SDG') => {
+    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
     return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
         style: 'currency',
         currency: validCurrency,
@@ -163,26 +163,26 @@ const resetFilters = () => {
             </div>
 
             <!-- Product Insights (Critical Alerts) -->
-            <div v-if="insights.length > 0" class="mb-6 space-y-2 px-4 sm:px-0">
-                <div v-for="(insight, index) in insights" :key="index"
+            <div v-if="insights.length > 0" class="mb-6 px-4 sm:px-0">
+                <div
                      :class="[
                          'flex items-center p-4 rounded-xl border transition-all',
-                         insight.type === 'danger' ? 'bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/30 text-red-800 dark:text-red-400' :
-                         insight.type === 'warning' ? 'bg-amber-50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/30 text-amber-800 dark:text-amber-400' :
+                         insights.some(i => i.type === 'danger') ? 'bg-red-50 border-red-100 dark:bg-red-900/10 dark:border-red-900/30 text-red-800 dark:text-red-400' :
+                         insights.some(i => i.type === 'warning') ? 'bg-amber-50 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/30 text-amber-800 dark:text-amber-400' :
                          'bg-blue-50 border-blue-100 dark:bg-blue-900/10 dark:border-blue-900/30 text-blue-800 dark:text-blue-400'
                      ]"
                 >
-                    <div class="flex-shrink-0 mr-3">
+                    <div class="flex-shrink-0 mr-5">
                         <div :class="[
                             'p-1.5 rounded-lg',
-                            insight.type === 'danger' ? 'bg-red-100 dark:bg-red-900/20' :
-                            insight.type === 'warning' ? 'bg-amber-100 dark:bg-amber-900/20' :
+                            insights.some(i => i.type === 'danger') ? 'bg-red-100 dark:bg-red-900/20' :
+                            insights.some(i => i.type === 'warning') ? 'bg-amber-100 dark:bg-amber-900/20' :
                             'bg-blue-100 dark:bg-blue-900/20'
                         ]">
-                            <svg v-if="insight.type === 'danger'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                            <svg v-if="insights.some(i => i.type === 'danger')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                 <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.401 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
                             </svg>
-                            <svg v-else-if="insight.type === 'warning'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
+                            <svg v-else-if="insights.some(i => i.type === 'warning')" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
                                 <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z" clip-rule="evenodd" />
                             </svg>
                             <svg v-else xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
@@ -190,11 +190,13 @@ const resetFilters = () => {
                             </svg>
                         </div>
                     </div>
-                    <div class="flex-grow">
-                        <p class="text-xs font-bold uppercase tracking-wider opacity-70 mb-0.5">
-                            {{ insight.type === 'danger' ? __("Critical Attention Required") : insight.type === 'warning' ? __("Stock Warning") : __("Inventory Notice") }}
+                    <div class="flex-grow mx-1">
+                        <p class="text-xs font-bold uppercase tracking-wider opacity-70 mb-1">
+                            {{ insights.some(i => i.type === 'danger') ? __("Critical Attention Required") : insights.some(i => i.type === 'warning') ? __("Stock Warning") : __("Inventory Notice") }}
                         </p>
-                        <p class="text-sm font-semibold">{{ insight.message }}</p>
+                        <div class="space-y-1">
+                            <p v-for="(insight, index) in insights" :key="index" class="text-sm font-semibold">{{ insight.message }}</p>
+                        </div>
                     </div>
                 </div>
             </div>

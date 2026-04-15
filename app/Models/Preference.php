@@ -2,18 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
-class Preference extends Model
+class Preference extends BaseModel
 {
-    /**
-     * List of the attributes that can be mass assigned.
-     *
-     * @var array<string>
-     */
-    protected $fillable = ['key', 'value'];
-
     /**
      * Get the preferences as pairs.
      *

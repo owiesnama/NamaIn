@@ -8,6 +8,7 @@ use App\Http\Controllers\ExpenseApprovalController;
 use App\Http\Controllers\ExpenseReceiptController;
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\GlobalSearchController;
+use App\Http\Controllers\InverseInvoicesController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\PreferenceController;
@@ -80,7 +81,13 @@ Route::middleware([
     Route::get('/expenses/{expense}/receipt', [ExpenseReceiptController::class, 'show'])->name('expenses.receipt');
     Route::get('/invoice/print/{invoice}', [InvoicesController::class, 'print'])->name('invoices.print');
     Route::get('/invoice/show/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
-    Route::put('/stock/{storage}/add', [StockController::class, 'add'])->name('stock.add');
-    Route::put('/stock/{storage}/deduct', [StockController::class, 'deduct'])->name('stock.deduct');
+    Route::put('/stock/{storage}/add', [StockController::class, 'add'])->name('stock.add')->can('manageStock', 'storage');
+    Route::put('/stock/{storage}/deduct', [StockController::class, 'deduct'])->name('stock.deduct')->can('manageStock', 'storage');
     Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.updateStatus');
+
+    Route::get('/invoices/search-for-return', [InverseInvoicesController::class, 'searchInvoices'])->name('invoices.search-for-return');
+    Route::get('/sales/{invoice}/return', [InverseInvoicesController::class, 'createSaleReturn'])->name('sales.return.create');
+    Route::post('/sales/{invoice}/return', [InverseInvoicesController::class, 'storeSaleReturn'])->name('sales.return.store');
+    Route::get('/purchases/{invoice}/return', [InverseInvoicesController::class, 'createPurchaseReturn'])->name('purchases.return.create');
+    Route::post('/purchases/{invoice}/return', [InverseInvoicesController::class, 'storePurchaseReturn'])->name('purchases.return.store');
 });

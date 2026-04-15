@@ -26,14 +26,14 @@ class CreateInvoiceRequest extends FormRequest
     public function rules()
     {
         return [
-            'total' => 'required|integer',
+            'total' => 'required|numeric|min:0',
             'invocable' => 'required|array',
-            'invocable.id' => 'required|integer|',
+            'invocable.id' => 'required|integer',
             'invocable.name' => 'required|string',
             'products.*.product' => 'integer|required',
-            'products.*.quantity' => 'integer|required',
+            'products.*.quantity' => 'numeric|required|gt:0',
             'products.*.unit' => 'integer|required',
-            'products.*.price' => 'integer|required',
+            'products.*.price' => 'numeric|required|min:0',
             'payment_method' => ['nullable', Rule::enum(PaymentMethod::class)],
             'discount' => 'nullable|numeric|min:0',
             'initial_payment_amount' => 'nullable|numeric|min:0',

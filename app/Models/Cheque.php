@@ -16,21 +16,6 @@ class Cheque extends BaseModel
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = [
-        'chequeable_id',
-        'chequeable_type',
-        'invoice_id',
-        'amount',
-        'cleared_amount',
-        'type',
-        'due',
-        'bank',
-        'bank_id',
-        'reference_number',
-        'status',
-        'notes',
-    ];
-
     /**
      * The accessors to append to the cheque in array form
      *
@@ -73,7 +58,7 @@ class Cheque extends BaseModel
      */
     public function getAmountFormatedAttribute(): string
     {
-        return number_format($this->amount, 2).' '.(preference('currency', 'USD'));
+        return number_format($this->amount, 2).' '.(preference('currency', 'SDG'));
     }
 
     /**
@@ -112,6 +97,12 @@ class Cheque extends BaseModel
         return $query->where('type', 0);
     }
 
+    public function scopeOverdue(Builder $query): Builder
+    {
+        return $query->whereDate('due', '<', now())
+            ->whereNotIn('status', [ChequeStatus::Cleared, ChequeStatus::Cancelled]);
+    }
+
     public function isReceivable(): bool
     {
         return $this->type === 1;
@@ -137,6 +128,8 @@ class Cheque extends BaseModel
 
     protected static function booted(): void
     {
+        parent::booted();
+
         static::saving(function (Cheque $cheque) {
             if ($cheque->bank_id && (! $cheque->bank || $cheque->isDirty('bank_id'))) {
                 $cheque->bank = Bank::find($cheque->bank_id)?->name ?? 'Unknown';

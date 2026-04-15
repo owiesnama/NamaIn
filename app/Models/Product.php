@@ -27,17 +27,12 @@ class Product extends BaseModel
 
     protected array $searchableRelationsAttributes = ['categories.name'];
 
-    /**
-     * List of fillable fields of the product
-     *
-     * @var array<string>
-     */
-    protected $fillable = ['name', 'cost', 'expire_date', 'currency', 'alert_quantity'];
-
     protected static function booted(): void
     {
+        parent::booted();
+
         static::creating(function (Product $product) {
-            $product->currency = $product->currency ?? preference('currency', 'USD');
+            $product->currency = $product->currency ?? preference('currency', 'SDG');
         });
     }
 

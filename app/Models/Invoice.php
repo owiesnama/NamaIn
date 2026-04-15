@@ -9,6 +9,7 @@ use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -31,12 +32,12 @@ class Invoice extends BaseModel
     /**
      * Attributes can be mass assigned.
      */
-    protected $fillable = ['total', 'payment_method', 'payment_status', 'paid_amount', 'discount', 'invocable_id', 'invocable_type', 'serial_number', 'currency'];
-
     protected static function booted(): void
     {
+        parent::booted();
+
         static::creating(function (Invoice $invoice) {
-            $invoice->currency = $invoice->currency ?? preference('currency', 'USD');
+            $invoice->currency = $invoice->currency ?? preference('currency', 'SDG');
         });
     }
 
@@ -106,15 +107,17 @@ class Invoice extends BaseModel
         $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
 
         $invoice->addTransaction($products->map(function ($product) use ($units) {
-            $product['product_id'] = $product['product'];
-            $unitId = $product['unit_id'] = $product['unit'] ?? null;
-            $product['base_quantity'] = $product['quantity'];
-
-            if ($unitId && isset($units[$unitId])) {
-                $product['base_quantity'] = $units[$unitId]->conversion_factor * $product['quantity'];
-            }
-
-            return $product;
+            return [
+                'product_id' => $product['product'],
+                'storage_id' => $product['storage'] ?? null,
+                'unit_id' => $product['unit'] ?? null,
+                'quantity' => $product['quantity'],
+                'price' => $product['price'],
+                'description' => $product['description'] ?? null,
+                'base_quantity' => isset($units[$product['unit'] ?? null])
+                    ? $units[$product['unit']]->conversion_factor * $product['quantity']
+                    : $product['quantity'],
+            ];
         }));
 
         return $invoice;
@@ -131,15 +134,17 @@ class Invoice extends BaseModel
         $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
 
         $invoice->addTransaction($products->map(function ($product) use ($units) {
-            $product['product_id'] = $product['product'];
-            $product['base_quantity'] = $product['quantity'];
-            $unitId = $product['unit_id'] = $product['unit'] ?? null;
-
-            if ($unitId && isset($units[$unitId])) {
-                $product['base_quantity'] = $units[$unitId]->conversion_factor * $product['quantity'];
-            }
-
-            return $product;
+            return [
+                'product_id' => $product['product'],
+                'storage_id' => $product['storage'] ?? null,
+                'unit_id' => $product['unit'] ?? null,
+                'quantity' => $product['quantity'],
+                'price' => $product['price'],
+                'description' => $product['description'] ?? null,
+                'base_quantity' => isset($units[$product['unit'] ?? null])
+                    ? $units[$product['unit']]->conversion_factor * $product['quantity']
+                    : $product['quantity'],
+            ];
         }));
 
         return $invoice;
@@ -155,7 +160,7 @@ class Invoice extends BaseModel
         $invocableId = $invocable['id'];
         $invocable = $invocableClass::find($invocableId);
 
-        $paymentMethod = $attributes->get('payment_method', 'credit');
+        $paymentMethod = $attributes->get('payment_method', 'cash');
         $discount = $attributes->get('discount', 0);
 
         return $invocable->invoices()->create([
@@ -237,7 +242,63 @@ class Invoice extends BaseModel
     }
 
     /**
-     * Check if invoice is fully paid.
+     * Check if invoice can be inversed (returned).
+     */
+    public function getCanBeInversedAttribute(): bool
+    {
+        return ! $this->is_inverse && $this->status !== InvoiceStatus::Returned;
+    }
+
+    /**
+     * Relationship: parent invoice for return invoices.
+     */
+    public function parentInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'parent_invoice_id');
+    }
+
+    /**
+     * Relationship: inverse invoices (returns) for this invoice.
+     */
+    public function inverseInvoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'parent_invoice_id');
+    }
+
+    /**
+     * Create an inverse invoice (return/credit note) for this invoice.
+     */
+    public function createInverseInvoice(Collection $attributes, string $reason): Invoice
+    {
+        $inverseInvoice = $this->replicate();
+        $inverseInvoice->is_inverse = true;
+        $inverseInvoice->parent_invoice_id = $this->id;
+        $inverseInvoice->inverse_reason = $reason;
+        $inverseInvoice->total = $attributes->get('refund_amount', 0);
+        $inverseInvoice->paid_amount = 0;
+        $inverseInvoice->discount = 0;
+        $inverseInvoice->serial_number = null;
+        $inverseInvoice->payment_status = PaymentStatus::Unpaid;
+        $inverseInvoice->status = InvoiceStatus::Pending;
+        $inverseInvoice->save();
+
+        foreach ($attributes->get('products', []) as $productData) {
+            $transaction = Transaction::find($productData['transaction_id']);
+            if ($transaction) {
+                $inverseTransaction = $transaction->replicate();
+                $inverseTransaction->invoice_id = $inverseInvoice->id;
+                $inverseTransaction->quantity = $productData['quantity'];
+                // base_quantity should be handled by logic or replicated with conversion factor
+                $inverseTransaction->base_quantity = $productData['quantity'] * ($transaction->base_quantity / $transaction->quantity);
+                $inverseTransaction->save();
+            }
+        }
+
+        return $inverseInvoice;
+    }
+
+    /**
+     * Check if the invoice is fully paid.
      */
     public function getIsFullyPaidAttribute(): bool
     {

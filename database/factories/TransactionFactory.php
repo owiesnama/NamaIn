@@ -34,7 +34,7 @@ class TransactionFactory extends Factory
             },
             'price' => $this->faker->randomFloat(2, 10, 1000),
             'delivered' => $this->faker->boolean(),
-            'currency' => 'USD',
+            'currency' => 'SDG',
         ];
     }
 }

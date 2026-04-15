@@ -54,7 +54,7 @@ class CustomersController extends Controller
 
     public function store(CustomerRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $customer = Customer::create($request->validated());
+        $customer = Customer::create($request->safe()->except('categories'));
 
         $syncCategories->execute($customer, $request->get('categories', []));
 
@@ -71,7 +71,7 @@ class CustomersController extends Controller
 
     public function update(Customer $customer, CustomerRequest $request, SyncCategoriesAction $syncCategories)
     {
-        $customer->update($request->validated());
+        $customer->update($request->safe()->except('categories'));
 
         $syncCategories->execute($customer, $request->get('categories', []));
 

@@ -14,26 +14,6 @@ class Payment extends BaseModel
     use HasFactory, SoftDeletes, WithTrashScope;
 
     /**
-     * Attributes that can be mass assigned.
-     *
-     * @var array<string>
-     */
-    protected $fillable = [
-        'invoice_id',
-        'payable_id',
-        'payable_type',
-        'amount',
-        'payment_method',
-        'reference',
-        'notes',
-        'paid_at',
-        'created_by',
-        'currency',
-        'metadata',
-        'receipt_path',
-    ];
-
-    /**
      * Direct columns to search against.
      *
      * @var array<string>
@@ -53,11 +33,13 @@ class Payment extends BaseModel
 
     protected static function booted(): void
     {
+        parent::booted();
+
         static::creating(function (Payment $payment) {
             $payment->currency = $payment->currency
                 ?? $payment->invoice?->currency
                 ?? $payment->payable?->currency
-                ?? preference('currency', 'USD');
+                ?? preference('currency', 'SDG');
         });
     }
 

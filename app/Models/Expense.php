@@ -20,20 +20,6 @@ class Expense extends BaseModel
      */
     protected array $searchable = ['title', 'notes', 'currency'];
 
-    protected $fillable = [
-        'title',
-        'amount',
-        'currency',
-        'notes',
-        'status',
-        'approved_by',
-        'approved_at',
-        'receipt_path',
-        'recurring_expense_id',
-        'expensed_at',
-        'created_by',
-    ];
-
     /**
      * List of attributes to cast.
      *
@@ -48,8 +34,10 @@ class Expense extends BaseModel
 
     protected static function booted(): void
     {
+        parent::booted();
+
         static::creating(function (Expense $expense) {
-            $expense->currency = $expense->currency ?? preference('currency', 'USD');
+            $expense->currency = $expense->currency ?? preference('currency', 'SDG');
             $expense->created_by = $expense->created_by ?? auth()->id();
         });
     }

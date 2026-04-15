@@ -9,7 +9,10 @@ class Bank extends BaseModel
 {
     use SoftDeletes;
 
-    protected $fillable = ['name', 'code'];
+    protected static function booted(): void
+    {
+        static::unguard();
+    }
 
     /**
      * @var array<string>

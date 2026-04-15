@@ -61,7 +61,7 @@
     const formatCurrency = (amount, currency = null) => {
         const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
             (props.invoice?.currency && /^[A-Z]{3}$/.test(props.invoice.currency) ? props.invoice.currency :
-                (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'USD'));
+                (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG'));
 
         return new Intl.NumberFormat(lang === 'ar' ? 'ar-SA' : 'en-US', {
             style: 'currency',
