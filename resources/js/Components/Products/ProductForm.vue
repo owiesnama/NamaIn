@@ -199,10 +199,9 @@
                                                 for="expire_date"
                                                 :value="__('Expire Date')"
                                             />
-                                            <TextInput
+                                            <DatePicker
                                                 id="expire_date"
                                                 v-model="product.expire_date"
-                                                type="date"
                                                 class="block w-full mt-1 rtl:text-right"
                                                 required
                                             />

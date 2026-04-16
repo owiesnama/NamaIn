@@ -209,7 +209,7 @@
                         <Card
                             :invoice="invoice"
                             @moveToStorage="deductFromStorage"
-                            :actionTitle="__('Deduct From Storage')"
+                            :actionTitle="__('Deduct from Storage')"
                             :printable="true"
                         ></Card>
                     </div>

@@ -7,7 +7,6 @@
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
-    import TextInput from "@/Components/TextInput.vue";
     import VueMultiselect from "vue-multiselect";
     import "vue-multiselect/dist/vue-multiselect.css";
 
@@ -245,9 +244,8 @@
                     <!-- Due Before -->
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Due Before") }}</label>
-                        <TextInput
+                        <DatePicker
                             v-model="filters.due"
-                            type="date"
                             class="block w-full text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
                         />
                     </div>

@@ -108,10 +108,9 @@ const formatDate = (date) => {
                         <!-- Date -->
                         <div>
                             <InputLabel for="expensed_at" :value="__('Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                            <TextInput
+                            <DatePicker
                                 v-model="form.expensed_at"
                                 id="expensed_at"
-                                type="date"
                                 class="block w-full"
                                 required
                             />

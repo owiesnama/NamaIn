@@ -94,19 +94,17 @@ const statementLines = computed(() => {
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3 items-end">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __("Start Date") }}</label>
-                        <input
-                            type="date"
+                        <DatePicker
                             v-model="filters.start_date"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
-                        >
+                        />
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __("End Date") }}</label>
-                        <input
-                            type="date"
+                        <DatePicker
                             v-model="filters.end_date"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
-                        >
+                        />
                     </div>
                     <div>
                         <button

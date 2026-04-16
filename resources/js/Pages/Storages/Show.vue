@@ -6,7 +6,6 @@ import Pagination from "@/Shared/Pagination.vue";
 import StorageForm from "@/Components/Storages/StorageForm.vue";
 import DeleteStorage from "@/Components/Storages/DeleteStorage.vue";
 import { Link, router } from "@inertiajs/vue3";
-import TextInput from "@/Components/TextInput.vue";
 import Tooltip from "@/Components/Tooltip.vue";
 import {
     Chart as ChartJS,
@@ -153,12 +152,12 @@ const resetFilters = () => {
             <div class="mb-8 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl px-4 sm:px-6">
                 <div class="flex flex-wrap items-center gap-6">
                     <div class="flex flex-col min-w-[140px]">
-                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("From Date") }}</label>
-                        <TextInput v-model="filters.from_date" type="date" class="!py-1.5 !px-3 text-sm rounded-lg" />
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-1.5 px-1">{{ __("From Date") }}</label>
+                        <DatePicker v-model="filters.from_date" class="!py-1.5 !px-3 text-sm rounded-lg" />
                     </div>
                     <div class="flex flex-col min-w-[140px]">
-                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("To Date") }}</label>
-                        <TextInput v-model="filters.to_date" type="date" class="!py-1.5 !px-3 text-sm rounded-lg" />
+                        <label class="text-[10px] font-bold text-gray-400 dark:text-gray-400 uppercase tracking-widest mb-1.5 px-1">{{ __("To Date") }}</label>
+                        <DatePicker v-model="filters.to_date" class="!py-1.5 !px-3 text-sm rounded-lg" />
                     </div>
                     <div class="flex flex-col min-w-[180px]">
                         <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("Filter by Product") }}</label>

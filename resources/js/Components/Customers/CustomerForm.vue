@@ -68,7 +68,7 @@
         <a
             v-if="props.customer"
             href="#"
-            class="p-2 text-gray-600 transition-colors duration-200 rounded-lg hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 focus:outline-none"
+            class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
             @click="show = true"
             :title="__('Edit')"
         >
@@ -78,7 +78,7 @@
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="w-5 h-5"
+                class="w-4 h-4"
             >
                 <path
                     stroke-linecap="round"

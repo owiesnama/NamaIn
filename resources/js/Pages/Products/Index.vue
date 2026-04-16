@@ -202,8 +202,8 @@
                         <div class="space-y-2">
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Expiration Date") }}</label>
                             <div class="space-y-2">
-                                <TextInput v-model="filters.expire_from" type="date" class="w-full text-xs" />
-                                <TextInput v-model="filters.expire_to" type="date" class="w-full text-xs" />
+                                <DatePicker v-model="filters.expire_from" class="w-full text-xs" />
+                                <DatePicker v-model="filters.expire_to" class="w-full text-xs" />
                             </div>
                         </div>
                     </template>

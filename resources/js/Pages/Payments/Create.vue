@@ -213,10 +213,9 @@ const submit = () => {
                 <!-- Payment Date -->
                 <div>
                     <InputLabel for="paid_at" :value="__('Payment Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                    <TextInput
+                    <DatePicker
                         id="paid_at"
                         v-model="form.paid_at"
-                        type="date"
                         class="block w-full"
                         required
                     />
@@ -315,10 +314,9 @@ const submit = () => {
                     </div>
                     <div>
                         <InputLabel for="cheque_due_date" :value="__('Due Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                        <TextInput
+                        <DatePicker
                             id="cheque_due_date"
                             v-model="form.cheque_due_date"
-                            type="date"
                             class="block w-full"
                             required
                         />

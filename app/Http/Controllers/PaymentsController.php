@@ -11,6 +11,8 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Supplier;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PaymentsController extends Controller
 {
@@ -107,12 +109,15 @@ class PaymentsController extends Controller
             ->with('success', 'Payment recorded successfully');
     }
 
-    public function show(Payment $payment)
+    public function show(Payment $payment): Response
     {
-        $payment->load(['invoice.invocable', 'invoice.payments', 'createdBy']);
-
         return inertia('Payments/Show', [
-            'payment' => $payment,
+            'payment' => $payment->load([
+                'invoice.invocable',
+                'invoice.payments',
+                'payable',
+                'createdBy',
+            ]),
         ]);
     }
 }

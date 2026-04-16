@@ -81,10 +81,9 @@ const submit = () => {
                         <!-- Date -->
                         <div>
                             <InputLabel for="expensed_at" :value="__('Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                            <TextInput
+                            <DatePicker
                                 v-model="form.expensed_at"
                                 id="expensed_at"
-                                type="date"
                                 class="block w-full"
                                 required
                             />
@@ -171,10 +170,9 @@ const submit = () => {
 
                             <div>
                                 <InputLabel for="starts_at" :value="__('Starts At')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                                <TextInput
+                                <DatePicker
                                     v-model="form.starts_at"
                                     id="starts_at"
-                                    type="date"
                                     class="block w-full"
                                 />
                                 <InputError :message="form.errors.starts_at" class="mt-2" />
@@ -182,10 +180,9 @@ const submit = () => {
 
                             <div>
                                 <InputLabel for="ends_at" :value="__('Ends At (Optional)')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                                <TextInput
+                                <DatePicker
                                     v-model="form.ends_at"
                                     id="ends_at"
-                                    type="date"
                                     class="block w-full"
                                 />
                                 <InputError :message="form.errors.ends_at" class="mt-2" />

@@ -121,9 +121,8 @@
                         <!-- Due Date -->
                         <div class="col-span-1">
                             <InputLabel :value="__('Due Date')" />
-                            <TextInput
+                            <DatePicker
                                 v-model="cheque.due"
-                                type="date"
                                 class="w-full mt-1 text-sm rtl:text-right"
                             />
                             <InputError :message="cheque.errors.due" class="mt-1" />

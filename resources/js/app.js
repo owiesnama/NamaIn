@@ -8,6 +8,7 @@ import translations from "./Plugins/translations";
 import preferences from "./Plugins/preferences";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
 import CustomSelect from './Components/CustomSelect.vue'
+import DatePicker from './Components/DatePicker.vue'
 
 
 import { translate } from "./Plugins/translations";
@@ -34,6 +35,7 @@ createInertiaApp({
             .use(translations)
             .use(preferences)
             .component('CustomSelect', CustomSelect)
+            .component('DatePicker', DatePicker)
             .component('VueMultiselect', CustomSelect)
             .component('VueSelect', CustomSelect)
             .mount(el);

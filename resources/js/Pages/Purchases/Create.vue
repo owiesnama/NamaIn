@@ -461,10 +461,9 @@
                             </div>
                             <div>
                                 <InputLabel for="cheque_due_date" :value="__('Due Date')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                                <TextInput
+                                <DatePicker
                                     id="cheque_due_date"
                                     v-model="form.cheque_due_date"
-                                    type="date"
                                     class="block w-full"
                                     required
                                 />
