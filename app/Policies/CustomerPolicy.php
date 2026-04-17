@@ -44,7 +44,7 @@ class CustomerPolicy
      */
     public function delete(User $user): bool
     {
-        return $user->isAdmin();
+        return true;
     }
 
     /**
@@ -52,7 +52,7 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        return $user->isAdmin();
+        return true;
     }
 
     /**
@@ -60,6 +60,6 @@ class CustomerPolicy
      */
     public function forceDelete(User $user): bool
     {
-        return $user->isAdmin();
+        return true;
     }
 }

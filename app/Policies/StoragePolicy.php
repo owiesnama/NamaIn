@@ -12,7 +12,7 @@ class StoragePolicy
      */
     public function manageStock(User $user, Storage $storage): bool
     {
-        return $user->isAdmin();
+        return true;
     }
 
     /**
@@ -20,6 +20,6 @@ class StoragePolicy
      */
     public function delete(User $user): bool
     {
-        return $user->isAdmin();
+        return true;
     }
 }
