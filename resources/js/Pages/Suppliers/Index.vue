@@ -125,7 +125,7 @@
                         </FileUploadButton>
 
                         <a
-                            :href="route('suppliers.import-sample')"
+                            :href="route('suppliers.import.sample')"
                             class="inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
                             :title="__('Download Sample')"
                         >

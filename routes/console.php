@@ -6,6 +6,7 @@ use App\Notifications\ChequeDueNotification;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
+use Illuminate\Support\Facades\Storage;
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
@@ -21,3 +22,12 @@ Artisan::command('cheques:notify-for-due', function () {
 
 Schedule::command('cheques:notify-for-due')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
+
+Schedule::call(function () {
+    $files = Storage::disk('local')->files('tmp');
+    foreach ($files as $file) {
+        if (Storage::disk('local')->lastModified($file) < now()->subDay()->getTimestamp()) {
+            Storage::disk('local')->delete($file);
+        }
+    }
+})->daily();

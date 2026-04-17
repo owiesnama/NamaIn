@@ -20,7 +20,7 @@ beforeEach(function () {
 // ============================================
 
 test('can download product import sample template', function () {
-    $response = $this->get(route('products.import-sample'));
+    $response = $this->get(route('products.import.sample'));
 
     $response->assertStatus(200);
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');

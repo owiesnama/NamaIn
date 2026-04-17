@@ -3,6 +3,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import InputError from "@/Components/InputError.vue";
+import FileUploader from "@/Components/FileUploader.vue";
 import { useForm } from "@inertiajs/vue3";
 
 defineProps({
@@ -30,6 +31,12 @@ const formatCurrency = (amount) => {
         style: 'currency',
         currency: validCurrency,
     }).format(amount || 0);
+};
+
+const addCategory = (newTag) => {
+    const tag = { name: newTag, id: newTag };
+    form.category_objects.push(tag);
+    form.category_ids = form.category_objects.map(c => c.id);
 };
 
 const submit = () => {
@@ -104,10 +111,13 @@ const submit = () => {
                                 label="name"
                                 track-by="id"
                                 :preselect-first="false"
+                                :taggable="true"
+                                :tag-placeholder="__('Press enter to create a category')"
                                 class="w-full"
                                 :select-label="__('Press enter to select')"
                                 :deselect-label="__('Press enter to remove')"
                                 :selected-label="__('Selected')"
+                                @tag="addCategory"
                                 @update:model-value="form.category_ids = form.category_objects.map(c => c.id)"
                             >
                                 <template #noResult>
@@ -132,12 +142,8 @@ const submit = () => {
                         <!-- Receipt -->
                         <div class="sm:col-span-2">
                             <InputLabel for="receipt" :value="__('Receipt')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                            <input
-                                type="file"
-                                id="receipt"
-                                @input="form.receipt = $event.target.files[0]"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-gray-700 dark:file:text-emerald-400"
-                                accept=".jpg,.jpeg,.png,.pdf"
+                            <FileUploader
+                                v-model="form.receipt"
                             />
                             <InputError :message="form.errors.receipt" class="mt-2" />
                         </div>

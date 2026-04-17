@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Traits;
+namespace App\Traits;
 
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;

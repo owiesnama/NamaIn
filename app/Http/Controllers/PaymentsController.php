@@ -11,11 +11,13 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Supplier;
-use Inertia\Inertia;
+use App\Traits\HandlesAsyncUploads;
 use Inertia\Response;
 
 class PaymentsController extends Controller
 {
+    use HandlesAsyncUploads;
+
     public function index(PaymentFilter $filter)
     {
         return inertia('Payments/Index', [
@@ -57,9 +59,7 @@ class PaymentsController extends Controller
 
         if ($request->payment_method === PaymentMethod::BankTransfer->value) {
             $metadata = ['bank_name' => $request->bank_name];
-            if ($request->hasFile('receipt')) {
-                $receiptPath = $request->file('receipt')->store('receipts', 'public');
-            }
+            $receiptPath = $this->resolveTemporaryUpload($request->receipt, 'receipts', disk: 'public');
         }
 
         if ($request->invoice_id) {

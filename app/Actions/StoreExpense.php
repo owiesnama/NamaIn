@@ -3,13 +3,16 @@
 namespace App\Actions;
 
 use App\Http\Requests\ExpenseRequest;
-use App\Models\Category;
 use App\Models\Expense;
 use App\Models\RecurringExpense;
-use Illuminate\Support\Str;
+use App\Traits\HandlesAsyncUploads;
 
 class StoreExpense
 {
+    use HandlesAsyncUploads;
+
+    public function __construct(private SyncCategoriesAction $syncCategories) {}
+
     public function handle(ExpenseRequest $request): Expense
     {
         $expense = Expense::create([
@@ -20,7 +23,7 @@ class StoreExpense
             'receipt_path' => $this->storeReceipt($request),
         ]);
 
-        $this->syncCategories($expense, $request->category_ids ?? []);
+        $this->syncCategories->execute($expense, $request->category_objects ?? [], 'expense');
 
         if ($request->boolean('is_recurring')) {
             $this->createRecurringTemplate($expense, $request);
@@ -31,22 +34,7 @@ class StoreExpense
 
     private function storeReceipt(ExpenseRequest $request): ?string
     {
-        if (! $request->hasFile('receipt')) {
-            return null;
-        }
-
-        $extension = $request->file('receipt')->getClientOriginalExtension();
-
-        return $request->file('receipt')->storeAs('receipts', Str::uuid().'.'.$extension, 'local');
-    }
-
-    private function syncCategories(Expense $expense, array $categoryIds): void
-    {
-        $expense->categories()->sync($categoryIds);
-
-        if (! empty($categoryIds)) {
-            Category::whereIn('id', $categoryIds)->update(['type' => 'expense']);
-        }
+        return $this->resolveTemporaryUpload($request->receipt, 'receipts');
     }
 
     private function createRecurringTemplate(Expense $expense, ExpenseRequest $request): void

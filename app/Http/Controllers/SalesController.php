@@ -11,9 +11,12 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
+use App\Traits\HandlesAsyncUploads;
 
 class SalesController extends Controller
 {
+    use HandlesAsyncUploads;
+
     public function index(InvoiceFilter $filter)
     {
         return inertia('Sales/Index', [
@@ -67,9 +70,7 @@ class SalesController extends Controller
             // Handle bank transfer
             if ($request->payment_method === PaymentMethod::BankTransfer->value) {
                 $metadata = ['bank_name' => $request->bank_name];
-                if ($request->hasFile('receipt')) {
-                    $receiptPath = $request->file('receipt')->store('receipts', 'public');
-                }
+                $receiptPath = $this->resolveTemporaryUpload($request->receipt, 'receipts', disk: 'public');
             }
 
             // Record payment

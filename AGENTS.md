@@ -255,6 +255,7 @@ This application is a Laravel application and its main Laravel ecosystems packag
 - laravel/boost (BOOST) - v2
 - laravel/fortify (FORTIFY) - v1
 - laravel/framework (LARAVEL) - v12
+- laravel/jetstream (JETSTREAM) - v5
 - laravel/mcp (MCP) - v0
 - laravel/prompts (PROMPTS) - v0
 - laravel/sanctum (SANCTUM) - v4
@@ -284,6 +285,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - You must follow all existing code conventions used in this application. When creating or editing a file, check sibling files for the correct structure, approach, and naming.
 - Use descriptive names for variables and methods. For example, `isRegisteredForDiscounts`, not `discount()`.
 - Check for existing components to reuse before writing a new one.
+- Most domain models extend `app/Models/BaseModel.php`; keep shared query behavior in `scopeFilter()` / `scopeSearch()` and avoid duplicating those helpers per model.
 
 ## Verification Scripts
 
@@ -293,10 +295,13 @@ This project has domain-specific skills available. You MUST activate the relevan
 
 - Stick to existing directory structure; don't create new base folders without approval.
 - Do not change the application's dependencies without approval.
+- HTTP middleware is configured in `bootstrap/app.php`; preserve existing web middleware append order (`HandleLocale`, `HandleInertiaRequests`, `AddLinkHeadersForPreloadedAssets`) unless there is a clear requirement to change it.
+- Keep authenticated web routes inside the existing `auth:sanctum` + `verified` group in `routes/web.php`, following the current `Route::resource()` + explicit import/export route style.
 
 ## Frontend Bundling
 
 - If the user doesn't see a frontend change reflected in the UI, it could mean they need to run `npm run build`, `npm run dev`, or `composer run dev`. Ask them.
+- Available frontend scripts are `npm run lint`, `npm run format`, `npm run dev`, and `npm run build`.
 
 ## Documentation Files
 
@@ -410,6 +415,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - When creating models for tests, use the factories for the models. Check if the factory has custom states that can be used before manually setting up the model.
 - Faker: Use methods such as `$this->faker->word()` or `fake()->randomDigit()`. Follow existing conventions whether to use `$this->faker` or `fake()`.
 - When creating tests, make use of `php artisan make:test [options] {name}` to create a feature test, and pass `--unit` to create a unit test. Most tests should be feature tests.
+- Pest binds `Tests\\TestCase` to `tests/Feature` and `Tests\\DuskTestCase` to `tests/Browser` in `tests/Pest.php`; keep browser flows in `tests/Browser` and feature/API tests in `tests/Feature`.
 
 ## Vite Error
 
@@ -433,7 +439,7 @@ This project has domain-specific skills available. You MUST activate the relevan
 - `bootstrap/app.php` is the file to register middleware, exceptions, and routing files.
 - `bootstrap/providers.php` contains application specific service providers.
 - The `app\Console/Kernel.php` file no longer exists; use `bootstrap/app.php` or `routes/console.php` for console configuration.
-- Console commands in `app\Console/Commands/` are automatically available and do not require manual registration.
+- Console commands in `app\Console\Commands\` are automatically available and do not require manual registration.
 
 ## Database
 

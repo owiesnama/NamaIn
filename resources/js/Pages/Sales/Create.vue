@@ -3,6 +3,7 @@
     import InputLabel from "@/Components/InputLabel.vue";
     import TextInput from "@/Components/TextInput.vue";
     import InputError from "@/Components/InputError.vue";
+    import FileUploader from "@/Components/FileUploader.vue";
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { ref, computed, watch } from "vue";
     import { router, useForm, Link } from "@inertiajs/vue3";
@@ -405,11 +406,8 @@
                             </div>
                             <div>
                                 <InputLabel for="receipt" :value="__('Payment Receipt (Optional)')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                                <input
-                                    id="receipt"
-                                    type="file"
-                                    class="block w-full text-sm text-gray-900 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer bg-white dark:bg-gray-800 focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-emerald-900/50 dark:file:text-emerald-300"
-                                    @input="form.receipt = $event.target.files[0]"
+                                <FileUploader
+                                    v-model="form.receipt"
                                 />
                                 <InputError class="mt-1" :message="form.errors.receipt" />
                             </div>

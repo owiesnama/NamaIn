@@ -3,6 +3,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import InputError from "@/Components/InputError.vue";
+import FileUploader from "@/Components/FileUploader.vue";
 import { useForm } from "@inertiajs/vue3";
 
 const props = defineProps({
@@ -27,6 +28,12 @@ const formatCurrency = (amount) => {
         style: 'currency',
         currency: validCurrency,
     }).format(amount || 0);
+};
+
+const addCategory = (newTag) => {
+    const tag = { name: newTag, id: newTag };
+    form.category_objects.push(tag);
+    form.category_ids = form.category_objects.map(c => c.id);
 };
 
 const submit = () => {
@@ -131,10 +138,13 @@ const formatDate = (date) => {
                                 label="name"
                                 track-by="id"
                                 :preselect-first="false"
+                                :taggable="true"
+                                :tag-placeholder="__('Press enter to create a category')"
                                 class="w-full"
                                 :select-label="__('Press enter to select')"
                                 :deselect-label="__('Press enter to remove')"
                                 :selected-label="__('Selected')"
+                                @tag="addCategory"
                                 @update:model-value="form.category_ids = form.category_objects.map(c => c.id)"
                             >
                                 <template #noResult>
@@ -159,18 +169,9 @@ const formatDate = (date) => {
                         <!-- Receipt -->
                         <div class="sm:col-span-2">
                             <InputLabel for="receipt" :value="__('Receipt')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
-                            <div v-if="expense.receipt_path" class="mb-2 flex items-center gap-2 text-sm text-emerald-600">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                                </svg>
-                                <a :href="route('expenses.receipt', expense.id)" target="_blank" class="hover:underline font-medium">{{ __("View Current Receipt") }}</a>
-                            </div>
-                            <input
-                                type="file"
-                                id="receipt"
-                                @input="form.receipt = $event.target.files[0]"
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 dark:file:bg-gray-700 dark:file:text-emerald-400"
-                                accept=".jpg,.jpeg,.png,.pdf"
+                            <FileUploader
+                                v-model="form.receipt"
+                                :existing-file-url="expense.receipt_path ? route('expenses.receipt', expense.id) : null"
                             />
                             <p class="mt-1 text-[10px] text-gray-500">{{ __("Uploading a new receipt will replace the old one.") }}</p>
                             <InputError :message="form.errors.receipt" class="mt-2" />

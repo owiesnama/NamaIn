@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Actions\SyncCategoriesAction;
 use App\Exports\CustomerExport;
 use App\Filters\CustomerFilter;
-use App\Http\Controllers\Traits\HasPartyFeatures;
 use App\Http\Requests\CustomerRequest;
 use App\Imports\CustomerImport;
 use App\Models\Category;
@@ -13,6 +12,7 @@ use App\Models\Customer;
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;
 use App\Services\StatementService;
+use App\Traits\HasPartyFeatures;
 
 class CustomersController extends Controller
 {

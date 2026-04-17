@@ -19,7 +19,7 @@ test('user can record an expense', function () {
             'title' => 'Monthly Rent',
             'amount' => 1200.50,
             'expensed_at' => now()->format('Y-m-d'),
-            'category_ids' => [$category->id],
+            'category_objects' => [['id' => $category->id, 'name' => $category->name]],
             'notes' => 'Rent for April',
         ]);
 
@@ -34,17 +34,38 @@ test('user can record an expense', function () {
     expect($expense->categories->first()->name)->toBe('Utilities');
 });
 
+test('user can create a new category when recording an expense', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->post(route('expenses.store'), [
+            'title' => 'Office Supplies',
+            'amount' => 75,
+            'expensed_at' => now()->format('Y-m-d'),
+            'category_objects' => [['id' => 'Stationery', 'name' => 'Stationery']],
+        ]);
+
+    $expense = Expense::first();
+    expect($expense->categories)->toHaveCount(1);
+    expect($expense->categories->first()->name)->toBe('Stationery');
+    expect($expense->categories->first()->type)->toBe('expense');
+});
+
 test('user can record an expense with a receipt', function () {
     Storage::fake('local');
     $user = User::factory()->create();
+
+    // Simulate FilePond async upload
     $file = UploadedFile::fake()->create('receipt.pdf', 100);
+    $tempFilename = 'temp-receipt.pdf';
+    Storage::disk('local')->putFileAs('tmp', $file, $tempFilename);
 
     $response = $this->actingAs($user)
         ->post(route('expenses.store'), [
             'title' => 'Hardware Purchase',
             'amount' => 500,
             'expensed_at' => now()->format('Y-m-d'),
-            'receipt' => $file,
+            'receipt' => $tempFilename,
         ]);
 
     $response->assertRedirect(route('expenses.index'));
@@ -52,6 +73,7 @@ test('user can record an expense with a receipt', function () {
     $expense = Expense::first();
     expect($expense->receipt_path)->not->toBeNull();
     Storage::disk('local')->assertExists($expense->receipt_path);
+    Storage::disk('local')->assertMissing('tmp/'.$tempFilename);
 });
 
 test('index response contains budget limit data', function () {

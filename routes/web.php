@@ -19,6 +19,7 @@ use App\Http\Controllers\SalesController;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\StoragesController;
 use App\Http\Controllers\SuppliersController;
+use App\Http\Controllers\TemporaryUploadController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -48,7 +49,7 @@ Route::middleware([
     Route::put('/preferences', [PreferenceController::class, 'update']);
     Route::get('/customers/export', [CustomersController::class, 'export'])->name('customers.export');
     Route::post('/customers/import', [CustomersController::class, 'import'])->name('customers.import');
-    Route::get('/customers/import/sample', [CustomersController::class, 'importSample'])->name('customers.import-sample');
+    Route::get('/customers/import/sample', [CustomersController::class, 'importSample'])->name('customers.import.sample');
     Route::resource('/customers', CustomersController::class);
     Route::get('/customers/{customer}/account', [CustomersController::class, 'account'])->name('customers.account');
     Route::get('/customers/{customer}/statement', [CustomersController::class, 'statement'])->name('customers.statement');
@@ -56,7 +57,7 @@ Route::middleware([
 
     Route::get('/suppliers/export', [SuppliersController::class, 'export'])->name('suppliers.export');
     Route::post('/suppliers/import', [SuppliersController::class, 'import'])->name('suppliers.import');
-    Route::get('/suppliers/import/sample', [SuppliersController::class, 'importSample'])->name('suppliers.import-sample');
+    Route::get('/suppliers/import/sample', [SuppliersController::class, 'importSample'])->name('suppliers.import.sample');
     Route::resource('/suppliers', SuppliersController::class);
     Route::get('/suppliers/{supplier}/account', [SuppliersController::class, 'account'])->name('suppliers.account');
     Route::get('/suppliers/{supplier}/statement', [SuppliersController::class, 'statement'])->name('suppliers.statement');
@@ -66,7 +67,7 @@ Route::middleware([
 
     Route::get('/products/export', [ProductsController::class, 'export'])->name('products.export');
     Route::post('/products/import', [ProductsController::class, 'import'])->name('products.import');
-    Route::get('/products/import/sample', [ProductsController::class, 'importSample'])->name('products.import-sample');
+    Route::get('/products/import/sample', [ProductsController::class, 'importSample'])->name('products.import.sample');
     Route::resource('/products', ProductsController::class);
     Route::resource('/purchases', PurchasesController::class);
     Route::resource('/sales', SalesController::class);
@@ -90,4 +91,7 @@ Route::middleware([
     Route::post('/sales/{invoice}/return', [InverseInvoicesController::class, 'storeSaleReturn'])->name('sales.return.store');
     Route::get('/purchases/{invoice}/return', [InverseInvoicesController::class, 'createPurchaseReturn'])->name('purchases.return.create');
     Route::post('/purchases/{invoice}/return', [InverseInvoicesController::class, 'storePurchaseReturn'])->name('purchases.return.store');
+
+    Route::post('/uploads/tmp', [TemporaryUploadController::class, 'store'])->name('uploads.tmp.store');
+    Route::delete('/uploads/tmp', [TemporaryUploadController::class, 'destroy'])->name('uploads.tmp.destroy');
 });

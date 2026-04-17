@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Actions\SyncCategoriesAction;
 use App\Exports\SupplierExport;
 use App\Filters\SupplierFilter;
-use App\Http\Controllers\Traits\HasPartyFeatures;
 use App\Http\Requests\SupplierRequest;
 use App\Imports\SupplierImport;
 use App\Models\Category;
@@ -13,6 +12,7 @@ use App\Models\Supplier;
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;
 use App\Services\StatementService;
+use App\Traits\HasPartyFeatures;
 
 class SuppliersController extends Controller
 {

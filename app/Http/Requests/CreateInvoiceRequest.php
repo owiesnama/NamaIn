@@ -39,6 +39,7 @@ class CreateInvoiceRequest extends FormRequest
             'initial_payment_amount' => 'nullable|numeric|min:0',
             'payment_reference' => 'nullable|string|max:255',
             'payment_notes' => 'nullable|string|max:1000',
+            'receipt' => 'nullable|string|max:255',
         ];
     }
 }

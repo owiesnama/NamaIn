@@ -189,6 +189,59 @@ class Product extends BaseModel
     }
 
     /**
+     * Get stock insights for this product.
+     *
+     * @return array<int, array{type: string, message: string}>
+     */
+    public function getInsights(): array
+    {
+        $insights = [];
+        $qtyOnHand = $this->quantityOnHand();
+        $pendingSales = $this->pendingSalesQuantity();
+        $availableQty = $this->availableQuantity();
+        $pendingPurchases = $this->pendingPurchaseQuantity();
+
+        if ($pendingSales > $qtyOnHand) {
+            $insights[] = [
+                'type' => 'danger',
+                'message' => __('Product overcommitted: :units units needed', ['units' => number_format($pendingSales - $qtyOnHand, 2)]),
+            ];
+        }
+
+        if ($qtyOnHand == 0) {
+            $insights[] = [
+                'type' => 'danger',
+                'message' => __('Out of Stock'),
+            ];
+        } elseif ($availableQty <= ($this->alert_quantity ?? config('namain.min_quantity_acceptable')) && $availableQty > 0) {
+            $insights[] = [
+                'type' => 'warning',
+                'message' => __('Low stock alert: :units units remaining', ['units' => number_format($availableQty, 2)]),
+            ];
+        }
+
+        if ($pendingPurchases > 0) {
+            $insights[] = [
+                'type' => 'info',
+                'message' => __('Incoming stock: :units units expected', ['units' => number_format($pendingPurchases, 2)]),
+            ];
+        }
+
+        return $insights;
+    }
+
+    /**
+     * Sync units for this product.
+     *
+     * @param  array<int, array{name: string, conversion_factor: float|int}>  $units
+     */
+    public function syncUnits(array $units): void
+    {
+        $this->units()->delete();
+        $this->units()->createMany($units);
+    }
+
+    /**
      * Get how many days went since the expiration date.
      */
     public function getExpiredAtAttribute(): int

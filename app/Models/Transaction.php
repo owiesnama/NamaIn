@@ -17,6 +17,10 @@ class Transaction extends BaseModel
 {
     use HasFactory, SoftDeletes, WithTrashScope;
 
+    protected array $searchable = ['description'];
+
+    protected array $searchableRelationsAttributes = ['product.name', 'product.categories.name'];
+
     protected static function booted(): void
     {
         parent::booted();
@@ -207,6 +211,79 @@ class Transaction extends BaseModel
     /**
      * Reverse this transaction (inventory adjustment).
      */
+    /**
+     * Scope to filter transactions by type (Sales/Purchases).
+     */
+    public function scopeFilterByType(Builder $query, ?string $type): Builder
+    {
+        if (! $type || $type === 'All') {
+            return $query;
+        }
+
+        return $query->whereHas('invoice', function ($q) use ($type) {
+            if ($type === 'Sales') {
+                $q->where('invocable_type', Customer::class);
+            } elseif ($type === 'Purchases') {
+                $q->where('invocable_type', '!=', Customer::class);
+            }
+        });
+    }
+
+    /**
+     * Scope to filter transactions by storage.
+     */
+    public function scopeForStorage(Builder $query, $storageId): Builder
+    {
+        return $query->when($storageId, fn ($q) => $q->where('storage_id', $storageId));
+    }
+
+    /**
+     * Scope to filter transactions by date range.
+     */
+    public function scopeInDateRange(Builder $query, ?string $from, ?string $to): Builder
+    {
+        return $query->when($from, fn ($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to, fn ($q) => $q->whereDate('created_at', '<=', $to));
+    }
+
+    /**
+     * Get chart data for sales and purchases.
+     */
+    public static function getMonthlyStats(int $productId, int $months = 6): array
+    {
+        $startDate = now()->subMonths($months - 1)->startOfMonth();
+        $dateLabels = collect();
+        for ($i = $months - 1; $i >= 0; $i--) {
+            $dateLabels->push(now()->subMonths($i)->format('Y-m'));
+        }
+
+        $baseQuery = static::where('product_id', $productId)
+            ->where('created_at', '>=', $startDate);
+
+        $salesQuery = (clone $baseQuery)->whereHas('invoice', fn ($q) => $q->where('invocable_type', Customer::class));
+        $purchasesQuery = (clone $baseQuery)->whereHas('invoice', fn ($q) => $q->where('invocable_type', '!=', Customer::class));
+
+        $format = match (config('database.default')) {
+            'sqlite' => "strftime('%Y-%m', created_at)",
+            'pgsql' => "to_char(created_at, 'YYYY-MM')",
+            default => "DATE_FORMAT(created_at, '%Y-%m')",
+        };
+
+        $sales = $salesQuery->selectRaw("$format as month, SUM(quantity) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        $purchases = $purchasesQuery->selectRaw("$format as month, SUM(quantity) as total")
+            ->groupBy('month')
+            ->pluck('total', 'month');
+
+        return [
+            'labels' => $dateLabels->map(fn ($m) => \Carbon\Carbon::parse($m)->format('M Y'))->toArray(),
+            'sales' => $dateLabels->map(fn ($m) => $sales->get($m, 0))->toArray(),
+            'purchases' => $dateLabels->map(fn ($m) => $purchases->get($m, 0))->toArray(),
+        ];
+    }
+
     public function reverse(): void
     {
         $storage = $this->storage;

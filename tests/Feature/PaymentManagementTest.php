@@ -104,8 +104,13 @@ test('can record cash payment without extra fields', function () {
 
 test('can record bank transfer with bank name and receipt', function () {
     Storage::fake('public');
+    Storage::fake('local');
     $customer = Customer::factory()->create();
+
+    // Simulate FilePond async upload
     $receipt = UploadedFile::fake()->image('receipt.jpg');
+    $tempFilename = 'temp-receipt.jpg';
+    Storage::disk('local')->putFileAs('tmp', $receipt, $tempFilename);
 
     $response = $this->post(route('payments.store'), [
         'payable_id' => $customer->id,
@@ -113,7 +118,7 @@ test('can record bank transfer with bank name and receipt', function () {
         'amount' => 250,
         'payment_method' => 'bank_transfer',
         'bank_name' => 'Palestinian Bank',
-        'receipt' => $receipt,
+        'receipt' => $tempFilename,
     ]);
 
     $response->assertRedirect(route('payments.index'));
@@ -123,6 +128,7 @@ test('can record bank transfer with bank name and receipt', function () {
     expect($payment->receipt_path)->not->toBeNull();
 
     Storage::disk('public')->assertExists($payment->receipt_path);
+    Storage::disk('local')->assertMissing('tmp/'.$tempFilename);
 });
 
 test('can record cheque payment and automated cheque creation', function () {
