@@ -32,6 +32,12 @@
     const selectedPayee = ref(null);
     const selectedInvoice = ref(null);
 
+    const addBank = (newTag) => {
+        const bank = { id: newTag, name: newTag };
+        selectedBank.value = bank;
+        cheque.bank_id = newTag;
+    };
+
     watch(() => cheque.payee_id, (newPayeeId) => {
         if (!newPayeeId) {
             invoices.value = [];
@@ -97,10 +103,13 @@
                                 :placeholder="__('Select Bank')"
                                 label="name"
                                 track-by="id"
+                                :taggable="true"
+                                :tag-placeholder="__('Press enter to add a new bank')"
                                 class="w-full mt-1"
                                 :select-label="''"
                                 :deselect-label="''"
                                 :selected-label="__('Selected')"
+                                @tag="addBank"
                                 @update:model-value="cheque.bank_id = selectedBank?.id || ''"
                             />
                             <InputError :message="cheque.errors.bank_id" class="mt-1" />

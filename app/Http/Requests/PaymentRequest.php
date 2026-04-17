@@ -38,7 +38,7 @@ class PaymentRequest extends FormRequest
             'receipt' => 'nullable|string|max:255',
 
             // Cheque fields
-            'cheque_bank_id' => 'required_if:payment_method,cheque|nullable|exists:banks,id',
+            'cheque_bank_id' => 'required_if:payment_method,cheque|nullable',
             'cheque_due_date' => 'required_if:payment_method,cheque|nullable|date',
             'cheque_number' => 'required_if:payment_method,cheque|nullable|string|max:255',
         ];

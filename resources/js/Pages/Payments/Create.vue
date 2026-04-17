@@ -24,6 +24,12 @@ const selectedInvoiceObject = ref(null);
 const selectedPaymentMethod = ref({ id: 'cash', label: 'Cash' });
 const selectedChequeBank = ref(null);
 
+const addBank = (newTag) => {
+    const bank = { name: newTag, id: newTag };
+    selectedChequeBank.value = bank;
+    form.cheque_bank_id = newTag;
+};
+
 const entities = computed(() => {
     return selectedType.value === "customer" ? props.customers : props.suppliers;
 });
@@ -291,10 +297,13 @@ const submit = () => {
                             :placeholder="__('Select Bank')"
                             label="name"
                             track-by="id"
+                            :taggable="true"
+                            :tag-placeholder="__('Press enter to add a new bank')"
                             class="w-full"
                             :select-label="''"
                             :deselect-label="''"
                             :selected-label="__('Selected')"
+                            @tag="addBank"
                             @update:model-value="form.cheque_bank_id = selectedChequeBank?.id || null"
                         />
                         <InputError class="mt-1" :message="form.errors.cheque_bank_id" />

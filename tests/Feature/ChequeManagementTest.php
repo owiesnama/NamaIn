@@ -80,3 +80,28 @@ test('can update status to Issued, Deposited, Returned, Cancelled', function ($s
     ChequeStatus::Returned,
     ChequeStatus::Cancelled,
 ]);
+
+test('can register a new cheque with a new bank name', function () {
+    $customer = Customer::factory()->create();
+
+    $response = $this->post(route('cheques.store'), [
+        'payee_id' => $customer->id,
+        'payee_type' => get_class($customer),
+        'type' => 1,
+        'amount' => 650,
+        'bank_id' => 'Taggable Bank',
+        'reference_number' => 'CHQ-TAG-01',
+        'due' => now()->addDays(7)->toDateString(),
+    ]);
+
+    $response->assertRedirect(route('cheques.index'));
+    $this->assertDatabaseHas('banks', ['name' => 'Taggable Bank']);
+
+    $bank = Bank::where('name', 'Taggable Bank')->first();
+
+    $this->assertDatabaseHas('cheques', [
+        'bank_id' => $bank->id,
+        'reference_number' => 'CHQ-TAG-01',
+        'amount' => 650,
+    ]);
+});

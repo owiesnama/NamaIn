@@ -96,7 +96,7 @@ class ChequesController extends Controller
             ->register([
                 'type' => $validated['type'],
                 'amount' => $validated['amount'],
-                'bank_id' => $validated['bank_id'],
+                'bank_id' => $this->resolveBankId($validated['bank_id']),
                 'due' => $validated['due'],
                 'reference_number' => $validated['reference_number'],
                 'invoice_id' => $validated['invoice_id'] ?? null,
@@ -134,13 +134,22 @@ class ChequesController extends Controller
             'invoice_id' => $validated['invoice_id'] ?? null,
             'type' => $validated['type'],
             'amount' => $validated['amount'],
-            'bank_id' => $validated['bank_id'],
+            'bank_id' => $this->resolveBankId($validated['bank_id']),
             'due' => $validated['due'],
             'reference_number' => $validated['reference_number'],
             'notes' => $validated['notes'] ?? null,
         ]);
 
         return redirect()->route('cheques.index')->with('success', 'Cheque has been updated');
+    }
+
+    private function resolveBankId(int|string $bankId): int
+    {
+        if (is_numeric($bankId)) {
+            return (int) $bankId;
+        }
+
+        return Bank::firstOrCreate(['name' => trim($bankId)])->id;
     }
 
     public function destroy(Cheque $cheque)

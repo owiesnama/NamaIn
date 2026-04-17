@@ -160,6 +160,31 @@ test('can record cheque payment and automated cheque creation', function () {
     ]);
 });
 
+test('can record cheque payment with a new bank name', function () {
+    $customer = Customer::factory()->create();
+
+    $response = $this->post(route('payments.store'), [
+        'payable_id' => $customer->id,
+        'payable_type' => 'App\\Models\\Customer',
+        'amount' => 750,
+        'payment_method' => 'cheque',
+        'cheque_bank_id' => 'New National Bank',
+        'cheque_number' => 'CHQ-NEW-001',
+        'cheque_due_date' => now()->addDays(30)->toDateString(),
+    ]);
+
+    $response->assertRedirect(route('payments.index'));
+
+    $this->assertDatabaseHas('banks', ['name' => 'New National Bank']);
+
+    $bank = Bank::where('name', 'New National Bank')->first();
+    $this->assertDatabaseHas('cheques', [
+        'amount' => 750,
+        'bank_id' => $bank->id,
+        'reference_number' => 'CHQ-NEW-001',
+    ]);
+});
+
 test('validation fails for bank transfer without bank name', function () {
     $customer = Customer::factory()->create();
 
