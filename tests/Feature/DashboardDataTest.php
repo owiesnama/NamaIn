@@ -97,7 +97,7 @@ test('dashboard displays enriched data', function () {
     // Assertions for new stat cards
     $this->assertEquals(200, $data['expenses_this_month']);
     $this->assertEquals(400, $data['outstanding_payables']); // 500 total - 100 paid
-    $this->assertEquals(1000 - 500 - 200, $data['gross_profit']); // sales - purchases - expenses
+    $this->assertEquals(1000 - 500 - 200 + 500, $data['gross_profit']); // sales - purchases - expenses + stock
     $this->assertEquals(500, $data['total_inventory_value']); // 10 * 50
 
     // Assertions for top products and customers

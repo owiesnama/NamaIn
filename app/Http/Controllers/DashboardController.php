@@ -21,7 +21,7 @@ class DashboardController extends Controller
             'total_inventory_value' => $totalInventoryValue,
             'outstanding_receivables' => $query->outstandingReceivables(),
             'outstanding_payables' => $query->outstandingPayables(),
-            'gross_profit' => (float) $totalSales - (float) $totalPurchase - (float) $expensesThisMonth,
+            'gross_profit' => (float) $totalSales - (float) $totalPurchase - (float) $expensesThisMonth + (float) $totalInventoryValue,
             'payments_this_month' => $query->paymentsThisMonth(),
             'top_products' => $query->topSellingProducts(),
             'top_customers' => $query->topCustomers(),
