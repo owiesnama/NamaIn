@@ -21,7 +21,7 @@ class Cheque extends BaseModel
      *
      * @var array<string>
      */
-    public $appends = ['is_credit', 'amount_formated', 'due_for_humans'];
+    public $appends = ['is_credit', 'amount_formated', 'due_formatted'];
 
     /**
      * @return array<string, string>
@@ -62,11 +62,11 @@ class Cheque extends BaseModel
     }
 
     /**
-     * The due of this cheque formatted on a readable way.
+     * The due of this cheque formatted as Y-m-d.
      */
-    public function getDueForHumansAttribute(): string
+    public function getDueFormattedAttribute(): string
     {
-        return $this->due->diffForHumans();
+        return $this->due->format('Y-m-d');
     }
 
     /**

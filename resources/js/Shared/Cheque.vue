@@ -138,25 +138,25 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-between">
-            <div>
-                <InputLabel :value="'#' + cheque.reference_number" />
-                <InputLabel :value="cheque.bank" />
+        <div class="flex items-center justify-between mt-4">
+            <div class="flex-1 min-w-0 pr-24 rtl:pr-0 rtl:pl-24">
+                <InputLabel :value="'#' + cheque.reference_number" class="truncate" />
+                <InputLabel :value="cheque.bank" class="truncate" />
             </div>
 
             <p
-                class="text-sm"
+                class="text-sm shrink-0"
                 :class="
                     isBeyondDue
                         ? 'text-red-500 font-semibold'
                         : 'text-gray-500 font-medium'
                 "
-                v-text="cheque.due_for_humans"
+                v-text="cheque.due_formatted"
             ></p>
         </div>
 
         <h2
-            class="mt-1 text-lg font-semibold text-gray-800"
+            class="mt-2 text-lg font-semibold text-gray-800"
             v-text="cheque.payee.name"
         ></h2>
             <div class="flex items-center gap-2">
@@ -169,10 +169,10 @@
                 </Link>
             </div>
 
-            <div class="mt-24 sm:flex sm:items-end sm:justify-between">
-                <div>
-                    <InputLabel :value="__('Status')" />
-                    <div class="flex items-center gap-2 mt-1">
+        <div class="mt-8 sm:flex sm:items-end sm:justify-between">
+            <div>
+                <InputLabel :value="__('Status')" />
+                <div class="flex items-center gap-2 mt-2">
                         <VueMultiselect
                             :model-value="{ id: selectedStatus, label: statusLable(selectedStatus) }"
                             :options="Object.entries(chequeStatus).map(([label, id]) => ({ id, label }))"
