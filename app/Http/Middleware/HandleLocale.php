@@ -10,6 +10,13 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HandleLocale
 {
+    private function tenantCacheKey(string $key): string
+    {
+        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
+
+        return "tenant_{$tenantId}_{$key}";
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -17,7 +24,7 @@ class HandleLocale
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $preferences = Cache::get('preferences');
+        $preferences = Cache::get($this->tenantCacheKey('preferences'));
         App::setLocale($preferences['language'] ?? 'en');
 
         return $next($request);

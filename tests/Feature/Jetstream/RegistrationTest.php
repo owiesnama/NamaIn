@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Jetstream;
 
-use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
 use Laravel\Jetstream\Jetstream;
@@ -11,6 +10,8 @@ use Tests\TestCase;
 class RegistrationTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected bool $withTenantSubdomain = false;
 
     public function test_registration_screen_can_be_rendered(): void
     {
@@ -51,10 +52,12 @@ class RegistrationTest extends TestCase
             'email' => 'test@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
+            'tenant_name' => 'Test Company',
+            'tenant_slug' => 'test-company',
             'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature(),
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect('https://test-company.namain.test/dashboard');
     }
 }

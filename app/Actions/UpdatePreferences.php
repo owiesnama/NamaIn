@@ -8,6 +8,13 @@ use Illuminate\Support\Facades\Cache;
 
 class UpdatePreferences
 {
+    private function tenantCacheKey(string $key): string
+    {
+        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
+
+        return "tenant_{$tenantId}_{$key}";
+    }
+
     public function execute(PreferenceRequest $request): void
     {
         foreach ($request->validated() as $key => $value) {
@@ -23,7 +30,7 @@ class UpdatePreferences
             );
         }
 
-        Cache::forget('preferences');
+        Cache::forget($this->tenantCacheKey('preferences'));
     }
 
     private function resolveValue(string $key, mixed $value, PreferenceRequest $request): mixed

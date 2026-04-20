@@ -115,5 +115,7 @@ class DatabaseSeeder extends Seeder
         RecurringExpense::factory(5)->create()->each(function ($recurring) use ($categories) {
             $recurring->categories()->attach($categories->random(fake()->numberBetween(1, 2))->pluck('id'));
         });
+
+        $this->call(DashboardExampleSeeder::class);
     }
 }

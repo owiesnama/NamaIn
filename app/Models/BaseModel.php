@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Filters\Filters;
+use App\Traits\BelongsToTenant;
 use App\Traits\Searchable;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseModel extends Model
 {
-    use HasFactory,Searchable;
+    use BelongsToTenant, HasFactory, Searchable;
 
     /**
      * Bootstrap the model and its traits.

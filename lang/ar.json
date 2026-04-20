@@ -592,5 +592,11 @@
     "Complete Purchase": "إتمام الشراء",
     "Description (optional)...": "الوصف (اختياري)...",
     "Ref \/ Cheque #": "المرجع \/ رقم الشيك #",
-    "Expense Summary": "ملخص المصروف"
+    "Expense Summary": "ملخص المصروف",
+    "Organization": "المؤسسة",
+    "Organization Name": "اسم المؤسسة",
+    "Subdomain": "النطاق الفرعي",
+    "Create Your Organization": "أنشئ مؤسستك",
+    "Account Details": "بيانات الحساب",
+    "Manage your business, simplified.": "أدِر أعمالك، ببساطة."
 }

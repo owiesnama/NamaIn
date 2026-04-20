@@ -108,7 +108,7 @@
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
-                    class="text-sm text-gray-600 underline hover:text-gray-900"
+                    class="text-sm text-emerald-600 hover:text-emerald-700"
                 >
                     {{ __("Forgot your password ?") }}
                 </Link>

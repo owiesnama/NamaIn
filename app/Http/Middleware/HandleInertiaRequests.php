@@ -9,6 +9,13 @@ use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
+    private function tenantCacheKey(string $key): string
+    {
+        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
+
+        return "tenant_{$tenantId}_{$key}";
+    }
+
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -36,16 +43,19 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         return array_merge(parent::share($request), [
+            'appDomain' => config('app.domain'),
             'user' => $request->user() ? [
                 'name' => $request->user()->name,
                 'email' => $request->user()->email,
                 'profile_photo_url' => $request->user()->profile_photo_url,
-                // Add other properties if needed by Jetstream
             ] : null,
+            'currentTenant' => $request->user()?->currentTenant
+                ? ['id' => $request->user()->currentTenant->id, 'name' => $request->user()->currentTenant->name, 'slug' => $request->user()->currentTenant->slug]
+                : null,
             'jetstream' => [
-                'managesProfilePhotos' => true, // You might want to get this from config
+                'managesProfilePhotos' => true,
             ],
-            'preferences' => Cache::rememberForever('preferences', fn () => Preference::asPairs()),
+            'preferences' => Cache::rememberForever($this->tenantCacheKey('preferences'), fn () => Preference::asPairs()),
             'flash' => [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),

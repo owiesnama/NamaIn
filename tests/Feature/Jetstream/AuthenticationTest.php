@@ -3,13 +3,14 @@
 namespace Tests\Feature\Jetstream;
 
 use App\Models\User;
-use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class AuthenticationTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected bool $withTenantSubdomain = false;
 
     public function test_login_screen_can_be_rendered(): void
     {
@@ -28,7 +29,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
-        $response->assertRedirect(RouteServiceProvider::HOME);
+        $response->assertRedirect(route('tenants.select'));
     }
 
     public function test_users_can_not_authenticate_with_invalid_password(): void
