@@ -78,3 +78,27 @@ test('registration redirects to the created tenant dashboard subdomain', functio
 
     $response->assertRedirect('https://is.namain.test/dashboard');
 });
+
+test('tenant switch route accepts tenant slug values', function () {
+    $tenant = Tenant::create(['name' => 'Is Tenant', 'slug' => 'is', 'is_active' => true]);
+    $user = User::factory()->create();
+    $tenant->users()->attach($user, ['role' => 'owner']);
+
+    $response = $this->actingAs($user)
+        ->post(route('tenants.switch', ['tenant' => $tenant->slug]));
+
+    $response->assertRedirect('https://is.namain.test/dashboard');
+});
+
+test('tenant switch returns inertia location to force full browser refresh', function () {
+    $tenant = Tenant::create(['name' => 'Is Tenant', 'slug' => 'is', 'is_active' => true]);
+    $user = User::factory()->create();
+    $tenant->users()->attach($user, ['role' => 'owner']);
+
+    $response = $this->actingAs($user)
+        ->withHeader('X-Inertia', 'true')
+        ->post(route('tenants.switch', ['tenant' => $tenant->slug]));
+
+    $response->assertStatus(409);
+    $response->assertHeader('X-Inertia-Location', 'https://is.namain.test/dashboard');
+});

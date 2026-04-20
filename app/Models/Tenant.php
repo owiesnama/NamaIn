@@ -51,4 +51,17 @@ class Tenant extends Model
     {
         return $this->update(['is_active' => true]);
     }
+
+    public function resolveRouteBinding($value, $field = null): ?Model
+    {
+        $bindingField = $field;
+
+        if (! $bindingField) {
+            $bindingField = is_numeric($value) ? $this->getRouteKeyName() : 'slug';
+        }
+
+        return $this->newQuery()
+            ->where($bindingField, $value)
+            ->first();
+    }
 }

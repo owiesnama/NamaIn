@@ -7,9 +7,10 @@ defineProps({
     tenants: Array,
 });
 
+const form = useForm({});
+
 const selectTenant = (tenant) => {
-    const form = useForm({});
-    form.post(route('tenants.switch', tenant.id));
+    form.post(route('tenants.switch', { tenant: tenant.slug }));
 };
 </script>
 
@@ -31,8 +32,11 @@ const selectTenant = (tenant) => {
             <button
                 v-for="tenant in tenants"
                 :key="tenant.id"
+                type="button"
                 @click="selectTenant(tenant)"
+                :disabled="form.processing"
                 class="flex items-center w-full px-4 py-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-indigo-300 transition group"
+                :class="{ 'opacity-60 cursor-not-allowed': form.processing }"
             >
                 <div class="flex items-center justify-center w-10 h-10 text-sm font-bold text-indigo-600 bg-indigo-100 rounded-full">
                     {{ tenant.name.charAt(0).toUpperCase() }}
