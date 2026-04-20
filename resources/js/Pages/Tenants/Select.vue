@@ -1,7 +1,8 @@
 <script setup>
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, usePage } from '@inertiajs/vue3';
 import AuthenticationCard from "@/Components/AuthenticationCard.vue";
 import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo.vue";
+import { computed } from 'vue';
 
 defineProps({
     tenants: Array,
@@ -9,8 +10,15 @@ defineProps({
 
 const form = useForm({});
 
+const fallbackDomain = computed(() => {
+    const appName = String(usePage().props.appName ?? '').trim();
+    const normalized = appName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+    return normalized ? `${normalized}.test` : 'app.test';
+});
+
 const selectTenant = (tenant) => {
-    form.post(route('tenants.switch', { tenant: tenant.slug }));
+    form.post(route('tenants.switch', { tenant: tenant.slug }, false));
 };
 </script>
 
@@ -46,7 +54,7 @@ const selectTenant = (tenant) => {
                         {{ tenant.name }}
                     </div>
                     <div class="text-xs text-gray-500">
-                        {{ tenant.slug }}.{{ $page.props.appDomain || 'nama-in.test' }}
+                        {{ tenant.slug }}.{{ $page.props.appDomain || fallbackDomain }}
                     </div>
                 </div>
             </button>

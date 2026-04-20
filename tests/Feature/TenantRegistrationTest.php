@@ -102,3 +102,16 @@ test('tenant switch returns inertia location to force full browser refresh', fun
     $response->assertStatus(409);
     $response->assertHeader('X-Inertia-Location', 'https://is.namain.test/dashboard');
 });
+
+test('tenant switch uses current request host domain for redirect url', function () {
+    $tenant = Tenant::create(['name' => 'Is Tenant', 'slug' => 'is', 'is_active' => true]);
+    $user = User::factory()->create();
+    $tenant->users()->attach($user, ['role' => 'owner']);
+
+    $response = $this->actingAs($user)
+        ->withHeader('X-Inertia', 'true')
+        ->post('https://erp.example.com/tenants/is/select');
+
+    $response->assertStatus(409);
+    $response->assertHeader('X-Inertia-Location', 'https://is.erp.example.com/dashboard');
+});

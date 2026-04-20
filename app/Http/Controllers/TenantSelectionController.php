@@ -35,12 +35,37 @@ class TenantSelectionController extends Controller
     {
         $request->user()->switchTenant($tenant);
 
-        $targetUrl = route('dashboard', ['tenant' => $tenant->slug]);
+        $targetUrl = $this->tenantDashboardUrl($request, $tenant);
 
         if ($request->header('X-Inertia')) {
             return Inertia::location($targetUrl);
         }
 
         return redirect()->away($targetUrl);
+    }
+
+    private function tenantDashboardUrl(Request $request, Tenant $tenant): string
+    {
+        $baseUrl = $request->getSchemeAndHttpHost();
+        $host = $request->getHost();
+
+        if (str_starts_with($host, $tenant->slug.'.')) {
+            return "{$baseUrl}/dashboard";
+        }
+
+        $baseDomain = $host;
+
+        if (app()->bound('currentTenant')) {
+            $currentTenant = app('currentTenant');
+
+            if ($currentTenant && str_starts_with($host, $currentTenant->slug.'.')) {
+                $baseDomain = substr($host, strlen($currentTenant->slug) + 1);
+            }
+        }
+
+        $targetHost = $tenant->slug.'.'.$baseDomain;
+        $targetBaseUrl = str_replace($host, $targetHost, $baseUrl);
+
+        return "{$targetBaseUrl}/dashboard";
     }
 }

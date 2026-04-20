@@ -13,7 +13,14 @@
     });
 
     const appDomain = computed(() => {
-        return usePage().props.appDomain || 'namain.test';
+        if (usePage().props.appDomain) {
+            return usePage().props.appDomain;
+        }
+
+        const appName = String(usePage().props.appName || '').trim();
+        const normalized = appName.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        return normalized ? `${normalized}.test` : 'app.test';
     });
 
     const fullDomain = computed(() => {
