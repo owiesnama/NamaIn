@@ -429,10 +429,10 @@
 
                                                 <!-- Tenant Switcher -->
                                                 <template v-if="$page.props.tenants?.length > 1">
-                                                    <div class="border-t border-gray-100 dark:border-gray-700 mx-3 my-1" />
+                                                    <div class="border-t border-slate-100 dark:border-gray-700 mx-3 my-1" />
 
                                                     <div class="px-4 pt-2 pb-1">
-                                                        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">{{ __('Workspaces') }}</p>
+                                                        <p class="text-xs font-semibold uppercase tracking-widest text-slate-400 dark:text-slate-500">{{ __('Workspaces') }}</p>
                                                     </div>
 
                                                     <div class="px-2 pb-2 space-y-0.5">
@@ -440,27 +440,27 @@
                                                             v-for="tenant in $page.props.tenants"
                                                             :key="tenant.id"
                                                             type="button"
-                                                            class="flex items-center gap-3 w-full px-2.5 py-2 rounded-lg text-sm transition-all duration-150 group focus:outline-none"
+                                                            class="flex items-center w-full overflow-hidden rounded-xl border text-sm transition-all duration-150 group focus:outline-none"
                                                             :class="[
                                                                 tenant.id === $page.props.currentTenant?.id
-                                                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 cursor-default'
+                                                                    ? 'border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-900/20 cursor-default'
                                                                     : switchingToTenant === tenant.id
-                                                                        ? 'bg-gray-100 dark:bg-gray-800 cursor-wait'
-                                                                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer',
+                                                                        ? 'border-slate-200 bg-slate-100 dark:border-gray-700 dark:bg-gray-800 cursor-wait'
+                                                                        : 'border-slate-200 bg-slate-100 dark:border-gray-700 dark:bg-gray-800 hover:border-slate-300 dark:hover:border-gray-600 cursor-pointer',
                                                                 switchingToTenant && switchingToTenant !== tenant.id && tenant.id !== $page.props.currentTenant?.id
                                                                     ? 'opacity-50' : ''
                                                             ]"
                                                             :disabled="tenant.id === $page.props.currentTenant?.id || !!switchingToTenant"
                                                             @click="tenant.id !== $page.props.currentTenant?.id && switchTenant(tenant)"
                                                         >
-                                                            <!-- Avatar / Spinner -->
+                                                            <!-- Avatar segment -->
                                                             <span
-                                                                class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-md text-xs font-bold uppercase transition-colors"
+                                                                class="flex shrink-0 items-center justify-center w-9 h-9 text-xs font-bold uppercase transition-colors border-e"
                                                                 :class="tenant.id === $page.props.currentTenant?.id
-                                                                    ? 'bg-emerald-500 text-white'
+                                                                    ? 'bg-emerald-500 text-white border-emerald-200 dark:border-emerald-800'
                                                                     : switchingToTenant === tenant.id
-                                                                        ? 'bg-emerald-500 text-white'
-                                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 group-hover:bg-gray-300 dark:group-hover:bg-gray-600'"
+                                                                        ? 'bg-emerald-500 text-white border-slate-200 dark:border-gray-700'
+                                                                        : 'bg-slate-200 dark:bg-gray-700 text-slate-500 dark:text-gray-300 border-slate-200 dark:border-gray-700 group-hover:bg-slate-300 dark:group-hover:bg-gray-600'"
                                                             >
                                                                 <svg
                                                                     v-if="switchingToTenant === tenant.id"
@@ -474,32 +474,33 @@
                                                                 <template v-else>{{ tenant.name.charAt(0) }}</template>
                                                             </span>
 
+                                                            <!-- Name -->
                                                             <span
-                                                                class="flex-1 text-left truncate font-medium ltr:text-left rtl:text-right"
+                                                                class="flex-1 truncate px-3 font-medium ltr:text-left rtl:text-right"
                                                                 :class="tenant.id === $page.props.currentTenant?.id
                                                                     ? 'text-emerald-700 dark:text-emerald-400'
                                                                     : switchingToTenant === tenant.id
                                                                         ? 'text-emerald-600 dark:text-emerald-400'
-                                                                        : 'text-gray-700 dark:text-gray-300'"
+                                                                        : 'text-slate-700 dark:text-gray-300'"
                                                             >{{ tenant.name }}</span>
 
                                                             <!-- Active badge -->
                                                             <span
                                                                 v-if="tenant.id === $page.props.currentTenant?.id"
-                                                                class="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                                                                class="shrink-0 me-2.5 inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
                                                             >{{ __('Active') }}</span>
 
                                                             <!-- Switching label -->
                                                             <span
                                                                 v-else-if="switchingToTenant === tenant.id"
-                                                                class="flex-shrink-0 text-xs text-emerald-600 dark:text-emerald-400 font-medium"
+                                                                class="shrink-0 me-2.5 text-xs text-emerald-600 dark:text-emerald-400 font-medium"
                                                             >{{ __('Switching…') }}</span>
 
                                                             <!-- Arrow on hover -->
                                                             <svg
                                                                 v-else
                                                                 xmlns="http://www.w3.org/2000/svg"
-                                                                class="w-3.5 h-3.5 text-gray-400 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180"
+                                                                class="w-3.5 h-3.5 shrink-0 me-2.5 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180"
                                                                 fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
                                                             >
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
