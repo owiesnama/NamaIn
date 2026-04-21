@@ -18,7 +18,7 @@ class PreferenceController extends Controller
 
     public function update(PreferenceRequest $request, UpdatePreferences $action)
     {
-        $action->execute($request);
+        $action->handle($request);
 
         return back()->with('success', 'Settings updated successfully');
     }

@@ -3,19 +3,12 @@
 namespace App\Http\Middleware;
 
 use App\Models\Preference;
+use App\Services\TenantCache;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
 {
-    private function tenantCacheKey(string $key): string
-    {
-        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
-
-        return "tenant_{$tenantId}_{$key}";
-    }
-
     /**
      * The root template that's loaded on the first page visit.
      *
@@ -38,10 +31,12 @@ class HandleInertiaRequests extends Middleware
     /**
      * Defines the props that are shared by default.
      *
-     * @see https://inertiajs.com/shared-data
+     * @see https://inertiajs/shared-data
      */
     public function share(Request $request): array
     {
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+
         return array_merge(parent::share($request), [
             'appName' => config('app.name'),
             'appDomain' => config('app.domain'),
@@ -50,13 +45,18 @@ class HandleInertiaRequests extends Middleware
                 'email' => $request->user()->email,
                 'profile_photo_url' => $request->user()->profile_photo_url,
             ] : null,
-            'currentTenant' => $request->user()?->currentTenant
-                ? ['id' => $request->user()->currentTenant->id, 'name' => $request->user()->currentTenant->name, 'slug' => $request->user()->currentTenant->slug]
+            'currentTenant' => $tenant
+                ? ['id' => $tenant->id, 'name' => $tenant->name, 'slug' => $tenant->slug]
                 : null,
+            'tenants' => fn () => $request->user()
+                ? $request->user()->tenants()->get(['tenants.id', 'name', 'slug'])
+                : [],
             'jetstream' => [
                 'managesProfilePhotos' => true,
             ],
-            'preferences' => Cache::rememberForever($this->tenantCacheKey('preferences'), fn () => Preference::asPairs()),
+            'preferences' => $tenant
+                ? TenantCache::rememberForever('preferences', fn () => Preference::asPairs())
+                : [],
             'flash' => [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),

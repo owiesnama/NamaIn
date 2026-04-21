@@ -4,18 +4,11 @@ namespace App\Actions;
 
 use App\Http\Requests\PreferenceRequest;
 use App\Models\Preference;
-use Illuminate\Support\Facades\Cache;
+use App\Services\TenantCache;
 
 class UpdatePreferences
 {
-    private function tenantCacheKey(string $key): string
-    {
-        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
-
-        return "tenant_{$tenantId}_{$key}";
-    }
-
-    public function execute(PreferenceRequest $request): void
+    public function handle(PreferenceRequest $request): void
     {
         foreach ($request->validated() as $key => $value) {
             $value = $this->resolveValue($key, $value, $request);
@@ -30,7 +23,7 @@ class UpdatePreferences
             );
         }
 
-        Cache::forget($this->tenantCacheKey('preferences'));
+        TenantCache::forget('preferences');
     }
 
     private function resolveValue(string $key, mixed $value, PreferenceRequest $request): mixed

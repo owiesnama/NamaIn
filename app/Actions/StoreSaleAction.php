@@ -8,7 +8,7 @@ use App\Traits\HandlesAsyncUploads;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
-class StorePurchaseAction
+class StoreSaleAction
 {
     use HandlesAsyncUploads;
 
@@ -16,7 +16,7 @@ class StorePurchaseAction
 
     public function handle(Collection $data, ?Request $request = null): Invoice
     {
-        $invoice = Invoice::purchase($data);
+        $invoice = Invoice::sale($data);
 
         $this->handlePayment($invoice, $data, $request);
 
@@ -48,7 +48,7 @@ class StorePurchaseAction
             method: $method,
             options: [
                 'reference' => $data->get('payment_reference'),
-                'notes' => $method === PaymentMethod::Cash ? 'Cash payment on purchase' : $data->get('payment_notes'),
+                'notes' => $method === PaymentMethod::Cash ? 'Cash payment on sale' : $data->get('payment_notes'),
                 'metadata' => $method === PaymentMethod::BankTransfer ? ['bank_name' => $data->get('bank_name')] : null,
                 'receipt_path' => $method === PaymentMethod::BankTransfer
                     ? $this->resolveTemporaryUpload($request?->receipt, 'receipts', disk: 'public')

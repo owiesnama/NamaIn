@@ -14,7 +14,7 @@ class ChequeStatusController extends Controller
         $status = ChequeStatus::from($request->validated('status'));
 
         if ($status === ChequeStatus::Cleared || $status === ChequeStatus::PartiallyCleared) {
-            $clearCheque->execute($cheque, $request->validated('cleared_amount'));
+            $clearCheque->handle($cheque, $request->validated('cleared_amount'));
         } else {
             $cheque->status = $status;
             $cheque->save();

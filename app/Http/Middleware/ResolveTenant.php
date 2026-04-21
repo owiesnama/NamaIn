@@ -27,10 +27,8 @@ class ResolveTenant
         app()->instance('currentTenant', $tenant);
         URL::defaults(['tenant' => $slug]);
 
-        if (auth()->check() && auth()->user()->current_tenant_id !== $tenant->id) {
-            if (auth()->user()->belongsToTenant($tenant)) {
-                auth()->user()->switchTenant($tenant);
-            }
+        if (auth()->check() && ! auth()->user()->belongsToTenant($tenant)) {
+            abort(403, 'You do not have access to this tenant.');
         }
 
         $request->route()->forgetParameter('tenant');

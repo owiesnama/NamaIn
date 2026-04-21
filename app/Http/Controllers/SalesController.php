@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\CreateChequeAction;
+use App\Actions\StoreSaleAction;
 use App\Enums\PaymentMethod;
 use App\Filters\InvoiceFilter;
 use App\Http\Requests\CreateInvoiceRequest;
@@ -11,12 +11,9 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
-use App\Traits\HandlesAsyncUploads;
 
 class SalesController extends Controller
 {
-    use HandlesAsyncUploads;
-
     public function index(InvoiceFilter $filter)
     {
         return inertia('Sales/Index', [
@@ -50,51 +47,9 @@ class SalesController extends Controller
         ]);
     }
 
-    public function store(CreateInvoiceRequest $request, CreateChequeAction $createCheque)
+    public function store(CreateInvoiceRequest $request, StoreSaleAction $storeSale)
     {
-        $invoice = Invoice::sale(collect($request->all()));
-        $invoice->save();
-
-        // Handle payment
-        if ($request->payment_method === 'cash') {
-            $invoice->recordPayment(
-                amount: $invoice->total - $invoice->discount,
-                method: PaymentMethod::Cash,
-                reference: $request->payment_reference,
-                notes: 'Cash payment on sale'
-            );
-        } elseif ($request->payment_method && $request->initial_payment_amount > 0) {
-            $metadata = null;
-            $receiptPath = null;
-
-            // Handle bank transfer
-            if ($request->payment_method === PaymentMethod::BankTransfer->value) {
-                $metadata = ['bank_name' => $request->bank_name];
-                $receiptPath = $this->resolveTemporaryUpload($request->receipt, 'receipts', disk: 'public');
-            }
-
-            // Record payment
-            $payment = $invoice->recordPayment(
-                amount: $request->initial_payment_amount,
-                method: PaymentMethod::from($request->payment_method),
-                reference: $request->payment_reference,
-                notes: $request->payment_notes,
-                metadata: $metadata,
-                receiptPath: $receiptPath
-            );
-
-            // Handle cheque creation
-            if ($request->payment_method === PaymentMethod::Cheque->value) {
-                $createCheque->execute($invoice->invocable, [
-                    'amount' => $request->initial_payment_amount,
-                    'type' => 1, // Receivable
-                    'due' => $request->cheque_due_date,
-                    'bank_id' => $request->cheque_bank_id,
-                    'reference_number' => $request->cheque_number,
-                    'invoice_id' => $invoice->id,
-                ]);
-            }
-        }
+        $storeSale->handle(collect($request->all()), $request);
 
         return redirect()->route('sales.index')->with('success', 'Sale created successfully');
     }

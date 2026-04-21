@@ -41,7 +41,7 @@ class LoginResponse implements LoginResponseContract
             $single = $tenants->first();
             $user->switchTenant($single);
 
-            return redirect()->away(route('dashboard', ['tenant' => $single->slug]));
+            return redirect()->away(tenant_route('dashboard', $single->slug));
         }
 
         return $request->wantsJson()

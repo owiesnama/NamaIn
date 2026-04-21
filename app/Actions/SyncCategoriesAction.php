@@ -10,7 +10,7 @@ class SyncCategoriesAction
     /**
      * Sync categories for a given model.
      */
-    public function execute(Model $model, array $categories, ?string $type = null): void
+    public function handle(Model $model, array $categories, ?string $type = null): void
     {
         $type = $type ?? strtolower(class_basename($model));
 

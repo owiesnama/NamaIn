@@ -47,7 +47,7 @@ class PurchasesController extends Controller
 
     public function store(CreateInvoiceRequest $request, StorePurchaseAction $storePurchase)
     {
-        $storePurchase->execute(collect($request->all()), $request);
+        $storePurchase->handle(collect($request->all()), $request);
 
         return redirect()->route('purchases.index')->with('success', 'Purchase created successfully');
     }

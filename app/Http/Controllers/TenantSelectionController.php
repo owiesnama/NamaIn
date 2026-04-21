@@ -31,41 +31,21 @@ class TenantSelectionController extends Controller
         return $this->redirectToTenant($request, $tenant);
     }
 
+    public function switchFrom(Request $request, Tenant $target): RedirectResponse|HttpResponse
+    {
+        return $this->redirectToTenant($request, $target);
+    }
+
     private function redirectToTenant(Request $request, Tenant $tenant): RedirectResponse|HttpResponse
     {
         $request->user()->switchTenant($tenant);
 
-        $targetUrl = $this->tenantDashboardUrl($request, $tenant);
+        $targetUrl = tenant_route('dashboard', $tenant->slug);
 
         if ($request->header('X-Inertia')) {
             return Inertia::location($targetUrl);
         }
 
         return redirect()->away($targetUrl);
-    }
-
-    private function tenantDashboardUrl(Request $request, Tenant $tenant): string
-    {
-        $baseUrl = $request->getSchemeAndHttpHost();
-        $host = $request->getHost();
-
-        if (str_starts_with($host, $tenant->slug.'.')) {
-            return "{$baseUrl}/dashboard";
-        }
-
-        $baseDomain = $host;
-
-        if (app()->bound('currentTenant')) {
-            $currentTenant = app('currentTenant');
-
-            if ($currentTenant && str_starts_with($host, $currentTenant->slug.'.')) {
-                $baseDomain = substr($host, strlen($currentTenant->slug) + 1);
-            }
-        }
-
-        $targetHost = $tenant->slug.'.'.$baseDomain;
-        $targetBaseUrl = str_replace($host, $targetHost, $baseUrl);
-
-        return "{$targetBaseUrl}/dashboard";
     }
 }

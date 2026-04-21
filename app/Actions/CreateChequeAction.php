@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CreateChequeAction
 {
-    public function execute(Model $payee, array $data): Cheque
+    public function handle(Model $payee, array $data): Cheque
     {
         return Cheque::create([
             'chequeable_id' => $payee->id,

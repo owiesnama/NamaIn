@@ -97,36 +97,25 @@ class Invoice extends BaseModel
     }
 
     /**
-     * Adds a purchase transaction for the invoice.
+     * Create a purchase invoice with transactions.
      */
     public static function purchase(Collection $attributes): Invoice
     {
-        $invoice = static::createInvoice($attributes);
-        $products = collect($attributes->get('products'));
-        $unitIds = $products->pluck('unit')->filter()->unique();
-        $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
-
-        $invoice->addTransaction($products->map(function ($product) use ($units) {
-            return [
-                'product_id' => $product['product'],
-                'storage_id' => $product['storage'] ?? null,
-                'unit_id' => $product['unit'] ?? null,
-                'quantity' => $product['quantity'],
-                'price' => $product['price'],
-                'description' => $product['description'] ?? null,
-                'base_quantity' => isset($units[$product['unit'] ?? null])
-                    ? $units[$product['unit']]->conversion_factor * $product['quantity']
-                    : $product['quantity'],
-            ];
-        }));
-
-        return $invoice;
+        return static::createWithTransactions($attributes);
     }
 
     /**
-     * Adds a sale transaction for the invoice.
+     * Create a sale invoice with transactions.
      */
     public static function sale(Collection $attributes): Invoice
+    {
+        return static::createWithTransactions($attributes);
+    }
+
+    /**
+     * Create an invoice and attach product transactions from the given attributes.
+     */
+    private static function createWithTransactions(Collection $attributes): Invoice
     {
         $invoice = static::createInvoice($attributes);
         $products = collect($attributes->get('products'));

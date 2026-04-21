@@ -17,8 +17,20 @@
         return usePage().props.locale === "ar" ? "rtl" : "ltr";
     });
 
+    const page = usePage();
+
     const logout = () => {
         router.post(route("logout"));
+    };
+
+    const switchingToTenant = ref(null);
+
+    const switchTenant = (tenant) => {
+        if (switchingToTenant.value) return;
+        switchingToTenant.value = tenant.id;
+        router.post(`${window.location.origin}/switch-tenant/${tenant.id}`, {}, {
+            onFinish: () => { switchingToTenant.value = null; },
+        });
     };
 </script>
 
@@ -403,32 +415,100 @@
 
                                             <template #content>
                                                 <!-- Account Management -->
-                                                <div
-                                                    class="block px-4 py-2 text-xs text-gray-400"
-                                                >
+                                                <div class="block px-4 py-2 text-xs text-gray-400">
                                                     {{__('Manage Account')}}
                                                 </div>
 
-                                                <DropdownLink
-                                                    :href="
-                                                        route('profile.show')
-                                                    "
-                                                >
+                                                <DropdownLink :href="route('profile.show')">
                                                     {{__('Profile')}}
                                                 </DropdownLink>
 
-                                                <DropdownLink
-                                                    :href="
-                                                        route(
-                                                            'preferences.index'
-                                                        )
-                                                    "
-                                                >
+                                                <DropdownLink :href="route('preferences.index')">
                                                     {{__('Preferences')}}
                                                 </DropdownLink>
-                                                <div
-                                                    class="border-t border-gray-100"
-                                                />
+
+                                                <!-- Tenant Switcher -->
+                                                <template v-if="$page.props.tenants?.length > 1">
+                                                    <div class="border-t border-gray-100 dark:border-gray-700 mx-3 my-1" />
+
+                                                    <div class="px-4 pt-2 pb-1">
+                                                        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">{{ __('Workspaces') }}</p>
+                                                    </div>
+
+                                                    <div class="px-2 pb-2 space-y-0.5">
+                                                        <button
+                                                            v-for="tenant in $page.props.tenants"
+                                                            :key="tenant.id"
+                                                            type="button"
+                                                            class="flex items-center gap-3 w-full px-2.5 py-2 rounded-lg text-sm transition-all duration-150 group focus:outline-none"
+                                                            :class="[
+                                                                tenant.id === $page.props.currentTenant?.id
+                                                                    ? 'bg-emerald-50 dark:bg-emerald-900/20 cursor-default'
+                                                                    : switchingToTenant === tenant.id
+                                                                        ? 'bg-gray-100 dark:bg-gray-800 cursor-wait'
+                                                                        : 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer',
+                                                                switchingToTenant && switchingToTenant !== tenant.id && tenant.id !== $page.props.currentTenant?.id
+                                                                    ? 'opacity-50' : ''
+                                                            ]"
+                                                            :disabled="tenant.id === $page.props.currentTenant?.id || !!switchingToTenant"
+                                                            @click="tenant.id !== $page.props.currentTenant?.id && switchTenant(tenant)"
+                                                        >
+                                                            <!-- Avatar / Spinner -->
+                                                            <span
+                                                                class="flex-shrink-0 flex items-center justify-center w-7 h-7 rounded-md text-xs font-bold uppercase transition-colors"
+                                                                :class="tenant.id === $page.props.currentTenant?.id
+                                                                    ? 'bg-emerald-500 text-white'
+                                                                    : switchingToTenant === tenant.id
+                                                                        ? 'bg-emerald-500 text-white'
+                                                                        : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 group-hover:bg-gray-300 dark:group-hover:bg-gray-600'"
+                                                            >
+                                                                <svg
+                                                                    v-if="switchingToTenant === tenant.id"
+                                                                    class="animate-spin w-3.5 h-3.5"
+                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                    fill="none" viewBox="0 0 24 24"
+                                                                >
+                                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                                                                </svg>
+                                                                <template v-else>{{ tenant.name.charAt(0) }}</template>
+                                                            </span>
+
+                                                            <span
+                                                                class="flex-1 text-left truncate font-medium ltr:text-left rtl:text-right"
+                                                                :class="tenant.id === $page.props.currentTenant?.id
+                                                                    ? 'text-emerald-700 dark:text-emerald-400'
+                                                                    : switchingToTenant === tenant.id
+                                                                        ? 'text-emerald-600 dark:text-emerald-400'
+                                                                        : 'text-gray-700 dark:text-gray-300'"
+                                                            >{{ tenant.name }}</span>
+
+                                                            <!-- Active badge -->
+                                                            <span
+                                                                v-if="tenant.id === $page.props.currentTenant?.id"
+                                                                class="flex-shrink-0 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
+                                                            >{{ __('Active') }}</span>
+
+                                                            <!-- Switching label -->
+                                                            <span
+                                                                v-else-if="switchingToTenant === tenant.id"
+                                                                class="flex-shrink-0 text-xs text-emerald-600 dark:text-emerald-400 font-medium"
+                                                            >{{ __('Switching…') }}</span>
+
+                                                            <!-- Arrow on hover -->
+                                                            <svg
+                                                                v-else
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                class="w-3.5 h-3.5 text-gray-400 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity rtl:rotate-180"
+                                                                fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                                            >
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </template>
+
+                                                <div class="border-t border-gray-100" />
 
                                                 <!-- Authentication -->
                                                 <form>

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ChequeStatus;
+use App\Enums\ChequeType;
 use App\Filters\Filters;
 use Carbon\Carbon;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -31,6 +32,7 @@ class Cheque extends BaseModel
         return [
             'due' => 'datetime',
             'status' => ChequeStatus::class,
+            'type' => ChequeType::class,
         ];
     }
 
@@ -50,7 +52,7 @@ class Cheque extends BaseModel
      */
     public function getIsCreditAttribute(): bool
     {
-        return $this->type === 1;
+        return $this->type === ChequeType::Receivable;
     }
 
     /**
@@ -89,12 +91,12 @@ class Cheque extends BaseModel
 
     public function scopeReceivable(Builder $query): Builder
     {
-        return $query->where('type', 1);
+        return $query->where('type', ChequeType::Receivable);
     }
 
     public function scopePayable(Builder $query): Builder
     {
-        return $query->where('type', 0);
+        return $query->where('type', ChequeType::Payable);
     }
 
     public function scopeOverdue(Builder $query): Builder
@@ -105,12 +107,12 @@ class Cheque extends BaseModel
 
     public function isReceivable(): bool
     {
-        return $this->type === 1;
+        return $this->type === ChequeType::Receivable;
     }
 
     public function isPayable(): bool
     {
-        return $this->type === 0;
+        return $this->type === ChequeType::Payable;
     }
 
     public function isEditable(): bool

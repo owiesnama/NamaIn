@@ -23,7 +23,7 @@ class StoreExpense
             'receipt_path' => $this->storeReceipt($request),
         ]);
 
-        $this->syncCategories->execute($expense, $request->category_objects ?? [], 'expense');
+        $this->syncCategories->handle($expense, $request->category_objects ?? [], 'expense');
 
         if ($request->boolean('is_recurring')) {
             $this->createRecurringTemplate($expense, $request);
