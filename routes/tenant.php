@@ -99,6 +99,6 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::post('/uploads/tmp', [TemporaryUploadController::class, 'store'])->name('uploads.tmp.store');
         Route::delete('/uploads/tmp', [TemporaryUploadController::class, 'destroy'])->name('uploads.tmp.destroy');
 
-        Route::post('/switch-tenant/{target}', [TenantSelectionController::class, 'switchFrom'])->name('tenants.switch');
+        Route::post('/switch-tenant/{target}', [TenantSelectionController::class, 'switchFrom'])->name('tenant.switch');
     });
 });
