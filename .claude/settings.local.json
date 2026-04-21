@@ -36,7 +36,10 @@
       "Bash(cmd.exe:*)",
       "Bash(./vendor/bin/pest --compact)",
       "Bash(cmd /c \"php artisan test --compact 2>&1\")",
-      "Bash(cmd:*)"
+      "Bash(cmd:*)",
+      "Bash(ls /usr/local/bin/php*)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84 artisan:*)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84/php.exe:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

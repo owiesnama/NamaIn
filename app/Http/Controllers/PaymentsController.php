@@ -9,6 +9,7 @@ use App\Http\Requests\PaymentRequest;
 use App\Models\Bank;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Supplier;
 use App\Traits\HandlesAsyncUploads;
 use Inertia\Response;
