@@ -2,8 +2,9 @@
 
 namespace App\Http\Responses;
 
-use Illuminate\Http\JsonResponse;
+use App\Models\Tenant;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,9 +14,7 @@ class LoginResponse implements LoginResponseContract
     {
         /** @var Request $request */
         $user = $request->user();
-
-        // If arriving via subdomain, the tenant is already resolved
-        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        $tenant = $this->resolveTenantFromHost($request);
 
         if ($tenant) {
             if (! $user->belongsToTenant($tenant)) {
@@ -29,9 +28,7 @@ class LoginResponse implements LoginResponseContract
 
             $user->switchTenant($tenant);
 
-            return $request->wantsJson()
-                ? new JsonResponse(['two_factor' => false])
-                : redirect()->intended('/dashboard');
+            return Inertia::location(tenant_route('dashboard', $tenant->slug));
         }
 
         // Main domain login — redirect to tenant selector
@@ -41,11 +38,23 @@ class LoginResponse implements LoginResponseContract
             $single = $tenants->first();
             $user->switchTenant($single);
 
-            return redirect()->away(tenant_route('dashboard', $single->slug));
+            return Inertia::location(tenant_route('dashboard', $single->slug));
         }
 
-        return $request->wantsJson()
-            ? new JsonResponse(['two_factor' => false])
-            : redirect()->route('tenants.select');
+        return Inertia::location(route('tenants.select'));
+    }
+
+    private function resolveTenantFromHost(Request $request): ?Tenant
+    {
+        $appDomain = config('app.domain');
+        $host = $request->getHost();
+
+        if ($host === $appDomain || ! str_ends_with($host, '.' . $appDomain)) {
+            return null;
+        }
+
+        $slug = str_replace('.' . $appDomain, '', $host);
+
+        return Tenant::where('slug', $slug)->first();
     }
 }

@@ -22,7 +22,7 @@ class CreateNewUser implements CreatesNewUsers
     {
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => $this->passwordRules(),
             'tenant_name' => ['required', 'string', 'max:255'],
             'tenant_slug' => ['required', 'string', 'max:255', 'unique:tenants,slug', 'alpha_dash:ascii'],
@@ -33,15 +33,12 @@ class CreateNewUser implements CreatesNewUsers
             'slug' => Str::lower($input['tenant_slug']),
         ]);
 
-        $user = User::firstOrCreate(
-            ['email' => $input['email']],
-            [
-                'name' => $input['name'],
-                'password' => Hash::make($input['password']),
-            ]
-        );
-
-        $user->update(['current_tenant_id' => $tenant->id]);
+        $user = User::create([
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'password' => Hash::make($input['password']),
+            'current_tenant_id' => $tenant->id,
+        ]);
 
         $tenant->users()->attach($user->id, ['role' => 'owner']);
 

@@ -2,8 +2,8 @@
 
 namespace App\Http\Responses;
 
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 use Laravel\Fortify\Contracts\RegisterResponse as RegisterResponseContract;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -16,15 +16,9 @@ class RegisterResponse implements RegisterResponseContract
         $tenant = $user?->currentTenant;
 
         if ($tenant) {
-            $tenantDashboardUrl = route('dashboard', ['tenant' => $tenant->slug]);
-
-            return $request->wantsJson()
-                ? new JsonResponse(['redirect' => $tenantDashboardUrl])
-                : redirect()->away($tenantDashboardUrl);
+            return Inertia::location(tenant_route('dashboard', $tenant->slug));
         }
 
-        return $request->wantsJson()
-            ? new JsonResponse(['redirect' => '/'])
-            : redirect('/');
+        return Inertia::location('/');
     }
 }
