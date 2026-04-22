@@ -2,11 +2,12 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
-use Laravel\Jetstream\Jetstream;
 
 class CreateNewUser implements CreatesNewUsers
 {
@@ -23,13 +24,24 @@ class CreateNewUser implements CreatesNewUsers
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => $this->passwordRules(),
-            'terms' => Jetstream::hasTermsAndPrivacyPolicyFeature() ? ['accepted', 'required'] : '',
+            'tenant_name' => ['required', 'string', 'max:255'],
+            'tenant_slug' => ['required', 'string', 'max:255', 'unique:tenants,slug', 'alpha_dash:ascii'],
         ])->validate();
 
-        return User::create([
+        $tenant = Tenant::create([
+            'name' => $input['tenant_name'],
+            'slug' => Str::lower($input['tenant_slug']),
+        ]);
+
+        $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => Hash::make($input['password']),
+            'current_tenant_id' => $tenant->id,
         ]);
+
+        $tenant->users()->attach($user->id, ['role' => 'owner']);
+
+        return $user;
     }
 }

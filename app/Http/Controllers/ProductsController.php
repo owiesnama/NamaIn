@@ -8,7 +8,6 @@ use App\Filters\ProductFilter;
 use App\Http\Requests\ProductRequest;
 use App\Imports\ProductImport;
 use App\Models\Category;
-use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\Transaction;
@@ -53,8 +52,8 @@ class ProductsController extends Controller
             'storages' => Storage::all(),
             'filters' => request()->only(['from_date', 'to_date', 'storage_id', 'type']),
             'stats' => [
-                'sales_count' => (float) (clone $query)->whereHas('invoice', fn ($q) => $q->where('invocable_type', Customer::class))->sum('base_quantity'),
-                'purchases_count' => (float) (clone $query)->whereHas('invoice', fn ($q) => $q->where('invocable_type', '!=', Customer::class))->sum('base_quantity'),
+                'sales_count' => (float) (clone $query)->forCustomer()->sum('base_quantity'),
+                'purchases_count' => (float) (clone $query)->forSupplier()->sum('base_quantity'),
                 'current_stock' => $product->quantityOnHand(),
                 'available_qty' => $product->availableQuantity(),
                 'pending_sales' => $product->pendingSalesQuantity(),
@@ -71,7 +70,7 @@ class ProductsController extends Controller
 
         $product->syncUnits($request->get('units'));
 
-        $syncCategoriesAction->execute($product, $request->get('categories'), 'product');
+        $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
 
         return redirect()->route('products.index')->with('success', 'Product has been Created Successfully');
     }
@@ -82,7 +81,7 @@ class ProductsController extends Controller
 
         $product->syncUnits($request->get('units'));
 
-        $syncCategoriesAction->execute($product, $request->get('categories'), 'product');
+        $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
 
         return back()->with('success', __('Product updated successfully'));
     }

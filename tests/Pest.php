@@ -1,5 +1,9 @@
 <?php
 
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\URL;
 use Tests\DuskTestCase;
 use Tests\TestCase;
 
@@ -19,7 +23,11 @@ uses(
 |
 */
 
-uses(TestCase::class)->in('Feature');
+uses(TestCase::class, RefreshDatabase::class)->beforeEach(function () {
+    $tenant = Tenant::create(['name' => 'Test Org', 'slug' => 'test-org', 'is_active' => true]);
+    app()->instance('currentTenant', $tenant);
+    URL::defaults(['tenant' => $tenant->slug]);
+})->in('Feature');
 
 /*
 |--------------------------------------------------------------------------
@@ -50,4 +58,25 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function actingAsTenantUser(?User $user = null): TestCase
+{
+    $tenant = Tenant::create(['name' => 'Test Org', 'slug' => 'test-org', 'is_active' => true]);
+
+    $user = $user ?? User::factory()->create(['current_tenant_id' => $tenant->id]);
+    $user->markEmailAsVerified();
+
+    if (! $user->belongsToTenant($tenant)) {
+        $tenant->users()->attach($user, ['role' => 'owner']);
+    }
+
+    if ($user->current_tenant_id !== $tenant->id) {
+        $user->update(['current_tenant_id' => $tenant->id]);
+    }
+
+    URL::defaults(['tenant' => $tenant->slug]);
+    app()->instance('currentTenant', $tenant);
+
+    return test()->actingAs($user);
 }

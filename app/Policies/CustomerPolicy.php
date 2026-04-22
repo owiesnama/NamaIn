@@ -44,7 +44,7 @@ class CustomerPolicy
      */
     public function delete(User $user): bool
     {
-        return true;
+        return $user->isAdmin();
     }
 
     /**

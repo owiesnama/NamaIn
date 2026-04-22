@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\CreateChequeAction;
+use App\Actions\RecordPaymentAction;
 use App\Enums\PaymentMethod;
 use App\Filters\PaymentFilter;
 use App\Http\Requests\PaymentRequest;
@@ -52,57 +52,32 @@ class PaymentsController extends Controller
         ]);
     }
 
-    public function store(PaymentRequest $request, CreateChequeAction $createCheque)
+    public function store(PaymentRequest $request, RecordPaymentAction $recordPayment)
     {
-        $metadata = null;
-        $receiptPath = null;
+        $method = PaymentMethod::from($request->payment_method);
+        $invoice = $request->invoice_id ? Invoice::findOrFail($request->invoice_id) : null;
+        $payable = $invoice
+            ? $invoice->invocable
+            : ($request->payable_type)::findOrFail($request->payable_id);
 
-        if ($request->payment_method === PaymentMethod::BankTransfer->value) {
-            $metadata = ['bank_name' => $request->bank_name];
-            $receiptPath = $this->resolveTemporaryUpload($request->receipt, 'receipts', disk: 'public');
-        }
-
-        if ($request->invoice_id) {
-            $invoice = Invoice::findOrFail($request->invoice_id);
-
-            $payment = $invoice->recordPayment(
-                amount: $request->amount,
-                method: PaymentMethod::from($request->payment_method),
-                reference: $request->reference,
-                notes: $request->notes,
-                metadata: $metadata,
-                receiptPath: $receiptPath,
-                paidAt: $request->paid_at
-            );
-        } else {
-            $payment = Payment::create([
-                'payable_id' => $request->payable_id,
-                'payable_type' => $request->payable_type,
-                'amount' => $request->amount,
-                'payment_method' => PaymentMethod::from($request->payment_method),
+        $recordPayment->handle(
+            invoice: $invoice,
+            payable: $payable,
+            amount: $request->amount,
+            method: $method,
+            options: [
                 'reference' => $request->reference,
                 'notes' => $request->notes,
-                'paid_at' => $request->paid_at ?? now(),
-                'created_by' => auth()->id(),
-                'metadata' => $metadata,
-                'receipt_path' => $receiptPath,
-            ]);
-        }
-
-        if ($request->payment_method === PaymentMethod::Cheque->value) {
-            $payee = $request->invoice_id
-                ? $invoice->invocable
-                : $payment->payable;
-
-            $createCheque->execute($payee, [
-                'amount' => $request->amount,
-                'type' => $payee instanceof Supplier ? 0 : 1, // 1 for Receivable (Customer), 0 for Payable (Supplier)
-                'due' => $request->cheque_due_date,
-                'bank_id' => $request->cheque_bank_id,
-                'reference_number' => $request->cheque_number,
-                'invoice_id' => $request->invoice_id,
-            ]);
-        }
+                'paid_at' => $request->paid_at,
+                'metadata' => $method === PaymentMethod::BankTransfer ? ['bank_name' => $request->bank_name] : null,
+                'receipt_path' => $method === PaymentMethod::BankTransfer
+                    ? $this->resolveTemporaryUpload($request->receipt, 'receipts', disk: 'public')
+                    : null,
+                'cheque_due' => $request->cheque_due_date,
+                'cheque_bank_id' => $request->cheque_bank_id,
+                'cheque_reference' => $request->cheque_number,
+            ]
+        );
 
         return redirect()
             ->route('payments.index')

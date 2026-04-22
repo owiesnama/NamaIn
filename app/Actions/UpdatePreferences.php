@@ -4,11 +4,11 @@ namespace App\Actions;
 
 use App\Http\Requests\PreferenceRequest;
 use App\Models\Preference;
-use Illuminate\Support\Facades\Cache;
+use App\Services\TenantCache;
 
 class UpdatePreferences
 {
-    public function execute(PreferenceRequest $request): void
+    public function handle(PreferenceRequest $request): void
     {
         foreach ($request->validated() as $key => $value) {
             $value = $this->resolveValue($key, $value, $request);
@@ -23,7 +23,7 @@ class UpdatePreferences
             );
         }
 
-        Cache::forget('preferences');
+        TenantCache::forget('preferences');
     }
 
     private function resolveValue(string $key, mixed $value, PreferenceRequest $request): mixed

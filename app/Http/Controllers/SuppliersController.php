@@ -12,11 +12,12 @@ use App\Models\Supplier;
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;
 use App\Services\StatementService;
-use App\Traits\HasPartyFeatures;
+use App\Traits\HandlesPartyAccount;
+use App\Traits\HandlesPartyImportExport;
 
 class SuppliersController extends Controller
 {
-    use HasPartyFeatures;
+    use HandlesPartyAccount, HandlesPartyImportExport;
 
     protected string $model = Supplier::class;
 
@@ -44,7 +45,7 @@ class SuppliersController extends Controller
                 ->get()
                 ->map(fn ($supplier) => [
                     ...$supplier->toArray(),
-                    'account_balance' => (float) $supplier->calculateAccountBalance(),
+                    'account_balance' => (float) $supplier->account_balance,
                     'total_invoiced' => (float) $supplier->invoices()->sum(\DB::raw('total - discount')),
                     'last_transaction_date' => $supplier->invoices()->latest()->value('created_at'),
                 ]),
@@ -56,7 +57,7 @@ class SuppliersController extends Controller
     {
         $supplier = Supplier::create($request->safe()->except('categories'));
 
-        $syncCategories->execute($supplier, $request->get('categories', []));
+        $syncCategories->handle($supplier, $request->get('categories', []));
 
         if ($request->wantsJson() || $request->hasHeader('X-Quick-Add')) {
             return response()->json([
@@ -73,7 +74,7 @@ class SuppliersController extends Controller
     {
         $supplier->update($request->safe()->except('categories'));
 
-        $syncCategories->execute($supplier, $request->get('categories', []));
+        $syncCategories->handle($supplier, $request->get('categories', []));
 
         return back()->with('success', 'Supplier updated successfully');
     }

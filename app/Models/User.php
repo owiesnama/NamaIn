@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
@@ -61,5 +63,29 @@ class User extends Authenticatable
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function tenants(): BelongsToMany
+    {
+        return $this->belongsToMany(Tenant::class)->withPivot('role')->withTimestamps();
+    }
+
+    public function currentTenant(): BelongsTo
+    {
+        return $this->belongsTo(Tenant::class, 'current_tenant_id');
+    }
+
+    public function switchTenant(Tenant $tenant): void
+    {
+        if (! $this->belongsToTenant($tenant)) {
+            throw new \DomainException('User does not belong to this tenant.');
+        }
+
+        $this->update(['current_tenant_id' => $tenant->id]);
+    }
+
+    public function belongsToTenant(Tenant $tenant): bool
+    {
+        return $this->tenants()->where('tenants.id', $tenant->id)->exists();
     }
 }

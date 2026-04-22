@@ -30,7 +30,16 @@
       "mcp__laravel-boost__database-query",
       "mcp__laravel-boost__last-error",
       "Bash(python3 -c \"import json; json.load\\(open\\('lang/ar.json', encoding='utf-8'\\)\\)\")",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(C:/Users/Owiesnama/AppData/Local/Programs/PHP/php8.4/php.exe artisan:*)",
+      "Bash(./vendor/bin/pint:*)",
+      "Bash(cmd.exe:*)",
+      "Bash(./vendor/bin/pest --compact)",
+      "Bash(cmd /c \"php artisan test --compact 2>&1\")",
+      "Bash(cmd:*)",
+      "Bash(ls /usr/local/bin/php*)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84 artisan:*)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84/php.exe:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

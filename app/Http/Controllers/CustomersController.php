@@ -12,11 +12,12 @@ use App\Models\Customer;
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;
 use App\Services\StatementService;
-use App\Traits\HasPartyFeatures;
+use App\Traits\HandlesPartyAccount;
+use App\Traits\HandlesPartyImportExport;
 
 class CustomersController extends Controller
 {
-    use HasPartyFeatures;
+    use HandlesPartyAccount, HandlesPartyImportExport;
 
     protected string $model = Customer::class;
 
@@ -44,7 +45,7 @@ class CustomersController extends Controller
                 ->get()
                 ->map(fn ($customer) => [
                     ...$customer->toArray(),
-                    'account_balance' => (float) $customer->calculateAccountBalance(),
+                    'account_balance' => (float) $customer->account_balance,
                     'total_invoiced' => (float) $customer->invoices()->sum(\DB::raw('total - discount')),
                     'last_transaction_date' => $customer->invoices()->latest()->value('created_at'),
                 ]),
@@ -56,7 +57,7 @@ class CustomersController extends Controller
     {
         $customer = Customer::create($request->safe()->except('categories'));
 
-        $syncCategories->execute($customer, $request->get('categories', []));
+        $syncCategories->handle($customer, $request->get('categories', []));
 
         if ($request->wantsJson() || $request->hasHeader('X-Quick-Add')) {
             return response()->json([
@@ -73,7 +74,7 @@ class CustomersController extends Controller
     {
         $customer->update($request->safe()->except('categories'));
 
-        $syncCategories->execute($customer, $request->get('categories', []));
+        $syncCategories->handle($customer, $request->get('categories', []));
 
         return back()->with('success', 'customer updated successfully');
     }

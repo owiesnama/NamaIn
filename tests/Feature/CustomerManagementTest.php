@@ -10,7 +10,7 @@ test('Auth Users Can See Customers Page', function () {
     $this->get(route('customers.index'))
         ->assertRedirect();
     $user = User::factory()->create();
-    $this->be($user)
+    $this->actingAs($user)
         ->get(route('customers.index'))
         ->assertOk();
 });
@@ -23,7 +23,7 @@ test('Auth Users Can Create A New Customers', function () {
     ];
     $user = User::factory()->create();
 
-    $response = $this->be($user)
+    $response = $this->actingAs($user)
         ->post(route('customers.store'), $customerAttributes);
 
     $response->assertRedirect();

@@ -22,7 +22,7 @@ class UpdateExpense
             'receipt_path' => $this->replaceReceipt($request, $expense),
         ]);
 
-        $this->syncCategories->execute($expense, $request->category_objects ?? [], 'expense');
+        $this->syncCategories->handle($expense, $request->category_objects ?? [], 'expense');
 
         return $expense;
     }

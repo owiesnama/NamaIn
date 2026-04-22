@@ -20,6 +20,13 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardStatsQuery
 {
+    private function cacheKey(string $key): string
+    {
+        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
+
+        return "tenant_{$tenantId}_{$key}";
+    }
+
     public function getMonthlyStats(): array
     {
         $months = collect(range(5, 0))->map(fn ($i) => now()->subMonths($i)->format('Y-m'));
@@ -54,7 +61,7 @@ class DashboardStatsQuery
 
     public function totalSales(): float|string
     {
-        return Cache::remember('total_sales', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
+        return Cache::remember($this->cacheKey('total_sales'), $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
             ->forCustomer()
             ->totalValue()
         );
@@ -62,7 +69,7 @@ class DashboardStatsQuery
 
     public function totalInventoryValue(): float|string
     {
-        return Cache::remember('total_inventory_value', $this->cacheTtl('hour'), function () {
+        return Cache::remember($this->cacheKey('total_inventory_value'), $this->cacheTtl('hour'), function () {
             $totalValue = 0;
             Product::with(['stock', 'transactions' => function ($query) {
                 $query->where('delivered', true)
@@ -77,7 +84,7 @@ class DashboardStatsQuery
 
     public function totalPurchase(): float|string
     {
-        return Cache::remember('total_purchase', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
+        return Cache::remember($this->cacheKey('total_purchase'), $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
             ->forSupplier()
             ->totalValue()
         );
@@ -85,7 +92,7 @@ class DashboardStatsQuery
 
     public function outstandingReceivables(): float|string
     {
-        return Cache::remember('outstanding_receivables', $this->cacheTtl('hour'), fn () => Invoice::forCustomer()
+        return Cache::remember($this->cacheKey('outstanding_receivables'), $this->cacheTtl('hour'), fn () => Invoice::forCustomer()
             ->outstanding()
             ->sum(DB::raw('(total - discount) - paid_amount'))
         );
@@ -93,7 +100,7 @@ class DashboardStatsQuery
 
     public function paymentsThisMonth(): float|string
     {
-        return Cache::remember('payments_this_month', $this->cacheTtl('hour'), fn () => Payment::whereMonth('paid_at', now()->month)
+        return Cache::remember($this->cacheKey('payments_this_month'), $this->cacheTtl('hour'), fn () => Payment::whereMonth('paid_at', now()->month)
             ->whereYear('paid_at', now()->year)
             ->sum('amount')
         );
@@ -101,7 +108,7 @@ class DashboardStatsQuery
 
     public function expensesThisMonth(): float|string
     {
-        return Cache::remember('expenses_this_month', $this->cacheTtl('hour'), fn () => Expense::where(function ($q) {
+        return Cache::remember($this->cacheKey('expenses_this_month'), $this->cacheTtl('hour'), fn () => Expense::where(function ($q) {
             $q->where('status', ExpenseStatus::Approved)
                 ->orWhereNull('status');
         })
@@ -112,7 +119,7 @@ class DashboardStatsQuery
 
     public function outstandingPayables(): float|string
     {
-        return Cache::remember('outstanding_payables', $this->cacheTtl('hour'), fn () => Invoice::forSupplier()
+        return Cache::remember($this->cacheKey('outstanding_payables'), $this->cacheTtl('hour'), fn () => Invoice::forSupplier()
             ->outstanding()
             ->sum(DB::raw('(total - discount) - paid_amount'))
         );
@@ -120,7 +127,7 @@ class DashboardStatsQuery
 
     public function upcomingCheques(): Collection
     {
-        return Cache::remember('upcoming_cheques', $this->cacheTtl('hour'), fn () => Cheque::whereIn('status', [ChequeStatus::Issued, ChequeStatus::Deposited])
+        return Cache::remember($this->cacheKey('upcoming_cheques'), $this->cacheTtl('hour'), fn () => Cheque::whereIn('status', [ChequeStatus::Issued, ChequeStatus::Deposited])
             ->where('due', '<=', now()->addDays(7))
             ->with('payee')
             ->orderBy('due')
@@ -131,7 +138,7 @@ class DashboardStatsQuery
 
     public function recentPayments(): Collection
     {
-        return Cache::remember('recent_payments', $this->cacheTtl('hour'), fn () => Payment::with(['invoice.invocable', 'createdBy'])
+        return Cache::remember($this->cacheKey('recent_payments'), $this->cacheTtl('hour'), fn () => Payment::with(['invoice.invocable', 'createdBy'])
             ->latest('paid_at')
             ->limit(5)
             ->get()
@@ -140,7 +147,7 @@ class DashboardStatsQuery
 
     public function recentExpenses(): Collection
     {
-        return Cache::remember('recent_expenses', $this->cacheTtl('hour'), fn () => Expense::with('createdBy')
+        return Cache::remember($this->cacheKey('recent_expenses'), $this->cacheTtl('hour'), fn () => Expense::with('createdBy')
             ->where('status', ExpenseStatus::Approved)
             ->latest('expensed_at')
             ->limit(5)
@@ -150,7 +157,7 @@ class DashboardStatsQuery
 
     public function topSellingProducts(): Collection
     {
-        return Cache::remember('top_products', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
+        return Cache::remember($this->cacheKey('top_products'), $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
             ->forCustomer()
             ->with('product')
             ->select('product_id', DB::raw('SUM(base_quantity) as total_quantity'), DB::raw('SUM(price * base_quantity) as total_revenue'))
@@ -163,7 +170,7 @@ class DashboardStatsQuery
 
     public function topCustomers(): SupportCollection
     {
-        return Cache::remember('top_customers', $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
+        return Cache::remember($this->cacheKey('top_customers'), $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
             ->forCustomer()
             ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
             ->join('customers', 'invoices.invocable_id', '=', 'customers.id')
@@ -184,7 +191,7 @@ class DashboardStatsQuery
     {
         $stockSubquery = '(SELECT COALESCE(SUM(quantity), 0) FROM stocks WHERE stocks.product_id = products.id AND stocks.deleted_at IS NULL)';
 
-        return Cache::remember('low_stock_products', $this->cacheTtl('hour'), fn () => Product::with('stock')
+        return Cache::remember($this->cacheKey('low_stock_products'), $this->cacheTtl('hour'), fn () => Product::with('stock')
             ->whereRaw("$stockSubquery <= COALESCE(products.alert_quantity, ?)", [config('namain.min_quantity_acceptable')])
             ->orderByRaw("$stockSubquery ASC")
             ->limit(5)

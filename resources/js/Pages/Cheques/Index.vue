@@ -3,7 +3,7 @@
     import { router, Link } from "@inertiajs/vue3";
     import Cheque from "@/Shared/Cheque.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import { watch, ref, onMounted } from "vue";
+    import { watch, ref, onMounted, onUnmounted } from "vue";
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
@@ -83,7 +83,18 @@
     });
 
     onMounted(() => {
-        observer.observe(landMark.value);
+        if (landMark.value) {
+            observer.observe(landMark.value);
+        }
+    });
+
+    watch(landMark, (el, oldEl) => {
+        if (oldEl) observer.unobserve(oldEl);
+        if (el) observer.observe(el);
+    });
+
+    onUnmounted(() => {
+        observer.disconnect();
     });
 
     watch(

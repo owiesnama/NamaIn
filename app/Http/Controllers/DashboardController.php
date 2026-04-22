@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Cache;
 
 class DashboardController extends Controller
 {
+    private function tenantCacheKey(string $key): string
+    {
+        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
+
+        return "tenant_{$tenantId}_{$key}";
+    }
+
     public function index(DashboardStatsQuery $query)
     {
         $totalSales = $query->totalSales();
@@ -30,7 +37,7 @@ class DashboardController extends Controller
             'recent_expenses' => $query->recentExpenses(),
             'recent_payments' => $query->recentPayments(),
             'transactions' => $query->recentTransactions(),
-            'monthly_stats' => Cache::remember('monthly_stats', now()->addHour(), fn () => $query->getMonthlyStats()),
+            'monthly_stats' => Cache::remember($this->tenantCacheKey('monthly_stats'), now()->addHour(), fn () => $query->getMonthlyStats()),
         ]);
     }
 }

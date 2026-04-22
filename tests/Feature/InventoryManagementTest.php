@@ -18,7 +18,7 @@ test('authenticated users only can access storages page', function () {
         ->assertRedirect();
 
     $user = User::factory()->create();
-    $this->be($user)
+    $this->actingAs($user)
         ->get(route('storages.index'))
         ->assertOk();
 });
@@ -61,7 +61,7 @@ test('authenticated users can create storages', function () {
     ]);
 
     $user = User::factory()->create();
-    $this->be($user)
+    $this->actingAs($user)
         ->post(route('storages.store'), $storageAttributes)
         ->assertRedirect();
 
@@ -82,7 +82,7 @@ test('authenticated users can update storages', function () {
         ->assertRedirect();
 
     $user = User::factory()->create();
-    $this->be($user)
+    $this->actingAs($user)
         ->put(route('storages.update', $storage), $storageAttributes)
         ->assertRedirect();
 
