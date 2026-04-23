@@ -1,7 +1,8 @@
 {
     "agents": [
         "claude_code",
-        "junie"
+        "junie",
+        "copilot"
     ],
     "guidelines": true,
     "mcp": true,

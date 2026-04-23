@@ -27,6 +27,19 @@ class DashboardStatsQuery
         return "tenant_{$tenantId}_{$key}";
     }
 
+    public function grossProfit(): float
+    {
+        return (float) $this->totalSales()
+            - (float) $this->totalPurchase()
+            - (float) $this->expensesThisMonth()
+            + (float) $this->totalInventoryValue();
+    }
+
+    public function monthlyStatsCached(): array
+    {
+        return Cache::remember($this->cacheKey('monthly_stats'), now()->addHour(), fn () => $this->getMonthlyStats());
+    }
+
     public function getMonthlyStats(): array
     {
         $months = collect(range(5, 0))->map(fn ($i) => now()->subMonths($i)->format('Y-m'));

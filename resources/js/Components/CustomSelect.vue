@@ -60,17 +60,24 @@ const searchInputRef = ref(null);
 const highlightedIndex = ref(-1);
 
 const displayValue = computed(() => {
-    if (!props.modelValue) return '';
+    if (!props.modelValue && props.modelValue !== 0) return '';
 
     if (props.multiple) {
-        return props.modelValue.map(item =>
-            typeof item === 'object' ? item[props.label] : item
-        ).join(', ');
+        return props.modelValue.map(item => {
+            if (typeof item !== 'object') {
+                const option = props.options.find(o => String(typeof o === 'object' ? o[props.trackBy] : o) === String(item));
+                return option ? (typeof option === 'object' ? option[props.label] : option) : item;
+            }
+            return item[props.label];
+        }).join(', ');
     }
 
-    return typeof props.modelValue === 'object'
-        ? props.modelValue[props.label]
-        : props.modelValue;
+    if (typeof props.modelValue !== 'object') {
+        const option = props.options.find(o => String(typeof o === 'object' ? o[props.trackBy] : o) === String(props.modelValue));
+        return option ? (typeof option === 'object' ? option[props.label] : option) : props.modelValue;
+    }
+
+    return props.modelValue[props.label];
 });
 
 const filteredOptions = computed(() => {
@@ -119,6 +126,12 @@ const hasValue = computed(() => {
     return props.modelValue !== null && props.modelValue !== undefined && props.modelValue !== '';
 });
 
+const selectedOption = computed(() => {
+    if (!hasValue.value) return null;
+    if (typeof props.modelValue === 'object') return props.modelValue;
+    return props.options.find(o => String(typeof o === 'object' ? o[props.trackBy] : o) === String(props.modelValue)) ?? null;
+});
+
 const toggleDropdown = () => {
     if (props.disabled) return;
 
@@ -127,6 +140,7 @@ const toggleDropdown = () => {
     if (isOpen.value) {
         searchQuery.value = '';
         highlightedIndex.value = -1;
+        emit('search-change', '');
         setTimeout(() => {
             if (props.searchable && searchInputRef.value) {
                 searchInputRef.value.focus();
@@ -150,7 +164,7 @@ const selectOption = (option) => {
         const optionId = typeof option === 'object' ? option[props.trackBy] : option;
         const index = currentValue.findIndex(item => {
             const itemId = typeof item === 'object' ? item[props.trackBy] : item;
-            return itemId === optionId;
+            return String(itemId) === String(optionId);
         });
 
         if (index > -1) {
@@ -165,7 +179,8 @@ const selectOption = (option) => {
             searchQuery.value = '';
         }
     } else {
-        emit('update:modelValue', option);
+        const value = typeof option === 'object' ? option[props.trackBy] : option;
+        emit('update:modelValue', value);
     }
 
     if (props.closeOnSelect) {
@@ -176,7 +191,7 @@ const selectOption = (option) => {
 };
 
 const isSelected = (option) => {
-    if (!props.modelValue) return false;
+    if (!props.modelValue && props.modelValue !== 0) return false;
 
     if (props.multiple) {
         const optionId = typeof option === 'object' ? option[props.trackBy] : option;
@@ -188,7 +203,7 @@ const isSelected = (option) => {
 
     const optionId = typeof option === 'object' ? option[props.trackBy] : option;
     const valueId = typeof props.modelValue === 'object' ? props.modelValue[props.trackBy] : props.modelValue;
-    return optionId === valueId;
+    return String(optionId) === String(valueId);
 };
 
 const handleClickOutside = (event) => {
@@ -259,15 +274,15 @@ onBeforeUnmount(() => {
         <div
             class="custom-select__trigger"
             :class="{ 'custom-select__trigger--open': isOpen }"
-            @click="toggleDropdown"
+            @click.stop="toggleDropdown"
             @keydown="handleKeydown"
             tabindex="0"
         >
             <div class="custom-select__value">
-                <slot name="singleLabel" :option="modelValue" v-if="hasValue">
+                <slot name="singleLabel" :option="selectedOption" v-if="hasValue">
                     <span class="custom-select__selected">{{ displayValue }}</span>
                 </slot>
-                <span v-else class="custom-select__placeholder">{{ placeholder }}</span>
+                <span v-else class="custom-select__placeholder">{{ placeholder === 'Select option' ? __('Select option') : placeholder }}</span>
             </div>
             <div class="custom-select__arrow" :class="{ 'custom-select__arrow--open': isOpen }">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -279,14 +294,14 @@ onBeforeUnmount(() => {
         <Transition name="dropdown">
             <div v-if="isOpen" class="custom-select__dropdown">
                 <div v-if="searchable" class="custom-select__search">
-                    <input
-                        ref="searchInputRef"
-                        v-model="searchQuery"
-                        type="text"
-                        class="custom-select__search-input"
-                        :placeholder="placeholder"
-                        @keydown="handleKeydown"
-                    />
+                        <input
+                            ref="searchInputRef"
+                            v-model="searchQuery"
+                            type="text"
+                            class="custom-select__search-input"
+                            :placeholder="placeholder === 'Select option' ? __('Select option') : placeholder"
+                            @keydown="handleKeydown"
+                        />
                 </div>
 
                 <div ref="dropdownRef" class="custom-select__options">
@@ -305,7 +320,7 @@ onBeforeUnmount(() => {
                         >
                             <slot name="option" :option="option" :index="index">
                                 <template v-if="option.isTag">
-                                    <span>{{ tagPlaceholder }}: <strong>{{ option[label] }}</strong></span>
+                                    <span>{{ tagPlaceholder === 'Press enter to create a tag' ? __('Press enter to create a tag') : tagPlaceholder }}: <strong>{{ option[label] }}</strong></span>
                                 </template>
                                 <template v-else>
                                     <span>{{ typeof option === 'object' ? option[label] : option }}</span>
@@ -318,7 +333,7 @@ onBeforeUnmount(() => {
                     </template>
                     <div v-else class="custom-select__no-results">
                         <slot name="noResult">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No results found</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">{{ __('No results found') }}</p>
                         </slot>
                     </div>
                 </div>
@@ -345,11 +360,11 @@ onBeforeUnmount(() => {
     min-height: 42px;
     padding: 0.5rem 0.75rem;
     padding-inline-end: 2.5rem;
-    border: 1px solid rgb(209 213 219);
-    border-radius: 0.375rem;
-    background-color: transparent;
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.75rem;
+    background-color: white;
     cursor: pointer;
-    transition: border-color 0.15s ease;
+    transition: all 0.15s ease;
 }
 
 .dark .custom-select__trigger {
@@ -366,20 +381,24 @@ onBeforeUnmount(() => {
 }
 
 .custom-select__trigger--open {
-    border-color: rgb(156 163 175);
+    border-color: rgb(16 185 129);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .dark .custom-select__trigger--open {
-    border-color: rgb(75 85 99);
+    border-color: rgb(52 211 153);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
 }
 
 .custom-select__trigger:focus {
     outline: none;
-    border-color: rgb(156 163 175);
+    border-color: rgb(16 185 129);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
 }
 
 .dark .custom-select__trigger:focus {
-    border-color: rgb(75 85 99);
+    border-color: rgb(52 211 153);
+    box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.1);
 }
 
 .custom-select__value {
@@ -432,10 +451,11 @@ onBeforeUnmount(() => {
     right: 0;
     z-index: 9999;
     background-color: white;
-    border: 1px solid rgb(209 213 219);
-    border-radius: 0.375rem;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    max-height: 240px;
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    max-height: 300px;
+    overflow: hidden;
 }
 
 .dark .custom-select__dropdown {
@@ -454,9 +474,9 @@ onBeforeUnmount(() => {
 
 .custom-select__search-input {
     width: 100%;
-    padding: 0.375rem 0.5rem;
-    border: 1px solid rgb(209 213 219);
-    border-radius: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgb(229 231 235);
+    border-radius: 0.5rem;
     font-size: 0.875rem;
     background-color: transparent;
     color: rgb(17 24 39);
@@ -469,11 +489,13 @@ onBeforeUnmount(() => {
 
 .custom-select__search-input:focus {
     outline: none;
-    border-color: rgb(156 163 175);
+    border-color: rgb(16 185 129);
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.1);
 }
 
 .dark .custom-select__search-input:focus {
-    border-color: rgb(75 85 99);
+    border-color: rgb(52 211 153);
+    box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.1);
 }
 
 .custom-select__search-input::placeholder {
@@ -506,12 +528,14 @@ onBeforeUnmount(() => {
 
 .custom-select__option:hover,
 .custom-select__option--highlighted {
-    background-color: rgb(243 244 246);
+    background-color: rgb(249 250 251);
+    color: rgb(16 185 129);
 }
 
 .dark .custom-select__option:hover,
 .dark .custom-select__option--highlighted {
     background-color: rgb(31 41 55);
+    color: rgb(52 211 153);
 }
 
 .custom-select__option--tag {
@@ -524,12 +548,15 @@ onBeforeUnmount(() => {
 }
 
 .custom-select__option--selected {
-    background-color: rgb(249 250 251);
-    font-weight: 500;
+    background-color: rgb(236 253 245);
+    color: rgb(5 150 105);
+    font-weight: 600;
 }
 
 .dark .custom-select__option--selected {
-    background-color: rgb(31 41 55);
+    background-color: rgba(6, 78, 59, 0.4);
+    color: rgb(52 211 153);
+    font-weight: 600;
 }
 
 .custom-select__no-results {

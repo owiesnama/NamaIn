@@ -36,14 +36,22 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
+        if ($customer->is_system) {
+            return false;
+        }
+
         return true;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user): bool
+    public function delete(User $user, Customer $customer): bool
     {
+        if ($customer->is_system) {
+            return false;
+        }
+
         return $user->isAdmin();
     }
 

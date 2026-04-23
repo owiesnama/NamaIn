@@ -2,6 +2,7 @@
 
 use App\Models\Product;
 use App\Models\Storage;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -27,6 +28,7 @@ test('authenticated user can view storage details', function () {
     $storage = Storage::factory()->create();
     $this->signIn(User::factory()->create())
         ->get(route('storages.show', $storage))
+        ->assertStatus(200)
         ->assertInertia(fn (Assert $page) => $page->component('Storages/Show')
             ->has('products.data')
         );
@@ -52,6 +54,7 @@ test('authenticated users can create storages', function () {
     $storageAttributes = [
         'name' => 'Fake Storage',
         'address' => 'wad madni',
+        'type' => 'warehouse',
     ];
 
     $this->post(route('storages.store'), $storageAttributes)->assertRedirect();
@@ -68,14 +71,16 @@ test('authenticated users can create storages', function () {
     $this->assertDatabaseHas('storages', [
         'name' => 'Fake Storage',
         'address' => 'wad madni',
+        'type' => 'warehouse',
     ]);
 });
 
 test('authenticated users can update storages', function () {
-    $storage = Storage::factory()->create();
+    $storage = Storage::factory()->create(['type' => 'warehouse']);
     $storageAttributes = [
         'name' => 'Updated Storage',
         'address' => 'New Address',
+        'type' => 'sale_point',
     ];
 
     $this->put(route('storages.update', $storage), $storageAttributes)
@@ -89,15 +94,26 @@ test('authenticated users can update storages', function () {
     $this->assertDatabaseHas(Storage::class, $storageAttributes);
 });
 
-test('only admins can delete storages', function () {
-    $storage = Storage::factory()->create();
+test('only owners or managers can delete storages', function () {
+    $tenant = Tenant::factory()->create(['slug' => 'delete-test']);
+    $storage = Storage::factory()->create(['tenant_id' => $tenant->id]);
 
-    $this->signIn()
-        ->delete(route('storages.destroy', $storage));
+    $staff = User::factory()->create(['current_tenant_id' => $tenant->id]);
+    $tenant->users()->attach($staff, ['role' => 'staff']);
+
+    $this->actingAs($staff)
+        ->delete(route('storages.destroy', ['tenant' => $tenant->slug, 'storage' => $storage]))
+        ->assertForbidden();
+
     $this->assertNotSoftDeleted(Storage::class, ['id' => $storage->id]);
 
-    $this->signIn(User::factory()->admin()->create())
-        ->delete(route('storages.destroy', $storage));
+    $owner = User::factory()->create(['current_tenant_id' => $tenant->id]);
+    $tenant->users()->attach($owner, ['role' => 'owner']);
+
+    $this->actingAs($owner)
+        ->delete(route('storages.destroy', ['tenant' => $tenant->slug, 'storage' => $storage]))
+        ->assertRedirect();
+
     $this->assertSoftDeleted(Storage::class, ['id' => $storage->id]);
 });
 

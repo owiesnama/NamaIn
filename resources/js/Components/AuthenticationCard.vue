@@ -31,9 +31,5 @@ defineProps({
         type: String,
         default: 'max-w-md',
     },
-    dir: {
-        type: String,
-        default: 'ltr',
-    },
 });
 </script>

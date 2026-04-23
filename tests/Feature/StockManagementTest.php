@@ -12,14 +12,21 @@ use Illuminate\Support\Facades\Cache;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    $this->admin = User::factory()->create(['role' => 'admin']);
-    $this->user = User::factory()->create(['role' => 'user']);
     $this->storage = Storage::factory()->create(['name' => 'Main Warehouse']);
     $this->product = Product::factory()->create();
+
+    $this->admin = User::factory()->create();
+    $this->admin->tenants()->attach($this->storage->tenant_id, ['role' => 'owner']);
+
+    $this->user = User::factory()->create();
+    $this->user->tenants()->attach($this->storage->tenant_id, ['role' => 'staff']);
 });
 
 test('unauthorized users cannot manage stock', function () {
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::Initial]);
+    $invoice = Invoice::factory()->create([
+        'status' => InvoiceStatus::Initial,
+        'tenant_id' => $this->storage->tenant_id,
+    ]);
 
     $this->actingAs($this->user)
         ->put(route('stock.add', $this->storage), ['invoice' => $invoice->id])
@@ -31,13 +38,17 @@ test('unauthorized users cannot manage stock', function () {
 });
 
 test('authorized users can add stock from invoice', function () {
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::Initial]);
+    $invoice = Invoice::factory()->create([
+        'status' => InvoiceStatus::Initial,
+        'tenant_id' => $this->storage->tenant_id,
+    ]);
     Transaction::factory()->create([
         'invoice_id' => $invoice->id,
         'product_id' => $this->product->id,
         'storage_id' => $this->storage->id,
         'base_quantity' => 10,
         'delivered' => false,
+        'tenant_id' => $this->storage->tenant_id,
     ]);
 
     $this->actingAs($this->admin)
@@ -50,15 +61,23 @@ test('authorized users can add stock from invoice', function () {
 
 test('authorized users can deduct stock from invoice', function () {
     // Setup initial stock
-    $this->storage->addStock(['product' => $this->product->id, 'quantity' => 50]);
+    $this->storage->addStock(
+        product: $this->product->id,
+        quantity: 50,
+        reason: 'test_addition'
+    );
 
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::Initial]);
+    $invoice = Invoice::factory()->create([
+        'status' => InvoiceStatus::Initial,
+        'tenant_id' => $this->storage->tenant_id,
+    ]);
     Transaction::factory()->create([
         'invoice_id' => $invoice->id,
         'product_id' => $this->product->id,
         'storage_id' => $this->storage->id,
         'base_quantity' => 10,
         'delivered' => false,
+        'tenant_id' => $this->storage->tenant_id,
     ]);
 
     $this->actingAs($this->admin)
@@ -71,15 +90,23 @@ test('authorized users can deduct stock from invoice', function () {
 
 test('deducting stock handles partial delivery when stock is insufficient', function () {
     // Setup initial stock (less than needed)
-    $this->storage->addStock(['product' => $this->product->id, 'quantity' => 5]);
+    $this->storage->addStock(
+        product: $this->product->id,
+        quantity: 5,
+        reason: 'test_addition'
+    );
 
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::Initial]);
+    $invoice = Invoice::factory()->create([
+        'status' => InvoiceStatus::Initial,
+        'tenant_id' => $this->storage->tenant_id,
+    ]);
     Transaction::factory()->create([
         'invoice_id' => $invoice->id,
         'product_id' => $this->product->id,
         'storage_id' => $this->storage->id,
         'base_quantity' => 10,
         'delivered' => false,
+        'tenant_id' => $this->storage->tenant_id,
     ]);
 
     $this->actingAs($this->admin)
@@ -101,7 +128,10 @@ test('deducting stock handles partial delivery when stock is insufficient', func
 });
 
 test('cannot process already delivered invoice', function () {
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::Delivered]);
+    $invoice = Invoice::factory()->create([
+        'status' => InvoiceStatus::Delivered,
+        'tenant_id' => $this->storage->tenant_id,
+    ]);
 
     $this->actingAs($this->admin)
         ->put(route('stock.add', $this->storage), ['invoice' => $invoice->id])
@@ -111,13 +141,17 @@ test('cannot process already delivered invoice', function () {
 test('stock cache is invalidated after stock operations', function () {
     Cache::put('low_stock_products', ['some' => 'data']);
 
-    $invoice = Invoice::factory()->create(['status' => InvoiceStatus::Initial]);
+    $invoice = Invoice::factory()->create([
+        'status' => InvoiceStatus::Initial,
+        'tenant_id' => $this->storage->tenant_id,
+    ]);
     Transaction::factory()->create([
         'invoice_id' => $invoice->id,
         'product_id' => $this->product->id,
         'storage_id' => $this->storage->id,
         'base_quantity' => 10,
         'delivered' => false,
+        'tenant_id' => $this->storage->tenant_id,
     ]);
 
     $this->actingAs($this->admin)

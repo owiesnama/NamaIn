@@ -71,17 +71,12 @@
 
     const showQuickAddModal = ref(false);
 
-    const selectedPaymentMethod = ref({ id: 'cash', label: 'Cash' });
-    const selectedChequeBank = ref(null);
-
     const addBank = (newTag) => {
-        const bank = { name: newTag, id: newTag };
-        selectedChequeBank.value = bank;
         form.cheque_bank_id = newTag;
     };
 
     const onSupplierCreated = (supplier) => {
-        form.invocable = supplier;
+        form.invocable = supplier.id;
         localSuppliers.value.unshift(supplier);
     };
 
@@ -192,8 +187,8 @@
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
                                 <div class="md:col-span-4">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
-                                    <VueMultiselect
-                                        v-model="purchase.selectedProduct"
+                                    <CustomSelect
+                                        v-model="purchase.product"
                                         :options="products"
                                         :multiple="false"
                                         :close-on-select="true"
@@ -201,18 +196,15 @@
                                         label="name"
                                         track-by="id"
                                         class="w-full"
-                                        :select-label="''"
-                                        :deselect-label="''"
-                                        :selected-label="__('Selected')"
-                                        @update:model-value="purchase.product = purchase.selectedProduct?.id || ''; purchase.unit = ''; purchase.selectedUnit = null"
+                                        @update:model-value="purchase.unit = null"
                                     />
                                     <InputError :message="form.errors[`products.${index}.product`]" class="mt-1" />
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Unit") }}</label>
-                                    <VueMultiselect
-                                        v-model="purchase.selectedUnit"
+                                    <CustomSelect
+                                        v-model="purchase.unit"
                                         :options="productUnits(purchase.product) || []"
                                         :multiple="false"
                                         :close-on-select="true"
@@ -220,11 +212,7 @@
                                         label="name"
                                         track-by="id"
                                         class="w-full"
-                                        :select-label="''"
-                                        :deselect-label="''"
-                                        :selected-label="__('Selected')"
                                         :disabled="!purchase.product"
-                                        @update:model-value="purchase.unit = purchase.selectedUnit?.id || ''"
                                     />
                                     <InputError :message="form.errors[`products.${index}.unit`]" class="mt-1" />
                                 </div>
@@ -362,7 +350,7 @@
                         <div>
                             <InputLabel for="payment_method" :value="__('Payment Method')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                             <CustomSelect
-                                v-model="selectedPaymentMethod"
+                                v-model="form.payment_method"
                                 :options="Object.entries(payment_methods).map(([label, value]) => ({ id: value, label }))"
                                 :multiple="false"
                                 :close-on-select="true"
@@ -370,13 +358,9 @@
                                 label="label"
                                 track-by="id"
                                 class="w-full"
-                                :select-label="''"
-                                :deselect-label="''"
-                                :selected-label="__('Selected')"
-                                @update:model-value="form.payment_method = selectedPaymentMethod?.id || 'cash'"
                             >
                                 <template #singleLabel="{ option }">
-                                    {{ __(option.label) }}
+                                    {{ __(option?.label) }}
                                 </template>
                                 <template #option="{ option }">
                                     {{ __(option.label) }}
@@ -436,8 +420,8 @@
                         <div v-if="form.payment_method === 'cheque'" class="col-span-full space-y-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
                             <div>
                                 <InputLabel for="cheque_bank" :value="__('Select Bank')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                                <VueMultiselect
-                                    v-model="selectedChequeBank"
+                                <CustomSelect
+                                    v-model="form.cheque_bank_id"
                                     :options="banks"
                                     :multiple="false"
                                     :close-on-select="true"
@@ -447,11 +431,7 @@
                                     :taggable="true"
                                     :tag-placeholder="__('Press enter to add a new bank')"
                                     class="w-full"
-                                    :select-label="''"
-                                    :deselect-label="''"
-                                    :selected-label="__('Selected')"
                                     @tag="addBank"
-                                    @update:model-value="form.cheque_bank_id = selectedChequeBank?.id || null"
                                 />
                                 <InputError class="mt-1" :message="form.errors.cheque_bank_id" />
                             </div>

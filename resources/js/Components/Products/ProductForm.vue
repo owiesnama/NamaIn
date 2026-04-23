@@ -31,7 +31,7 @@
         categories: props.product?.categories || [],
         units: props.product?.units?.length
             ? props.product?.units
-            : [{ unit: "", conversion_factor: null }],
+            : [{ name: "", conversion_factor: null }],
     });
 
     const addCategory = (newTag) => {
@@ -42,7 +42,7 @@
         product.categories.push(tag);
     };
     const addUnit = () => {
-        product.units.push({ name: "", conversion_factor: "" });
+        product.units.push({ name: "", conversion_factor: null });
     };
 
     const formAttributes = () => {

@@ -18,6 +18,7 @@
     const storage = useForm({
         name: props.storage?.name,
         address: props.storage?.address,
+        type: props.storage?.type ?? 'warehouse',
     });
 
     const formAttributes = () => {
@@ -115,8 +116,8 @@
                         <div
                             class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6"
                         >
-                            <h1 class="font-semibold text-gray-800 rtl:text-right">
-                                {{__('Add New Storage')}}
+                            <h1 class="font-bold text-gray-900 dark:text-white rtl:text-right">
+                                {{ props.storage ? __('Edit Storage') : __('Add New Storage') }}
                             </h1>
 
                             <form
@@ -160,23 +161,43 @@
                                     />
                                 </div>
 
+                                <div class="mt-4">
+                                    <InputLabel
+                                        for="type"
+                                        :value="__('Type')"
+                                    />
+                                    <select
+                                        id="type"
+                                        v-model="storage.type"
+                                        class="block w-full mt-1 border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-emerald-500 dark:focus:border-emerald-600 focus:ring-emerald-500 dark:focus:ring-emerald-600 rounded-md shadow-sm"
+                                        required
+                                    >
+                                        <option value="warehouse">{{ __('Warehouse') }}</option>
+                                        <option value="sale_point">{{ __('Sale Point') }}</option>
+                                    </select>
+                                    <InputError
+                                        class="mt-2"
+                                        :message="storage.errors.type"
+                                    />
+                                </div>
+
                                 <div class="flex items-center mt-6 gap-x-4">
                                     <button
                                         type="button"
-                                        class="px-6 w-1/2 py-2.5 text-sm font-semibold tracking-wide focus:outline-none border rounded-lg"
+                                        class="px-6 w-1/2 py-2.5 text-sm font-semibold tracking-wide focus:outline-none border border-gray-200 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800 rounded-lg"
                                         @click="cancel"
                                     >
                                     {{__('Cancel')}}
                                     </button>
 
                                     <PrimaryButton
-                                        class="w-1/2 font-semibold"
+                                        class="w-1/2 font-semibold justify-center"
                                         :class="{
                                             'opacity-25': storage.processing,
                                         }"
                                         :disabled="storage.processing"
                                     >
-                                        {{__('Add')}}
+                                        {{ props.storage ? __('Update') : __('Add') }}
                                     </PrimaryButton>
                                 </div>
                             </form>

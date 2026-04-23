@@ -60,6 +60,7 @@ class HandleInertiaRequests extends Middleware
             'flash' => [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
+                'response' => session()->get('response'),
             ],
             'locale' => function () {
                 return app()->getLocale();

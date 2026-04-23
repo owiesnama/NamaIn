@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Preference;
+use App\Models\Tenant;
 
 if (! function_exists('tenant_route')) {
     /**
@@ -39,5 +40,17 @@ if (! function_exists('preference')) {
         }
 
         return $value ?? $default;
+    }
+}
+
+if (! function_exists('currentTenant')) {
+    /**
+     * Get the current tenant.
+     *
+     * @return Tenant|null
+     */
+    function currentTenant()
+    {
+        return app()->bound('currentTenant') ? app('currentTenant') : null;
     }
 }

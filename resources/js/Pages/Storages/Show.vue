@@ -5,7 +5,8 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
 import StorageForm from "@/Components/Storages/StorageForm.vue";
 import DeleteStorage from "@/Components/Storages/DeleteStorage.vue";
-import { Link, router } from "@inertiajs/vue3";
+import AdjustmentModal from "@/Components/Storages/AdjustmentModal.vue";
+import { Link, router, usePage } from "@inertiajs/vue3";
 import Tooltip from "@/Components/Tooltip.vue";
 import {
     Chart as ChartJS,
@@ -120,6 +121,11 @@ const resetFilters = () => {
         type: 'All'
     };
 };
+
+const canTransfer = computed(() => {
+    const user = usePage().props.auth.user;
+    return ['owner', 'manager'].includes(user.role_in_current_tenant);
+});
 </script>
 
 <template>
@@ -143,6 +149,12 @@ const resetFilters = () => {
                 </div>
 
                 <div class="flex items-center gap-x-3">
+                    <Link v-if="canTransfer" :href="route('stock-transfers.create', { from_storage_id: storage.id })" class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ltr:mr-2 rtl:ml-2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+                        </svg>
+                        {{ __("Transfer Stock") }}
+                    </Link>
                     <StorageForm :storage="storage" />
                     <DeleteStorage :storage="storage" />
                 </div>
@@ -161,8 +173,8 @@ const resetFilters = () => {
                     </div>
                     <div class="flex flex-col min-w-[180px]">
                         <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("Filter by Product") }}</label>
-                        <VueMultiselect
-                            :model-value="all_products.find(p => p.id == filters.product_id)"
+                        <CustomSelect
+                            v-model="filters.product_id"
                             :options="all_products"
                             :multiple="false"
                             :close-on-select="true"
@@ -170,16 +182,12 @@ const resetFilters = () => {
                             label="name"
                             track-by="id"
                             class="w-full"
-                            :select-label="''"
-                            :deselect-label="''"
-                            :selected-label="__('Selected')"
-                            @update:model-value="option => filters.product_id = option?.id || ''"
                         />
                     </div>
                     <div class="flex flex-col min-w-[140px]">
                         <label class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5 px-1">{{ __("Movement Type") }}</label>
-                        <VueMultiselect
-                            :model-value="[{ id: 'All', label: __('All Movement') }, { id: 'Sales', label: __('Only Sales') }, { id: 'Purchases', label: __('Only Purchases') }].find(o => o.id === filters.type)"
+                        <CustomSelect
+                            v-model="filters.type"
                             :options="[{ id: 'All', label: __('All Movement') }, { id: 'Sales', label: __('Only Sales') }, { id: 'Purchases', label: __('Only Purchases') }]"
                             :multiple="false"
                             :close-on-select="true"
@@ -187,10 +195,6 @@ const resetFilters = () => {
                             label="label"
                             track-by="id"
                             class="w-full"
-                            :select-label="''"
-                            :deselect-label="''"
-                            :selected-label="__('Selected')"
-                            @update:model-value="option => filters.type = option?.id || 'All'"
                         />
                     </div>
                     <div class="flex items-end flex-grow justify-end h-full self-end pb-0.5">
@@ -309,6 +313,7 @@ const resetFilters = () => {
                                 <th scope="col" class="px-6 py-4 text-xs font-bold text-start text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Quantity On Hand") }}</th>
                                 <th scope="col" class="px-6 py-4 text-xs font-bold text-start text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Expire Date") }}</th>
                                 <th scope="col" class="px-6 py-4 text-xs font-bold text-start text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Added Time") }}</th>
+                                <th scope="col" class="px-6 py-4 text-xs font-bold text-start text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __("Actions") }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -330,6 +335,9 @@ const resetFilters = () => {
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap dark:text-gray-400">{{ formatDate(product.created_at) }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <AdjustmentModal :storage="storage" :product="product" :current-quantity="product.pivot.quantity" />
+                                </td>
                             </tr>
                             <tr v-if="products.data.length === 0">
                                 <td colspan="4" class="px-6 py-10 text-center text-gray-500 dark:text-gray-400">

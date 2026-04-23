@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
+import AdjustmentModal from "@/Components/Storages/AdjustmentModal.vue";
 import { Link, router } from "@inertiajs/vue3";
 import { ref, watch, computed } from "vue";
 import debounce from "lodash/debounce";
@@ -115,6 +116,11 @@ const resetFilters = () => {
         storage_id: '',
         type: 'All'
     };
+};
+
+const stockInStorage = (storage) => {
+    const entry = props.product.stock?.find(s => s.id === storage.id);
+    return entry?.pivot?.quantity ?? 0;
 };
 </script>
 
@@ -268,6 +274,46 @@ const resetFilters = () => {
                             <span class="text-xs text-gray-400 cursor-help border-b border-dotted border-gray-400">{{ product.unit?.name || __("Units") }}</span>
                         </Tooltip>
                     </div>
+                </div>
+            </div>
+
+            <!-- Stock by Location -->
+            <div class="mb-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden mx-4 sm:mx-0">
+                <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Stock by Location') }}</h3>
+                    <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">{{ __('Current quantity across all storage locations.') }}</p>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                        <thead class="bg-gray-50/50 dark:bg-gray-800/40">
+                            <tr>
+                                <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Storage') }}</th>
+                                <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Quantity') }}</th>
+                                <th class="px-6 py-4 text-end text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500"></th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
+                            <tr v-for="storage in storages" :key="storage.id" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ storage.name }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="text-sm font-bold"
+                                        :class="stockInStorage(storage) > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-500'"
+                                    >{{ stockInStorage(storage) }}</span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500 ms-1">{{ product.unit?.name }}</span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-end">
+                                    <AdjustmentModal
+                                        :storage="storage"
+                                        :product="product"
+                                        :current-quantity="stockInStorage(storage)"
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 

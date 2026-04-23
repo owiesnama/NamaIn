@@ -88,4 +88,28 @@ class User extends Authenticatable
     {
         return $this->tenants()->where('tenants.id', $tenant->id)->exists();
     }
+
+    public function roleInCurrentTenant(): ?string
+    {
+        if (! $this->current_tenant_id) {
+            return null;
+        }
+
+        return $this->tenants()
+            ->where('tenants.id', $this->current_tenant_id)
+            ->first()
+            ?->pivot
+            ?->role;
+    }
+
+    public function hasRole(string ...$roles): bool
+    {
+        $currentRole = $this->roleInCurrentTenant();
+
+        if (! $currentRole) {
+            return false;
+        }
+
+        return in_array($currentRole, $roles);
+    }
 }

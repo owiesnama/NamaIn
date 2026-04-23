@@ -5,6 +5,10 @@
     const props = defineProps({
         invoice: Object,
         actionTitle: String,
+        storages: {
+            type: Array,
+            default: () => []
+        },
         printable: {
             type: Boolean,
             default: true
@@ -86,6 +90,7 @@
 
         <Transactions
             :invoice="invoice"
+            :storages="storages"
             class="w-full"
         />
     </div>

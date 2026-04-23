@@ -24,8 +24,9 @@ class DeductStockFromInvoice
             }
 
             $transaction->for($storage)
-                ->deduct($storage)
-                ->deliver();
+                ->deduct($storage);
+
+            $transaction->deliver(auth()->user() ?? User::first(), $storage);
         });
 
         $invoice->markAs($invoiceStatus);
