@@ -76,10 +76,12 @@
     <div class="m-2">
         <card v-if="invoice.invocable.type_string == 'Supplier'"
               :invoice="invoice"
+              :storages="storages"
               @moveToStorage="moveToStorage"
               :actionTitle="__('Deliver to Storage')" :printable="false"></card>
         <card v-else
               :invoice="invoice"
+              :storages="storages"
               @moveToStorage="deductFromStorage"
               :actionTitle="__('Deduct From Storage')" :printable="false"></card>
 

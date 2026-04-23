@@ -1,20 +1,32 @@
 <?php
 
+use App\Enums\StorageType;
 use App\Models\Customer;
 use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Storage;
 use App\Models\Supplier;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 test('all major index and create pages load successfully', function (string $route) {
-    $user = User::factory()->admin()->create();
+    $user = User::factory()->create();
+    $this->actingAs($user); // This will handle tenant setup via TestCase::ensureTenantContext
+    $tenant = $user->fresh()->currentTenant;
 
-    $response = $this->actingAs($user)->get($route);
+    // Ensure POS can load if that route is requested
+    if ($route === '/pos') {
+        Storage::factory()->create([
+            'tenant_id' => $tenant->id,
+            'type' => StorageType::SALE_POINT,
+        ]);
+    }
+
+    $response = $this->get($route);
 
     $response->assertStatus(200);
     $response->assertInertia();
@@ -37,6 +49,7 @@ test('all major index and create pages load successfully', function (string $rou
     '/cheques',
     '/cheques/create',
     '/preferences',
+    '/pos',
 ]);
 
 test('invoice show page loads successfully', function () {

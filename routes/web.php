@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\TenantSelectionController;
+use App\Http\Controllers\Core\TenantSelectionController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 

@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Listeners\InvalidateAllUserSessions;
 use App\Models\Invoice;
 use App\Observers\InvoiceObserver;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -52,6 +54,11 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(
             Registered::class,
             SendEmailVerificationNotification::class,
+        );
+
+        Event::listen(
+            Logout::class,
+            InvalidateAllUserSessions::class,
         );
 
         Invoice::observe(InvoiceObserver::class);

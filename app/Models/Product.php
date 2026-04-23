@@ -238,7 +238,15 @@ class Product extends BaseModel
     public function syncUnits(array $units): void
     {
         $this->units()->delete();
-        $this->units()->createMany($units);
+
+        $formattedUnits = collect($units)->map(function ($unit) {
+            return [
+                'name' => $unit['name'],
+                'conversion_factor' => $unit['conversion_factor'],
+            ];
+        })->toArray();
+
+        $this->units()->createMany($formattedUnits);
     }
 
     /**

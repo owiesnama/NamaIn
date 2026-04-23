@@ -39,7 +39,16 @@
       "Bash(cmd:*)",
       "Bash(ls /usr/local/bin/php*)",
       "Bash(/c/Users/Owiesnama/.config/herd/bin/php84 artisan:*)",
-      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84/php.exe:*)"
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84/php.exe:*)",
+      "Bash(\"/c/Users/Owiesnama/.config/herd/bin/php84/php.exe\" artisan:*)",
+      "Bash(~/.config/herd/bin/php artisan:*)",
+      "Bash(node_modules/.bin/vue-tsc --noEmit)",
+      "Bash(node_modules/.bin/eslint resources/js/Pages/StockTransfers/Show.vue resources/js/Pages/StockTransfers/Create.vue)",
+      "Bash(sed -i 's|^namespace App\\\\\\\\Http\\\\\\\\Controllers;|namespace App\\\\\\\\Http\\\\\\\\Controllers\\\\\\\\Contacts;|' \"app/Http/Controllers/Contacts/CustomersController.php\")",
+      "Bash(sed -i 's|^namespace App\\\\\\\\Http\\\\\\\\Controllers;|namespace App\\\\\\\\Http\\\\\\\\Controllers\\\\\\\\Contacts;|' \"app/Http/Controllers/Contacts/SuppliersController.php\")",
+      "Bash(sed -i 's|^namespace App\\\\\\\\Http\\\\\\\\Controllers;|namespace App\\\\\\\\Http\\\\\\\\Controllers\\\\\\\\Catalog;|'  \"app/Http/Controllers/Catalog/ProductsController.php\")",
+      "Bash(sed -i 's|^namespace App\\\\\\\\Http\\\\\\\\Controllers;|namespace App\\\\\\\\Http\\\\\\\\Controllers\\\\\\\\Inventory;|' \"app/Http/Controllers/Inventory/StoragesController.php\")",
+      "Bash(sed -i 's|^namespace App\\\\\\\\Http\\\\\\\\Controllers;|namespace App\\\\\\\\Http\\\\\\\\Controllers\\\\\\\\Inventory;|' \"app/Http/Controllers/Inventory/StockController.php\")"
     ]
   },
   "enableAllProjectMcpServers": true,

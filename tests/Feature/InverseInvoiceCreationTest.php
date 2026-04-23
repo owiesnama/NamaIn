@@ -87,7 +87,11 @@ test('it can create a return for a purchase invoice', function () {
     $unit = Unit::factory()->create(['product_id' => $product->id, 'conversion_factor' => 1]);
 
     // Initial stock (Purchase return needs existing stock to deduct)
-    $storage->addStock(['product' => $product->id, 'quantity' => 20]);
+    $storage->addStock(
+        product: $product->id,
+        quantity: 20,
+        reason: 'test_addition'
+    );
 
     // Create a purchase invoice
     $invoice = Invoice::factory()->create([

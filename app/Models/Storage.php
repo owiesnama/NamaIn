@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use App\Enums\StorageType;
+use App\Exceptions\InsufficientStockException;
 use App\Traits\WithTrashScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class Storage extends BaseModel
 {
@@ -27,6 +32,18 @@ class Storage extends BaseModel
     protected $appends = ['created_at_human'];
 
     /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'type' => StorageType::class,
+        ];
+    }
+
+    /**
      * Stock for this storage
      */
     public function stock(): BelongsToMany
@@ -43,7 +60,10 @@ class Storage extends BaseModel
     {
         $productId = is_int($product) ? $product : $product->id;
 
-        return (int) $this->stock()->find($productId)?->pivot?->quantity ?: 0;
+        return (int) DB::table('stocks')
+            ->where('storage_id', $this->id)
+            ->where('product_id', $productId)
+            ->value('quantity') ?: 0;
     }
 
     /**
@@ -85,28 +105,114 @@ class Storage extends BaseModel
     /**
      * Add a stock to this storage
      */
-    public function addStock(array $attributes): bool
+    public function addStock(Product|int $product, int $quantity, string $reason, ?Model $movable = null, ?User $actor = null): void
     {
-        if ($this->hasNoStockFor($attributes['product'])) {
-            $this->stock()->attach([$attributes['product'] => ['quantity' => $attributes['quantity']]]);
-        } else {
-            $this->stock()->find($attributes['product'])->pivot->increment('quantity', $attributes['quantity']);
-        }
+        $productId = $product instanceof Product ? $product->id : $product;
+        $productModel = $product instanceof Product ? $product : Product::findOrFail($productId);
 
-        return true;
+        DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
+            $stockData = DB::table('stocks')
+                ->where('storage_id', $this->id)
+                ->where('product_id', $productId)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $stockData) {
+                DB::table('stocks')->insert([
+                    'tenant_id' => $this->tenant_id,
+                    'storage_id' => $this->id,
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+                $quantityBefore = 0;
+            } else {
+                DB::table('stocks')
+                    ->where('id', $stockData->id)
+                    ->increment('quantity', $quantity, ['updated_at' => now()]);
+                $quantityBefore = $stockData->quantity;
+            }
+
+            $this->recordMovement($productModel, $quantity, $quantityBefore, $quantityBefore + $quantity, $reason, $movable, $actor);
+        });
     }
 
     /**
      * Deduct a stock from this store.
      */
-    public function deductStock(array $attributes): bool
+    public function deductStock(Product|int $product, int $quantity, string $reason, ?Model $movable = null, ?User $actor = null): void
     {
-        if ($this->hasNoStockFor($attributes['product'])) {
-            return false;
-        }
-        $stock = $this->stock()->find($attributes['product']);
+        $productId = $product instanceof Product ? $product->id : $product;
+        $productModel = $product instanceof Product ? $product : Product::findOrFail($productId);
 
-        return (bool) $stock->pivot->decrement('quantity', $attributes['quantity']);
+        DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
+            $stockData = DB::table('stocks')
+                ->where('storage_id', $this->id)
+                ->where('product_id', $productId)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $stockData || $stockData->quantity < $quantity) {
+                throw new InsufficientStockException($productModel, $this);
+            }
+
+            DB::table('stocks')
+                ->where('id', $stockData->id)
+                ->decrement('quantity', $quantity, ['updated_at' => now()]);
+
+            $quantityBefore = $stockData->quantity;
+
+            $this->recordMovement($productModel, -$quantity, $quantityBefore, $quantityBefore - $quantity, $reason, $movable, $actor);
+        });
+    }
+
+    /**
+     * Set stock to a specific quantity
+     */
+    public function setStockTo(Product|int $product, int $quantity, string $reason, ?Model $movable = null, ?User $actor = null): void
+    {
+        $productId = $product instanceof Product ? $product->id : $product;
+        $productModel = $product instanceof Product ? $product : Product::findOrFail($productId);
+
+        DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
+            DB::table('stocks')->insertOrIgnore([
+                'tenant_id' => $this->tenant_id,
+                'storage_id' => $this->id,
+                'product_id' => $productId,
+                'quantity' => 0,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $stock = $this->stock()->where('product_id', $productId)->lockForUpdate()->first();
+            $quantityBefore = $stock->pivot->quantity;
+            $delta = $quantity - $quantityBefore;
+
+            $stock->pivot->update(['quantity' => $quantity]);
+
+            $this->recordMovement($productModel, $delta, $quantityBefore, $quantity, $reason, $movable, $actor);
+        });
+    }
+
+    protected function recordMovement(Product $product, int $quantity, int $before, int $after, string $reason, ?Model $movable = null, ?User $actor = null): void
+    {
+        $this->movements()->create([
+            'tenant_id' => $this->tenant_id,
+            'product_id' => $product->id,
+            'user_id' => $actor?->id,
+            'movable_type' => $movable?->getMorphClass(),
+            'movable_id' => $movable?->getKey(),
+            'reason' => $reason,
+            'quantity' => $quantity,
+            'quantity_before' => $before,
+            'quantity_after' => $after,
+        ]);
+    }
+
+    public function movements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
     }
 
     /**
@@ -123,5 +229,25 @@ class Storage extends BaseModel
     public function getStockCountAttribute(): int
     {
         return $this->stock()->count();
+    }
+
+    public function scopeWarehouses(Builder $query): void
+    {
+        $query->where('type', StorageType::WAREHOUSE);
+    }
+
+    public function scopeSalePoints(Builder $query): void
+    {
+        $query->where('type', StorageType::SALE_POINT);
+    }
+
+    public function isWarehouse(): bool
+    {
+        return $this->type === StorageType::WAREHOUSE;
+    }
+
+    public function isSalePoint(): bool
+    {
+        return $this->type === StorageType::SALE_POINT;
     }
 }

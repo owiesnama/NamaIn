@@ -9,7 +9,11 @@ class CustomersController extends Controller
 {
     public function __invoke()
     {
-        return Customer::search(request()->get('search'))
-            ->latest()->limit(5)->get();
+        return Customer::query()
+            ->where('is_system', false)
+            ->search(request()->get('search'))
+            ->latest()
+            ->limit(5)
+            ->get();
     }
 }

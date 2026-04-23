@@ -6,6 +6,7 @@ use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -38,13 +39,34 @@ class Transaction extends BaseModel
         return [
             'delivered' => 'boolean',
             'created_at' => 'datetime',
+            'delivered_at' => 'datetime',
         ];
     }
 
     /**
      * @var array<string>
      */
-    protected $appends = ['type', 'created_at_human'];
+    protected $appends = ['type', 'created_at_human', 'received_quantity', 'remaining_quantity'];
+
+    public function receipts(): HasMany
+    {
+        return $this->hasMany(TransactionReceipt::class);
+    }
+
+    public function getReceivedQuantityAttribute(): int
+    {
+        return (int) $this->receipts()->sum('quantity');
+    }
+
+    public function getRemainingQuantityAttribute(): int
+    {
+        return max(0, (int) $this->base_quantity - $this->received_quantity);
+    }
+
+    public function isFullyReceived(): bool
+    {
+        return $this->remaining_quantity <= 0;
+    }
 
     /**
      * The invoice for this transaction.
@@ -119,10 +141,12 @@ class Transaction extends BaseModel
     {
         $storage = $storage ?? $this->storage()->first();
 
-        $storage->deductStock([
-            'product' => $this->product_id,
-            'quantity' => $this->base_quantity,
-        ]);
+        $storage->deductStock(
+            product: $this->product_id,
+            quantity: (int) $this->base_quantity,
+            reason: 'invoice_deduction',
+            movable: $this
+        );
 
         return $this;
     }
@@ -139,10 +163,12 @@ class Transaction extends BaseModel
 
         $storage = $storage ?? $this->storage()->first();
 
-        $storage->addStock([
-            'product' => $this->product_id,
-            'quantity' => $this->base_quantity,
-        ]);
+        $storage->addStock(
+            product: $this->product_id,
+            quantity: (int) $this->base_quantity,
+            reason: 'invoice_addition',
+            movable: $this
+        );
 
         return $this;
     }
@@ -150,9 +176,12 @@ class Transaction extends BaseModel
     /**
      * Mark this transaction as delivered.
      */
-    public function deliver(): void
+    public function deliver(User $actor, ?Storage $fromStorage = null): void
     {
         $this->delivered = true;
+        $this->delivered_at = now();
+        $this->delivered_by = $actor->id;
+        $this->fulfilled_from_storage_id = ($fromStorage ?? $this->storage)->id;
         $this->save();
     }
 
@@ -290,16 +319,20 @@ class Transaction extends BaseModel
 
         if ($this->invoice?->invocable_type === Customer::class) {
             // Sales return: Add stock back
-            $storage->addStock([
-                'product' => $this->product_id,
-                'quantity' => $this->base_quantity,
-            ]);
+            $storage->addStock(
+                product: $this->product_id,
+                quantity: (int) $this->base_quantity,
+                reason: 'sales_return',
+                movable: $this
+            );
         } else {
             // Purchase return: Deduct stock
-            $storage->deductStock([
-                'product' => $this->product_id,
-                'quantity' => $this->base_quantity,
-            ]);
+            $storage->deductStock(
+                product: $this->product_id,
+                quantity: (int) $this->base_quantity,
+                reason: 'purchase_return',
+                movable: $this
+            );
         }
     }
 }

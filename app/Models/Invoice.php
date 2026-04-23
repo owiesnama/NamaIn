@@ -87,6 +87,11 @@ class Invoice extends BaseModel
         return $this->morphTo();
     }
 
+    public function posSession(): BelongsTo
+    {
+        return $this->belongsTo(PosSession::class);
+    }
+
     /**
      * Adds an attribute to the invoice showing whether it's delivered and should
      * be locked.
@@ -212,6 +217,16 @@ class Invoice extends BaseModel
     {
         return $builder->where('delivered', true)
             ->when($datetime, fn ($query) => $query->where('created_at', '>', $datetime));
+    }
+
+    public function scopeFromPos(Builder $builder): Builder
+    {
+        return $builder->whereNotNull('pos_session_id');
+    }
+
+    public function scopeNotFromPos(Builder $builder): Builder
+    {
+        return $builder->whereNull('pos_session_id');
     }
 
     /**

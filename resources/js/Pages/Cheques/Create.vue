@@ -28,13 +28,7 @@
     const invoices = ref([]);
     const isLoadingInvoices = ref(false);
 
-    const selectedBank = ref(null);
-    const selectedPayee = ref(null);
-    const selectedInvoice = ref(null);
-
     const addBank = (newTag) => {
-        const bank = { id: newTag, name: newTag };
-        selectedBank.value = bank;
         cheque.bank_id = newTag;
     };
 
@@ -45,7 +39,7 @@
             return;
         }
 
-        const payee = props.payees.find(p => p.id === newPayeeId);
+        const payee = props.payees.find(p => String(p.id) === String(newPayeeId));
         cheque.payee_type = payee?.type || "";
 
         fetchInvoices(newPayeeId, cheque.payee_type);
@@ -96,7 +90,7 @@
                         <div class="col-span-1">
                             <InputLabel :value="__('Bank')" />
                             <CustomSelect
-                                v-model="selectedBank"
+                                v-model="cheque.bank_id"
                                 :options="banks"
                                 :multiple="false"
                                 :close-on-select="true"
@@ -106,11 +100,7 @@
                                 :taggable="true"
                                 :tag-placeholder="__('Press enter to add a new bank')"
                                 class="w-full mt-1"
-                                :select-label="''"
-                                :deselect-label="''"
-                                :selected-label="__('Selected')"
                                 @tag="addBank"
-                                @update:model-value="cheque.bank_id = selectedBank?.id || ''"
                             />
                             <InputError :message="cheque.errors.bank_id" class="mt-1" />
                         </div>
@@ -143,7 +133,7 @@
                         <div>
                             <InputLabel :value="__('Payee')" />
                             <CustomSelect
-                                v-model="selectedPayee"
+                                v-model="cheque.payee_id"
                                 :options="payees"
                                 :multiple="false"
                                 :close-on-select="true"
@@ -151,10 +141,6 @@
                                 label="name"
                                 track-by="id"
                                 class="w-full mt-1"
-                                :select-label="''"
-                                :deselect-label="''"
-                                :selected-label="__('Selected')"
-                                @update:model-value="cheque.payee_id = selectedPayee?.id || null"
                             >
                                 <template #option="{ option }">
                                     {{ option.name }} ({{ __(option.type_string) }})
@@ -168,7 +154,7 @@
                         <div v-if="cheque.payee_id">
                             <InputLabel :value="__('Link to Invoice')" />
                             <CustomSelect
-                                v-model="selectedInvoice"
+                                v-model="cheque.invoice_id"
                                 :options="invoices"
                                 :multiple="false"
                                 :close-on-select="true"
@@ -176,11 +162,7 @@
                                 label="serial_number"
                                 track-by="id"
                                 class="w-full mt-1"
-                                :select-label="''"
-                                :deselect-label="''"
-                                :selected-label="__('Selected')"
                                 :disabled="isLoadingInvoices"
-                                @update:model-value="cheque.invoice_id = selectedInvoice?.id || null"
                             >
                                 <template #option="{ option }">
                                     #{{ option.serial_number }} ({{ __('Remaining') }}: {{ option.remaining_balance }})

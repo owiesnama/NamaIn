@@ -140,6 +140,9 @@
                                                 <div class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug">{{ storage.name }}</div>
                                                 <div class="flex flex-wrap items-center gap-2 mt-1">
                                                     <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">#{{ storage.id }}</span>
+                                                    <span class="px-1.5 py-0.5 text-[10px] font-bold rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 uppercase tracking-tight">
+                                                        {{ storage.type === 'warehouse' ? __('Warehouse') : __('Sale Point') }}
+                                                    </span>
                                                     <span class="text-[11px] text-gray-500 dark:text-gray-400 truncate max-w-[200px]" :title="storage.address">{{ storage.address }}</span>
                                                 </div>
                                             </div>
@@ -177,6 +180,11 @@
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                            </Link>
+                                            <Link @click.stop :href="route('stock-transfers.create', { from_storage_id: storage.id })" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Transfer')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                                                 </svg>
                                             </Link>
                                             <div @click.stop>
