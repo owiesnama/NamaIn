@@ -3,7 +3,6 @@
     import { router, Head, Link, usePage } from "@inertiajs/vue3";
     import ApplicationLogo from "@/Components/ApplicationLogo.vue";
     import Banner from "@/Components/Banner.vue";
-    import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import NavLink from "@/Components/NavLink.vue";
     import SidebarGroup from "@/Components/SidebarGroup.vue";
@@ -15,6 +14,7 @@
     });
 
     const showingSidebar = ref(false);
+    const showingUserMenu = ref(false);
     const direction = computed(() => {
         return usePage().props.locale === "ar" ? "rtl" : "ltr";
     });
@@ -235,38 +235,57 @@
                     :class="showingSidebar ? 'block' : 'hidden'"
                     class="xl:block shrink-0 border-t border-gray-100 dark:border-gray-800"
                 >
-                    <Dropdown
-                        :align="direction === 'rtl' ? 'right' : 'left'"
-                        width="72"
-                    >
-                        <template #trigger>
-                            <button
-                                type="button"
-                                class="flex w-full items-center gap-x-3 px-4 py-3 transition-colors duration-200 hover:bg-gray-50 focus:outline-none dark:hover:bg-gray-800"
-                            >
-                                <img
-                                    v-if="$page.props.user?.profile_photo_url"
-                                    class="h-8 w-8 shrink-0 rounded-full object-cover"
-                                    :src="$page.props.user.profile_photo_url"
-                                    :alt="$page.props.user?.name"
-                                />
-                                <div
-                                    v-else
-                                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
-                                >
-                                    {{ $page.props.user?.name?.charAt(0)?.toUpperCase() }}
-                                </div>
-                                <div class="min-w-0 flex-1 text-start">
-                                    <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ $page.props.user?.name }}</p>
-                                    <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ $page.props.currentTenant?.name }}</p>
-                                </div>
-                                <svg class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                </svg>
-                            </button>
-                        </template>
+                    <!-- Click-outside overlay -->
+                    <div v-if="showingUserMenu" class="fixed inset-0 z-40" @click="showingUserMenu = false" />
 
-                        <template #content>
+                    <div class="relative">
+                        <!-- Trigger -->
+                        <button
+                            type="button"
+                            class="flex w-full items-center gap-x-3 px-4 py-3 transition-colors duration-200 hover:bg-gray-50 focus:outline-none dark:hover:bg-gray-800"
+                            @click="showingUserMenu = !showingUserMenu"
+                        >
+                            <img
+                                v-if="$page.props.user?.profile_photo_url"
+                                class="h-8 w-8 shrink-0 rounded-full object-cover"
+                                :src="$page.props.user.profile_photo_url"
+                                :alt="$page.props.user?.name"
+                            />
+                            <div
+                                v-else
+                                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                            >
+                                {{ $page.props.user?.name?.charAt(0)?.toUpperCase() }}
+                            </div>
+                            <div class="min-w-0 flex-1 text-start">
+                                <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">{{ $page.props.user?.name }}</p>
+                                <p class="truncate text-xs text-gray-500 dark:text-gray-400">{{ $page.props.currentTenant?.name }}</p>
+                            </div>
+                            <svg
+                                class="h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 dark:text-gray-500"
+                                :class="showingUserMenu ? 'rotate-180' : ''"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15 12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                            </svg>
+                        </button>
+
+                        <!-- Popover — opens upward -->
+                        <Transition
+                            enter-active-class="transition duration-200 ease-out"
+                            enter-from-class="opacity-0 translate-y-1"
+                            enter-to-class="opacity-100 translate-y-0"
+                            leave-active-class="transition duration-150 ease-in"
+                            leave-from-class="opacity-100 translate-y-0"
+                            leave-to-class="opacity-0 translate-y-1"
+                        >
+                            <div
+                                v-if="showingUserMenu"
+                                class="absolute bottom-full z-50 mb-1 w-72 rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900"
+                                :class="direction === 'rtl' ? 'right-0' : 'left-0'"
+                                @click="showingUserMenu = false"
+                            >
+                                <div class="py-1">
                             <!-- Account Management -->
                             <div class="block px-4 py-2 text-xs text-gray-400">
                                 {{ __('Manage Account') }}
@@ -374,8 +393,10 @@
                                     <span class="text-red-400" @click.prevent="logout">{{ __('Log Out') }}</span>
                                 </DropdownLink>
                             </form>
-                        </template>
-                    </Dropdown>
+                                </div>
+                            </div>
+                        </Transition>
+                    </div>
                 </div>
             </aside>
 

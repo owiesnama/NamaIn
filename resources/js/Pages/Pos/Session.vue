@@ -13,6 +13,7 @@ const props = defineProps({
     session: Object,
     products: Array,
     customers: Array,
+    session_stats: Object,
     flash: Object,
 });
 
@@ -157,7 +158,20 @@ const confirmTransferAndCheckout = () => {
 
 const closeSessionForm = useForm({
     session_id: props.session.id,
-    closing_float: 0,
+    closing_float: '',
+});
+
+const liveVariance = computed(() => {
+    const actual = parseFloat(closeSessionForm.closing_float);
+    if (isNaN(actual) || closeSessionForm.closing_float === '') return null;
+    return actual - (props.session_stats?.expected_closing_float ?? 0);
+});
+
+const varianceLabel = computed(() => {
+    if (liveVariance.value === null) return null;
+    const v = liveVariance.value;
+    if (v > 0) return `+${v.toFixed(2)}`;
+    return v.toFixed(2);
 });
 
 const closeSession = () => {
@@ -434,29 +448,77 @@ const closeSession = () => {
 
         <Modal :show="showingCloseModal" @close="showingCloseModal = false">
             <div class="p-6">
+                <!-- Header -->
                 <div class="flex items-center gap-x-3 mb-6">
-                    <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center">
+                    <div class="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center shrink-0">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-red-600 dark:text-red-400">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M5.636 5.636a9 9 0 1 0 12.728 0M12 3v9" />
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">
-                            {{ __('Close POS Session') }}
-                        </h2>
+                        <h2 class="text-lg font-bold text-gray-900 dark:text-white">{{ __('Close POS Session') }}</h2>
                         <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Please verify the cash in hand before closing.') }}</p>
                     </div>
                 </div>
 
-                <div class="space-y-4">
-                    <div>
-                        <InputLabel for="closing_float" :value="__('Closing Float (Actual Cash in Hand)')" />
-                        <TextInput v-model="closeSessionForm.closing_float" id="closing_float" type="number" step="0.01" class="mt-1 block w-full rounded-xl" />
+                <!-- Reconciliation summary -->
+                <div v-if="session_stats" class="mb-5 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('Opening Float') }}</span>
+                            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ session_stats.opening_float.toFixed(2) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between px-4 py-3">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">{{ __('Cash Sales This Session') }}</span>
+                            <span class="text-sm font-semibold text-emerald-600 dark:text-emerald-400">+ {{ session_stats.cash_sales_total.toFixed(2) }}</span>
+                        </div>
+                        <div class="flex items-center justify-between px-4 py-3 bg-gray-50 dark:bg-gray-800/40">
+                            <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">{{ __('Expected Closing Float') }}</span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ session_stats.expected_closing_float.toFixed(2) }}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mt-8 flex justify-end gap-x-3">
-                    <button @click="showingCloseModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">{{ __('Cancel') }}</button>
+                <!-- Actual cash input -->
+                <div class="space-y-4">
+                    <div>
+                        <InputLabel for="closing_float" :value="__('Actual Cash in Hand')" />
+                        <TextInput
+                            v-model="closeSessionForm.closing_float"
+                            id="closing_float"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            class="mt-1 block w-full rounded-xl"
+                            :placeholder="session_stats ? session_stats.expected_closing_float.toFixed(2) : '0.00'"
+                        />
+                    </div>
+
+                    <!-- Live variance -->
+                    <div v-if="liveVariance !== null" class="flex items-center justify-between rounded-lg px-4 py-3 transition-colors"
+                        :class="[
+                            liveVariance === 0 ? 'bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800' :
+                            liveVariance > 0  ? 'bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800' :
+                                                'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800'
+                        ]"
+                    >
+                        <span class="text-sm font-medium"
+                            :class="liveVariance < 0 ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'"
+                        >
+                            {{ __('Variance') }}
+                        </span>
+                        <span class="text-sm font-bold"
+                            :class="liveVariance < 0 ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'"
+                        >
+                            {{ varianceLabel }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end gap-x-3">
+                    <button @click="showingCloseModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">
+                        {{ __('Cancel') }}
+                    </button>
                     <PrimaryButton @click="closeSession" :disabled="closeSessionForm.processing" class="bg-red-600 hover:bg-red-700 focus:ring-red-500">
                         {{ __('Confirm & Close') }}
                     </PrimaryButton>

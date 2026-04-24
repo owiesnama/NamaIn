@@ -88,6 +88,11 @@ class SalesController extends Controller
                 'units' => $product->units,
             ]),
             'customers' => Customer::where('is_system', false)->get(),
+            'session_stats' => [
+                'opening_float' => $session->opening_float / 100,
+                'cash_sales_total' => $session->cashSalesTotal() / 100,
+                'expected_closing_float' => $session->expectedClosingFloat() / 100,
+            ],
         ]);
     }
 
