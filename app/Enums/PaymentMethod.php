@@ -9,6 +9,7 @@ enum PaymentMethod: string
     case Cheque = 'cheque';
     case BankTransfer = 'bank_transfer';
     case Mixed = 'mixed';
+    case Advance = 'advance';
 
     public static function casesWithLabels(): array
     {
@@ -27,6 +28,7 @@ enum PaymentMethod: string
             self::Cheque => 'Cheque',
             self::BankTransfer => 'Bank Transfer',
             self::Mixed => 'Mixed',
+            self::Advance => 'Advance',
         };
     }
 }

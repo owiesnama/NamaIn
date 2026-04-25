@@ -15,6 +15,7 @@ use App\Models\Invoice;
 use App\Models\PosSession;
 use App\Models\Product;
 use App\Models\Storage;
+use App\Models\TreasuryAccount;
 
 class SalesController extends Controller
 {
@@ -49,6 +50,13 @@ class SalesController extends Controller
             'customers' => $query->latest()->limit(10)->get(),
             'payment_methods' => PaymentMethod::casesWithLabels(),
             'banks' => Bank::all(),
+            'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'type' => $a->type->value,
+                'type_label' => $a->type->label(),
+                'current_balance' => $a->currentBalance(),
+            ]),
         ]);
     }
 
@@ -82,7 +90,7 @@ class SalesController extends Controller
             'products' => Product::with('units')->get()->map(fn (Product $product) => [
                 'id' => $product->id,
                 'name' => $product->name,
-                'price' => $product->price ?? $product->cost ?? 0,
+                'price' => ($product->price ?? $product->cost ?? 0) / 100,
                 'sale_point_qty' => $storage->quantityOf($product),
                 'replenishment' => $this->buildReplenishmentInfo($product, $replenishmentAction),
                 'units' => $product->units,

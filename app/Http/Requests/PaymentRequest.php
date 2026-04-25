@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -29,6 +30,7 @@ class PaymentRequest extends FormRequest
             'payable_type' => 'required_with:payable_id|nullable|string',
             'amount' => 'required|numeric|min:0.01',
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
+            'direction' => ['required', Rule::enum(PaymentDirection::class)],
             'reference' => 'nullable|string|max:255',
             'notes' => 'nullable|string|max:1000',
             'paid_at' => 'nullable|date',
@@ -41,6 +43,9 @@ class PaymentRequest extends FormRequest
             'cheque_bank_id' => 'required_if:payment_method,cheque|nullable',
             'cheque_due_date' => 'required_if:payment_method,cheque|nullable|date',
             'cheque_number' => 'required_if:payment_method,cheque|nullable|string|max:255',
+
+            // Treasury
+            'treasury_account_id' => 'nullable|exists:treasury_accounts,id',
         ];
     }
 

@@ -2,7 +2,9 @@
 
 namespace App\Actions;
 
+use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
+use App\Enums\TreasuryMovementReason;
 use App\Models\Invoice;
 use App\Traits\HandlesAsyncUploads;
 use Illuminate\Http\Request;
@@ -46,6 +48,7 @@ class StorePurchaseAction
             payable: $invoice->invocable,
             amount: $amount,
             method: $method,
+            direction: PaymentDirection::Out,
             options: [
                 'reference' => $data->get('payment_reference'),
                 'notes' => $method === PaymentMethod::Cash ? 'Cash payment on purchase' : $data->get('payment_notes'),
@@ -56,6 +59,8 @@ class StorePurchaseAction
                 'cheque_due' => $data->get('cheque_due_date'),
                 'cheque_bank_id' => $data->get('cheque_bank_id'),
                 'cheque_reference' => $data->get('cheque_number'),
+                'treasury_account_id' => $data->get('treasury_account_id'),
+                'movement_reason' => TreasuryMovementReason::ExpensePaid,
             ]
         );
     }

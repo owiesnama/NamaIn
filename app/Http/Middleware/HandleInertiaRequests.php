@@ -44,6 +44,8 @@ class HandleInertiaRequests extends Middleware
                 'name' => $request->user()->name,
                 'email' => $request->user()->email,
                 'profile_photo_url' => $request->user()->profile_photo_url,
+                'role' => fn () => $request->user()->roleInCurrentTenant()?->only('id', 'name', 'slug'),
+                'permissions' => fn () => $request->user()->roleInCurrentTenant()?->permissions->pluck('slug') ?? [],
             ] : null,
             'currentTenant' => $tenant
                 ? ['id' => $tenant->id, 'name' => $tenant->name, 'slug' => $tenant->slug]

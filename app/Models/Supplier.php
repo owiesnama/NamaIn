@@ -75,4 +75,12 @@ class Supplier extends BaseModel
     {
         return $this->morphMany(Payment::class, 'payable');
     }
+
+    /**
+     * Payments going OUT settle a supplier's balance (money we pay them).
+     */
+    protected function settlingDirection(): string
+    {
+        return 'out';
+    }
 }

@@ -28,7 +28,8 @@ class UpdateChequeStatusRequest extends FormRequest
 
         return [
             'status' => ['required', new Enum(ChequeStatus::class)],
-            'cleared_amount' => 'required_if:status,partially_cleared|numeric|min:0.01|max:'.($cheque->amount - $cheque->cleared_amount),
+            'cleared_amount' => 'nullable|required_if:status,partially_cleared|numeric|min:0.01|max:'.($cheque->amount - $cheque->cleared_amount),
+            'treasury_account_id' => 'nullable|exists:treasury_accounts,id',
         ];
     }
 }

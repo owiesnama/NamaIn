@@ -5,6 +5,7 @@ use App\Models\Bank;
 use App\Models\Cheque;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\TreasuryAccount;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -14,6 +15,9 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
     $this->bank = Bank::create(['name' => 'Test Bank']);
+    // ChequeClearing account is required to register receivable cheques,
+    // and needs balance so Returned receivable cheques can be reversed.
+    TreasuryAccount::factory()->chequeClearing()->withOpeningBalance(1_000_000)->create();
 });
 
 test('can register a new cheque via cheques.store', function () {
@@ -67,6 +71,33 @@ test('can update status to Issued, Deposited, Returned, Cancelled', function ($s
 
     $response = $this->put(route('cheques.updateStatus', $cheque->id), [
         'status' => $status->value,
+    ]);
+
+    $response->assertRedirect();
+    $this->assertDatabaseHas('cheques', [
+        'id' => $cheque->id,
+        'status' => $status->value,
+    ]);
+})->with([
+    ChequeStatus::Issued,
+    ChequeStatus::Deposited,
+    ChequeStatus::Returned,
+    ChequeStatus::Cancelled,
+]);
+
+test('updating status with null cleared_amount passes validation', function ($status) {
+    $customer = Customer::factory()->create();
+    $cheque = Cheque::factory()->create([
+        'chequeable_id' => $customer->id,
+        'chequeable_type' => get_class($customer),
+        'status' => ChequeStatus::Drafted,
+    ]);
+
+    // Simulate exactly what the Inertia form sends — explicit nulls for optional fields
+    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+        'status' => $status->value,
+        'cleared_amount' => null,
+        'treasury_account_id' => null,
     ]);
 
     $response->assertRedirect();

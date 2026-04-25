@@ -45,6 +45,7 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'must_change_password' => 'boolean',
         ];
     }
 
@@ -67,7 +68,7 @@ class User extends Authenticatable
 
     public function tenants(): BelongsToMany
     {
-        return $this->belongsToMany(Tenant::class)->withPivot('role')->withTimestamps();
+        return $this->belongsToMany(Tenant::class)->withPivot('role', 'role_id', 'is_active')->withTimestamps();
     }
 
     public function currentTenant(): BelongsTo
@@ -89,27 +90,53 @@ class User extends Authenticatable
         return $this->tenants()->where('tenants.id', $tenant->id)->exists();
     }
 
-    public function roleInCurrentTenant(): ?string
+    public function roleInCurrentTenant(): ?Role
     {
         if (! $this->current_tenant_id) {
             return null;
         }
 
-        return $this->tenants()
+        $roleId = $this->tenants()
             ->where('tenants.id', $this->current_tenant_id)
             ->first()
             ?->pivot
-            ?->role;
+            ?->role_id;
+
+        if (! $roleId) {
+            return null;
+        }
+
+        return Role::withoutGlobalScopes()->with('permissions')->find($roleId);
     }
 
     public function hasRole(string ...$roles): bool
     {
-        $currentRole = $this->roleInCurrentTenant();
+        $role = $this->roleInCurrentTenant();
 
-        if (! $currentRole) {
+        if (! $role) {
             return false;
         }
 
-        return in_array($currentRole, $roles);
+        return in_array($role->slug, $roles);
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        return $this->roleInCurrentTenant()?->hasPermission($permission) ?? false;
+    }
+
+    public function isActiveInTenant(?Tenant $tenant = null): bool
+    {
+        $tenant ??= $this->currentTenant;
+
+        if (! $tenant) {
+            return false;
+        }
+
+        return (bool) $this->tenants()
+            ->where('tenants.id', $tenant->id)
+            ->first()
+            ?->pivot
+            ?->is_active;
     }
 }

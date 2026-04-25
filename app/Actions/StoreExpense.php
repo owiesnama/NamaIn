@@ -2,16 +2,22 @@
 
 namespace App\Actions;
 
+use App\Actions\Treasury\RecordTreasuryMovementAction;
+use App\Enums\TreasuryMovementReason;
 use App\Http\Requests\ExpenseRequest;
 use App\Models\Expense;
 use App\Models\RecurringExpense;
+use App\Models\TreasuryAccount;
 use App\Traits\HandlesAsyncUploads;
 
 class StoreExpense
 {
     use HandlesAsyncUploads;
 
-    public function __construct(private SyncCategoriesAction $syncCategories) {}
+    public function __construct(
+        private SyncCategoriesAction $syncCategories,
+        private RecordTreasuryMovementAction $recordMovement,
+    ) {}
 
     public function handle(ExpenseRequest $request): Expense
     {
@@ -21,7 +27,21 @@ class StoreExpense
             'expensed_at' => $request->expensed_at,
             'notes' => $request->notes,
             'receipt_path' => $this->storeReceipt($request),
+            'treasury_account_id' => $request->treasury_account_id,
         ]);
+
+        if ($request->treasury_account_id) {
+            $account = TreasuryAccount::findOrFail($request->treasury_account_id);
+            $amountInCents = (int) round($request->amount * 100);
+
+            $this->recordMovement->handle(
+                account: $account,
+                amount: -$amountInCents,
+                reason: TreasuryMovementReason::ExpensePaid,
+                movable: $expense,
+                actor: auth()->user(),
+            );
+        }
 
         $this->syncCategories->handle($expense, $request->category_objects ?? [], 'expense');
 

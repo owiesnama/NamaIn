@@ -2,8 +2,11 @@
 
 namespace Tests;
 
+use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\DefaultRolesService;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -91,8 +94,11 @@ abstract class TestCase extends BaseTestCase
             $tenant = Tenant::create(['name' => 'Test Org', 'slug' => 'test-org', 'is_active' => true]);
         }
 
+        $this->seedTenantRoles($tenant);
+
         if (! $user->belongsToTenant($tenant)) {
-            $tenant->users()->attach($user, ['role' => 'owner']);
+            $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'owner')->first();
+            $tenant->users()->attach($user, ['role' => 'owner', 'role_id' => $ownerRole?->id]);
             $user->unsetRelation('tenants');
         }
 
@@ -100,5 +106,15 @@ abstract class TestCase extends BaseTestCase
         $user->refresh();
 
         app()->instance('currentTenant', $tenant);
+    }
+
+    protected function seedTenantRoles(Tenant $tenant): void
+    {
+        if (Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->exists()) {
+            return;
+        }
+
+        (new PermissionSeeder)->run();
+        (new DefaultRolesService)->seedForTenant($tenant);
     }
 }

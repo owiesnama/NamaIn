@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,6 +56,7 @@ class Payment extends BaseModel
     {
         return [
             'payment_method' => PaymentMethod::class,
+            'direction' => PaymentDirection::class,
             'paid_at' => 'datetime',
             'amount' => 'decimal:2',
             'metadata' => 'json',
@@ -75,6 +77,30 @@ class Payment extends BaseModel
     public function payable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * The treasury account that received this payment.
+     */
+    public function treasuryAccount(): BelongsTo
+    {
+        return $this->belongsTo(TreasuryAccount::class);
+    }
+
+    /**
+     * Whether this payment is incoming (money received).
+     */
+    public function isIncoming(): bool
+    {
+        return $this->direction === PaymentDirection::In;
+    }
+
+    /**
+     * Whether this payment is outgoing (money paid out).
+     */
+    public function isOutgoing(): bool
+    {
+        return $this->direction === PaymentDirection::Out;
     }
 
     /**

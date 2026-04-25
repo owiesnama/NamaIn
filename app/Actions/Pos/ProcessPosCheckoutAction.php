@@ -2,9 +2,14 @@
 
 namespace App\Actions\Pos;
 
+use App\Actions\RecordPaymentAction;
 use App\Actions\Stock\DeliverTransactionAction;
 use App\Actions\Stock\ExecuteStockTransferAction;
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentDirection;
+use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
+use App\Enums\TreasuryAccountType;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -13,6 +18,7 @@ use App\Models\Product;
 use App\Models\StockTransfer;
 use App\Models\StockTransferLine;
 use App\Models\Storage;
+use App\Models\TreasuryAccount;
 use App\Models\Unit;
 use App\Models\User;
 use DomainException;
@@ -21,6 +27,8 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessPosCheckoutAction
 {
+    public function __construct(private RecordPaymentAction $recordPayment) {}
+
     public function execute(
         PosSession $session,
         Collection $data,
@@ -80,6 +88,8 @@ class ProcessPosCheckoutAction
                 'invocable_id' => $customerId,
                 'total' => $data->get('total'),
                 'payment_method' => $data->get('payment_method', 'cash'),
+                'payment_status' => PaymentStatus::Unpaid,
+                'paid_amount' => 0,
                 'status' => InvoiceStatus::Initial,
                 'idempotency_key' => $idempotencyKey,
             ]);
@@ -106,6 +116,30 @@ class ProcessPosCheckoutAction
             }
 
             $invoice->markAs(InvoiceStatus::Delivered);
+
+            // Record payment for all POS sales (cash is always collected upfront at POS).
+            // Treasury movement is a bonus when a cash drawer is configured — it is NOT
+            // a gate for the payment itself.
+            $paymentMethod = PaymentMethod::tryFrom($data->get('payment_method', 'cash')) ?? PaymentMethod::Cash;
+
+            $cashDrawer = $paymentMethod === PaymentMethod::Cash
+                ? TreasuryAccount::where('sale_point_id', $session->storage_id)
+                    ->ofType(TreasuryAccountType::Cash)
+                    ->active()
+                    ->first()
+                : null;
+
+            $this->recordPayment->handle(
+                invoice: $invoice,
+                payable: $invoice->invocable,
+                amount: $invoice->total,
+                method: $paymentMethod,
+                direction: PaymentDirection::In,
+                options: [
+                    'notes' => 'POS sale',
+                    'treasury_account_id' => $cashDrawer?->id,
+                ]
+            );
 
             return $invoice;
         });

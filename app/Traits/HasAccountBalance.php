@@ -33,11 +33,30 @@ trait HasAccountBalance
     }
 
     /**
+     * The direction value whose payments reduce this party's balance.
+     * Customers default to 'in' (money coming in settles their debt).
+     * Suppliers override to 'out' (money going out settles their debt).
+     */
+    protected function settlingDirection(): string
+    {
+        return 'in';
+    }
+
+    /**
      * Calculate the total paid amount as of a specific date.
      */
     private function getTotalPaidAsOf(string $asOfDate): float
     {
-        $directPayments = (float) $this->payments()
+        $settling = $this->settlingDirection();
+        $reversing = $settling === 'in' ? 'out' : 'in';
+
+        $directSettling = (float) $this->payments()
+            ->where('direction', $settling)
+            ->where('paid_at', '<', $asOfDate)
+            ->sum('amount');
+
+        $directReversing = (float) $this->payments()
+            ->where('direction', $reversing)
             ->where('paid_at', '<', $asOfDate)
             ->sum('amount');
 
@@ -47,7 +66,7 @@ trait HasAccountBalance
         })->where('paid_at', '<', $asOfDate)
             ->sum('amount');
 
-        return $directPayments + $paymentsOnInvoices;
+        return ($directSettling + $paymentsOnInvoices) - $directReversing;
     }
 
     /**
@@ -55,9 +74,13 @@ trait HasAccountBalance
      */
     private function getCurrentTotalPaid(): float
     {
-        $directPayments = (float) $this->payments()->sum('amount');
+        $settling = $this->settlingDirection();
+        $reversing = $settling === 'in' ? 'out' : 'in';
+
+        $directSettling = (float) $this->payments()->where('direction', $settling)->sum('amount');
+        $directReversing = (float) $this->payments()->where('direction', $reversing)->sum('amount');
         $invoicePayments = (float) $this->invoices()->sum('paid_amount');
 
-        return $directPayments + $invoicePayments;
+        return ($directSettling + $invoicePayments) - $directReversing;
     }
 }

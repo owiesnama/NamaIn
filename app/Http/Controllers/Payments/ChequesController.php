@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Payments;
 
+use App\Actions\Treasury\RecordTreasuryMovementAction;
 use App\Enums\ChequeStatus;
+use App\Enums\ChequeType;
+use App\Enums\TreasuryAccountType;
+use App\Enums\TreasuryMovementReason;
 use App\Filters\ChequeFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChequeRequest;
@@ -10,6 +14,7 @@ use App\Models\Bank;
 use App\Models\Cheque;
 use App\Models\Customer;
 use App\Models\Supplier;
+use App\Models\TreasuryAccount;
 
 class ChequesController extends Controller
 {
@@ -28,6 +33,7 @@ class ChequesController extends Controller
                 ->paginate(10)
                 ->withQueryString(),
             'status' => ChequeStatus::casesWithLabels(),
+            'bank_treasury_accounts' => TreasuryAccount::ofType(TreasuryAccountType::Bank)->active()->get(['id', 'name', 'bank_id']),
             'summary' => [
                 'total_receivable' => Cheque::receivable()->whereNotIn('status', [ChequeStatus::Cleared, ChequeStatus::Cancelled])->sum('amount'),
                 'total_payable' => Cheque::payable()->whereNotIn('status', [ChequeStatus::Cleared, ChequeStatus::Cancelled])->sum('amount'),
@@ -89,11 +95,21 @@ class ChequesController extends Controller
             ]);
     }
 
-    public function store(ChequeRequest $request)
+    public function store(ChequeRequest $request, RecordTreasuryMovementAction $recordMovement)
     {
         $validated = $request->validated();
 
-        Cheque::forPayee($validated['payee_id'], $validated['payee_type'])
+        // Block receivable cheque registration if no active ChequeClearing account exists
+        if (ChequeType::from((int) $validated['type']) === ChequeType::Receivable) {
+            $clearingAccount = TreasuryAccount::ofType(TreasuryAccountType::ChequeClearing)->active()->first();
+
+            if (! $clearingAccount) {
+                return redirect()->route('treasury.create')
+                    ->with('error', __('A Cheque Clearing treasury account is required before registering receivable cheques. Please create one first.'));
+            }
+        }
+
+        $cheque = Cheque::forPayee($validated['payee_id'], $validated['payee_type'])
             ->register([
                 'type' => $validated['type'],
                 'amount' => $validated['amount'],
@@ -103,6 +119,19 @@ class ChequesController extends Controller
                 'invoice_id' => $validated['invoice_id'] ?? null,
                 'notes' => $validated['notes'] ?? null,
             ]);
+
+        // Credit the cheque_clearing account when a receivable cheque is registered
+        if (ChequeType::from((int) $validated['type']) === ChequeType::Receivable) {
+            $clearingAccount = TreasuryAccount::ofType(TreasuryAccountType::ChequeClearing)->active()->first();
+
+            $recordMovement->handle(
+                account: $clearingAccount,
+                amount: (int) round($validated['amount'] * 100),
+                reason: TreasuryMovementReason::ChequeDeposited,
+                movable: $cheque,
+                actor: auth()->user(),
+            );
+        }
 
         return redirect()->route('cheques.index')->with('success', __('New cheque registered successfully'));
     }

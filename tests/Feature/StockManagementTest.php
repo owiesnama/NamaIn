@@ -3,7 +3,9 @@
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Storage;
+use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -15,11 +17,18 @@ beforeEach(function () {
     $this->storage = Storage::factory()->create(['name' => 'Main Warehouse']);
     $this->product = Product::factory()->create();
 
-    $this->admin = User::factory()->create();
-    $this->admin->tenants()->attach($this->storage->tenant_id, ['role' => 'owner']);
+    $tenant = Tenant::find($this->storage->tenant_id);
+    seedTenantRoles($tenant);
+    app()->instance('currentTenant', $tenant);
 
-    $this->user = User::factory()->create();
-    $this->user->tenants()->attach($this->storage->tenant_id, ['role' => 'staff']);
+    $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'owner')->first();
+    $staffRole = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'staff')->first();
+
+    $this->admin = User::factory()->create(['current_tenant_id' => $tenant->id]);
+    $tenant->users()->attach($this->admin, ['role' => 'owner', 'role_id' => $ownerRole->id, 'is_active' => true]);
+
+    $this->user = User::factory()->create(['current_tenant_id' => $tenant->id]);
+    $tenant->users()->attach($this->user, ['role' => 'staff', 'role_id' => $staffRole->id, 'is_active' => true]);
 });
 
 test('unauthorized users cannot manage stock', function () {

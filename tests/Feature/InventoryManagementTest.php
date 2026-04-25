@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Storage;
 use App\Models\Tenant;
 use App\Models\User;
@@ -97,9 +98,14 @@ test('authenticated users can update storages', function () {
 test('only owners or managers can delete storages', function () {
     $tenant = Tenant::factory()->create(['slug' => 'delete-test']);
     $storage = Storage::factory()->create(['tenant_id' => $tenant->id]);
+    seedTenantRoles($tenant);
+    app()->instance('currentTenant', $tenant);
+
+    $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'owner')->first();
+    $staffRole = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'staff')->first();
 
     $staff = User::factory()->create(['current_tenant_id' => $tenant->id]);
-    $tenant->users()->attach($staff, ['role' => 'staff']);
+    $tenant->users()->attach($staff, ['role' => 'staff', 'role_id' => $staffRole->id, 'is_active' => true]);
 
     $this->actingAs($staff)
         ->delete(route('storages.destroy', ['tenant' => $tenant->slug, 'storage' => $storage]))
@@ -108,7 +114,7 @@ test('only owners or managers can delete storages', function () {
     $this->assertNotSoftDeleted(Storage::class, ['id' => $storage->id]);
 
     $owner = User::factory()->create(['current_tenant_id' => $tenant->id]);
-    $tenant->users()->attach($owner, ['role' => 'owner']);
+    $tenant->users()->attach($owner, ['role' => 'owner', 'role_id' => $ownerRole->id, 'is_active' => true]);
 
     $this->actingAs($owner)
         ->delete(route('storages.destroy', ['tenant' => $tenant->slug, 'storage' => $storage]))

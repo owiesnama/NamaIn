@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Payments;
 
 use App\Actions\RecordPaymentAction;
+use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Filters\PaymentFilter;
 use App\Http\Controllers\Controller;
@@ -12,6 +13,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Supplier;
+use App\Models\TreasuryAccount;
 use App\Traits\HandlesAsyncUploads;
 use Inertia\Response;
 
@@ -21,16 +23,26 @@ class PaymentsController extends Controller
 
     public function index(PaymentFilter $filter)
     {
+        $baseQuery = Payment::filter($filter)->with(['invoice.invocable', 'payable', 'createdBy', 'treasuryAccount']);
+
+        $summary = [
+            'total_in' => (clone $baseQuery)->where('direction', 'in')->sum('amount'),
+            'total_out' => (clone $baseQuery)->where('direction', 'out')->sum('amount'),
+        ];
+
+        $payments = (clone $baseQuery)
+            ->when(request('sort_by'), function ($query, $sortBy) {
+                $query->orderBy(in_array($sortBy, ['id', 'created_at', 'amount']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
+            }, function ($query) {
+                $query->latest();
+            })
+            ->paginate(10)
+            ->withQueryString();
+
         return inertia('Payments/Index', [
-            'payments' => Payment::filter($filter)
-                ->when(request('sort_by'), function ($query, $sortBy) {
-                    $query->orderBy(in_array($sortBy, ['id', 'created_at', 'amount']) ? $sortBy : 'created_at', request('sort_order', 'desc'));
-                }, function ($query) {
-                    $query->latest();
-                })
-                ->with(['invoice.invocable', 'payable', 'createdBy'])
-                ->paginate(10)
-                ->withQueryString(),
+            'payments' => $payments,
+            'summary' => $summary,
+            'payment_methods' => PaymentMethod::casesWithLabels(),
         ]);
     }
 
@@ -45,6 +57,13 @@ class PaymentsController extends Controller
             'suppliers' => $suppliers,
             'banks' => $banks,
             'payment_methods' => PaymentMethod::casesWithLabels(),
+            'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'type' => $a->type->value,
+                'type_label' => $a->type->label(),
+                'current_balance' => $a->currentBalance(),
+            ]),
         ]);
     }
 
@@ -68,6 +87,7 @@ class PaymentsController extends Controller
             payable: $payable,
             amount: $request->amount,
             method: $method,
+            direction: PaymentDirection::from($request->direction),
             options: [
                 'reference' => $request->reference,
                 'notes' => $request->notes,
@@ -79,6 +99,7 @@ class PaymentsController extends Controller
                 'cheque_due' => $request->cheque_due_date,
                 'cheque_bank_id' => $request->cheque_bank_id,
                 'cheque_reference' => $request->cheque_number,
+                'treasury_account_id' => $request->treasury_account_id,
             ]
         );
 

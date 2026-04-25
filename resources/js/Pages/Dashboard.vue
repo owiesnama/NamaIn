@@ -2,6 +2,7 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { Link } from "@inertiajs/vue3";
     import { computed, ref } from "vue";
+    import { usePrivacyMode } from "@/Composables/usePrivacyMode";
     import {
         Chart as ChartJS,
         CategoryScale,
@@ -97,6 +98,12 @@
         }).format(amount || 0);
     };
 
+    const { isPrivate, togglePrivacy } = usePrivacyMode();
+
+    const sensitiveClass = computed(() =>
+        isPrivate.value ? "blur-sm select-none pointer-events-none transition-all duration-300" : "transition-all duration-300"
+    );
+
     const isOverdue = (cheque) => new Date(cheque.due) < new Date();
 
     const daysUntilDue = (cheque) => Math.ceil((new Date(cheque.due) - new Date()) / (1000 * 60 * 60 * 24));
@@ -109,6 +116,28 @@
 <template>
     <AppLayout :title="__('Dashboard')">
         <div class="space-y-6">
+
+            <!-- Page Header -->
+            <div class="w-full flex items-center justify-between">
+                <div class="flex items-center gap-x-3">
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">{{ __('Dashboard') }}</h2>
+                </div>
+                <button
+                    type="button"
+                    @click="togglePrivacy"
+                    class="inline-flex items-center gap-x-2 px-3 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+                >
+                    <!-- Eye-slash icon (shown when data is visible → click to hide) -->
+                    <svg v-if="!isPrivate" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                    </svg>
+                    <!-- Eye icon (shown when data is hidden → click to show) -->
+                    <svg v-else class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </button>
+            </div>
 
             <!-- Zone 1: 4 Key Numbers -->
             <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -126,10 +155,10 @@
                             <Tooltip :text="__('Net result: Sales minus purchases and expenses over the last 30 days.')" position="top">
                                 <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Gross Profit") }}</p>
                             </Tooltip>
-                            <p class="text-2xl font-bold mt-1 tracking-tight" :class="gross_profit >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600'">
+                            <p class="text-2xl font-bold mt-1 tracking-tight" :class="[gross_profit >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600', sensitiveClass]">
                                 {{ formatCurrency(gross_profit) }}
                             </p>
-                            <p class="text-[10px] text-gray-400 mt-1 font-medium">
+                            <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">
                                 {{ __("Exp") }}: {{ formatCurrency(expenses_this_month) }} &middot; {{ __("Pmts") }}: {{ formatCurrency(payments_this_month) }}
                             </p>
                         </div>
@@ -147,8 +176,8 @@
                         <Tooltip :text="__('Total revenue from sales and inventory value.')" position="top">
                             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Total Revenue") }}</p>
                         </Tooltip>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(parseFloat(total_sales) + parseFloat(total_inventory_value)) }}</p>
-                        <p class="text-[10px] text-gray-400 mt-1 font-medium">
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(parseFloat(total_sales) + parseFloat(total_inventory_value)) }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">
                             {{ __("Sales") }}: {{ formatCurrency(total_sales) }} &middot; {{ __("Inventory") }}: {{ formatCurrency(total_inventory_value) }}
                         </p>
                     </div>
@@ -165,8 +194,8 @@
                         <Tooltip :text="__('Total money owed by customers.')" position="top">
                             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Receivables") }}</p>
                         </Tooltip>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(outstanding_receivables) }}</p>
-                        <p class="text-[10px] text-gray-400 mt-1 font-medium">{{ __("Open invoices") }}</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(outstanding_receivables) }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">{{ __("Open invoices") }}</p>
                     </div>
                 </Link>
 
@@ -181,8 +210,8 @@
                         <Tooltip :text="__('Total money owed to suppliers.')" position="top">
                             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Payables") }}</p>
                         </Tooltip>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight">{{ formatCurrency(outstanding_payables) }}</p>
-                        <p class="text-[10px] text-gray-400 mt-1 font-medium">{{ __("Open invoices") }}</p>
+                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(outstanding_payables) }}</p>
+                        <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">{{ __("Open invoices") }}</p>
                     </div>
                 </Link>
             </div>
@@ -193,8 +222,23 @@
                 <!-- Chart -->
                 <div class="lg:col-span-2 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 p-6 transition-all">
                     <h3 class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">{{ __("Sales vs Purchases vs Expenses") }}</h3>
-                    <div class="h-[300px]">
+                    <div class="relative h-[300px]">
                         <Line :data="chartData" :options="chartOptions" />
+                        <Transition
+                            enter-active-class="ease-out duration-300"
+                            enter-from-class="opacity-0"
+                            enter-to-class="opacity-100"
+                            leave-active-class="ease-in duration-200"
+                            leave-from-class="opacity-100"
+                            leave-to-class="opacity-0"
+                        >
+                            <div v-if="isPrivate" class="absolute inset-0 flex flex-col items-center justify-center rounded-lg backdrop-blur-md bg-white/60 dark:bg-gray-900/60">
+                                <svg class="h-6 w-6 text-gray-400 dark:text-gray-500 mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+                                </svg>
+                                <p class="text-sm text-gray-400 dark:text-gray-500">{{ __('Chart data hidden') }}</p>
+                            </div>
+                        </Transition>
                     </div>
                 </div>
 
@@ -245,7 +289,7 @@
                                                 {{ cheque.payee?.name }}
                                             </p>
                                             <p class="text-xs font-semibold mt-0.5"
-                                               :class="cheque.type === 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">
+                                               :class="[cheque.type === 1 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400', sensitiveClass]">
                                                 {{ formatCurrency(cheque.amount) }}
                                             </p>
                                         </div>
@@ -320,7 +364,7 @@
                                 </Link>
                                 <p class="text-xs text-gray-400 dark:text-gray-500">{{ item.total_quantity }} {{ __("sold") }}</p>
                             </div>
-                            <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 ltr:ml-4 rtl:mr-4">
+                            <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 ltr:ml-4 rtl:mr-4" :class="sensitiveClass">
                                 {{ formatCurrency(item.total_revenue, item.product?.currency) }}
                             </p>
                         </li>
@@ -344,7 +388,7 @@
                                     {{ item.name }}
                                 </Link>
                             </div>
-                            <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 ltr:ml-4 rtl:mr-4">
+                            <p class="text-sm font-semibold text-emerald-600 dark:text-emerald-400 ltr:ml-4 rtl:mr-4" :class="sensitiveClass">
                                 {{ formatCurrency(item.revenue) }}
                             </p>
                         </li>

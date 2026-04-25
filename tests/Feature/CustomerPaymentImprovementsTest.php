@@ -92,6 +92,7 @@ test('it can set payment date on payment creation', function () {
         'payable_type' => Customer::class,
         'amount' => 500,
         'payment_method' => 'cash',
+        'direction' => 'in',
         'paid_at' => $customDate,
     ];
 
@@ -118,6 +119,7 @@ test('it can set payment date on invoice payment recording', function () {
         'invoice_id' => $invoice->id,
         'amount' => 500,
         'payment_method' => 'cash',
+        'direction' => 'in',
         'paid_at' => $customDate,
     ];
 

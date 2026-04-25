@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Models\TreasuryAccount;
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;
 use App\Services\StatementService;
@@ -14,12 +15,18 @@ trait HandlesPartyAccount
     {
         $resourceName = Str::camel(Str::singular($this->inertiaFolder));
 
+        $advances = method_exists($party, 'advances')
+            ? $party->advances()->with('treasuryAccount')->latest()->get()
+            : collect();
+
         return inertia("{$this->inertiaFolder}/Account", [
             $resourceName => $party,
             'account_balance' => $party->account_balance,
             'invoices' => $query->invoices($party, parent::ELEMENTS_PER_PAGE),
             'payments' => $query->payments($party, parent::ELEMENTS_PER_PAGE),
             'transactions' => $query->transactions($party, parent::ELEMENTS_PER_PAGE),
+            'advances' => $advances,
+            'treasury_accounts' => TreasuryAccount::active()->get(['id', 'name', 'type']),
         ]);
     }
 

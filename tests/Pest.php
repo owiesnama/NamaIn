@@ -1,7 +1,10 @@
 <?php
 
+use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\DefaultRolesService;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;
 use Tests\DuskTestCase;
@@ -60,20 +63,36 @@ function something()
     // ..
 }
 
-function actingAsTenantUser(?User $user = null): TestCase
+function seedTenantRoles(Tenant $tenant): void
 {
-    $tenant = Tenant::create(['name' => 'Test Org', 'slug' => 'test-org', 'is_active' => true]);
+    if (! Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->exists()) {
+        (new PermissionSeeder)->run();
+        (new DefaultRolesService)->seedForTenant($tenant);
+    }
+}
+
+function actingAsTenantUser(?User $user = null, string $role = 'owner'): TestCase
+{
+    $tenant = Tenant::firstOrCreate(
+        ['slug' => 'test-org'],
+        ['name' => 'Test Org', 'is_active' => true]
+    );
+    seedTenantRoles($tenant);
 
     $user = $user ?? User::factory()->create(['current_tenant_id' => $tenant->id]);
     $user->markEmailAsVerified();
 
     if (! $user->belongsToTenant($tenant)) {
-        $tenant->users()->attach($user, ['role' => 'owner']);
+        $roleModel = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', $role)->first();
+        $tenant->users()->attach($user, ['role' => $role, 'role_id' => $roleModel?->id, 'is_active' => true]);
     }
 
     if ($user->current_tenant_id !== $tenant->id) {
         $user->update(['current_tenant_id' => $tenant->id]);
     }
+
+    $user->unsetRelation('tenants');
+    $user->refresh();
 
     URL::defaults(['tenant' => $tenant->slug]);
     app()->instance('currentTenant', $tenant);

@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Models\Invoice;
 use App\Traits\HandlesAsyncUploads;
@@ -46,6 +47,7 @@ class StoreSaleAction
             payable: $invoice->invocable,
             amount: $amount,
             method: $method,
+            direction: PaymentDirection::In,
             options: [
                 'reference' => $data->get('payment_reference'),
                 'notes' => $method === PaymentMethod::Cash ? 'Cash payment on sale' : $data->get('payment_notes'),
@@ -56,6 +58,7 @@ class StoreSaleAction
                 'cheque_due' => $data->get('cheque_due_date'),
                 'cheque_bank_id' => $data->get('cheque_bank_id'),
                 'cheque_reference' => $data->get('cheque_number'),
+                'treasury_account_id' => $data->get('treasury_account_id'),
             ]
         );
     }

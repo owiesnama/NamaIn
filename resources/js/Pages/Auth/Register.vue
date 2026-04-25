@@ -3,7 +3,7 @@ import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AuthenticationCard from '@/Components/AuthenticationCard.vue';
 import AuthenticationCardLogo from '@/Components/AuthenticationCardLogo.vue';
 import InputError from '@/Components/InputError.vue';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 const direction = computed(() => usePage().props.locale === 'ar' ? 'rtl' : 'ltr');
 
@@ -25,8 +25,56 @@ const form = useForm({
     tenant_slug: '',
 });
 
+// ── Change 1: Arabic transliteration ──
+const arabicToLatin = {
+    'ا': 'a', 'أ': 'a', 'إ': 'a', 'آ': 'a', 'ب': 'b', 'ت': 't', 'ث': 'th',
+    'ج': 'j', 'ح': 'h', 'خ': 'kh', 'د': 'd', 'ذ': 'dh', 'ر': 'r', 'ز': 'z',
+    'س': 's', 'ش': 'sh', 'ص': 's', 'ض': 'd', 'ط': 't', 'ظ': 'z', 'ع': 'a',
+    'غ': 'gh', 'ف': 'f', 'ق': 'q', 'ك': 'k', 'ل': 'l', 'م': 'm', 'ن': 'n',
+    'ه': 'h', 'و': 'w', 'ي': 'y', 'ى': 'a', 'ة': 'h', 'ء': '', 'ئ': 'y',
+    'ؤ': 'w', 'لا': 'la',
+};
+
+function toSlug(val) {
+    let result = '';
+    for (const char of val) {
+        result += arabicToLatin[char] ?? char;
+    }
+    return result.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+const slugManuallyEdited = ref(false);
+
 watch(() => form.tenant_name, (val) => {
-    form.tenant_slug = val.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    if (!slugManuallyEdited.value) {
+        form.tenant_slug = toSlug(val);
+    }
+});
+
+function onSlugInput() {
+    slugManuallyEdited.value = true;
+}
+
+// ── Change 2: Client-side slug validation ──
+const slugError = computed(() => {
+    const s = form.tenant_slug;
+    if (!s) return null;
+    if (!/^[a-z0-9]/.test(s)) return 'Subdomain must start with a letter or number.';
+    if (!/^[a-z0-9-]+$/.test(s)) return 'Subdomain may only contain lowercase letters, numbers, and hyphens.';
+    if (/--/.test(s)) return 'Subdomain cannot contain consecutive hyphens.';
+    if (s.endsWith('-')) return 'Subdomain cannot end with a hyphen.';
+    return null;
+});
+
+// ── Change 3: Password requirements ──
+const passwordChecks = computed(() => {
+    const p = form.password;
+    return [
+        { label: '8+ characters', met: p.length >= 8 },
+        { label: 'At least one uppercase letter', met: /[A-Z]/.test(p) },
+        { label: 'At least one number', met: /[0-9]/.test(p) },
+        { label: 'At least one special character', met: /[^a-zA-Z0-9]/.test(p) },
+    ];
 });
 
 const submit = () => {
@@ -102,9 +150,12 @@ const inputClass = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-4 p
                                 required
                                 placeholder="my-org"
                                 class="min-w-0 flex-1 rounded-r-xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-800 placeholder-slate-400 transition focus:border-emerald-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-100"
+                                @input="onSlugInput"
                             />
                         </div>
                         <p v-if="fullDomain" class="mt-1.5 text-xs font-medium text-emerald-600" dir="ltr">{{ fullDomain }}</p>
+                        <!-- Change 2: client-side slug error -->
+                        <p v-if="slugError" class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ slugError }}</p>
                         <InputError class="mt-1.5" :message="form.errors.tenant_slug" />
                     </div>
                 </div>
@@ -161,6 +212,26 @@ const inputClass = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-4 p
                             :class="inputClass"
                         />
                         <InputError class="mt-1.5" :message="form.errors.password" />
+
+                        <!-- Change 3: Password requirements checklist -->
+                        <ul v-if="form.password" class="mt-2.5 space-y-1.5">
+                            <li
+                                v-for="check in passwordChecks"
+                                :key="check.label"
+                                class="flex items-center gap-2 text-xs"
+                                :class="check.met ? 'text-emerald-600' : 'text-slate-400'"
+                            >
+                                <!-- Checkmark icon (met) -->
+                                <svg v-if="check.met" class="h-3.5 w-3.5 shrink-0 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                </svg>
+                                <!-- X icon (not met) -->
+                                <svg v-else class="h-3.5 w-3.5 shrink-0 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                {{ check.label }}
+                            </li>
+                        </ul>
                     </div>
 
                     <div>
@@ -179,10 +250,11 @@ const inputClass = 'w-full rounded-xl border border-slate-200 bg-slate-50 px-4 p
 
             <!-- CTA -->
             <div class="space-y-4 pt-2">
+                <!-- Change 5: flat solid button (no gradient) -->
                 <button
                     type="submit"
-                    :disabled="form.processing"
-                    class="w-full rounded-xl bg-gradient-to-l from-emerald-600 to-emerald-400 py-3.5 text-base font-semibold text-white shadow-md shadow-emerald-200 transition hover:from-emerald-500 hover:to-emerald-300 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
+                    :disabled="form.processing || !!slugError"
+                    class="w-full rounded-xl bg-emerald-600 py-3.5 text-base font-semibold text-white transition hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                     <span v-if="!form.processing">{{ __('Create Your Organization') }}</span>
                     <span v-else class="flex items-center justify-center gap-2">

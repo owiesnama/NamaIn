@@ -4,7 +4,7 @@ export function translate(key, replace = {}) {
     const translations = usePage().props.translations || {};
     let translation = translations[key] ? translations[key] : key;
     Object.keys(replace).forEach(function (key) {
-        translation = translation.replace(":" + key, replace[key]);
+        translation = translation.replace(new RegExp(':' + key, 'g'), replace[key]);
     });
 
     return translation;

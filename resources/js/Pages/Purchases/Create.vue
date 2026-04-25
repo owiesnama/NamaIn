@@ -15,7 +15,8 @@
         products: Object,
         suppliers: Array,
         payment_methods: Object,
-        banks: Array
+        banks: Array,
+        treasury_accounts: Array,
     });
 
     const localSuppliers = ref([...props.suppliers]);
@@ -47,6 +48,7 @@
         products: purchases.value,
         invocable: null,
         payment_method: 'cash',
+        treasury_account_id: null,
         discount: 0,
         initial_payment_amount: 0,
         payment_reference: '',
@@ -60,6 +62,21 @@
         cheque_bank_id: null,
         cheque_due_date: '',
         cheque_number: ''
+    });
+
+    const methodToAccountType = { cash: 'cash', bank_transfer: 'bank', cheque: 'cheque_clearing' };
+
+    const filteredTreasuryAccounts = computed(() => {
+        const type = methodToAccountType[form.payment_method];
+        if (!type) return [];
+        return (props.treasury_accounts ?? []).filter(a => a.type === type);
+    });
+
+    const selectedTreasuryAccount = ref(null);
+
+    watch(() => form.payment_method, () => {
+        selectedTreasuryAccount.value = null;
+        form.treasury_account_id = null;
     });
 
     const searchSupplier = debounce(function(search) {
@@ -367,6 +384,29 @@
                                 </template>
                             </CustomSelect>
                             <InputError :message="form.errors.payment_method" class="mt-1" />
+                        </div>
+
+                        <!-- Treasury Account -->
+                        <div v-if="filteredTreasuryAccounts.length">
+                            <InputLabel :value="__('Paid From')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
+                            <CustomSelect
+                                v-model="selectedTreasuryAccount"
+                                :options="filteredTreasuryAccounts"
+                                label="name"
+                                track-by="id"
+                                :placeholder="__('Select account...')"
+                                :close-on-select="true"
+                                :multiple="false"
+                                :select-label="''"
+                                :deselect-label="''"
+                                :selected-label="__('Selected')"
+                                @update:model-value="form.treasury_account_id = selectedTreasuryAccount?.id ?? null"
+                            >
+                                <template #option="{ option }">
+                                    <span>{{ option.name }}</span>
+                                    <span class="text-xs text-gray-400 ms-1">({{ option.type_label }})</span>
+                                </template>
+                            </CustomSelect>
                         </div>
 
                         <div class="grid grid-cols-2 gap-3">
