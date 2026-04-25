@@ -34,11 +34,11 @@ test('Auth Users Can Create A New Customers', function () {
 test('Only admins can delete customers', function () {
     $customer = Customer::factory()->create();
 
-    $this->signIn()
+    actingAsTenantUser(role: 'cashier')
         ->delete(route('customers.destroy', $customer));
     $this->assertNotSoftDeleted(Customer::class, ['id' => $customer->id]);
 
-    $this->signIn(User::factory()->admin()->create())
+    actingAsTenantUser(role: 'owner')
         ->delete(route('customers.destroy', $customer));
     $this->assertSoftDeleted(Customer::class, ['id' => $customer->id]);
 });

@@ -4,14 +4,15 @@ import InputLabel from "@/Components/InputLabel.vue";
 import TextInput from "@/Components/TextInput.vue";
 import InputError from "@/Components/InputError.vue";
 import FileUploader from "@/Components/FileUploader.vue";
-import { useForm } from "@inertiajs/vue3";
-import { ref, computed } from "vue";
+import { useForm, Link } from "@inertiajs/vue3";
+import { ref, computed, watch } from "vue";
 
 const props = defineProps({
     customers: Array,
     suppliers: Array,
     banks: Array,
     payment_methods: Object,
+    treasury_accounts: Array,
 });
 
 const selectedType = ref("customer"); // 'customer' or 'supplier'
@@ -58,6 +59,8 @@ const form = useForm({
     amount: 0,
     paid_at: new Date().toISOString().slice(0, 10),
     payment_method: "cash",
+    direction: "in",
+    treasury_account_id: null,
     reference: "",
     notes: "",
 
@@ -69,6 +72,26 @@ const form = useForm({
     cheque_bank_id: null,
     cheque_due_date: "",
     cheque_number: "",
+});
+
+const methodToAccountType = {
+    cash: 'cash',
+    bank_transfer: 'bank',
+    cheque: 'cheque_clearing',
+};
+
+const filteredTreasuryAccounts = computed(() => {
+    const type = methodToAccountType[form.payment_method];
+    if (!type) return [];
+    return props.treasury_accounts.filter(a => a.type === type);
+});
+
+const selectedTreasuryAccount = ref(null);
+
+// Clear treasury selection when payment method changes type
+watch(() => form.payment_method, () => {
+    selectedTreasuryAccount.value = null;
+    form.treasury_account_id = null;
 });
 
 const formatCurrency = (amount, currency = null) => {
@@ -198,6 +221,44 @@ const submit = () => {
                             <span class="text-lg font-bold text-red-600 dark:text-red-400">{{ formatCurrency(selectedInvoiceData.remaining_balance, selectedInvoiceData.currency) }}</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Direction -->
+                <div>
+                    <InputLabel :value="__('Direction')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
+                    <div class="flex gap-x-2">
+                        <button
+                            type="button"
+                            @click="form.direction = 'in'"
+                            :class="[
+                                'flex-1 inline-flex items-center justify-center gap-x-2 px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200',
+                                form.direction === 'in'
+                                    ? 'bg-emerald-600 border-emerald-600 text-white'
+                                    : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            ]"
+                        >
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                            </svg>
+                            {{ __('Incoming') }}
+                        </button>
+                        <button
+                            type="button"
+                            @click="form.direction = 'out'"
+                            :class="[
+                                'flex-1 inline-flex items-center justify-center gap-x-2 px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200',
+                                form.direction === 'out'
+                                    ? 'bg-red-600 border-red-600 text-white'
+                                    : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+                            ]"
+                        >
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+                            </svg>
+                            {{ __('Outgoing') }}
+                        </button>
+                    </div>
+                    <InputError class="mt-1" :message="form.errors.direction" />
                 </div>
 
                 <!-- Amount -->
@@ -372,6 +433,23 @@ const submit = () => {
                             <span class="text-gray-500 dark:text-gray-400 font-medium">{{ __("Payment Type") }}</span>
                             <span class="font-bold text-gray-900 dark:text-white">{{ selectedType === 'customer' ? __('Customer') : __('Supplier') }}</span>
                         </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500 dark:text-gray-400 font-medium">{{ __("Direction") }}</span>
+                            <span
+                                class="inline-flex items-center gap-x-1 px-2.5 py-1 text-xs font-bold rounded-full"
+                                :class="form.direction === 'in'
+                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                                    : 'bg-red-100 text-red-700 dark:bg-red-900/20 dark:text-red-400'"
+                            >
+                                <svg v-if="form.direction === 'in'" class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
+                                </svg>
+                                <svg v-else class="h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />
+                                </svg>
+                                {{ form.direction === 'in' ? __('Incoming') : __('Outgoing') }}
+                            </span>
+                        </div>
                         <div v-if="selectedInvoiceData" class="flex items-center justify-between text-sm">
                             <span class="text-gray-500 dark:text-gray-400 font-medium">{{ __("Invoice") }}</span>
                             <span class="font-bold text-gray-900 dark:text-white">#{{ selectedInvoiceData.serial_number || selectedInvoiceData.id }}</span>
@@ -382,6 +460,43 @@ const submit = () => {
                                 <span class="text-3xl font-black text-emerald-600 dark:text-emerald-400 tabular-nums">
                                     {{ formatCurrency(form.amount) }}
                                 </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Treasury Account -->
+                    <div v-if="filteredTreasuryAccounts.length" class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <p class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{{ __("Received Into") }}</p>
+                        <CustomSelect
+                            v-model="selectedTreasuryAccount"
+                            :options="filteredTreasuryAccounts"
+                            label="name"
+                            track-by="id"
+                            :placeholder="__('Select account...')"
+                            :close-on-select="true"
+                            :multiple="false"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            @update:model-value="form.treasury_account_id = selectedTreasuryAccount?.id ?? null"
+                        >
+                            <template #option="{ option }">
+                                <span>{{ option.name }}</span>
+                                <span class="text-xs text-gray-400 ms-1">({{ option.type_label }})</span>
+                            </template>
+                        </CustomSelect>
+                    </div>
+                    <div v-else-if="form.payment_method in methodToAccountType" class="pt-4 border-t border-gray-100 dark:border-gray-700">
+                        <div class="flex items-start gap-x-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 dark:border-amber-800 dark:bg-amber-900/20">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                            </svg>
+                            <div>
+                                <p class="text-xs font-semibold text-amber-800 dark:text-amber-300">{{ __("No treasury account configured") }}</p>
+                                <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400">{{ __("This payment method requires a treasury account. Please set one up in treasury settings.") }}</p>
+                                <Link :href="route('treasury.create')" class="mt-1 inline-flex items-center text-xs font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800">
+                                    {{ __("Go to Treasury") }} &rarr;
+                                </Link>
                             </div>
                         </div>
                     </div>

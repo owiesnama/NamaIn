@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Traits\WithTrashScope;
@@ -319,13 +320,15 @@ class Invoice extends BaseModel
         ?string $notes = null,
         ?array $metadata = null,
         ?string $receiptPath = null,
-        ?string $paidAt = null
+        ?string $paidAt = null,
+        PaymentDirection $direction = PaymentDirection::In
     ): Payment {
         $payment = $this->payments()->create([
             'payable_id' => $this->invocable_id,
             'payable_type' => $this->invocable_type,
             'amount' => $amount,
             'payment_method' => $method,
+            'direction' => $direction,
             'reference' => $reference,
             'notes' => $notes,
             'paid_at' => $paidAt ?? now(),

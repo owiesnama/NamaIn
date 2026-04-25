@@ -8,16 +8,16 @@ class StockTransferPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.transfer');
     }
 
     public function view(User $user): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.transfer');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.transfer');
     }
 }

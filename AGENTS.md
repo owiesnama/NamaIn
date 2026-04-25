@@ -18,6 +18,67 @@ Any AI agent writing Vue/Tailwind code must produce output that is indistinguish
 
 ---
 
+## Flat Design Philosophy
+
+The agent must strictly follow a **flat design philosophy** across all generated UI.
+
+### Core Principle
+
+Interfaces must feel clean, modern, lightweight, and visually calm.  
+Avoid decorative styling that adds visual noise without improving usability.
+
+### Rules
+
+1. **No skeuomorphic styling**
+    - Do not imitate real-world materials such as glass, metal, paper, leather, or plastic.
+    - No glossy surfaces, bevels, embossing, inset highlights, or realistic textures.
+
+2. **Shadows must be minimal**
+    - Use shadows only when necessary to clarify hierarchy or focus.
+    - Prefer `shadow-sm` for standard surfaces.
+    - Avoid heavy, layered, dramatic, or floating-card shadows unless explicitly required for modals or overlays.
+
+3. **No gradients in the main application UI**
+    - Use solid colors for surfaces, buttons, badges, borders, and states.
+    - Gradients are not allowed in standard tenant/app pages.
+    - If gradients are used in auth or marketing-like screens, they must remain subtle and intentional, never dominant.
+
+4. **Rely on spacing, contrast, and borders instead of decoration**
+    - Visual hierarchy should come from typography, layout, spacing, alignment, and restrained color usage.
+    - Prefer clear borders, soft background contrast, and consistent structure over ornamental effects.
+
+5. **Keep surfaces simple**
+    - Cards, panels, tables, modals, and inputs should use flat fills with clean borders.
+    - Avoid layered visual treatments that make components feel overly dimensional.
+
+6. **Icons and illustrations must stay simple**
+    - Use clean inline SVG icons only.
+    - Avoid overly detailed, 3D-looking, filled decorative icons unless the surrounding pattern clearly calls for them.
+
+7. **Interactive states must remain flat**
+    - Hover, active, selected, and focus states should be expressed through:
+        - slight color shifts
+        - border/ring changes
+        - subtle background changes
+    - Avoid glow effects, exaggerated scaling, or flashy animation.
+
+8. **Emphasis should come from color and typography, not visual effects**
+    - Important actions should stand out because of strong layout placement, readable labels, and brand color usage.
+    - Never rely on gradients, deep shadows, or excessive animation to create importance.
+
+### Practical Guidance
+
+When choosing between two UI treatments, always prefer the one that is:
+- simpler
+- flatter
+- cleaner
+- easier to scan
+- less visually noisy
+
+### Enforcement
+
+Any generated component that introduces unnecessary visual depth, decorative gradients, glossy effects, or excessive shadow should be considered **non-compliant** with the design system.
+
 ## Color Palette
 
 ### Brand / Primary

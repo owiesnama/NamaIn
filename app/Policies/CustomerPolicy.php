@@ -12,62 +12,44 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->hasPermission('customers.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Customer $customer): bool
     {
-        return true;
+        return $user->hasPermission('customers.view');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return true;
+        return $user->hasPermission('customers.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Customer $customer): bool
     {
         if ($customer->is_system) {
             return false;
         }
 
-        return true;
+        return $user->hasPermission('customers.update');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Customer $customer): bool
     {
         if ($customer->is_system) {
             return false;
         }
 
-        return $user->isAdmin();
+        return $user->hasPermission('customers.delete');
     }
 
-    /**
-     * Determine whether the user can restore the model.
-     */
     public function restore(User $user, Customer $customer): bool
     {
-        return true;
+        return $user->hasPermission('customers.update');
     }
 
-    /**
-     * Determine whether the user can permanently delete the model.
-     */
     public function forceDelete(User $user): bool
     {
-        return true;
+        return $user->hasPermission('customers.delete');
     }
 }

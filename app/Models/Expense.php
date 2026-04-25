@@ -43,6 +43,14 @@ class Expense extends BaseModel
     }
 
     /**
+     * The treasury account this expense was paid from.
+     */
+    public function treasuryAccount(): BelongsTo
+    {
+        return $this->belongsTo(TreasuryAccount::class);
+    }
+
+    /**
      * The categories that belongs to this expense.
      */
     public function categories(): MorphToMany

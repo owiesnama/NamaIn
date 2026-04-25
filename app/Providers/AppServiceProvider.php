@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Listeners\InvalidateAllUserSessions;
 use App\Models\Invoice;
+use App\Models\User;
 use App\Observers\InvoiceObserver;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
@@ -14,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -62,6 +64,12 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Invoice::observe(InvoiceObserver::class);
+
+        Gate::before(function (User $user, string $ability) {
+            if ($user->hasRole('owner')) {
+                return true;
+            }
+        });
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

@@ -12,46 +12,31 @@ class StoragePolicy
      */
     public function manageStock(User $user, Storage $storage): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.manage');
     }
 
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('owner', 'manager', 'cashier', 'staff');
+        return $user->hasPermission('inventory.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Storage $storage): bool
     {
-        return $user->hasRole('owner', 'manager', 'cashier', 'staff');
+        return $user->hasPermission('inventory.view');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.manage');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Storage $storage): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.manage');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Storage $storage): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.manage');
     }
 }

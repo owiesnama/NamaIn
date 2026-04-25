@@ -6,11 +6,13 @@ use App\Actions\Pos\ClosePosSessionAction;
 use App\Actions\Pos\OpenPosSessionAction;
 use App\Actions\Pos\PosPreflightAction;
 use App\Actions\Pos\ProcessPosCheckoutAction;
+use App\Enums\PaymentMethod;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Models\PosSession;
 use App\Models\Storage;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rules\Enum;
 
 class PosController extends Controller
 {
@@ -39,6 +41,7 @@ class PosController extends Controller
             'items.*.price' => 'required|numeric|min:0',
             'items.*.unit_id' => 'nullable|exists:units,id',
             'total' => 'required|numeric',
+            'payment_method' => ['nullable', new Enum(PaymentMethod::class)],
             'idempotency_key' => 'nullable|string',
             'acknowledge_transfers' => 'nullable|boolean',
         ]);
@@ -57,7 +60,7 @@ class PosController extends Controller
         }
 
         $data = collect($request->all());
-        $data->put('total', $request->total * 100);
+        $data->put('total', $request->total);
 
         try {
             $invoice = $action->execute(

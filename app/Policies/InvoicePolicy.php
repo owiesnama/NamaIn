@@ -12,38 +12,26 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('owner', 'manager', 'cashier', 'staff');
+        return $user->hasPermission('sales.view') || $user->hasPermission('purchases.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, Invoice $invoice): bool
     {
-        return $user->hasRole('owner', 'manager', 'cashier', 'staff');
+        return $user->hasPermission('sales.view') || $user->hasPermission('purchases.view');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('owner', 'manager', 'cashier');
+        return $user->hasPermission('sales.create') || $user->hasPermission('purchases.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, Invoice $invoice): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('sales.create') || $user->hasPermission('purchases.create');
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, Invoice $invoice): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('sales.delete') || $user->hasPermission('purchases.delete');
     }
 }

@@ -9,6 +9,7 @@ use App\Traits\HasPaymentHistory;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -79,6 +80,22 @@ class Customer extends BaseModel
     public function payments(): MorphMany
     {
         return $this->morphMany(Payment::class, 'payable');
+    }
+
+    /**
+     * Customer advances given to this customer.
+     */
+    public function advances(): HasMany
+    {
+        return $this->hasMany(CustomerAdvance::class);
+    }
+
+    /**
+     * Payments coming IN settle a customer's balance (money they pay us).
+     */
+    protected function settlingDirection(): string
+    {
+        return 'in';
     }
 
     /**

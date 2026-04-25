@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Bank extends BaseModel
@@ -22,5 +23,13 @@ class Bank extends BaseModel
     public function cheques(): HasMany
     {
         return $this->hasMany(Cheque::class);
+    }
+
+    /**
+     * The treasury account linked to this bank institution.
+     */
+    public function treasuryAccount(): HasOne
+    {
+        return $this->hasOne(TreasuryAccount::class);
     }
 }

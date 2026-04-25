@@ -14,6 +14,10 @@
         },
         chequeStatus: {
             type: Object
+        },
+        bankTreasuryAccounts: {
+            type: Array,
+            default: () => []
         }
     });
 
@@ -36,7 +40,16 @@
 
     const form = useForm({
         status: props.cheque.status,
-        cleared_amount: null
+        cleared_amount: null,
+        treasury_account_id: null,
+    });
+
+    const selectedBankAccount = ref(null);
+
+    // Check if the cheque's bank already has a linked treasury account
+    const hasLinkedBankAccount = computed(() => {
+        if (!props.cheque.bank_id) return false;
+        return props.bankTreasuryAccounts.some(a => a.bank_id === props.cheque.bank_id);
     });
 
     const showConfirmationModal = ref(false);
@@ -73,10 +86,15 @@
 
     const confirmClearance = () => {
         form.put(route("cheques.updateStatus", props.cheque.id), {
+            preserveScroll: true,
             onSuccess: () => {
                 selectedStatus.value = form.status;
                 showConfirmationModal.value = false;
-            }
+            },
+            onError: () => {
+                showConfirmationModal.value = false;
+                selectedStatus.value = props.cheque.status;
+            },
         });
     };
 
@@ -87,7 +105,12 @@
 
     const submit = () => {
         form.status = selectedStatus.value;
-        form.put(route("cheques.updateStatus", props.cheque.id));
+        form.put(route("cheques.updateStatus", props.cheque.id), {
+            preserveScroll: true,
+            onError: () => {
+                selectedStatus.value = props.cheque.status;
+            },
+        });
     };
 
     const confirmationMessage = computed(() => {
@@ -238,6 +261,26 @@
                         step="0.01"
                         :max="cheque.amount - cheque.cleared_amount"
                         required
+                    />
+                </div>
+
+                <!-- Bank treasury account fallback (shown when bank has no linked treasury account) -->
+                <div v-if="bankTreasuryAccounts.length && !hasLinkedBankAccount" class="mt-4">
+                    <InputLabel :value="__('Deposit Into')" />
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">{{ __("No treasury account linked to this bank. Select one manually:") }}</p>
+                    <CustomSelect
+                        v-model="selectedBankAccount"
+                        :options="bankTreasuryAccounts"
+                        label="name"
+                        track-by="id"
+                        :placeholder="__('Select bank account...')"
+                        :close-on-select="true"
+                        :multiple="false"
+                        :select-label="''"
+                        :deselect-label="''"
+                        :selected-label="__('Selected')"
+                        class="mt-1"
+                        @update:model-value="form.treasury_account_id = selectedBankAccount?.id ?? null"
                     />
                 </div>
 

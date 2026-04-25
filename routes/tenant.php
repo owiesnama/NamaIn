@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\MustChangePasswordController;
 use App\Http\Controllers\Catalog\ProductsController;
 use App\Http\Controllers\Contacts\CustomersController;
 use App\Http\Controllers\Contacts\SuppliersController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\Core\DashboardController;
 use App\Http\Controllers\Core\GlobalSearchController;
 use App\Http\Controllers\Core\PreferenceController;
 use App\Http\Controllers\Core\TenantSelectionController;
+use App\Http\Controllers\CustomerAdvancesController;
 use App\Http\Controllers\Expenses\ExpenseApprovalController;
 use App\Http\Controllers\Expenses\ExpenseReceiptController;
 use App\Http\Controllers\Expenses\ExpensesController;
@@ -25,8 +27,15 @@ use App\Http\Controllers\Purchases\PurchasesController;
 use App\Http\Controllers\Sales\PosController;
 use App\Http\Controllers\Sales\PosInvoicesController;
 use App\Http\Controllers\Sales\SalesController;
+use App\Http\Controllers\Treasury\TreasuryAccountsController;
+use App\Http\Controllers\Treasury\TreasuryAdjustmentsController;
+use App\Http\Controllers\Treasury\TreasuryTransfersController;
+use App\Http\Controllers\Users\RoleController;
+use App\Http\Controllers\Users\UserManagementController;
 use App\Http\Controllers\Utils\TemporaryUploadController;
+use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureTenantIsActive;
+use App\Http\Middleware\EnsureUserIsActiveInTenant;
 use App\Http\Middleware\ResolveTenant;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +52,28 @@ Route::middleware([ResolveTenant::class])->group(function () {
         config('jetstream.auth_session'),
         'verified',
         EnsureTenantIsActive::class,
+        EnsureUserIsActiveInTenant::class,
+    ])->group(function () {
+
+        /*
+        |--------------------------------------------------------------------------
+        | Must Change Password
+        |--------------------------------------------------------------------------
+        | Force password change for users created directly by an admin.
+        | These routes bypass the EnsurePasswordIsChanged middleware.
+        */
+        Route::get('/must-change-password', [MustChangePasswordController::class, 'show'])->name('password.change');
+        Route::post('/must-change-password', [MustChangePasswordController::class, 'update'])->name('password.change.update');
+
+    }); // end password-change-exempt group
+
+    Route::middleware([
+        'auth:sanctum',
+        config('jetstream.auth_session'),
+        'verified',
+        EnsureTenantIsActive::class,
+        EnsureUserIsActiveInTenant::class,
+        EnsurePasswordIsChanged::class,
     ])->group(function () {
 
         /*
@@ -72,6 +103,8 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/customers/{customer}/account', [CustomersController::class, 'account'])->name('customers.account');
         Route::get('/customers/{customer}/statement', [CustomersController::class, 'statement'])->name('customers.statement');
         Route::get('/customers/{customer}/statement/print', [CustomersController::class, 'printStatement'])->name('customers.print-statement');
+        Route::post('/customers/{customer}/advances', [CustomerAdvancesController::class, 'store'])->name('customer-advances.store');
+        Route::post('/customer-advances/{customerAdvance}/settle', [CustomerAdvancesController::class, 'settle'])->name('customer-advances.settle');
 
         /*
         |--------------------------------------------------------------------------
@@ -180,6 +213,50 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::resource('/expenses', ExpensesController::class);
         Route::put('/expenses/{expense}/approval', [ExpenseApprovalController::class, 'update'])->name('expenses.approval');
         Route::get('/expenses/{expense}/receipt', [ExpenseReceiptController::class, 'show'])->name('expenses.receipt');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Treasury
+        |--------------------------------------------------------------------------
+        | Treasury accounts, movement ledger, inter-account transfers,
+        | and manual balance adjustments.
+        */
+        Route::get('/treasury', [TreasuryAccountsController::class, 'index'])->name('treasury.index');
+        Route::get('/treasury/create', [TreasuryAccountsController::class, 'create'])->name('treasury.create');
+        Route::post('/treasury', [TreasuryAccountsController::class, 'store'])->name('treasury.store');
+        Route::get('/treasury/transfer', [TreasuryTransfersController::class, 'create'])->name('treasury.transfer.create');
+        Route::post('/treasury/transfer', [TreasuryTransfersController::class, 'store'])->name('treasury.transfer.store');
+        Route::get('/treasury/transfer/{transfer}', [TreasuryTransfersController::class, 'show'])->name('treasury.transfer.show');
+        Route::get('/treasury/{treasury}', [TreasuryAccountsController::class, 'show'])->name('treasury.show');
+        Route::get('/treasury/{treasury}/edit', [TreasuryAccountsController::class, 'edit'])->name('treasury.edit');
+        Route::put('/treasury/{treasury}', [TreasuryAccountsController::class, 'update'])->name('treasury.update');
+        Route::post('/treasury/{treasury}/adjust', [TreasuryAdjustmentsController::class, 'store'])->name('treasury.adjust');
+
+        /*
+        |--------------------------------------------------------------------------
+        | User Management
+        |--------------------------------------------------------------------------
+        | Invite, enable/disable, assign roles, and remove team members.
+        */
+        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+        Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+        Route::post('/users/invite', [UserManagementController::class, 'invite'])->name('users.invite');
+        Route::delete('/users/invitations/{invitation}', [UserManagementController::class, 'cancelInvitation'])->name('users.invitations.cancel');
+        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+        Route::put('/users/{user}/role', [UserManagementController::class, 'assignRole'])->name('users.assign-role');
+        Route::put('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Role Management
+        |--------------------------------------------------------------------------
+        | Create, update, and delete tenant-scoped roles with custom permissions.
+        */
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
         /*
         |--------------------------------------------------------------------------

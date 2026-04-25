@@ -91,6 +91,7 @@ test('can record cash payment without extra fields', function () {
         'payable_type' => 'App\\Models\\Customer',
         'amount' => 100,
         'payment_method' => 'cash',
+        'direction' => 'in',
         'notes' => 'Cash payment',
     ]);
 
@@ -117,6 +118,7 @@ test('can record bank transfer with bank name and receipt', function () {
         'payable_type' => 'App\\Models\\Customer',
         'amount' => 250,
         'payment_method' => 'bank_transfer',
+        'direction' => 'in',
         'bank_name' => 'Palestinian Bank',
         'receipt' => $tempFilename,
     ]);
@@ -139,6 +141,7 @@ test('can record cheque payment and automated cheque creation', function () {
         'payable_type' => 'App\\Models\\Customer',
         'amount' => 500,
         'payment_method' => 'cheque',
+        'direction' => 'in',
         'cheque_bank_id' => $this->bank->id,
         'cheque_number' => 'CHQ-123',
         'cheque_due_date' => now()->addDays(30)->toDateString(),
@@ -168,6 +171,7 @@ test('can record cheque payment with a new bank name', function () {
         'payable_type' => 'App\\Models\\Customer',
         'amount' => 750,
         'payment_method' => 'cheque',
+        'direction' => 'in',
         'cheque_bank_id' => 'New National Bank',
         'cheque_number' => 'CHQ-NEW-001',
         'cheque_due_date' => now()->addDays(30)->toDateString(),
@@ -193,6 +197,7 @@ test('validation fails for bank transfer without bank name', function () {
         'payable_type' => 'App\\Models\\Customer',
         'amount' => 100,
         'payment_method' => 'bank_transfer',
+        'direction' => 'in',
     ]);
 
     $response->assertSessionHasErrors(['bank_name']);
@@ -206,6 +211,7 @@ test('validation fails for cheque without cheque details', function () {
         'payable_type' => 'App\\Models\\Customer',
         'amount' => 100,
         'payment_method' => 'cheque',
+        'direction' => 'in',
     ]);
 
     $response->assertSessionHasErrors(['cheque_bank_id', 'cheque_number', 'cheque_due_date']);
@@ -223,6 +229,7 @@ test('can record direct payment for customer', function () {
         'payable_type' => Customer::class,
         'amount' => 500,
         'payment_method' => PaymentMethod::Cash->value,
+        'direction' => 'in',
         'reference' => 'Direct Payment',
         'notes' => 'No invoice linked',
     ]);
@@ -246,6 +253,7 @@ test('can record direct payment for supplier', function () {
         'payable_type' => Supplier::class,
         'amount' => 1000,
         'payment_method' => PaymentMethod::BankTransfer->value,
+        'direction' => 'out',
         'bank_name' => 'Test Bank',
         'reference' => 'Advance Payment',
         'notes' => 'For future purchases',

@@ -8,16 +8,16 @@ class AdjustmentPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.manage');
     }
 
     public function view(User $user): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.manage');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('owner', 'manager');
+        return $user->hasPermission('inventory.manage');
     }
 }

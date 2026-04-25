@@ -1,6 +1,7 @@
 <?php
 
 use App\Enums\ChequeStatus;
+use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Models\Bank;
 use App\Models\Cheque;
@@ -8,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Supplier;
+use App\Models\TreasuryAccount;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -17,6 +19,8 @@ beforeEach(function () {
     $this->user = User::factory()->create();
     $this->actingAs($this->user);
     $this->bank = Bank::create(['name' => 'Test Bank']);
+    $this->bankAccount = TreasuryAccount::factory()->bank()->withOpeningBalance(1_000_000)->create(['bank_id' => $this->bank->id]);
+    $this->clearingAccount = TreasuryAccount::factory()->chequeClearing()->withOpeningBalance(1_000_000)->create();
 });
 
 test('clearing a credit cheque with invoice records payment on that invoice', function () {
@@ -37,6 +41,7 @@ test('clearing a credit cheque with invoice records payment on that invoice', fu
         'amount' => 500,
         'status' => ChequeStatus::Issued,
         'bank' => 'Test Bank',
+        'bank_id' => $this->bank->id,
         'reference_number' => 'CHQ-1',
     ]);
 
@@ -71,6 +76,7 @@ test('clearing a debit cheque with invoice records payment on that invoice', fun
         'amount' => 500,
         'status' => ChequeStatus::Issued,
         'bank' => 'Test Bank',
+        'bank_id' => $this->bank->id,
         'reference_number' => 'CHQ-2',
     ]);
 
@@ -92,6 +98,7 @@ test('clearing a credit cheque without invoice creates a direct customer payment
         'amount' => 500,
         'status' => ChequeStatus::Issued,
         'bank' => 'Test Bank',
+        'bank_id' => $this->bank->id,
         'reference_number' => 'CHQ-3',
     ]);
 
@@ -108,6 +115,10 @@ test('clearing a credit cheque without invoice creates a direct customer payment
     // Balance should decrease (more negative if we use the same calculation)
     // Actually, calculateAccountBalance subtracts direct payments from invoice balance.
     $this->assertEquals(-500, $customer->fresh()->account_balance);
+
+    // Cleared receivable cheque payment should have direction = in
+    $payment = Payment::where('payable_id', $customer->id)->first();
+    expect($payment->direction)->toBe(PaymentDirection::In);
 });
 
 test('clearing a debit cheque without invoice creates a direct supplier payment', function () {
@@ -120,6 +131,7 @@ test('clearing a debit cheque without invoice creates a direct supplier payment'
         'amount' => 500,
         'status' => ChequeStatus::Issued,
         'bank' => 'Test Bank',
+        'bank_id' => $this->bank->id,
         'reference_number' => 'CHQ-4',
     ]);
 
@@ -134,6 +146,10 @@ test('clearing a debit cheque without invoice creates a direct supplier payment'
         'amount' => 500,
     ]);
     $this->assertEquals(-500, $supplier->fresh()->account_balance);
+
+    // Cleared payable cheque payment should have direction = out
+    $payment = Payment::where('payable_id', $supplier->id)->first();
+    expect($payment->direction)->toBe(PaymentDirection::Out);
 });
 
 test('partially clearing a cheque records cleared_amount, not full amount', function () {
@@ -146,6 +162,7 @@ test('partially clearing a cheque records cleared_amount, not full amount', func
         'amount' => 1000,
         'status' => ChequeStatus::Issued,
         'bank' => 'Test Bank',
+        'bank_id' => $this->bank->id,
         'reference_number' => 'CHQ-5',
     ]);
 
@@ -177,6 +194,7 @@ test('clearing a partially cleared cheque again records the remaining amount', f
         'cleared_amount' => 400,
         'status' => ChequeStatus::PartiallyCleared,
         'bank' => 'Test Bank',
+        'bank_id' => $this->bank->id,
         'reference_number' => 'CHQ-6',
     ]);
 

@@ -5,9 +5,11 @@ import TextInput from "@/Components/TextInput.vue";
 import InputError from "@/Components/InputError.vue";
 import FileUploader from "@/Components/FileUploader.vue";
 import { useForm } from "@inertiajs/vue3";
+import { ref } from "vue";
 
-defineProps({
+const props = defineProps({
     categories: Array,
+    treasury_accounts: Array,
 });
 
 const form = useForm({
@@ -16,6 +18,7 @@ const form = useForm({
     expensed_at: new Date().toISOString().substr(0, 10),
     category_ids: [],
     category_objects: [],
+    treasury_account_id: null,
     notes: "",
     receipt: null,
     is_recurring: false,
@@ -23,6 +26,8 @@ const form = useForm({
     starts_at: new Date().toISOString().substr(0, 10),
     ends_at: null,
 });
+
+const selectedTreasuryAccount = ref(null);
 
 const formatCurrency = (amount) => {
     const validCurrency = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
@@ -125,6 +130,30 @@ const submit = () => {
                                 </template>
                             </VueMultiselect>
                             <InputError :message="form.errors.category_ids" class="mt-2" />
+                        </div>
+
+                        <!-- Paid From (Treasury) -->
+                        <div class="sm:col-span-2" v-if="treasury_accounts?.length">
+                            <InputLabel for="treasury_account_id" :value="__('Paid From')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
+                            <CustomSelect
+                                v-model="selectedTreasuryAccount"
+                                :options="treasury_accounts"
+                                label="name"
+                                track-by="id"
+                                :placeholder="__('Select account (optional)...')"
+                                :close-on-select="true"
+                                :multiple="false"
+                                :select-label="''"
+                                :deselect-label="''"
+                                :selected-label="__('Selected')"
+                                @update:model-value="form.treasury_account_id = selectedTreasuryAccount?.id ?? null"
+                            >
+                                <template #option="{ option }">
+                                    <span>{{ option.name }}</span>
+                                    <span class="text-xs text-gray-400 ms-1">({{ option.type_label }})</span>
+                                </template>
+                            </CustomSelect>
+                            <InputError :message="form.errors.treasury_account_id" class="mt-2" />
                         </div>
 
                         <!-- Notes -->

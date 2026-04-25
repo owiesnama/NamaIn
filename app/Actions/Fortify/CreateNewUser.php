@@ -4,7 +4,10 @@ namespace App\Actions\Fortify;
 
 use App\Models\Tenant;
 use App\Models\User;
+use App\Services\DefaultRolesService;
+use Database\Seeders\PermissionSeeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
@@ -33,6 +36,10 @@ class CreateNewUser implements CreatesNewUsers
             'slug' => Str::lower($input['tenant_slug']),
         ]);
 
+        if (app()->isLocal()) {
+            Process::run('herd link '.$tenant->slug.'.namain.test');
+        }
+
         $user = User::create([
             'name' => $input['name'],
             'email' => $input['email'],
@@ -40,7 +47,15 @@ class CreateNewUser implements CreatesNewUsers
             'current_tenant_id' => $tenant->id,
         ]);
 
-        $tenant->users()->attach($user->id, ['role' => 'owner']);
+        (new PermissionSeeder)->run();
+        (new DefaultRolesService)->seedForTenant($tenant);
+
+        $ownerRole = $tenant->roles()->where('slug', 'owner')->first();
+
+        $tenant->users()->attach($user->id, [
+            'role' => 'owner',
+            'role_id' => $ownerRole?->id,
+        ]);
 
         return $user;
     }

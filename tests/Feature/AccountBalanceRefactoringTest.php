@@ -98,11 +98,12 @@ test('supplier account balance matches refactored logic', function () {
         'paid_amount' => 300,
     ]);
 
-    // Direct payment
+    // Direct payment (direction = out because we're paying the supplier)
     Payment::factory()->create([
         'payable_id' => $supplier->id,
         'payable_type' => Supplier::class,
         'amount' => 100,
+        'direction' => 'out',
     ]);
 
     // Formula: (1000 - 100) - 300 - 100 - 500 = 900 - 300 - 100 - 500 = 0

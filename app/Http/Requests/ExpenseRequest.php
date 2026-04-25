@@ -31,6 +31,7 @@ class ExpenseRequest extends FormRequest
             'category_objects.*.name' => 'required_with:category_objects|string|max:255',
             'notes' => 'nullable|string|max:1000',
             'receipt' => 'nullable|string|max:255',
+            'treasury_account_id' => 'nullable|exists:treasury_accounts,id',
             'is_recurring' => 'nullable|boolean',
             'frequency' => 'required_if:is_recurring,true|nullable|in:daily,weekly,monthly,yearly',
             'starts_at' => 'required_if:is_recurring,true|nullable|date',

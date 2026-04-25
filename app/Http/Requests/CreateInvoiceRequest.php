@@ -40,6 +40,7 @@ class CreateInvoiceRequest extends FormRequest
             'payment_reference' => 'nullable|string|max:255',
             'payment_notes' => 'nullable|string|max:1000',
             'receipt' => 'nullable|string|max:255',
+            'treasury_account_id' => 'nullable|exists:treasury_accounts,id',
         ];
     }
 }

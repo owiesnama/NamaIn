@@ -13,7 +13,8 @@
     const props = defineProps({
         initialCheques: Object,
         status: Object,
-        summary: Object
+        summary: Object,
+        bank_treasury_accounts: Array,
     });
 
     const showSidebar = ref(true);
@@ -95,6 +96,10 @@
 
     onUnmounted(() => {
         observer.disconnect();
+    });
+
+    watch(() => props.initialCheques.data, (newData) => {
+        cheques.value = newData;
     });
 
     watch(
@@ -291,6 +296,7 @@
                             :key="cheque.id + '-' + cheque.status"
                             :cheque="cheque"
                             :cheque-status="status"
+                            :bank-treasury-accounts="bank_treasury_accounts"
                         />
                     </div>
                     <div

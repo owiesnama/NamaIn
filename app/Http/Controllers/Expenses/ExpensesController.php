@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpenseRequest;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\TreasuryAccount;
 use App\Models\User;
 use App\Queries\ExpenseIndexQuery;
 use Maatwebsite\Excel\Facades\Excel;
@@ -35,6 +36,12 @@ class ExpensesController extends Controller
     {
         return inertia('Expenses/Create', [
             'categories' => Category::ofType('expense')->get(),
+            'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'type_label' => $a->type->label(),
+                'current_balance' => $a->currentBalance(),
+            ]),
         ]);
     }
 

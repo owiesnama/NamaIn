@@ -15,6 +15,7 @@ use App\Models\Product;
 use App\Models\Storage;
 use App\Models\Supplier;
 use App\Models\Transaction;
+use App\Models\TreasuryAccount;
 use Illuminate\Http\Request;
 
 class PurchasesController extends Controller
@@ -46,6 +47,13 @@ class PurchasesController extends Controller
             'suppliers' => Supplier::search(request('supplier'))->latest()->limit(10)->get(),
             'payment_methods' => PaymentMethod::casesWithLabels(),
             'banks' => Bank::all(),
+            'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'type' => $a->type->value,
+                'type_label' => $a->type->label(),
+                'current_balance' => $a->currentBalance(),
+            ]),
         ]);
     }
 
