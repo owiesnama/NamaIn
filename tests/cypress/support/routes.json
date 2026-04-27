@@ -1,0 +1,1867 @@
+{
+  "": {
+    "name": null,
+    "domain": null,
+    "action": "\\Illuminate\\Broadcasting\\BroadcastController@authenticate",
+    "uri": "broadcasting/auth",
+    "method": [
+      "GET",
+      "POST",
+      "HEAD"
+    ]
+  },
+  "cypress.factory": {
+    "name": "cypress.factory",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@factory",
+    "uri": "__cypress__/factory",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.login": {
+    "name": "cypress.login",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@login",
+    "uri": "__cypress__/login",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.logout": {
+    "name": "cypress.logout",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@logout",
+    "uri": "__cypress__/logout",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.artisan": {
+    "name": "cypress.artisan",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@artisan",
+    "uri": "__cypress__/artisan",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.run-php": {
+    "name": "cypress.run-php",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@runPhp",
+    "uri": "__cypress__/run-php",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.csrf-token": {
+    "name": "cypress.csrf-token",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@csrfToken",
+    "uri": "__cypress__/csrf_token",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "cypress.routes": {
+    "name": "cypress.routes",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@routes",
+    "uri": "__cypress__/routes",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.current-user": {
+    "name": "cypress.current-user",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@currentUser",
+    "uri": "__cypress__/current-user",
+    "method": [
+      "POST"
+    ]
+  },
+  "boost.browser-logs": {
+    "name": "boost.browser-logs",
+    "domain": null,
+    "action": "Closure",
+    "uri": "_boost/browser-logs",
+    "method": [
+      "POST"
+    ]
+  },
+  "dusk.login": {
+    "name": "dusk.login",
+    "domain": null,
+    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@login",
+    "uri": "_dusk/login/{userId}/{guard?}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "dusk.logout": {
+    "name": "dusk.logout",
+    "domain": null,
+    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@logout",
+    "uri": "_dusk/logout/{guard?}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "dusk.user": {
+    "name": "dusk.user",
+    "domain": null,
+    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@user",
+    "uri": "_dusk/user/{guard?}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "login": {
+    "name": "login",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@create",
+    "uri": "login",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "login.store": {
+    "name": "login.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@store",
+    "uri": "login",
+    "method": [
+      "POST"
+    ]
+  },
+  "logout": {
+    "name": "logout",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@destroy",
+    "uri": "logout",
+    "method": [
+      "POST"
+    ]
+  },
+  "password.request": {
+    "name": "password.request",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@create",
+    "uri": "forgot-password",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.reset": {
+    "name": "password.reset",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@create",
+    "uri": "reset-password/{token}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.email": {
+    "name": "password.email",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@store",
+    "uri": "forgot-password",
+    "method": [
+      "POST"
+    ]
+  },
+  "password.update": {
+    "name": "password.update",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@store",
+    "uri": "reset-password",
+    "method": [
+      "POST"
+    ]
+  },
+  "register": {
+    "name": "register",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@create",
+    "uri": "register",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "register.store": {
+    "name": "register.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@store",
+    "uri": "register",
+    "method": [
+      "POST"
+    ]
+  },
+  "user-profile-information.update": {
+    "name": "user-profile-information.update",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ProfileInformationController@update",
+    "uri": "user/profile-information",
+    "method": [
+      "PUT"
+    ]
+  },
+  "user-password.update": {
+    "name": "user-password.update",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordController@update",
+    "uri": "user/password",
+    "method": [
+      "PUT"
+    ]
+  },
+  "password.confirm": {
+    "name": "password.confirm",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@show",
+    "uri": "user/confirm-password",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.confirmation": {
+    "name": "password.confirmation",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedPasswordStatusController@show",
+    "uri": "user/confirmed-password-status",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.confirm.store": {
+    "name": "password.confirm.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@store",
+    "uri": "user/confirm-password",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.login": {
+    "name": "two-factor.login",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@create",
+    "uri": "two-factor-challenge",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.login.store": {
+    "name": "two-factor.login.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@store",
+    "uri": "two-factor-challenge",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.enable": {
+    "name": "two-factor.enable",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@store",
+    "uri": "user/two-factor-authentication",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.confirm": {
+    "name": "two-factor.confirm",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedTwoFactorAuthenticationController@store",
+    "uri": "user/confirmed-two-factor-authentication",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.disable": {
+    "name": "two-factor.disable",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@destroy",
+    "uri": "user/two-factor-authentication",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "two-factor.qr-code": {
+    "name": "two-factor.qr-code",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorQrCodeController@show",
+    "uri": "user/two-factor-qr-code",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.secret-key": {
+    "name": "two-factor.secret-key",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorSecretKeyController@show",
+    "uri": "user/two-factor-secret-key",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.recovery-codes": {
+    "name": "two-factor.recovery-codes",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@index",
+    "uri": "user/two-factor-recovery-codes",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.regenerate-recovery-codes": {
+    "name": "two-factor.regenerate-recovery-codes",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@store",
+    "uri": "user/two-factor-recovery-codes",
+    "method": [
+      "POST"
+    ]
+  },
+  "profile.show": {
+    "name": "profile.show",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\UserProfileController@show",
+    "uri": "user/profile",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "other-browser-sessions.destroy": {
+    "name": "other-browser-sessions.destroy",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\OtherBrowserSessionsController@destroy",
+    "uri": "user/other-browser-sessions",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "current-user-photo.destroy": {
+    "name": "current-user-photo.destroy",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\ProfilePhotoController@destroy",
+    "uri": "user/profile-photo",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "current-user.destroy": {
+    "name": "current-user.destroy",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\CurrentUserController@destroy",
+    "uri": "user",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "sanctum.csrf-cookie": {
+    "name": "sanctum.csrf-cookie",
+    "domain": null,
+    "action": "Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController@show",
+    "uri": "sanctum/csrf-cookie",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "ignition.healthCheck": {
+    "name": "ignition.healthCheck",
+    "domain": null,
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\HealthCheckController",
+    "uri": "_ignition/health-check",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "ignition.executeSolution": {
+    "name": "ignition.executeSolution",
+    "domain": null,
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\ExecuteSolutionController",
+    "uri": "_ignition/execute-solution",
+    "method": [
+      "POST"
+    ]
+  },
+  "ignition.updateConfig": {
+    "name": "ignition.updateConfig",
+    "domain": null,
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\UpdateConfigController",
+    "uri": "_ignition/update-config",
+    "method": [
+      "POST"
+    ]
+  },
+  "api.customers.index": {
+    "name": "api.customers.index",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Api\\CustomersController",
+    "uri": "api/customers",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "welcome": {
+    "name": "welcome",
+    "domain": null,
+    "action": "Closure",
+    "uri": "/",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "tenants.select": {
+    "name": "tenants.select",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Core\\TenantSelectionController@index",
+    "uri": "tenants/select",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "tenants.switch": {
+    "name": "tenants.switch",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Core\\TenantSelectionController@select",
+    "uri": "tenants/{tenant}/select",
+    "method": [
+      "POST"
+    ]
+  },
+  "invitations.accept": {
+    "name": "invitations.accept",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Users\\InvitationController@show",
+    "uri": "invitations/{token}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "invitations.accept.store": {
+    "name": "invitations.accept.store",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Users\\InvitationController@accept",
+    "uri": "invitations/{token}",
+    "method": [
+      "POST"
+    ]
+  },
+  "password.change": {
+    "name": "password.change",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Auth\\MustChangePasswordController@show",
+    "uri": "must-change-password",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.change.update": {
+    "name": "password.change.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Auth\\MustChangePasswordController@update",
+    "uri": "must-change-password",
+    "method": [
+      "POST"
+    ]
+  },
+  "dashboard": {
+    "name": "dashboard",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Core\\DashboardController@index",
+    "uri": "dashboard",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "global-search": {
+    "name": "global-search",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Core\\GlobalSearchController",
+    "uri": "global-search",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "preferences.index": {
+    "name": "preferences.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Core\\PreferenceController@index",
+    "uri": "preferences",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "preferences.update": {
+    "name": "preferences.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Core\\PreferenceController@update",
+    "uri": "preferences",
+    "method": [
+      "POST"
+    ]
+  },
+  "customers.export": {
+    "name": "customers.export",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerExportController@store",
+    "uri": "customers/export",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.import": {
+    "name": "customers.import",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerImportController@store",
+    "uri": "customers/import",
+    "method": [
+      "POST"
+    ]
+  },
+  "customers.import.sample": {
+    "name": "customers.import.sample",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerImportController@show",
+    "uri": "customers/import/sample",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.index": {
+    "name": "customers.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomersController@index",
+    "uri": "customers",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.create": {
+    "name": "customers.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomersController@create",
+    "uri": "customers/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.store": {
+    "name": "customers.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomersController@store",
+    "uri": "customers",
+    "method": [
+      "POST"
+    ]
+  },
+  "customers.show": {
+    "name": "customers.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomersController@show",
+    "uri": "customers/{customer}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.edit": {
+    "name": "customers.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomersController@edit",
+    "uri": "customers/{customer}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.update": {
+    "name": "customers.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomersController@update",
+    "uri": "customers/{customer}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "customers.destroy": {
+    "name": "customers.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomersController@destroy",
+    "uri": "customers/{customer}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "customers.account": {
+    "name": "customers.account",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerAccountController@show",
+    "uri": "customers/{customer}/account",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.statement": {
+    "name": "customers.statement",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerStatementController@show",
+    "uri": "customers/{customer}/statement",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customers.print-statement": {
+    "name": "customers.print-statement",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerStatementController@store",
+    "uri": "customers/{customer}/statement/print",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "customer-advances.store": {
+    "name": "customer-advances.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\CustomerAdvancesController@store",
+    "uri": "customers/{customer}/advances",
+    "method": [
+      "POST"
+    ]
+  },
+  "customer-advances.settle": {
+    "name": "customer-advances.settle",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\CustomerAdvancesController@settle",
+    "uri": "customer-advances/{customerAdvance}/settle",
+    "method": [
+      "POST"
+    ]
+  },
+  "suppliers.export": {
+    "name": "suppliers.export",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SupplierExportController@store",
+    "uri": "suppliers/export",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.import": {
+    "name": "suppliers.import",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SupplierImportController@store",
+    "uri": "suppliers/import",
+    "method": [
+      "POST"
+    ]
+  },
+  "suppliers.import.sample": {
+    "name": "suppliers.import.sample",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SupplierImportController@show",
+    "uri": "suppliers/import/sample",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.index": {
+    "name": "suppliers.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SuppliersController@index",
+    "uri": "suppliers",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.create": {
+    "name": "suppliers.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SuppliersController@create",
+    "uri": "suppliers/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.store": {
+    "name": "suppliers.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SuppliersController@store",
+    "uri": "suppliers",
+    "method": [
+      "POST"
+    ]
+  },
+  "suppliers.show": {
+    "name": "suppliers.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SuppliersController@show",
+    "uri": "suppliers/{supplier}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.edit": {
+    "name": "suppliers.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SuppliersController@edit",
+    "uri": "suppliers/{supplier}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.update": {
+    "name": "suppliers.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SuppliersController@update",
+    "uri": "suppliers/{supplier}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "suppliers.destroy": {
+    "name": "suppliers.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SuppliersController@destroy",
+    "uri": "suppliers/{supplier}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "suppliers.account": {
+    "name": "suppliers.account",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SupplierAccountController@show",
+    "uri": "suppliers/{supplier}/account",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.statement": {
+    "name": "suppliers.statement",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SupplierStatementController@show",
+    "uri": "suppliers/{supplier}/statement",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "suppliers.print-statement": {
+    "name": "suppliers.print-statement",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Contacts\\SupplierStatementController@store",
+    "uri": "suppliers/{supplier}/statement/print",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "products.export": {
+    "name": "products.export",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductExportController@store",
+    "uri": "products/export",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "products.import": {
+    "name": "products.import",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductImportController@store",
+    "uri": "products/import",
+    "method": [
+      "POST"
+    ]
+  },
+  "products.import.sample": {
+    "name": "products.import.sample",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductImportController@show",
+    "uri": "products/import/sample",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "products.index": {
+    "name": "products.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@index",
+    "uri": "products",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "products.create": {
+    "name": "products.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@create",
+    "uri": "products/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "products.store": {
+    "name": "products.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@store",
+    "uri": "products",
+    "method": [
+      "POST"
+    ]
+  },
+  "products.show": {
+    "name": "products.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@show",
+    "uri": "products/{product}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "products.edit": {
+    "name": "products.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@edit",
+    "uri": "products/{product}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "products.update": {
+    "name": "products.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@update",
+    "uri": "products/{product}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "products.destroy": {
+    "name": "products.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@destroy",
+    "uri": "products/{product}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "storages.index": {
+    "name": "storages.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StoragesController@index",
+    "uri": "storages",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "storages.create": {
+    "name": "storages.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StoragesController@create",
+    "uri": "storages/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "storages.store": {
+    "name": "storages.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StoragesController@store",
+    "uri": "storages",
+    "method": [
+      "POST"
+    ]
+  },
+  "storages.show": {
+    "name": "storages.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StoragesController@show",
+    "uri": "storages/{storage}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "storages.edit": {
+    "name": "storages.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StoragesController@edit",
+    "uri": "storages/{storage}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "storages.update": {
+    "name": "storages.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StoragesController@update",
+    "uri": "storages/{storage}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "storages.destroy": {
+    "name": "storages.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StoragesController@destroy",
+    "uri": "storages/{storage}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "storages.adjust": {
+    "name": "storages.adjust",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StockAdjustmentController@store",
+    "uri": "storages/{storage}/adjust/{product}",
+    "method": [
+      "POST"
+    ]
+  },
+  "stock.add": {
+    "name": "stock.add",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StockAdditionController@store",
+    "uri": "stock/{storage}/add",
+    "method": [
+      "PUT"
+    ]
+  },
+  "stock.deduct": {
+    "name": "stock.deduct",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StockDeductionController@store",
+    "uri": "stock/{storage}/deduct",
+    "method": [
+      "PUT"
+    ]
+  },
+  "stock-transfers.index": {
+    "name": "stock-transfers.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StockTransfersController@index",
+    "uri": "stock-transfers",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "stock-transfers.create": {
+    "name": "stock-transfers.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StockTransfersController@create",
+    "uri": "stock-transfers/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "stock-transfers.store": {
+    "name": "stock-transfers.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StockTransfersController@store",
+    "uri": "stock-transfers",
+    "method": [
+      "POST"
+    ]
+  },
+  "stock-transfers.show": {
+    "name": "stock-transfers.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Inventory\\StockTransfersController@show",
+    "uri": "stock-transfers/{transfer}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "purchases.index": {
+    "name": "purchases.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@index",
+    "uri": "purchases",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "purchases.create": {
+    "name": "purchases.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@create",
+    "uri": "purchases/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "purchases.store": {
+    "name": "purchases.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@store",
+    "uri": "purchases",
+    "method": [
+      "POST"
+    ]
+  },
+  "purchases.show": {
+    "name": "purchases.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@show",
+    "uri": "purchases/{purchase}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "purchases.edit": {
+    "name": "purchases.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@edit",
+    "uri": "purchases/{purchase}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "purchases.update": {
+    "name": "purchases.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@update",
+    "uri": "purchases/{purchase}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "purchases.destroy": {
+    "name": "purchases.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@destroy",
+    "uri": "purchases/{purchase}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "purchases.receive": {
+    "name": "purchases.receive",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Purchases\\PurchaseReceiptController@store",
+    "uri": "purchases/receive/{transaction}",
+    "method": [
+      "POST"
+    ]
+  },
+  "purchases.return.create": {
+    "name": "purchases.return.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\PurchaseReturnController@create",
+    "uri": "purchases/{invoice}/return",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "purchases.return.store": {
+    "name": "purchases.return.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\PurchaseReturnController@store",
+    "uri": "purchases/{invoice}/return",
+    "method": [
+      "POST"
+    ]
+  },
+  "sales.index": {
+    "name": "sales.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\SalesController@index",
+    "uri": "sales",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "sales.create": {
+    "name": "sales.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\SalesController@create",
+    "uri": "sales/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "sales.store": {
+    "name": "sales.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\SalesController@store",
+    "uri": "sales",
+    "method": [
+      "POST"
+    ]
+  },
+  "sales.show": {
+    "name": "sales.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\SalesController@show",
+    "uri": "sales/{sale}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "sales.edit": {
+    "name": "sales.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\SalesController@edit",
+    "uri": "sales/{sale}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "sales.update": {
+    "name": "sales.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\SalesController@update",
+    "uri": "sales/{sale}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "sales.destroy": {
+    "name": "sales.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\SalesController@destroy",
+    "uri": "sales/{sale}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "pos.index": {
+    "name": "pos.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\PosSessionController@show",
+    "uri": "pos",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "pos.invoices": {
+    "name": "pos.invoices",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\PosInvoicesController@index",
+    "uri": "pos/invoices",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "pos.open": {
+    "name": "pos.open",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\PosSessionController@store",
+    "uri": "pos/open",
+    "method": [
+      "POST"
+    ]
+  },
+  "pos.checkout": {
+    "name": "pos.checkout",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\PosCheckoutController@store",
+    "uri": "pos/checkout",
+    "method": [
+      "POST"
+    ]
+  },
+  "pos.close": {
+    "name": "pos.close",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\PosSessionController@destroy",
+    "uri": "pos/close",
+    "method": [
+      "POST"
+    ]
+  },
+  "sales.return.create": {
+    "name": "sales.return.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\SaleReturnController@create",
+    "uri": "sales/{invoice}/return",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "sales.return.store": {
+    "name": "sales.return.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\SaleReturnController@store",
+    "uri": "sales/{invoice}/return",
+    "method": [
+      "POST"
+    ]
+  },
+  "invoices.print": {
+    "name": "invoices.print",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\InvoicePrintController@show",
+    "uri": "invoice/print/{invoice}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "invoices.show": {
+    "name": "invoices.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\InvoicesController@show",
+    "uri": "invoice/show/{invoice}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "transactions.deliver": {
+    "name": "transactions.deliver",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\TransactionDeliveryController@store",
+    "uri": "transactions/{transaction}/deliver",
+    "method": [
+      "POST"
+    ]
+  },
+  "invoices.search-for-return": {
+    "name": "invoices.search-for-return",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\InvoiceSearchController@index",
+    "uri": "invoices/search-for-return",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "payments.index": {
+    "name": "payments.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\PaymentsController@index",
+    "uri": "payments",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "payments.create": {
+    "name": "payments.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\PaymentsController@create",
+    "uri": "payments/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "payments.store": {
+    "name": "payments.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\PaymentsController@store",
+    "uri": "payments",
+    "method": [
+      "POST"
+    ]
+  },
+  "payments.show": {
+    "name": "payments.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\PaymentsController@show",
+    "uri": "payments/{payment}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "payments.edit": {
+    "name": "payments.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\PaymentsController@edit",
+    "uri": "payments/{payment}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "payments.update": {
+    "name": "payments.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\PaymentsController@update",
+    "uri": "payments/{payment}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "payments.destroy": {
+    "name": "payments.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\PaymentsController@destroy",
+    "uri": "payments/{payment}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "cheques.index": {
+    "name": "cheques.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequesController@index",
+    "uri": "cheques",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "cheques.create": {
+    "name": "cheques.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequesController@create",
+    "uri": "cheques/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "cheques.store": {
+    "name": "cheques.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequesController@store",
+    "uri": "cheques",
+    "method": [
+      "POST"
+    ]
+  },
+  "cheques.show": {
+    "name": "cheques.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequesController@show",
+    "uri": "cheques/{cheque}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "cheques.edit": {
+    "name": "cheques.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequesController@edit",
+    "uri": "cheques/{cheque}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "cheques.update": {
+    "name": "cheques.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequesController@update",
+    "uri": "cheques/{cheque}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "cheques.destroy": {
+    "name": "cheques.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequesController@destroy",
+    "uri": "cheques/{cheque}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "cheques.payee-invoices": {
+    "name": "cheques.payee-invoices",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequePayeeInvoiceController@index",
+    "uri": "payee-invoices",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "cheques.updateStatus": {
+    "name": "cheques.updateStatus",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Payments\\ChequeStatusController@update",
+    "uri": "cheques/{cheque}/status",
+    "method": [
+      "PUT"
+    ]
+  },
+  "recurring-expenses.index": {
+    "name": "recurring-expenses.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpensesController@index",
+    "uri": "recurring-expenses",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "recurring-expenses.create": {
+    "name": "recurring-expenses.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpensesController@create",
+    "uri": "recurring-expenses/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "recurring-expenses.store": {
+    "name": "recurring-expenses.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpensesController@store",
+    "uri": "recurring-expenses",
+    "method": [
+      "POST"
+    ]
+  },
+  "recurring-expenses.show": {
+    "name": "recurring-expenses.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpensesController@show",
+    "uri": "recurring-expenses/{recurring_expense}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "recurring-expenses.edit": {
+    "name": "recurring-expenses.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpensesController@edit",
+    "uri": "recurring-expenses/{recurring_expense}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "recurring-expenses.update": {
+    "name": "recurring-expenses.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpensesController@update",
+    "uri": "recurring-expenses/{recurring_expense}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "recurring-expenses.destroy": {
+    "name": "recurring-expenses.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpensesController@destroy",
+    "uri": "recurring-expenses/{recurring_expense}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "recurring-expenses.toggle": {
+    "name": "recurring-expenses.toggle",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\RecurringExpenseStatusController@update",
+    "uri": "recurring-expenses/{recurring_expense}/toggle",
+    "method": [
+      "PUT"
+    ]
+  },
+  "expenses.export": {
+    "name": "expenses.export",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpenseExportController@store",
+    "uri": "expenses/export",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "expenses.index": {
+    "name": "expenses.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpensesController@index",
+    "uri": "expenses",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "expenses.create": {
+    "name": "expenses.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpensesController@create",
+    "uri": "expenses/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "expenses.store": {
+    "name": "expenses.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpensesController@store",
+    "uri": "expenses",
+    "method": [
+      "POST"
+    ]
+  },
+  "expenses.show": {
+    "name": "expenses.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpensesController@show",
+    "uri": "expenses/{expense}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "expenses.edit": {
+    "name": "expenses.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpensesController@edit",
+    "uri": "expenses/{expense}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "expenses.update": {
+    "name": "expenses.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpensesController@update",
+    "uri": "expenses/{expense}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "expenses.destroy": {
+    "name": "expenses.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpensesController@destroy",
+    "uri": "expenses/{expense}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "expenses.approval": {
+    "name": "expenses.approval",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpenseApprovalController@update",
+    "uri": "expenses/{expense}/approval",
+    "method": [
+      "PUT"
+    ]
+  },
+  "expenses.receipt": {
+    "name": "expenses.receipt",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Expenses\\ExpenseReceiptController@show",
+    "uri": "expenses/{expense}/receipt",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "treasury.index": {
+    "name": "treasury.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryAccountsController@index",
+    "uri": "treasury",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "treasury.create": {
+    "name": "treasury.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryAccountsController@create",
+    "uri": "treasury/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "treasury.store": {
+    "name": "treasury.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryAccountsController@store",
+    "uri": "treasury",
+    "method": [
+      "POST"
+    ]
+  },
+  "treasury.transfer.create": {
+    "name": "treasury.transfer.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryTransfersController@create",
+    "uri": "treasury/transfer",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "treasury.transfer.store": {
+    "name": "treasury.transfer.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryTransfersController@store",
+    "uri": "treasury/transfer",
+    "method": [
+      "POST"
+    ]
+  },
+  "treasury.transfer.show": {
+    "name": "treasury.transfer.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryTransfersController@show",
+    "uri": "treasury/transfer/{transfer}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "treasury.show": {
+    "name": "treasury.show",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryAccountsController@show",
+    "uri": "treasury/{treasury}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "treasury.edit": {
+    "name": "treasury.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryAccountsController@edit",
+    "uri": "treasury/{treasury}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "treasury.update": {
+    "name": "treasury.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryAccountsController@update",
+    "uri": "treasury/{treasury}",
+    "method": [
+      "PUT"
+    ]
+  },
+  "treasury.adjust": {
+    "name": "treasury.adjust",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Treasury\\TreasuryAdjustmentsController@store",
+    "uri": "treasury/{treasury}/adjust",
+    "method": [
+      "POST"
+    ]
+  },
+  "users.index": {
+    "name": "users.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserManagementController@index",
+    "uri": "users",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "users.store": {
+    "name": "users.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserManagementController@store",
+    "uri": "users",
+    "method": [
+      "POST"
+    ]
+  },
+  "users.invite": {
+    "name": "users.invite",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserInvitationController@store",
+    "uri": "users/invite",
+    "method": [
+      "POST"
+    ]
+  },
+  "users.invitations.cancel": {
+    "name": "users.invitations.cancel",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserInvitationController@destroy",
+    "uri": "users/invitations/{invitation}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "users.update": {
+    "name": "users.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserManagementController@update",
+    "uri": "users/{user}",
+    "method": [
+      "PUT"
+    ]
+  },
+  "users.assign-role": {
+    "name": "users.assign-role",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserRoleController@update",
+    "uri": "users/{user}/role",
+    "method": [
+      "PUT"
+    ]
+  },
+  "users.toggle-status": {
+    "name": "users.toggle-status",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserStatusController@update",
+    "uri": "users/{user}/toggle-status",
+    "method": [
+      "PUT"
+    ]
+  },
+  "users.destroy": {
+    "name": "users.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserManagementController@destroy",
+    "uri": "users/{user}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "roles.index": {
+    "name": "roles.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\RoleController@index",
+    "uri": "roles",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "roles.store": {
+    "name": "roles.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\RoleController@store",
+    "uri": "roles",
+    "method": [
+      "POST"
+    ]
+  },
+  "roles.update": {
+    "name": "roles.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\RoleController@update",
+    "uri": "roles/{role}",
+    "method": [
+      "PUT"
+    ]
+  },
+  "roles.destroy": {
+    "name": "roles.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\RoleController@destroy",
+    "uri": "roles/{role}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "uploads.tmp.store": {
+    "name": "uploads.tmp.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Utils\\TemporaryUploadController@store",
+    "uri": "uploads/tmp",
+    "method": [
+      "POST"
+    ]
+  },
+  "uploads.tmp.destroy": {
+    "name": "uploads.tmp.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Utils\\TemporaryUploadController@destroy",
+    "uri": "uploads/tmp",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "tenant.switch": {
+    "name": "tenant.switch",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Core\\TenantSelectionController@switchFrom",
+    "uri": "switch-tenant/{target}",
+    "method": [
+      "POST"
+    ]
+  }
+}

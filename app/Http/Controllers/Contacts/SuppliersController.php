@@ -3,37 +3,18 @@
 namespace App\Http\Controllers\Contacts;
 
 use App\Actions\SyncCategoriesAction;
-use App\Exports\SupplierExport;
 use App\Filters\SupplierFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SupplierRequest;
-use App\Imports\SupplierImport;
 use App\Models\Category;
 use App\Models\Supplier;
-use App\Queries\PartyAccountQuery;
-use App\Queries\StatementQuery;
-use App\Services\StatementService;
-use App\Traits\HandlesPartyAccount;
-use App\Traits\HandlesPartyImportExport;
 
 class SuppliersController extends Controller
 {
-    use HandlesPartyAccount, HandlesPartyImportExport;
-
-    protected string $model = Supplier::class;
-
-    protected string $inertiaFolder = 'Suppliers';
-
-    protected string $importClass = SupplierImport::class;
-
-    protected string $exportClass = SupplierExport::class;
-
-    protected array $importHeaders = ['name', 'address', 'phone_number', 'opening_balance'];
-
-    protected array $importSampleData = ['Example Supplier', 'Supplier Address 123', '0123456789', '1000'];
-
     public function index(SupplierFilter $filter)
     {
+        $this->authorize('viewAny', Supplier::class);
+
         return inertia('Suppliers/Index', [
             'suppliers' => Supplier::filter($filter)
                 ->when(request('sort_by'), function ($query, $sortBy) {
@@ -58,6 +39,8 @@ class SuppliersController extends Controller
 
     public function store(SupplierRequest $request, SyncCategoriesAction $syncCategories)
     {
+        $this->authorize('create', Supplier::class);
+
         $supplier = Supplier::create($request->safe()->except('categories'));
 
         $syncCategories->handle($supplier, $request->get('categories', []));
@@ -75,6 +58,8 @@ class SuppliersController extends Controller
 
     public function update(Supplier $supplier, SupplierRequest $request, SyncCategoriesAction $syncCategories)
     {
+        $this->authorize('update', $supplier);
+
         $supplier->update($request->safe()->except('categories'));
 
         $syncCategories->handle($supplier, $request->get('categories', []));
@@ -84,23 +69,10 @@ class SuppliersController extends Controller
 
     public function destroy(Supplier $supplier)
     {
+        $this->authorize('delete', $supplier);
+
         $supplier->delete();
 
         return back()->with('success', __('Supplier deleted successfully'));
-    }
-
-    public function account(Supplier $supplier, PartyAccountQuery $query)
-    {
-        return $this->handleAccount($supplier, $query);
-    }
-
-    public function statement(Supplier $supplier, StatementQuery $query)
-    {
-        return $this->handleStatement($supplier, $query);
-    }
-
-    public function printStatement(Supplier $supplier, StatementService $statementService)
-    {
-        return $this->handlePrintStatement($supplier, $statementService);
     }
 }

@@ -10,8 +10,22 @@
         status: String
     });
 
-    const direction = computed(() => usePage().props.locale === "ar" ? "rtl" : "ltr");
+    const page = usePage();
+    const direction = computed(() => page.props.locale === "ar" ? "rtl" : "ltr");
     const showPassword = ref(false);
+
+    const appDomain = page.props.appDomain;
+    const isSubdomain = computed(() => {
+        const host = window.location.hostname;
+        return host !== appDomain && host.endsWith('.' + appDomain);
+    });
+
+    const rootUrl = (path) => {
+        const scheme = window.location.protocol;
+        return `${scheme}//${appDomain}${path}`;
+    };
+
+    const registerUrl = computed(() => isSubdomain.value ? rootUrl('/register') : route('register'));
 
     const form = useForm({
         email: "",
@@ -23,7 +37,7 @@
         form.transform((data) => ({
             ...data,
             remember: form.remember ? "on" : ""
-        })).post(route("login"), {
+        })).post("/login", {
             onFinish: () => form.reset("password")
         });
     };
@@ -43,7 +57,11 @@
                       class="text-sm font-medium text-slate-600 transition hover:text-emerald-600">
                     {{ __("Sign In") }}
                 </Link>
-                <Link :href="route('register')"
+                <a v-if="isSubdomain" :href="registerUrl"
+                   class="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500">
+                    {{ __("Create Your Organization") }}
+                </a>
+                <Link v-else :href="route('register')"
                       class="rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-500">
                     {{ __("Create Your Organization") }}
                 </Link>
@@ -161,7 +179,11 @@
 
             <p class="text-center text-sm text-slate-500">
                 {{ __("Don't have an account?") }}
-                <Link :href="route('register')"
+                <a v-if="isSubdomain" :href="registerUrl"
+                   class="font-semibold text-emerald-600 transition hover:text-emerald-500">
+                    {{ __("Register now") }}
+                </a>
+                <Link v-else :href="route('register')"
                       class="font-semibold text-emerald-600 transition hover:text-emerald-500">
                     {{ __("Register now") }}
                 </Link>

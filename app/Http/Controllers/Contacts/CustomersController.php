@@ -3,37 +3,18 @@
 namespace App\Http\Controllers\Contacts;
 
 use App\Actions\SyncCategoriesAction;
-use App\Exports\CustomerExport;
 use App\Filters\CustomerFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CustomerRequest;
-use App\Imports\CustomerImport;
 use App\Models\Category;
 use App\Models\Customer;
-use App\Queries\PartyAccountQuery;
-use App\Queries\StatementQuery;
-use App\Services\StatementService;
-use App\Traits\HandlesPartyAccount;
-use App\Traits\HandlesPartyImportExport;
 
 class CustomersController extends Controller
 {
-    use HandlesPartyAccount, HandlesPartyImportExport;
-
-    protected string $model = Customer::class;
-
-    protected string $inertiaFolder = 'Customers';
-
-    protected string $importClass = CustomerImport::class;
-
-    protected string $exportClass = CustomerExport::class;
-
-    protected array $importHeaders = ['name', 'address', 'phone_number', 'credit_limit', 'opening_balance'];
-
-    protected array $importSampleData = ['Example Customer', 'Customer Address 123', '0123456789', '5000', '1000'];
-
     public function index(CustomerFilter $filter)
     {
+        $this->authorize('viewAny', Customer::class);
+
         return inertia('Customers/Index', [
             'customers' => Customer::query()
                 ->where('is_system', false)
@@ -60,6 +41,8 @@ class CustomersController extends Controller
 
     public function store(CustomerRequest $request, SyncCategoriesAction $syncCategories)
     {
+        $this->authorize('create', Customer::class);
+
         $customer = Customer::create($request->safe()->except('categories'));
 
         $syncCategories->handle($customer, $request->get('categories', []));
@@ -92,20 +75,5 @@ class CustomersController extends Controller
         $customer->delete();
 
         return back()->with('success', __('Customer deleted successfully'));
-    }
-
-    public function account(Customer $customer, PartyAccountQuery $query)
-    {
-        return $this->handleAccount($customer, $query);
-    }
-
-    public function statement(Customer $customer, StatementQuery $query)
-    {
-        return $this->handleStatement($customer, $query);
-    }
-
-    public function printStatement(Customer $customer, StatementService $statementService)
-    {
-        return $this->handlePrintStatement($customer, $statementService);
     }
 }

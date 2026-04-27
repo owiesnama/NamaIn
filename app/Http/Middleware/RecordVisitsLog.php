@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\RateLimiter;
 use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * TODO: This middleware is not registered in bootstrap/app.php or applied to any route group.
+ *       Register it when ready to enable visit logging.
+ */
 class RecordVisitsLog
 {
     /**

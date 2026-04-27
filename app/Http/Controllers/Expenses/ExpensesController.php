@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Expenses;
 
 use App\Actions\StoreExpense;
 use App\Actions\UpdateExpense;
-use App\Exports\ExpenseExport;
 use App\Filters\ExpenseFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpenseRequest;
@@ -13,12 +12,13 @@ use App\Models\Expense;
 use App\Models\TreasuryAccount;
 use App\Models\User;
 use App\Queries\ExpenseIndexQuery;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ExpensesController extends Controller
 {
     public function index(ExpenseFilter $filter, ExpenseIndexQuery $query)
     {
+        $this->authorize('viewAny', Expense::class);
+
         return inertia('Expenses/Index', [
             'expenses' => Expense::filter($filter)
                 ->with(['categories', 'createdBy'])
@@ -34,6 +34,8 @@ class ExpensesController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Expense::class);
+
         return inertia('Expenses/Create', [
             'categories' => Category::ofType('expense')->get(),
             'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
@@ -47,6 +49,8 @@ class ExpensesController extends Controller
 
     public function store(ExpenseRequest $request, StoreExpense $action)
     {
+        $this->authorize('create', Expense::class);
+
         $action->handle($request);
 
         return redirect()->route('expenses.index')->with('success', 'Expense recorded successfully');
@@ -54,6 +58,8 @@ class ExpensesController extends Controller
 
     public function show(Expense $expense)
     {
+        $this->authorize('view', $expense);
+
         return inertia('Expenses/Show', [
             'expense' => $expense->load(['categories', 'createdBy']),
         ]);
@@ -61,6 +67,8 @@ class ExpensesController extends Controller
 
     public function edit(Expense $expense)
     {
+        $this->authorize('update', $expense);
+
         return inertia('Expenses/Edit', [
             'expense' => $expense->load('categories'),
             'categories' => Category::ofType('expense')->get(),
@@ -69,6 +77,8 @@ class ExpensesController extends Controller
 
     public function update(ExpenseRequest $request, Expense $expense, UpdateExpense $action)
     {
+        $this->authorize('update', $expense);
+
         $action->handle($request, $expense);
 
         return redirect()->route('expenses.index')->with('success', 'Expense updated successfully');
@@ -76,13 +86,10 @@ class ExpensesController extends Controller
 
     public function destroy(Expense $expense)
     {
+        $this->authorize('delete', $expense);
+
         $expense->delete();
 
         return back()->with('success', 'Expense deleted successfully');
-    }
-
-    public function export(ExpenseFilter $filter)
-    {
-        return Excel::download(new ExpenseExport($filter), 'expenses.xlsx');
     }
 }

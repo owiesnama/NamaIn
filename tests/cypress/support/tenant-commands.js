@@ -54,3 +54,60 @@ Cypress.Commands.add('tenantLogin', (slug = 'cypress-test') => {
         });
     });
 });
+
+/**
+ * Set up a tenant and log in as a user with a specific role.
+ *
+ * Uses cy.session() with a role-specific key so each role is cached
+ * independently and doesn't interfere with other role sessions.
+ *
+ * @param {string} roleSlug  One of: owner, manager, cashier, staff (or any custom role slug)
+ * @param {string} slug      Tenant slug (defaults to 'cypress-test')
+ *
+ * @example
+ *   beforeEach(() => cy.tenantLoginAs('cashier'));
+ *   beforeEach(() => cy.tenantLoginAs('staff'));
+ */
+Cypress.Commands.add('tenantLoginAs', (roleSlug, slug = 'cypress-test') => {
+    cy.session(`${slug}-${roleSlug}`, () => {
+        cy.php(`
+            $tenant = App\\Models\\Tenant::firstOrCreate(
+                ['slug' => '${slug}'],
+                ['name' => 'Cypress Test', 'is_active' => true]
+            );
+
+            app()->instance('currentTenant', $tenant);
+
+            if (!App\\Models\\Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->exists()) {
+                (new Database\\Seeders\\PermissionSeeder)->run();
+                (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+            }
+
+            $user = App\\Models\\User::factory()->create([
+                'current_tenant_id' => $tenant->id,
+                'email_verified_at' => now(),
+            ]);
+
+            $role = App\\Models\\Role::withoutGlobalScopes()
+                ->where('tenant_id', $tenant->id)
+                ->where('slug', '${roleSlug}')
+                ->first();
+
+            $tenant->users()->attach($user, [
+                'role'    => '${roleSlug}',
+                'role_id' => $role?->id,
+                'is_active' => true,
+            ]);
+
+            App\\Models\\Preference::updateOrCreate(
+                ['key' => 'language', 'tenant_id' => $tenant->id],
+                ['value' => 'en']
+            );
+            App\\Services\\TenantCache::forget('preferences');
+
+            return ['slug' => $tenant->slug, 'email' => $user->email]
+        `).then((result) => {
+            cy.login({ attributes: { email: result.email } });
+        });
+    });
+});

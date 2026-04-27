@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers\Invoicing;
 
-use App\Enums\InvoiceStatus;
+use App\Actions\CreateInverseInvoiceAction;
 use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateInverseInvoiceRequest;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Supplier;
-use App\Models\Transaction;
-use Illuminate\Support\Facades\DB;
 
 class InverseInvoicesController extends Controller
 {
@@ -69,46 +67,21 @@ class InverseInvoicesController extends Controller
         ]);
     }
 
-    public function storeSaleReturn(CreateInverseInvoiceRequest $request, Invoice $invoice)
+    public function storeSaleReturn(CreateInverseInvoiceRequest $request, Invoice $invoice, CreateInverseInvoiceAction $action)
     {
-        return $this->storeReturn($request, $invoice, 'sales.index');
+        return $this->storeReturn($request, $invoice, $action, 'sales.index');
     }
 
-    public function storePurchaseReturn(CreateInverseInvoiceRequest $request, Invoice $invoice)
+    public function storePurchaseReturn(CreateInverseInvoiceRequest $request, Invoice $invoice, CreateInverseInvoiceAction $action)
     {
-        return $this->storeReturn($request, $invoice, 'purchases.index');
+        return $this->storeReturn($request, $invoice, $action, 'purchases.index');
     }
 
-    protected function storeReturn(CreateInverseInvoiceRequest $request, Invoice $invoice, string $redirectRoute)
+    protected function storeReturn(CreateInverseInvoiceRequest $request, Invoice $invoice, CreateInverseInvoiceAction $action, string $redirectRoute)
     {
         abort_unless($invoice->can_be_inversed, 403, 'This invoice cannot be returned.');
 
-        DB::transaction(function () use ($request, $invoice) {
-            $inverseInvoice = $invoice->createInverseInvoice(
-                collect($request->validated()),
-                $request->inverse_reason
-            );
-
-            foreach ($inverseInvoice->transactions as $index => $transaction) {
-                $originalTransaction = Transaction::find($request->input("products.{$index}.transaction_id"));
-                if ($originalTransaction) {
-                    $transaction->storage_id = $originalTransaction->storage_id;
-                    $transaction->save();
-                }
-
-                $transaction->reverse();
-            }
-
-            if ($request->refund_amount > 0 && $request->payment_method) {
-                $inverseInvoice->recordPayment(
-                    amount: $request->refund_amount,
-                    method: PaymentMethod::from($request->payment_method),
-                    notes: "Refund for invoice #{$invoice->serial_number}"
-                );
-            }
-
-            $invoice->markAs(InvoiceStatus::Returned);
-        });
+        $action->handle($invoice, collect($request->validated()), $request->inverse_reason);
 
         return redirect()->route($redirectRoute)->with('success', __('Return invoice created successfully'));
     }

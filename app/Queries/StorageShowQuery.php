@@ -55,12 +55,12 @@ class StorageShowQuery
 
     public function totalStockValue(): float
     {
-        $total = 0;
-        $this->storage->stock()->get()->each(function ($product) use (&$total) {
-            $total += $product->pivot->quantity * $product->average_cost;
-        });
-
-        return (float) $total;
+        return (float) DB::table('stocks')
+            ->where('stocks.storage_id', $this->storage->id)
+            ->where('stocks.quantity', '>', 0)
+            ->join('products', 'stocks.product_id', '=', 'products.id')
+            ->selectRaw('SUM(stocks.quantity * COALESCE(products.cost, 0)) as total')
+            ->value('total') ?? 0;
     }
 
     /**

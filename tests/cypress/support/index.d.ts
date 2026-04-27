@@ -88,5 +88,14 @@ declare namespace Cypress {
          * cy.php('App\\User::count()')
          */
         php(command: string): Chainable<any>;
+
+        /**
+         * Set up a tenant and log in as a user with a specific role.
+         *
+         * @example
+         * cy.tenantLoginAs('cashier')
+         * cy.tenantLoginAs('staff', 'my-tenant')
+         */
+        tenantLoginAs(roleSlug: string, slug?: string): Chainable<any>;
     }
 }

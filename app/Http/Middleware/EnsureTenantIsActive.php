@@ -9,10 +9,10 @@ class EnsureTenantIsActive
 {
     public function handle(Request $request, Closure $next): mixed
     {
-        $tenant = auth()->user()?->currentTenant;
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
 
         if ($tenant && ! $tenant->isActive()) {
-            auth()->logout();
+            auth('web')->logout();
             $request->session()->invalidate();
 
             return redirect()->route('login')

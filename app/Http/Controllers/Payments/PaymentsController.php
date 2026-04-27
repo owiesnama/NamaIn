@@ -23,6 +23,8 @@ class PaymentsController extends Controller
 
     public function index(PaymentFilter $filter)
     {
+        $this->authorize('viewAny', Payment::class);
+
         $baseQuery = Payment::filter($filter)->with(['invoice.invocable', 'payable', 'createdBy', 'treasuryAccount']);
 
         $summary = [
@@ -48,6 +50,8 @@ class PaymentsController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Payment::class);
+
         $customers = Customer::orderBy('name')->get();
         $suppliers = Supplier::orderBy('name')->get();
         $banks = Bank::orderBy('name')->get();
@@ -69,6 +73,8 @@ class PaymentsController extends Controller
 
     public function store(PaymentRequest $request, RecordPaymentAction $recordPayment)
     {
+        $this->authorize('create', Payment::class);
+
         $method = PaymentMethod::from($request->payment_method);
         $invoice = $request->invoice_id ? Invoice::findOrFail($request->invoice_id) : null;
 

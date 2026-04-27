@@ -3,35 +3,59 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\MustChangePasswordController;
+use App\Http\Controllers\Catalog\ProductExportController;
+use App\Http\Controllers\Catalog\ProductImportController;
 use App\Http\Controllers\Catalog\ProductsController;
+use App\Http\Controllers\Contacts\CustomerAccountController;
+use App\Http\Controllers\Contacts\CustomerExportController;
+use App\Http\Controllers\Contacts\CustomerImportController;
 use App\Http\Controllers\Contacts\CustomersController;
+use App\Http\Controllers\Contacts\CustomerStatementController;
+use App\Http\Controllers\Contacts\SupplierAccountController;
+use App\Http\Controllers\Contacts\SupplierExportController;
+use App\Http\Controllers\Contacts\SupplierImportController;
 use App\Http\Controllers\Contacts\SuppliersController;
+use App\Http\Controllers\Contacts\SupplierStatementController;
 use App\Http\Controllers\Core\DashboardController;
 use App\Http\Controllers\Core\GlobalSearchController;
 use App\Http\Controllers\Core\PreferenceController;
 use App\Http\Controllers\Core\TenantSelectionController;
 use App\Http\Controllers\CustomerAdvancesController;
 use App\Http\Controllers\Expenses\ExpenseApprovalController;
+use App\Http\Controllers\Expenses\ExpenseExportController;
 use App\Http\Controllers\Expenses\ExpenseReceiptController;
 use App\Http\Controllers\Expenses\ExpensesController;
 use App\Http\Controllers\Expenses\RecurringExpensesController;
-use App\Http\Controllers\Inventory\StockController;
+use App\Http\Controllers\Expenses\RecurringExpenseStatusController;
+use App\Http\Controllers\Inventory\StockAdditionController;
+use App\Http\Controllers\Inventory\StockAdjustmentController;
+use App\Http\Controllers\Inventory\StockDeductionController;
 use App\Http\Controllers\Inventory\StockTransfersController;
 use App\Http\Controllers\Inventory\StoragesController;
-use App\Http\Controllers\Invoicing\InverseInvoicesController;
+use App\Http\Controllers\Invoicing\InvoicePrintController;
 use App\Http\Controllers\Invoicing\InvoicesController;
+use App\Http\Controllers\Invoicing\InvoiceSearchController;
+use App\Http\Controllers\Invoicing\PurchaseReturnController;
+use App\Http\Controllers\Invoicing\SaleReturnController;
+use App\Http\Controllers\Invoicing\TransactionDeliveryController;
+use App\Http\Controllers\Payments\ChequePayeeInvoiceController;
 use App\Http\Controllers\Payments\ChequesController;
 use App\Http\Controllers\Payments\ChequeStatusController;
 use App\Http\Controllers\Payments\PaymentsController;
+use App\Http\Controllers\Purchases\PurchaseReceiptController;
 use App\Http\Controllers\Purchases\PurchasesController;
-use App\Http\Controllers\Sales\PosController;
+use App\Http\Controllers\Sales\PosCheckoutController;
 use App\Http\Controllers\Sales\PosInvoicesController;
+use App\Http\Controllers\Sales\PosSessionController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Treasury\TreasuryAccountsController;
 use App\Http\Controllers\Treasury\TreasuryAdjustmentsController;
 use App\Http\Controllers\Treasury\TreasuryTransfersController;
 use App\Http\Controllers\Users\RoleController;
+use App\Http\Controllers\Users\UserInvitationController;
 use App\Http\Controllers\Users\UserManagementController;
+use App\Http\Controllers\Users\UserRoleController;
+use App\Http\Controllers\Users\UserStatusController;
 use App\Http\Controllers\Utils\TemporaryUploadController;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureTenantIsActive;
@@ -96,13 +120,13 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Customer management including CRUD, account ledger, account statement,
         | and bulk import/export.
         */
-        Route::get('/customers/export', [CustomersController::class, 'export'])->name('customers.export');
-        Route::post('/customers/import', [CustomersController::class, 'import'])->name('customers.import');
-        Route::get('/customers/import/sample', [CustomersController::class, 'importSample'])->name('customers.import.sample');
+        Route::get('/customers/export', [CustomerExportController::class, 'store'])->name('customers.export');
+        Route::post('/customers/import', [CustomerImportController::class, 'store'])->name('customers.import');
+        Route::get('/customers/import/sample', [CustomerImportController::class, 'show'])->name('customers.import.sample');
         Route::resource('/customers', CustomersController::class);
-        Route::get('/customers/{customer}/account', [CustomersController::class, 'account'])->name('customers.account');
-        Route::get('/customers/{customer}/statement', [CustomersController::class, 'statement'])->name('customers.statement');
-        Route::get('/customers/{customer}/statement/print', [CustomersController::class, 'printStatement'])->name('customers.print-statement');
+        Route::get('/customers/{customer}/account', [CustomerAccountController::class, 'show'])->name('customers.account');
+        Route::get('/customers/{customer}/statement', [CustomerStatementController::class, 'show'])->name('customers.statement');
+        Route::get('/customers/{customer}/statement/print', [CustomerStatementController::class, 'store'])->name('customers.print-statement');
         Route::post('/customers/{customer}/advances', [CustomerAdvancesController::class, 'store'])->name('customer-advances.store');
         Route::post('/customer-advances/{customerAdvance}/settle', [CustomerAdvancesController::class, 'settle'])->name('customer-advances.settle');
 
@@ -113,13 +137,13 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Supplier management including CRUD, account ledger, account statement,
         | and bulk import/export.
         */
-        Route::get('/suppliers/export', [SuppliersController::class, 'export'])->name('suppliers.export');
-        Route::post('/suppliers/import', [SuppliersController::class, 'import'])->name('suppliers.import');
-        Route::get('/suppliers/import/sample', [SuppliersController::class, 'importSample'])->name('suppliers.import.sample');
+        Route::get('/suppliers/export', [SupplierExportController::class, 'store'])->name('suppliers.export');
+        Route::post('/suppliers/import', [SupplierImportController::class, 'store'])->name('suppliers.import');
+        Route::get('/suppliers/import/sample', [SupplierImportController::class, 'show'])->name('suppliers.import.sample');
         Route::resource('/suppliers', SuppliersController::class);
-        Route::get('/suppliers/{supplier}/account', [SuppliersController::class, 'account'])->name('suppliers.account');
-        Route::get('/suppliers/{supplier}/statement', [SuppliersController::class, 'statement'])->name('suppliers.statement');
-        Route::get('/suppliers/{supplier}/statement/print', [SuppliersController::class, 'printStatement'])->name('suppliers.print-statement');
+        Route::get('/suppliers/{supplier}/account', [SupplierAccountController::class, 'show'])->name('suppliers.account');
+        Route::get('/suppliers/{supplier}/statement', [SupplierStatementController::class, 'show'])->name('suppliers.statement');
+        Route::get('/suppliers/{supplier}/statement/print', [SupplierStatementController::class, 'store'])->name('suppliers.print-statement');
 
         /*
         |--------------------------------------------------------------------------
@@ -127,9 +151,9 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Product catalog management including CRUD and bulk import/export.
         */
-        Route::get('/products/export', [ProductsController::class, 'export'])->name('products.export');
-        Route::post('/products/import', [ProductsController::class, 'import'])->name('products.import');
-        Route::get('/products/import/sample', [ProductsController::class, 'importSample'])->name('products.import.sample');
+        Route::get('/products/export', [ProductExportController::class, 'store'])->name('products.export');
+        Route::post('/products/import', [ProductImportController::class, 'store'])->name('products.import');
+        Route::get('/products/import/sample', [ProductImportController::class, 'show'])->name('products.import.sample');
         Route::resource('/products', ProductsController::class);
 
         /*
@@ -140,9 +164,9 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | and inter-storage stock transfers.
         */
         Route::resource('/storages', StoragesController::class);
-        Route::post('/storages/{storage}/adjust/{product}', [StoragesController::class, 'adjust'])->name('storages.adjust');
-        Route::put('/stock/{storage}/add', [StockController::class, 'add'])->name('stock.add')->can('manageStock', 'storage');
-        Route::put('/stock/{storage}/deduct', [StockController::class, 'deduct'])->name('stock.deduct')->can('manageStock', 'storage');
+        Route::post('/storages/{storage}/adjust/{product}', [StockAdjustmentController::class, 'store'])->name('storages.adjust');
+        Route::put('/stock/{storage}/add', [StockAdditionController::class, 'store'])->name('stock.add');
+        Route::put('/stock/{storage}/deduct', [StockDeductionController::class, 'store'])->name('stock.deduct');
 
         Route::get('/stock-transfers', [StockTransfersController::class, 'index'])->name('stock-transfers.index');
         Route::get('/stock-transfers/create', [StockTransfersController::class, 'create'])->name('stock-transfers.create');
@@ -156,9 +180,9 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Purchase invoices, goods receiving, and purchase return (credit notes).
         */
         Route::resource('/purchases', PurchasesController::class);
-        Route::post('/purchases/receive/{transaction}', [PurchasesController::class, 'receive'])->name('purchases.receive');
-        Route::get('/purchases/{invoice}/return', [InverseInvoicesController::class, 'createPurchaseReturn'])->name('purchases.return.create');
-        Route::post('/purchases/{invoice}/return', [InverseInvoicesController::class, 'storePurchaseReturn'])->name('purchases.return.store');
+        Route::post('/purchases/receive/{transaction}', [PurchaseReceiptController::class, 'store'])->name('purchases.receive');
+        Route::get('/purchases/{invoice}/return', [PurchaseReturnController::class, 'create'])->name('purchases.return.create');
+        Route::post('/purchases/{invoice}/return', [PurchaseReturnController::class, 'store'])->name('purchases.return.store');
 
         /*
         |--------------------------------------------------------------------------
@@ -168,13 +192,13 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | and sale return (credit notes).
         */
         Route::resource('/sales', SalesController::class);
-        Route::get('/pos', [SalesController::class, 'pos'])->name('pos.index');
+        Route::get('/pos', [PosSessionController::class, 'show'])->name('pos.index');
         Route::get('/pos/invoices', [PosInvoicesController::class, 'index'])->name('pos.invoices');
-        Route::post('/pos/open', [PosController::class, 'open'])->name('pos.open');
-        Route::post('/pos/checkout', [PosController::class, 'checkout'])->name('pos.checkout');
-        Route::post('/pos/close', [PosController::class, 'close'])->name('pos.close');
-        Route::get('/sales/{invoice}/return', [InverseInvoicesController::class, 'createSaleReturn'])->name('sales.return.create');
-        Route::post('/sales/{invoice}/return', [InverseInvoicesController::class, 'storeSaleReturn'])->name('sales.return.store');
+        Route::post('/pos/open', [PosSessionController::class, 'store'])->name('pos.open');
+        Route::post('/pos/checkout', [PosCheckoutController::class, 'store'])->name('pos.checkout');
+        Route::post('/pos/close', [PosSessionController::class, 'destroy'])->name('pos.close');
+        Route::get('/sales/{invoice}/return', [SaleReturnController::class, 'create'])->name('sales.return.create');
+        Route::post('/sales/{invoice}/return', [SaleReturnController::class, 'store'])->name('sales.return.store');
 
         /*
         |--------------------------------------------------------------------------
@@ -183,10 +207,10 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Invoice printing, viewing, transaction delivery, and searching
         | invoices eligible for return.
         */
-        Route::get('/invoice/print/{invoice}', [InvoicesController::class, 'print'])->name('invoices.print');
+        Route::get('/invoice/print/{invoice}', [InvoicePrintController::class, 'show'])->name('invoices.print');
         Route::get('/invoice/show/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
-        Route::post('/transactions/{transaction}/deliver', [InvoicesController::class, 'deliverTransaction'])->name('transactions.deliver');
-        Route::get('/invoices/search-for-return', [InverseInvoicesController::class, 'searchInvoices'])->name('invoices.search-for-return');
+        Route::post('/transactions/{transaction}/deliver', [TransactionDeliveryController::class, 'store'])->name('transactions.deliver');
+        Route::get('/invoices/search-for-return', [InvoiceSearchController::class, 'index'])->name('invoices.search-for-return');
 
         /*
         |--------------------------------------------------------------------------
@@ -197,7 +221,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         */
         Route::resource('/payments', PaymentsController::class);
         Route::resource('/cheques', ChequesController::class);
-        Route::get('/payee-invoices', [ChequesController::class, 'payeeInvoices'])->name('cheques.payee-invoices');
+        Route::get('/payee-invoices', [ChequePayeeInvoiceController::class, 'index'])->name('cheques.payee-invoices');
         Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.updateStatus');
 
         /*
@@ -208,8 +232,8 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | receipt viewing, and bulk export.
         */
         Route::resource('/recurring-expenses', RecurringExpensesController::class);
-        Route::put('/recurring-expenses/{recurring_expense}/toggle', [RecurringExpensesController::class, 'toggle'])->name('recurring-expenses.toggle');
-        Route::get('/expenses/export', [ExpensesController::class, 'export'])->name('expenses.export');
+        Route::put('/recurring-expenses/{recurring_expense}/toggle', [RecurringExpenseStatusController::class, 'update'])->name('recurring-expenses.toggle');
+        Route::get('/expenses/export', [ExpenseExportController::class, 'store'])->name('expenses.export');
         Route::resource('/expenses', ExpensesController::class);
         Route::put('/expenses/{expense}/approval', [ExpenseApprovalController::class, 'update'])->name('expenses.approval');
         Route::get('/expenses/{expense}/receipt', [ExpenseReceiptController::class, 'show'])->name('expenses.receipt');
@@ -240,11 +264,11 @@ Route::middleware([ResolveTenant::class])->group(function () {
         */
         Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
         Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
-        Route::post('/users/invite', [UserManagementController::class, 'invite'])->name('users.invite');
-        Route::delete('/users/invitations/{invitation}', [UserManagementController::class, 'cancelInvitation'])->name('users.invitations.cancel');
+        Route::post('/users/invite', [UserInvitationController::class, 'store'])->name('users.invite');
+        Route::delete('/users/invitations/{invitation}', [UserInvitationController::class, 'destroy'])->name('users.invitations.cancel');
         Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
-        Route::put('/users/{user}/role', [UserManagementController::class, 'assignRole'])->name('users.assign-role');
-        Route::put('/users/{user}/toggle-status', [UserManagementController::class, 'toggleStatus'])->name('users.toggle-status');
+        Route::put('/users/{user}/role', [UserRoleController::class, 'update'])->name('users.assign-role');
+        Route::put('/users/{user}/toggle-status', [UserStatusController::class, 'update'])->name('users.toggle-status');
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
 
         /*

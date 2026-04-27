@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Actions\Stock\ReverseTransactionAction;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -313,26 +314,11 @@ class Transaction extends BaseModel
         ];
     }
 
+    /**
+     * @deprecated Use ReverseTransactionAction instead
+     */
     public function reverse(): void
     {
-        $storage = $this->storage;
-
-        if ($this->invoice?->invocable_type === Customer::class) {
-            // Sales return: Add stock back
-            $storage->addStock(
-                product: $this->product_id,
-                quantity: (int) $this->base_quantity,
-                reason: 'sales_return',
-                movable: $this
-            );
-        } else {
-            // Purchase return: Deduct stock
-            $storage->deductStock(
-                product: $this->product_id,
-                quantity: (int) $this->base_quantity,
-                reason: 'purchase_return',
-                movable: $this
-            );
-        }
+        app(ReverseTransactionAction::class)->execute($this);
     }
 }

@@ -92,21 +92,23 @@ class User extends Authenticatable
 
     public function roleInCurrentTenant(): ?Role
     {
-        if (! $this->current_tenant_id) {
-            return null;
-        }
+        return once(function () {
+            if (! $this->current_tenant_id) {
+                return null;
+            }
 
-        $roleId = $this->tenants()
-            ->where('tenants.id', $this->current_tenant_id)
-            ->first()
-            ?->pivot
-            ?->role_id;
+            $roleId = $this->tenants()
+                ->where('tenants.id', $this->current_tenant_id)
+                ->first()
+                ?->pivot
+                ?->role_id;
 
-        if (! $roleId) {
-            return null;
-        }
+            if (! $roleId) {
+                return null;
+            }
 
-        return Role::withoutGlobalScopes()->with('permissions')->find($roleId);
+            return Role::withoutGlobalScopes()->with('permissions')->find($roleId);
+        });
     }
 
     public function hasRole(string ...$roles): bool

@@ -4,13 +4,10 @@ namespace App\Http\Controllers\Users;
 
 use App\Actions\Users\AssignRoleAction;
 use App\Actions\Users\CreateDirectUserAction;
-use App\Actions\Users\InviteUserAction;
 use App\Actions\Users\RemoveUserAction;
-use App\Actions\Users\ToggleUserStatusAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssignRoleRequest;
 use App\Http\Requests\CreateDirectUserRequest;
-use App\Http\Requests\InviteUserRequest;
 use App\Models\Role;
 use App\Models\User;
 use App\Models\UserInvitation;
@@ -75,17 +72,6 @@ class UserManagementController extends Controller
         ]);
     }
 
-    public function invite(InviteUserRequest $request, InviteUserAction $action): RedirectResponse
-    {
-        $this->authorize('invite', User::class);
-
-        $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
-
-        $action->handle(app('currentTenant'), $request->email, $role, $request->user());
-
-        return back()->with('success', __('Invitation sent successfully.'));
-    }
-
     public function update(AssignRoleRequest $request, User $user, AssignRoleAction $action): RedirectResponse
     {
         $tenant = app('currentTenant');
@@ -104,35 +90,6 @@ class UserManagementController extends Controller
         }
 
         return back()->with('success', __('Member updated successfully.'));
-    }
-
-    public function assignRole(AssignRoleRequest $request, User $user, AssignRoleAction $action): RedirectResponse
-    {
-        $this->authorize('assignRole', User::class);
-
-        $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
-
-        $action->handle(app('currentTenant'), $user, $role);
-
-        return back()->with('success', __('Role updated successfully.'));
-    }
-
-    public function toggleStatus(User $user, ToggleUserStatusAction $action): RedirectResponse
-    {
-        $this->authorize('manage', $user);
-
-        $action->handle(app('currentTenant'), $user);
-
-        return back()->with('success', __('User status updated.'));
-    }
-
-    public function cancelInvitation(UserInvitation $invitation): RedirectResponse
-    {
-        $this->authorize('invite', User::class);
-
-        $invitation->delete();
-
-        return back()->with('success', __('Invitation cancelled.'));
     }
 
     public function destroy(User $user, RemoveUserAction $action): RedirectResponse

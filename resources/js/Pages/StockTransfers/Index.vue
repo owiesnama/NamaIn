@@ -2,6 +2,9 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
 import { Link } from "@inertiajs/vue3";
+import { usePermissions } from "@/Composables/usePermissions";
+
+const { can } = usePermissions();
 
 defineProps({
     transfers: Object
@@ -26,7 +29,7 @@ const formatDate = (dateString) => {
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __("Manage and track inventory movements between storages.") }}</p>
             </div>
             <div class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0">
-                <Link :href="route('stock-transfers.create')" class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
+                <Link v-if="can('inventory.transfer')" :href="route('stock-transfers.create')" class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 ltr:mr-2 rtl:ml-2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\WithTrashScope;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -41,13 +42,17 @@ class Product extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['expired_at', 'average_cost', 'pending_sales', 'pending_purchases', 'available_qty'];
+    protected $appends = ['expired_at'];
 
     /**
      * Get the average cost of this product across all storages.
      */
     public function getAverageCostAttribute(): float|int
     {
+        if (isset($this->attributes['computed_average_cost'])) {
+            return (float) $this->attributes['computed_average_cost'] ?: ($this->cost ?? 0);
+        }
+
         $totalPurchasedQty = $this->transactions()
             ->where('delivered', true)
             ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
@@ -63,6 +68,20 @@ class Product extends BaseModel
             ->sum(\DB::raw('base_quantity * unit_cost'));
 
         return $totalPurchasedCost / $totalPurchasedQty;
+    }
+
+    /**
+     * Scope to add average cost as a subselect (avoids N+1 on lists).
+     */
+    public function scopeWithAverageCost(Builder $query): Builder
+    {
+        return $query->addSelect([
+            'computed_average_cost' => Transaction::query()
+                ->whereColumn('product_id', 'products.id')
+                ->where('delivered', true)
+                ->whereHas('invoice', fn ($q) => $q->where('invocable_type', Supplier::class))
+                ->selectRaw('CASE WHEN COALESCE(SUM(base_quantity), 0) > 0 THEN SUM(base_quantity * unit_cost) / SUM(base_quantity) ELSE 0 END'),
+        ]);
     }
 
     /**
@@ -116,6 +135,28 @@ class Product extends BaseModel
     public function getAvailableQtyAttribute(): float|int
     {
         return $this->availableQuantity();
+    }
+
+    /**
+     * Scope to add stock aggregates as subselects (avoids N+1 on lists).
+     */
+    public function scopeWithStockAggregates(Builder $query): Builder
+    {
+        return $query
+            ->withAverageCost()
+            ->addSelect([
+                'pending_sales_qty' => Transaction::query()
+                    ->whereColumn('product_id', 'products.id')
+                    ->where('delivered', false)
+                    ->whereHas('invoice', fn ($q) => $q->where('invocable_type', Customer::class))
+                    ->selectRaw('COALESCE(SUM(base_quantity), 0)'),
+                'pending_purchases_qty' => Transaction::query()
+                    ->whereColumn('product_id', 'products.id')
+                    ->where('delivered', false)
+                    ->whereHas('invoice', fn ($q) => $q->where('invocable_type', Supplier::class))
+                    ->selectRaw('COALESCE(SUM(base_quantity), 0)'),
+            ])
+            ->withSum('stock as quantity_on_hand', 'stocks.quantity');
     }
 
     /**

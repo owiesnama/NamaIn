@@ -27,7 +27,12 @@ use Illuminate\Support\Facades\DB;
 
 class ProcessPosCheckoutAction
 {
-    public function __construct(private RecordPaymentAction $recordPayment) {}
+    public function __construct(
+        private RecordPaymentAction $recordPayment,
+        private DeliverTransactionAction $deliverAction,
+        private FindReplenishmentSourceAction $findReplenishmentSource,
+        private ExecuteStockTransferAction $executeStockTransfer,
+    ) {}
 
     public function execute(
         PosSession $session,
@@ -40,18 +45,18 @@ class ProcessPosCheckoutAction
             throw new DomainException('POS session is closed.');
         }
 
-        if ($idempotencyKey) {
-            $existing = Invoice::where('tenant_id', $session->tenant_id)
-                ->where('idempotency_key', $idempotencyKey)
-                ->lockForUpdate()
-                ->first();
-
-            if ($existing) {
-                return $existing;
-            }
-        }
-
         return DB::transaction(function () use ($session, $data, $actor, $idempotencyKey, $acknowledgeTransfers) {
+            if ($idempotencyKey) {
+                $existing = Invoice::where('tenant_id', $session->tenant_id)
+                    ->where('idempotency_key', $idempotencyKey)
+                    ->lockForUpdate()
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+            }
+
             // 1. Replenish if needed
             foreach ($data->get('items') as $item) {
                 $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
@@ -95,7 +100,6 @@ class ProcessPosCheckoutAction
             ]);
 
             // 4. Create Transactions & Deduct Stock
-            $deliverAction = app(DeliverTransactionAction::class);
 
             foreach ($data->get('items') as $item) {
                 $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
@@ -112,7 +116,7 @@ class ProcessPosCheckoutAction
                     'delivered' => false,
                 ]);
 
-                $deliverAction->execute($transaction, $actor, $session->storage);
+                $this->deliverAction->execute($transaction, $actor, $session->storage);
             }
 
             $invoice->markAs(InvoiceStatus::Delivered);
@@ -147,7 +151,7 @@ class ProcessPosCheckoutAction
 
     private function replenish(Storage $salePoint, int $productId, int $quantityNeeded, User $actor): void
     {
-        $source = app(FindReplenishmentSourceAction::class)
+        $source = $this->findReplenishmentSource
             ->handle(Product::findOrFail($productId), $quantityNeeded);
 
         if (! $source) {
@@ -170,6 +174,6 @@ class ProcessPosCheckoutAction
             'quantity' => $quantityNeeded,
         ]);
 
-        app(ExecuteStockTransferAction::class)->execute($transfer, $actor);
+        $this->executeStockTransfer->execute($transfer, $actor);
     }
 }

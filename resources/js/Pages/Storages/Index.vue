@@ -1,5 +1,6 @@
 <script setup>
     import { useQueryString } from "@/Composables/useQueryString";
+    import { usePermissions } from "@/Composables/usePermissions";
     import AppLayout from "@/Layouts/AppLayout.vue";
     import Pagination from "@/Shared/Pagination.vue";
     import StorageForm from "@/Components/Storages/StorageForm.vue";
@@ -9,6 +10,8 @@
     import { debounce } from "lodash";
     import { router, Link } from "@inertiajs/vue3";
     import EmptySearch from "@/Shared/EmptySearch.vue";
+
+    const { can } = usePermissions();
 
     defineProps({
         storages: Array
@@ -104,7 +107,7 @@
                         </svg>
                     </button>
 
-                    <StorageForm></StorageForm>
+                    <StorageForm v-if="can('inventory.manage')" />
                 </div>
             </div>
 
@@ -182,15 +185,15 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
                                             </Link>
-                                            <Link @click.stop :href="route('stock-transfers.create', { from_storage_id: storage.id })" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Transfer')">
+                                            <Link v-if="can('inventory.transfer')" @click.stop :href="route('stock-transfers.create', { from_storage_id: storage.id })" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Transfer')">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                                                 </svg>
                                             </Link>
-                                            <div @click.stop>
+                                            <div v-if="can('inventory.manage')" @click.stop>
                                                 <StorageForm :storage="storage" />
                                             </div>
-                                            <div @click.stop>
+                                            <div v-if="can('inventory.manage')" @click.stop>
                                                 <DeleteStorage :storage="storage" />
                                             </div>
                                         </div>

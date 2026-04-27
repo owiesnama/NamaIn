@@ -8,9 +8,12 @@
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import DeleteCustomer from "@/Components/Customers/DeleteCustomer.vue";
     import { useQueryString } from "@/Composables/useQueryString";
+    import { usePermissions } from "@/Composables/usePermissions";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import FileUploadButton from "@/Shared/FileUploadButton.vue";
     import Tooltip from "@/Components/Tooltip.vue";
+
+    const { can } = usePermissions();
 
     defineProps({
         customers: Array,
@@ -160,7 +163,7 @@
                         </a>
                     </div>
 
-                    <CustomerForm :categories="categories"></CustomerForm>
+                    <CustomerForm v-if="can('customers.create')" :categories="categories" />
                 </div>
             </div>
 
@@ -249,10 +252,10 @@
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                                                 </svg>
                                             </Link>
-                                            <div @click.stop>
+                                            <div v-if="can('customers.update')" @click.stop>
                                                 <CustomerForm :customer="customer" :categories="categories" />
                                             </div>
-                                            <div @click.stop>
+                                            <div v-if="can('customers.delete')" @click.stop>
                                                 <DeleteCustomer :customer="customer" />
                                             </div>
                                         </div>

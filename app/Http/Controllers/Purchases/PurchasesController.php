@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Purchases;
 
-use App\Actions\Purchase\ReceiveGoodsAction;
 use App\Actions\StorePurchaseAction;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
@@ -14,14 +13,14 @@ use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\Supplier;
-use App\Models\Transaction;
 use App\Models\TreasuryAccount;
-use Illuminate\Http\Request;
 
 class PurchasesController extends Controller
 {
     public function index(InvoiceFilter $filter)
     {
+        $this->authorize('viewAny', Invoice::class);
+
         $invoices = Invoice::forSupplier()
             ->filter($filter)
             ->when(request('sort_by'), function ($query, $sortBy) {
@@ -42,6 +41,8 @@ class PurchasesController extends Controller
 
     public function create()
     {
+        $this->authorize('create', Invoice::class);
+
         return inertia('Purchases/Create', [
             'products' => Product::with('units')->get(),
             'suppliers' => Supplier::search(request('supplier'))->latest()->limit(10)->get(),
@@ -59,23 +60,10 @@ class PurchasesController extends Controller
 
     public function store(CreateInvoiceRequest $request, StorePurchaseAction $storePurchase)
     {
+        $this->authorize('create', Invoice::class);
+
         $storePurchase->handle(collect($request->all()), $request);
 
         return redirect()->route('purchases.index')->with('success', 'Purchase created successfully');
-    }
-
-    public function receive(Transaction $transaction, Request $request, ReceiveGoodsAction $action)
-    {
-        $request->validate([
-            'quantity' => 'required|integer|min:1',
-            'storage_id' => 'required|exists:storages,id',
-            'notes' => 'nullable|string',
-        ]);
-
-        $storage = Storage::findOrFail($request->storage_id);
-
-        $action->execute($transaction, $storage, $request->quantity, auth()->user(), $request->notes);
-
-        return back()->with('success', __('Goods received successfully'));
     }
 }

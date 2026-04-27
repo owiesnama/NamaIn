@@ -9,6 +9,7 @@ use App\Models\Expense;
 use App\Models\RecurringExpense;
 use App\Models\TreasuryAccount;
 use App\Traits\HandlesAsyncUploads;
+use Illuminate\Support\Facades\DB;
 
 class StoreExpense
 {
@@ -20,6 +21,13 @@ class StoreExpense
     ) {}
 
     public function handle(ExpenseRequest $request): Expense
+    {
+        return DB::transaction(function () use ($request) {
+            return $this->execute($request);
+        });
+    }
+
+    private function execute(ExpenseRequest $request): Expense
     {
         $expense = Expense::create([
             'title' => $request->title,

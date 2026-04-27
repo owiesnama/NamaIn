@@ -32,6 +32,8 @@ uses(TestCase::class, RefreshDatabase::class)->beforeEach(function () {
     URL::defaults(['tenant' => $tenant->slug]);
 })->in('Feature');
 
+uses(TestCase::class, RefreshDatabase::class)->in('Integration');
+
 /*
 |--------------------------------------------------------------------------
 | Expectations

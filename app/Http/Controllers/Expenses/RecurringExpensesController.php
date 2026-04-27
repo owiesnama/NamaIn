@@ -89,16 +89,4 @@ class RecurringExpensesController extends Controller
             ->route('recurring-expenses.index')
             ->with('success', __('Recurring expense template deleted successfully'));
     }
-
-    /**
-     * Toggle the active status of the recurring expense.
-     */
-    public function toggle(RecurringExpense $recurringExpense)
-    {
-        $recurringExpense->update([
-            'is_active' => ! $recurringExpense->is_active,
-        ]);
-
-        return back()->with('success', __('Recurring expense '.($recurringExpense->is_active ? 'activated' : 'paused').' successfully'));
-    }
 }

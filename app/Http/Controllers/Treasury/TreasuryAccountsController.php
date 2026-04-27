@@ -8,6 +8,7 @@ use App\Http\Requests\TreasuryAccountRequest;
 use App\Models\Bank;
 use App\Models\Storage;
 use App\Models\TreasuryAccount;
+use App\Models\TreasuryMovement;
 
 class TreasuryAccountsController extends Controller
 {
@@ -15,28 +16,30 @@ class TreasuryAccountsController extends Controller
     {
         $this->authorize('viewAny', TreasuryAccount::class);
 
-        $cashDrawers = TreasuryAccount::with('storage')
-            ->ofType(TreasuryAccountType::Cash)
+        $accounts = TreasuryAccount::with(['storage', 'bank'])
+            ->active()
+            ->withSum('movements', 'amount')
+            ->addSelect([
+                'last_movement_at' => TreasuryMovement::query()
+                    ->whereColumn('treasury_account_id', 'treasury_accounts.id')
+                    ->latest('occurred_at')
+                    ->select('occurred_at')
+                    ->limit(1),
+            ])
+            ->get();
+
+        $cashDrawers = $accounts
+            ->where('type', TreasuryAccountType::Cash)
             ->whereNotNull('sale_point_id')
-            ->active()
-            ->get()
+            ->values()
             ->map(fn (TreasuryAccount $account) => $this->formatAccount($account));
 
-        $sharedAccounts = TreasuryAccount::shared()
-            ->active()
-            ->whereNotIn('type', [TreasuryAccountType::Cash])
-            ->orWhere(fn ($q) => $q->shared()->whereNull('sale_point_id')->active())
-            ->get()
-            ->unique('id')
+        $sharedAccounts = $accounts
+            ->filter(fn (TreasuryAccount $account) => $account->sale_point_id === null)
+            ->values()
             ->map(fn (TreasuryAccount $account) => $this->formatAccount($account));
 
-        // All shared accounts (not tied to a sale point)
-        $sharedAccounts = TreasuryAccount::shared()
-            ->active()
-            ->get()
-            ->map(fn (TreasuryAccount $account) => $this->formatAccount($account));
-
-        $activeTypes = TreasuryAccount::active()->pluck('type')->map(fn ($t) => $t->value)->unique()->values()->all();
+        $activeTypes = $accounts->pluck('type')->map(fn ($t) => $t->value)->unique()->values()->all();
         $requiredTypes = [
             TreasuryAccountType::Cash->value,
             TreasuryAccountType::Bank->value,
@@ -122,7 +125,7 @@ class TreasuryAccountsController extends Controller
             'type' => $account->type->value,
             'type_label' => $account->type->label(),
             'currency' => $account->currency,
-            'current_balance' => $account->currentBalance(),
+            'current_balance' => $account->opening_balance + (int) ($account->movements_sum_amount ?? 0),
             'opening_balance' => $account->opening_balance,
             'is_active' => $account->is_active,
             'notes' => $account->notes,
@@ -130,7 +133,7 @@ class TreasuryAccountsController extends Controller
             'sale_point_name' => $account->storage?->name,
             'bank_id' => $account->bank_id,
             'bank_name' => $account->bank?->name,
-            'last_movement_at' => $account->movements()->latest('occurred_at')->value('occurred_at'),
+            'last_movement_at' => $account->last_movement_at,
         ];
     }
 }

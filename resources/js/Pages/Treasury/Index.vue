@@ -1,6 +1,9 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
+import { usePermissions } from "@/Composables/usePermissions";
+
+const { can } = usePermissions();
 
 defineProps({
     cash_drawers: Array,
@@ -69,6 +72,7 @@ const typeBgClass = (type) => {
             </div>
             <div class="mt-4 flex items-center justify-end gap-x-3 lg:mt-0">
                 <Link
+                    v-if="can('treasury.transfer')"
                     :href="route('treasury.transfer.create')"
                     class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
                 >
@@ -78,6 +82,7 @@ const typeBgClass = (type) => {
                     {{ __("Transfer") }}
                 </Link>
                 <Link
+                    v-if="can('treasury.create')"
                     :href="route('treasury.create')"
                     class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                 >
@@ -101,7 +106,7 @@ const typeBgClass = (type) => {
                     <strong>{{ missing_types.map(t => missingTypeLabels[t] || t).join(', ') }}</strong>.
                     {{ __("Payments and cheque operations require these accounts to record transactions correctly.") }}
                 </p>
-                <Link :href="route('treasury.create')" class="mt-2 inline-flex items-center text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300">
+                <Link v-if="can('treasury.create')" :href="route('treasury.create')" class="mt-2 inline-flex items-center text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300">
                     {{ __("Create missing accounts") }}
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ms-1 h-4 w-4 rtl:rotate-180">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
@@ -194,7 +199,7 @@ const typeBgClass = (type) => {
                 <p class="text-sm text-gray-400 dark:text-gray-500">
                     {{ __("No shared accounts yet.") }}
                 </p>
-                <Link :href="route('treasury.create')" class="inline-flex items-center mt-4 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
+                <Link v-if="can('treasury.create')" :href="route('treasury.create')" class="inline-flex items-center mt-4 text-sm text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
                     {{ __("Create your first account") }}
                 </Link>
             </div>

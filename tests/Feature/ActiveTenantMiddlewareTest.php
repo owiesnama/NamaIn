@@ -38,6 +38,32 @@ it('passes through for unauthenticated users without interfering', function () {
     $this->assertGuest();
 });
 
+it('rejects access when the subdomain tenant is inactive even if user current tenant is active', function () {
+    $activeTenant = $this->tenant; // test-org is active
+    $inactiveTenant = Tenant::create(['name' => 'Inactive Org', 'slug' => 'inactive-org', 'is_active' => false]);
+
+    $user = User::factory()->create(['current_tenant_id' => $activeTenant->id]);
+    $activeTenant->users()->attach($user, [
+        'role' => 'owner',
+        'role_id' => $this->ownerRole->id,
+        'is_active' => true,
+    ]);
+    $inactiveTenant->users()->attach($user, [
+        'role' => 'staff',
+        'is_active' => true,
+    ]);
+
+    $this->actingAs($user);
+
+    // Visit the inactive tenant's subdomain — ResolveTenant will bind
+    // the inactive tenant as app('currentTenant')
+    $inactiveUrl = 'http://inactive-org.'.config('app.domain').'/dashboard';
+
+    $this->get($inactiveUrl)
+        ->assertRedirect(route('login'))
+        ->assertSessionHas('error');
+});
+
 it('allows an active user whose status is re-enabled', function () {
     $user = User::factory()->create(['current_tenant_id' => $this->tenant->id]);
     $this->tenant->users()->attach($user, [
