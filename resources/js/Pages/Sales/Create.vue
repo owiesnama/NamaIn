@@ -93,7 +93,7 @@
     };
 
     const onCustomerCreated = (customer) => {
-        form.invocable = customer.id;
+        form.invocable = customer;
         localCustomers.value.unshift(customer);
     };
 
@@ -137,10 +137,11 @@
                     </div>
                     <div class="max-w-sm" v-auto-animate>
                         <CustomSelect
-                            v-model="form.invocable"
+                            :model-value="form.invocable"
                             :options="localCustomers"
                             label="name"
                             track-by="id"
+                            @update:model-value="id => { form.invocable = localCustomers.find(c => c.id === id) ?? null }"
                             @search-change="searchCustomer"
                             :placeholder="__('Search customer...')"
                         >

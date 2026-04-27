@@ -12,6 +12,7 @@
         "@vitejs/plugin-vue": "^4.0.0",
         "autoprefixer": "^10.4.7",
         "axios": "^1.1.2",
+        "cypress": "^15.14.1",
         "eslint": "^8.36.0",
         "eslint-config-prettier": "^8.8.0",
         "eslint-plugin-vue": "^9.9.0",

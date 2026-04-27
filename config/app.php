@@ -14,7 +14,7 @@ return [
 
     'timezone' => 'UTC',
 
-    'locale' => 'ar',
+    'locale' => env('APP_LOCALE', 'ar'),
 
     'fallback_locale' => 'en',
 

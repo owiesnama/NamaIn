@@ -14,13 +14,20 @@ class HandleLocale
     /**
      * Handle an incoming request.
      *
-     * @param  Closure(Request): (Response)  $next
+     * Locale is set by ResolveTenant for tenant-scoped routes.
+     * This middleware handles non-tenant requests (e.g. auth pages)
+     * where the tenant is already bound by other means.
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (app()->bound('currentTenant') && ! App::isLocale(config('app.locale'))) {
+            // Already set by ResolveTenant — nothing to do.
+            return $next($request);
+        }
+
         if (app()->bound('currentTenant')) {
             $preferences = TenantCache::rememberForever('preferences', fn () => Preference::asPairs());
-            App::setLocale($preferences['language'] ?? 'en');
+            App::setLocale($preferences['language'] ?? config('app.locale'));
         }
 
         return $next($request);

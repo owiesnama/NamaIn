@@ -93,7 +93,7 @@
     };
 
     const onSupplierCreated = (supplier) => {
-        form.invocable = supplier.id;
+        form.invocable = supplier;
         localSuppliers.value.unshift(supplier);
     };
 
@@ -137,10 +137,11 @@
                     </div>
                     <div class="max-w-sm" v-auto-animate>
                         <CustomSelect
-                            v-model="form.invocable"
+                            :model-value="form.invocable"
                             :options="localSuppliers"
                             label="name"
                             track-by="id"
+                            @update:model-value="id => { form.invocable = localSuppliers.find(s => s.id === id) ?? null }"
                             @search-change="searchSupplier"
                             class="modern-select"
                             :placeholder="__('Search supplier...')"
