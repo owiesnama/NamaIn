@@ -278,3 +278,15 @@ test('payment requires either invoice_id or payable_id and type', function () {
 
     $response->assertSessionHasErrors(['invoice_id', 'payable_id']);
 });
+
+test('payment rejects unsupported direct payable types', function () {
+    $response = $this->post(route('payments.store'), [
+        'payable_id' => 1,
+        'payable_type' => User::class,
+        'amount' => 100,
+        'payment_method' => PaymentMethod::Cash->value,
+        'direction' => 'in',
+    ]);
+
+    $response->assertSessionHasErrors(['payable_type']);
+});

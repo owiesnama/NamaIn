@@ -12,6 +12,7 @@ use App\Models\Payment;
 use App\Models\Supplier;
 use App\Models\TreasuryAccount;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class RecordPaymentAction
 {
@@ -38,42 +39,44 @@ class RecordPaymentAction
         PaymentDirection $direction,
         array $options = []
     ): Payment {
-        $payment = $invoice
-            ? $this->recordForInvoice($invoice, $amount, $method, $direction, $options)
-            : $this->recordStandalone($payable, $amount, $method, $direction, $options);
+        return DB::transaction(function () use ($invoice, $payable, $amount, $method, $direction, $options) {
+            $payment = $invoice
+                ? $this->recordForInvoice($invoice, $amount, $method, $direction, $options)
+                : $this->recordStandalone($payable, $amount, $method, $direction, $options);
 
-        if ($method === PaymentMethod::Cheque && isset($options['cheque_due'])) {
-            $this->createCheque->handle($payable, [
-                'amount' => $amount,
-                'type' => $payable instanceof Supplier ? ChequeType::Payable : ChequeType::Receivable,
-                'due' => $options['cheque_due'],
-                'bank_id' => $options['cheque_bank_id'] ?? null,
-                'reference_number' => $options['cheque_reference'] ?? null,
-                'invoice_id' => $invoice?->id,
-            ]);
-        }
+            if ($method === PaymentMethod::Cheque && isset($options['cheque_due'])) {
+                $this->createCheque->handle($payable, [
+                    'amount' => $amount,
+                    'type' => $payable instanceof Supplier ? ChequeType::Payable : ChequeType::Receivable,
+                    'due' => $options['cheque_due'],
+                    'bank_id' => $options['cheque_bank_id'] ?? null,
+                    'reference_number' => $options['cheque_reference'] ?? null,
+                    'invoice_id' => $invoice?->id,
+                ]);
+            }
 
-        if (isset($options['treasury_account_id'])) {
-            $account = TreasuryAccount::findOrFail($options['treasury_account_id']);
-            $amountInCents = (int) round($amount * 100);
+            if (isset($options['treasury_account_id'])) {
+                $account = TreasuryAccount::findOrFail($options['treasury_account_id']);
+                $amountInCents = (int) round($amount * 100);
 
-            $reason = $options['movement_reason']
-                ?? ($direction === PaymentDirection::In
-                    ? TreasuryMovementReason::PaymentReceived
-                    : TreasuryMovementReason::ExpensePaid);
+                $reason = $options['movement_reason']
+                    ?? ($direction === PaymentDirection::In
+                        ? TreasuryMovementReason::PaymentReceived
+                        : TreasuryMovementReason::ExpensePaid);
 
-            $this->recordMovement->handle(
-                account: $account,
-                amount: $direction === PaymentDirection::In ? $amountInCents : -$amountInCents,
-                reason: $reason,
-                movable: $payment,
-                actor: auth()->user(),
-            );
+                $this->recordMovement->handle(
+                    account: $account,
+                    amount: $direction === PaymentDirection::In ? $amountInCents : -$amountInCents,
+                    reason: $reason,
+                    movable: $payment,
+                    actor: auth()->user(),
+                );
 
-            $payment->update(['treasury_account_id' => $account->id]);
-        }
+                $payment->update(['treasury_account_id' => $account->id]);
+            }
 
-        return $payment;
+            return $payment;
+        });
     }
 
     private function recordForInvoice(Invoice $invoice, float $amount, PaymentMethod $method, PaymentDirection $direction, array $options): Payment

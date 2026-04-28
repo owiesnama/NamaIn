@@ -164,6 +164,37 @@ test('clearing a payable cheque debits the bank account', function () {
 // Fix 1.2 — Treasury account edit persists bank_id
 // ─────────────────────────────────────────────
 
+test('returning a receivable cheque reverses the cheque clearing account', function () {
+    $customer = Customer::factory()->create();
+    $this->clearingAccount->update(['opening_balance' => 90000]);
+    $balanceBefore = $this->clearingAccount->currentBalance();
+
+    $cheque = Cheque::factory()->create([
+        'chequeable_id' => $customer->id,
+        'chequeable_type' => get_class($customer),
+        'type' => ChequeType::Receivable->value,
+        'amount' => 900,
+        'status' => ChequeStatus::Issued,
+        'bank_id' => $this->bank->id,
+        'bank' => $this->bank->name,
+        'reference_number' => 'CHQ-FLOW-RETURNED',
+    ]);
+
+    $this->put(route('cheques.updateStatus', $cheque->id), [
+        'status' => ChequeStatus::Returned->value,
+    ])->assertRedirect();
+
+    expect($cheque->fresh()->status)->toBe(ChequeStatus::Returned)
+        ->and($this->clearingAccount->fresh()->currentBalance())->toBe($balanceBefore - 90000);
+
+    $movement = TreasuryMovement::where('treasury_account_id', $this->clearingAccount->id)
+        ->where('amount', -90000)
+        ->latest()
+        ->first();
+
+    expect($movement->reason)->toBe(TreasuryMovementReason::ChequeBounced);
+});
+
 test('updating a bank-type treasury account persists bank_id', function () {
     $newBank = Bank::create(['name' => 'New Bank']);
 

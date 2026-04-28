@@ -40,7 +40,7 @@ class CustomerAdvancesController extends Controller
     /**
      * Settle an existing advance — direct repayment or invoice offset.
      */
-    public function settle(
+    public function destroy(
         CustomerAdvance $customerAdvance,
         SettleCustomerAdvanceRequest $request,
         SettleCustomerAdvanceAction $action,

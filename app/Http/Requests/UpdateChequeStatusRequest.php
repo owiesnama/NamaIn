@@ -32,4 +32,23 @@ class UpdateChequeStatusRequest extends FormRequest
             'treasury_account_id' => 'nullable|exists:treasury_accounts,id',
         ];
     }
+
+    public function status(): ChequeStatus
+    {
+        return ChequeStatus::from($this->validated('status'));
+    }
+
+    public function clearedAmount(): ?float
+    {
+        $amount = $this->validated('cleared_amount');
+
+        return $amount === null ? null : (float) $amount;
+    }
+
+    public function treasuryAccountId(): ?int
+    {
+        $accountId = $this->validated('treasury_account_id');
+
+        return $accountId === null ? null : (int) $accountId;
+    }
 }

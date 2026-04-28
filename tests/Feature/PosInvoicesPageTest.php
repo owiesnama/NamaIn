@@ -5,14 +5,17 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\PosSession;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Storage;
 use App\Models\User;
 use Inertia\Testing\AssertableInertia as Assert;
 
 it('shows only pos invoices on the pos invoices page', function () {
     $tenant = app('currentTenant');
+    seedTenantRoles($tenant);
+    $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'owner')->first();
     $user = User::factory()->create(['current_tenant_id' => $tenant->id]);
-    $tenant->users()->attach($user, ['role' => 'owner']);
+    $tenant->users()->attach($user, ['role' => 'owner', 'role_id' => $ownerRole->id, 'is_active' => true]);
     $this->actingAs($user);
 
     $salePoint = Storage::factory()->create([
@@ -65,8 +68,10 @@ it('shows only pos invoices on the pos invoices page', function () {
 
 it('flags walk-in customer as system during pos checkout', function () {
     $tenant = app('currentTenant');
+    seedTenantRoles($tenant);
+    $cashierRole = Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('slug', 'cashier')->first();
     $user = User::factory()->create(['current_tenant_id' => $tenant->id]);
-    $tenant->users()->attach($user, ['role' => 'cashier']);
+    $tenant->users()->attach($user, ['role' => 'cashier', 'role_id' => $cashierRole->id, 'is_active' => true]);
     $this->actingAs($user);
 
     $salePoint = Storage::factory()->create([

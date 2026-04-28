@@ -6,7 +6,7 @@ use App\Models\Tenant;
 use Closure;
 use Illuminate\Http\Request;
 
-class BindTenantFromAuth
+class BindTenant
 {
     public function handle(Request $request, Closure $next): mixed
     {

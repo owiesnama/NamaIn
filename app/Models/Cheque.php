@@ -120,6 +120,11 @@ class Cheque extends BaseModel
         return $this->status === ChequeStatus::Drafted;
     }
 
+    public function isDeletable(): bool
+    {
+        return $this->status === ChequeStatus::Drafted || $this->status === ChequeStatus::Cancelled;
+    }
+
     /**
      * Scope for filtering cheque query with a given filter.
      */

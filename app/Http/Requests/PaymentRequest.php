@@ -4,6 +4,8 @@ namespace App\Http\Requests;
 
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
+use App\Models\Customer;
+use App\Models\Supplier;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -27,7 +29,7 @@ class PaymentRequest extends FormRequest
         return [
             'invoice_id' => 'required_without:payable_id|nullable|exists:invoices,id',
             'payable_id' => 'required_without:invoice_id|nullable|integer',
-            'payable_type' => 'required_with:payable_id|nullable|string',
+            'payable_type' => ['required_with:payable_id', 'nullable', 'string', Rule::in([Customer::class, Supplier::class])],
             'amount' => 'required|numeric|min:0.01',
             'payment_method' => ['required', Rule::enum(PaymentMethod::class)],
             'direction' => ['required', Rule::enum(PaymentDirection::class)],

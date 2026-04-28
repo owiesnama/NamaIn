@@ -45,7 +45,13 @@ class ProcessPosCheckoutAction
             throw new DomainException('POS session is closed.');
         }
 
-        return DB::transaction(function () use ($session, $data, $actor, $idempotencyKey, $acknowledgeTransfers) {
+        $paymentMethod = PaymentMethod::tryFrom($data->get('payment_method', 'cash')) ?? PaymentMethod::Cash;
+
+        if ($paymentMethod === PaymentMethod::Credit && ! $data->get('customer_id')) {
+            throw new DomainException('Credit sales require a named customer.');
+        }
+
+        return DB::transaction(function () use ($session, $data, $actor, $idempotencyKey, $acknowledgeTransfers, $paymentMethod) {
             if ($idempotencyKey) {
                 $existing = Invoice::where('tenant_id', $session->tenant_id)
                     ->where('idempotency_key', $idempotencyKey)
@@ -100,7 +106,6 @@ class ProcessPosCheckoutAction
             ]);
 
             // 4. Create Transactions & Deduct Stock
-
             foreach ($data->get('items') as $item) {
                 $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
                 $quantity = $item['quantity'] * ($unit->conversion_factor ?? 1);
@@ -121,32 +126,39 @@ class ProcessPosCheckoutAction
 
             $invoice->markAs(InvoiceStatus::Delivered);
 
-            // Record payment for all POS sales (cash is always collected upfront at POS).
-            // Treasury movement is a bonus when a cash drawer is configured — it is NOT
-            // a gate for the payment itself.
-            $paymentMethod = PaymentMethod::tryFrom($data->get('payment_method', 'cash')) ?? PaymentMethod::Cash;
+            // 5. Record payment only for methods that collect money at checkout
+            if ($this->recordsImmediatePayment($paymentMethod)) {
+                $cashDrawer = $paymentMethod === PaymentMethod::Cash
+                    ? TreasuryAccount::where('sale_point_id', $session->storage_id)
+                        ->ofType(TreasuryAccountType::Cash)
+                        ->active()
+                        ->first()
+                    : null;
 
-            $cashDrawer = $paymentMethod === PaymentMethod::Cash
-                ? TreasuryAccount::where('sale_point_id', $session->storage_id)
-                    ->ofType(TreasuryAccountType::Cash)
-                    ->active()
-                    ->first()
-                : null;
-
-            $this->recordPayment->handle(
-                invoice: $invoice,
-                payable: $invoice->invocable,
-                amount: $invoice->total,
-                method: $paymentMethod,
-                direction: PaymentDirection::In,
-                options: [
-                    'notes' => 'POS sale',
-                    'treasury_account_id' => $cashDrawer?->id,
-                ]
-            );
+                $this->recordPayment->handle(
+                    invoice: $invoice,
+                    payable: $invoice->invocable,
+                    amount: $invoice->total,
+                    method: $paymentMethod,
+                    direction: PaymentDirection::In,
+                    options: [
+                        'notes' => 'POS sale',
+                        'treasury_account_id' => $cashDrawer?->id,
+                    ]
+                );
+            }
 
             return $invoice;
         });
+    }
+
+    private function recordsImmediatePayment(PaymentMethod $method): bool
+    {
+        return in_array($method, [
+            PaymentMethod::Cash,
+            PaymentMethod::Cheque,
+            PaymentMethod::BankTransfer,
+        ], true);
     }
 
     private function replenish(Storage $salePoint, int $productId, int $quantityNeeded, User $actor): void

@@ -3,6 +3,7 @@
 use App\Actions\Pos\OpenPosSessionAction;
 use App\Actions\Pos\ProcessPosCheckoutAction;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Storage;
 use App\Models\Tenant;
 use App\Models\Unit;
@@ -14,12 +15,15 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create();
     app()->instance('currentTenant', $this->tenant);
+    seedTenantRoles($this->tenant);
 
+    $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $this->tenant->id)->where('slug', 'owner')->first();
     $this->owner = User::factory()->create(['current_tenant_id' => $this->tenant->id]);
-    $this->tenant->users()->attach($this->owner, ['role' => 'owner']);
+    $this->tenant->users()->attach($this->owner, ['role' => 'owner', 'role_id' => $ownerRole->id, 'is_active' => true]);
 
+    $cashierRole = Role::withoutGlobalScopes()->where('tenant_id', $this->tenant->id)->where('slug', 'cashier')->first();
     $this->cashier = User::factory()->create(['current_tenant_id' => $this->tenant->id]);
-    $this->tenant->users()->attach($this->cashier, ['role' => 'cashier']);
+    $this->tenant->users()->attach($this->cashier, ['role' => 'cashier', 'role_id' => $cashierRole->id, 'is_active' => true]);
 
     $this->storage = Storage::factory()->create(['tenant_id' => $this->tenant->id]);
     $this->product = Product::factory()->create(['tenant_id' => $this->tenant->id]);
@@ -84,25 +88,18 @@ test('it correctly handles preflight with units', function () {
     $this->actingAs($this->cashier);
 
     // Requesting 11 Boxes = 110 units. We only have 100.
-    $response = $this->post(route('pos.checkout', ['tenant' => $this->tenant->slug]), [
+    $response = $this->postJson(route('pos.preflight', ['tenant' => $this->tenant->slug]), [
         'session_id' => $this->session->id,
-        'total' => 11000,
         'items' => [
             [
                 'product_id' => $this->product->id,
                 'quantity' => 11,
-                'price' => 1000,
                 'unit_id' => $this->unit->id,
             ],
         ],
-        'acknowledge_transfers' => false,
-    ], [
-        'X-Inertia' => 'true',
     ]);
 
-    $response->assertStatus(302);
-    $response->assertSessionHas('response', function ($response) {
-        return $response['requires_confirmation'] === true &&
-               $response['transfers_required'][0]['quantity'] == 10; // Need 10 more base units
-    });
+    $response->assertSuccessful();
+    $response->assertJson(['requires_confirmation' => true]);
+    expect($response->json('transfers_required.0.quantity'))->toBe(10); // Need 10 more base units
 });

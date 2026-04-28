@@ -46,6 +46,7 @@ use App\Http\Controllers\Purchases\PurchaseReceiptController;
 use App\Http\Controllers\Purchases\PurchasesController;
 use App\Http\Controllers\Sales\PosCheckoutController;
 use App\Http\Controllers\Sales\PosInvoicesController;
+use App\Http\Controllers\Sales\PosPreflightController;
 use App\Http\Controllers\Sales\PosSessionController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Treasury\TreasuryAccountsController;
@@ -128,7 +129,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/customers/{customer}/statement', [CustomerStatementController::class, 'show'])->name('customers.statement');
         Route::get('/customers/{customer}/statement/print', [CustomerStatementController::class, 'store'])->name('customers.print-statement');
         Route::post('/customers/{customer}/advances', [CustomerAdvancesController::class, 'store'])->name('customer-advances.store');
-        Route::post('/customer-advances/{customerAdvance}/settle', [CustomerAdvancesController::class, 'settle'])->name('customer-advances.settle');
+        Route::post('/customer-advances/{customerAdvance}/settle', [CustomerAdvancesController::class, 'destroy'])->name('customer-advances.settle');
 
         /*
         |--------------------------------------------------------------------------
@@ -195,6 +196,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/pos', [PosSessionController::class, 'show'])->name('pos.index');
         Route::get('/pos/invoices', [PosInvoicesController::class, 'index'])->name('pos.invoices');
         Route::post('/pos/open', [PosSessionController::class, 'store'])->name('pos.open');
+        Route::post('/pos/preflight', [PosPreflightController::class, 'store'])->name('pos.preflight');
         Route::post('/pos/checkout', [PosCheckoutController::class, 'store'])->name('pos.checkout');
         Route::post('/pos/close', [PosSessionController::class, 'destroy'])->name('pos.close');
         Route::get('/sales/{invoice}/return', [SaleReturnController::class, 'create'])->name('sales.return.create');

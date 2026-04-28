@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
+import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
@@ -176,7 +177,7 @@ const onCustomerCreated = (customer) => {
     checkoutForm.customer_id = customer.id;
 };
 
-const checkout = () => {
+const checkout = async () => {
     if (cart.value.length === 0) return;
 
     cartErrorMessage.value = '';
@@ -188,22 +189,37 @@ const checkout = () => {
         checkoutForm.idempotency_key = Date.now().toString();
     }
 
+    checkoutForm.processing = true;
+
+    try {
+        const { data } = await axios.post(route('pos.preflight'), {
+            session_id: checkoutForm.session_id,
+            items: checkoutForm.items,
+        });
+
+        if (data.requires_confirmation) {
+            showingCheckoutModal.value = false;
+            if (data.unavailable_products) {
+                unavailableProducts.value = data.unavailable_products;
+                showingUnavailableModal.value = true;
+            } else {
+                transfersRequired.value = data.transfers_required;
+                showingTransferModal.value = true;
+            }
+            return;
+        }
+
+        proceedToCheckout();
+    } catch (error) {
+        cartErrorMessage.value = error.response?.data?.message || __('Error during checkout');
+    } finally {
+        checkoutForm.processing = false;
+    }
+};
+
+const proceedToCheckout = () => {
     router.post(route('pos.checkout'), checkoutForm, {
         onSuccess: (successPage) => {
-            const response = successPage.props.flash?.response;
-
-            if (response?.requires_confirmation) {
-                showingCheckoutModal.value = false;
-                if (response.unavailable_products) {
-                    unavailableProducts.value = response.unavailable_products;
-                    showingUnavailableModal.value = true;
-                } else {
-                    transfersRequired.value = response.transfers_required;
-                    showingTransferModal.value = true;
-                }
-                return;
-            }
-
             const invoiceId = page.props.flash?.last_invoice_id || successPage.props.flash?.last_invoice_id;
             completedSale.value = {
                 invoiceId: invoiceId ?? null,
@@ -227,7 +243,7 @@ const checkout = () => {
 const confirmTransferAndCheckout = () => {
     checkoutForm.acknowledge_transfers = true;
     showingTransferModal.value = false;
-    checkout();
+    proceedToCheckout();
 };
 
 const startNewSale = () => {

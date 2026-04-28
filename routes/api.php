@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\CustomersController;
-use App\Http\Middleware\BindTenantFromAuth;
+use App\Http\Middleware\BindTenant;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware(['auth:sanctum', BindTenantFromAuth::class])
+Route::middleware(['auth:sanctum', BindTenant::class])
     ->get('/customers', CustomersController::class)
     ->name('api.customers.index');
