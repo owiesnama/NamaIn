@@ -283,7 +283,6 @@
     "CHEQUE": "شيك",
     "Status": "الحالة",
     "Credit": "دائن (لنا)",
-    "Cash": "نقداً",
     "CASH": "نقداً",
     "Recurring Templates": "قوالب المصروفات المتكررة",
     "used": "مستخدم",
@@ -1016,5 +1015,18 @@
     "Includes discount of": "يشمل خصم",
     "Payment Method": "طريقة الدفع",
     "Sale Invoice": "فاتورة بيع",
-    "Invoice": "فاتورة"
+    "Invoice": "فاتورة",
+    "Payment Summary": "ملخص الدفع",
+    "Payment Type": "نوع الدفع",
+    "No treasury account configured": "لم يتم انشا حساب الخزينة",
+    "This payment method requires a treasury account. Please set one up in treasury settings.": "تتطلب طريقة الدفع هذه حساب خزينة. يرجى إعداد واحد في إعدادات الخزينة.",
+    "Go to Treasury": "الذهاب إلى الخزينة",
+
+    "Payment Date": "تاريخ الدفع",
+    "Additional notes about this payment": "ملاحظات إضافية حول هذا الدفع",
+    "The following account types are missing:": "أنواع الحسابات التالية مفقودة:",
+    "Payments and cheque operations require these accounts to record transactions correctly.": "تتطلب عمليات المدفوعات والشيكات هذه الحسابات لتسجيل المعاملات بشكل صحيح.",
+    "Cheque Clearing": "مقاصة الشيكات",
+    "Treasury setup incomplete": "إعداد الخزينة غير مكتمل",
+    "Create missing accounts": "إنشاء الحسابات المفقودة"
 }

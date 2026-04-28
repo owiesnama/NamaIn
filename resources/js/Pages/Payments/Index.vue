@@ -4,6 +4,7 @@ import { Link, router } from "@inertiajs/vue3";
 import Pagination from "@/Shared/Pagination.vue";
 import EmptySearch from "@/Shared/EmptySearch.vue";
 import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import DatePicker from "@/Components/DatePicker.vue";
 import { watch, ref, computed, onMounted, onUnmounted } from "vue";
 import { useQueryString } from "@/Composables/useQueryString";
 import { debounce } from "lodash";
@@ -11,7 +12,7 @@ import { debounce } from "lodash";
 const props = defineProps({
     payments: Object,
     summary: Object,
-    payment_methods: Array,
+    payment_methods: [Object, Array],
 });
 
 const showSidebar = ref(true);
@@ -48,6 +49,25 @@ const sortByOptions = [
     { label: __("Payment Number"), value: "id" },
     { label: __("Amount"), value: "amount" },
 ];
+
+const methodOptions = computed(() => {
+    if (Array.isArray(props.payment_methods)) {
+        return props.payment_methods.map(m => ({
+            value: typeof m === 'object' ? m.value : m,
+            label: typeof m === 'object' ? m.label : m,
+        }));
+    }
+
+    return Object.entries(props.payment_methods || {}).map(([label, value]) => ({
+        value: typeof value === 'object' ? value.value : value,
+        label,
+    }));
+});
+
+const methodLabel = (method) => {
+    const found = methodOptions.value.find(m => m.value === method);
+    return found ? __(found.label) : __(method);
+};
 
 function isIncoming(payment) {
     return payment.direction === "in";
@@ -232,7 +252,11 @@ watch(
                     </p>
                     <p
                         class="text-xl font-bold mt-1 tracking-tight"
-                        :class="netAmount >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'"
+                        :class="netAmount > 0
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : netAmount < 0
+                                ? 'text-red-600 dark:text-red-400'
+                                : 'text-gray-600 dark:text-gray-400'"
                     >
                         {{ formatCurrency(Math.abs(netAmount)) }}
                     </p>
@@ -253,7 +277,7 @@ watch(
                     <!-- Direction Pills -->
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Direction") }}</label>
-                        <div class="flex bg-gray-50 border border-gray-200 divide-x rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse overflow-hidden h-9">
+                        <div class="flex bg-gray-50 border border-gray-200 divide-x divide-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse rtl:divide-x-reverse h-9">
                             <button
                                 v-for="opt in [
                                     { label: __('All'), value: null },
@@ -263,7 +287,7 @@ watch(
                                 :key="String(opt.value)"
                                 @click="filters.direction = opt.value"
                                 :class="[
-                                    'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                                    'px-3 flex-1 py-2 text-xs font-semibold whitespace-nowrap transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                                     filters.direction === opt.value || (opt.value === null && !filters.direction)
                                         ? 'bg-gray-100 dark:bg-gray-700'
                                         : 'text-gray-600',
@@ -274,12 +298,12 @@ watch(
                         </div>
                     </div>
 
-                    <!-- Payment Method Checkboxes -->
+                    <!-- Payment Method -->
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Method") }}</label>
                         <div class="space-y-2">
                             <label
-                                v-for="m in payment_methods"
+                                v-for="m in methodOptions"
                                 :key="m.value"
                                 class="flex items-center gap-x-2 cursor-pointer"
                             >
@@ -290,7 +314,7 @@ watch(
                                     @change="filters.method = filters.method === m.value ? null : m.value"
                                     class="border-gray-300 dark:border-gray-600 text-emerald-600 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                                 />
-                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ m.label }}</span>
+                                <span class="text-sm text-gray-700 dark:text-gray-300">{{ __(m.label) }}</span>
                             </label>
                         </div>
                     </div>
@@ -299,14 +323,12 @@ watch(
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Date Range") }}</label>
                         <div class="space-y-2">
-                            <input
-                                type="date"
+                            <DatePicker
                                 v-model="filters.date_from"
                                 :placeholder="__('From')"
                                 class="w-full px-3 py-2 text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
                             />
-                            <input
-                                type="date"
+                            <DatePicker
                                 v-model="filters.date_to"
                                 :placeholder="__('To')"
                                 class="w-full px-3 py-2 text-xs text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40"
@@ -317,17 +339,17 @@ watch(
                     <!-- Party Type Pills -->
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Party Type") }}</label>
-                        <div class="flex bg-gray-50 border border-gray-200 divide-x rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse overflow-hidden h-9">
+                        <div class="flex bg-gray-50 border border-gray-200 divide-x divide-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse rtl:divide-x-reverse h-9">
                             <button
                                 v-for="opt in [
                                     { label: __('All'), value: null },
-                                    { label: __('customer'), value: 'Customer' },
-                                    { label: __('supplier'), value: 'Supplier' },
+                                    { label: __('Customer'), value: 'Customer' },
+                                    { label: __('Supplier'), value: 'Supplier' },
                                 ]"
                                 :key="String(opt.value)"
                                 @click="filters.party_type = opt.value"
                                 :class="[
-                                    'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
+                                    'px-3 flex-1 py-2 text-xs font-semibold whitespace-nowrap transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                                     filters.party_type === opt.value || (opt.value === null && !filters.party_type)
                                         ? 'bg-gray-100 dark:bg-gray-700'
                                         : 'text-gray-600',
@@ -512,13 +534,7 @@ watch(
                                                     payment.payment_method === 'credit',
                                             }"
                                         >
-                                            {{
-                                                __(
-                                                    payment.payment_method
-                                                        .replace("_", " ")
-                                                        .toUpperCase()
-                                                )
-                                            }}
+                                            {{ methodLabel(payment.payment_method) }}
                                         </span>
                                     </td>
 
@@ -537,12 +553,15 @@ watch(
                                     </td>
 
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span
-                                            v-if="payment.invoice"
-                                            class="text-red-600 dark:text-red-400 font-medium"
-                                        >
-                                            {{ formatCurrency(payment.invoice.remaining_balance) }}
-                                        </span>
+                                        <template v-if="payment.invoice">
+                                            <span
+                                                :class="payment.invoice.remaining_balance > 0
+                                                    ? 'text-red-600 dark:text-red-400 font-medium'
+                                                    : 'text-gray-600 dark:text-gray-400'"
+                                            >
+                                                {{ formatCurrency(payment.invoice.remaining_balance) }}
+                                            </span>
+                                        </template>
                                         <span v-else class="text-gray-400 dark:text-gray-500">—</span>
                                     </td>
 
@@ -607,11 +626,11 @@ watch(
         <!-- Slide-over Panel -->
         <Transition
             enter-active-class="ease-out duration-300"
-            enter-from-class="translate-x-full rtl:-translate-x-full"
+            enter-from-class="ltr:translate-x-full rtl:-translate-x-full"
             enter-to-class="translate-x-0"
             leave-active-class="ease-in duration-200"
             leave-from-class="translate-x-0"
-            leave-to-class="translate-x-full rtl:-translate-x-full"
+            leave-to-class="ltr:translate-x-full rtl:-translate-x-full"
         >
             <div
                 v-if="selectedPayment"
@@ -648,7 +667,7 @@ watch(
                                     selectedPayment.payment_method === 'credit',
                             }"
                         >
-                            {{ __(selectedPayment.payment_method.replace("_", " ").toUpperCase()) }}
+                            {{ methodLabel(selectedPayment.payment_method) }}
                         </span>
                     </div>
                     <button

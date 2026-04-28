@@ -1,0 +1,1 @@
+Before finalizing any code or pull request, you must run all tests to ensure complet run e coverage. This includes Cypress tests, unit tests, and end-to-end tests. For example, you should run php artisan test and npx cypress run. Only finalize once all tests pass successfully.

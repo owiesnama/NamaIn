@@ -1,5 +1,7 @@
 /**
  * E2E tests: sale invoice creation
+ *
+ * CustomSelect dropdown is teleported to <body>, so we target it globally.
  */
 
 before(() => {
@@ -32,22 +34,23 @@ describe('Sale Invoice', () => {
         cy.visit('/sales/create');
         cy.url().should('include', '/sales/create');
 
-        cy.get('.custom-select').first().within(() => {
-            cy.get('.custom-select__trigger').click();
-            cy.get('.custom-select__search-input').type('Cypress Customer');
-            cy.get('.custom-select__option').first().click();
-        });
+        cy.get('.custom-select').first().find('.custom-select__trigger').click();
+        cy.get('.custom-select__dropdown').should('have.length', 1);
+        cy.get('.custom-select__dropdown .custom-select__search-input').type('Cypress Customer');
+        cy.get('.custom-select__dropdown .custom-select__option').first().click();
 
-        cy.get('.custom-select').eq(1).within(() => {
-            cy.get('.custom-select__trigger').click();
-            cy.get('.custom-select__search-input').type('Cypress Sale');
-            cy.get('.custom-select__option').first().click();
-        });
+        cy.get('.custom-select__dropdown').should('not.exist');
 
-        cy.get('.custom-select').eq(2).within(() => {
-            cy.get('.custom-select__trigger').click();
-            cy.get('.custom-select__option').first().click();
-        });
+        cy.get('.custom-select').eq(1).find('.custom-select__trigger').click();
+        cy.get('.custom-select__dropdown').should('have.length', 1);
+        cy.get('.custom-select__dropdown .custom-select__search-input').type('Cypress Sale');
+        cy.get('.custom-select__dropdown .custom-select__option').first().click();
+
+        cy.get('.custom-select__dropdown').should('not.exist');
+
+        cy.get('.custom-select').eq(2).find('.custom-select__trigger').click();
+        cy.get('.custom-select__dropdown').should('have.length', 1);
+        cy.get('.custom-select__dropdown .custom-select__option').first().click();
 
         cy.get('input[type="number"][min="0.01"]').first().clear().type('3');
         cy.get('input[type="number"][step="0.01"]').eq(1).clear().type('2500');

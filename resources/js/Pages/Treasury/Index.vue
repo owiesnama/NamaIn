@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
+import WarningAlert from "@/Components/WarningAlert.vue";
 import { Link } from "@inertiajs/vue3";
 import { usePermissions } from "@/Composables/usePermissions";
 
@@ -12,9 +13,9 @@ defineProps({
 });
 
 const missingTypeLabels = {
-    cash: 'Cash',
-    bank: 'Bank',
-    cheque_clearing: 'Cheque Clearing',
+    cash: __('Cash'),
+    bank: __('Bank'),
+    cheque_clearing: __('Cheque Clearing'),
 };
 
 const formatBalance = (amount, currency = "SDG") => {
@@ -95,24 +96,18 @@ const typeBgClass = (type) => {
         </div>
 
         <!-- Missing account types warning -->
-        <div v-if="missing_types && missing_types.length" class="mb-6 flex items-start gap-x-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400 mt-0.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-            </svg>
-            <div>
-                <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __("Treasury setup incomplete") }}</p>
-                <p class="mt-0.5 text-sm text-amber-700 dark:text-amber-400">
+        <div v-if="missing_types && missing_types.length" class="mb-6">
+            <WarningAlert
+                :title="__('Treasury setup incomplete')"
+                :action-label="can('treasury.create') ? __('Create missing accounts') : ''"
+                :action-href="can('treasury.create') ? route('treasury.create') : ''"
+            >
+                <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
                     {{ __("The following account types are missing:") }}
                     <strong>{{ missing_types.map(t => missingTypeLabels[t] || t).join(', ') }}</strong>.
                     {{ __("Payments and cheque operations require these accounts to record transactions correctly.") }}
                 </p>
-                <Link v-if="can('treasury.create')" :href="route('treasury.create')" class="mt-2 inline-flex items-center text-sm font-medium text-amber-700 dark:text-amber-400 hover:text-amber-800 dark:hover:text-amber-300">
-                    {{ __("Create missing accounts") }}
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="ms-1 h-4 w-4 rtl:rotate-180">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                    </svg>
-                </Link>
-            </div>
+            </WarningAlert>
         </div>
 
         <!-- Cash Drawers (per sale point) -->

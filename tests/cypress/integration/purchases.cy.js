@@ -3,6 +3,7 @@
  *
  * The purchase form starts with one empty line item by default.
  * CustomSelect uses .custom-select__* classes.
+ * The dropdown is teleported to <body>, so we target it globally.
  */
 
 before(() => {
@@ -33,24 +34,26 @@ describe('Purchase Invoice', () => {
         cy.url().should('include', '/purchases/create');
 
         // Select supplier — first CustomSelect on the page
-        cy.get('.custom-select').first().within(() => {
-            cy.get('.custom-select__trigger').click();
-            cy.get('.custom-select__search-input').type('Cypress Supplier');
-            cy.get('.custom-select__option').first().click();
-        });
+        cy.get('.custom-select').first().find('.custom-select__trigger').click();
+        cy.get('.custom-select__dropdown').should('have.length', 1);
+        cy.get('.custom-select__dropdown .custom-select__search-input').type('Cypress Supplier');
+        cy.get('.custom-select__dropdown .custom-select__option').first().click();
+
+        // Wait for previous dropdown to close before opening the next
+        cy.get('.custom-select__dropdown').should('not.exist');
 
         // First line item already exists — select product (second CustomSelect)
-        cy.get('.custom-select').eq(1).within(() => {
-            cy.get('.custom-select__trigger').click();
-            cy.get('.custom-select__search-input').type('Cypress Purchase');
-            cy.get('.custom-select__option').first().click();
-        });
+        cy.get('.custom-select').eq(1).find('.custom-select__trigger').click();
+        cy.get('.custom-select__dropdown').should('have.length', 1);
+        cy.get('.custom-select__dropdown .custom-select__search-input').type('Cypress Purchase');
+        cy.get('.custom-select__dropdown .custom-select__option').first().click();
+
+        cy.get('.custom-select__dropdown').should('not.exist');
 
         // Select unit (third CustomSelect — auto-populates after product selection)
-        cy.get('.custom-select').eq(2).within(() => {
-            cy.get('.custom-select__trigger').click();
-            cy.get('.custom-select__option').first().click();
-        });
+        cy.get('.custom-select').eq(2).find('.custom-select__trigger').click();
+        cy.get('.custom-select__dropdown').should('have.length', 1);
+        cy.get('.custom-select__dropdown .custom-select__option').first().click();
 
         // Quantity (first number input in the line item area)
         cy.get('input[type="number"][min="0.01"]').first().clear().type('5');

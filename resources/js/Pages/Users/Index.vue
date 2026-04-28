@@ -1,5 +1,6 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
+import WarningAlert from '@/Components/WarningAlert.vue';
 import { ref, computed, watch } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import { usePermissions } from '@/Composables/usePermissions';
@@ -609,12 +610,7 @@ const roleBadgeClass = (slug) => {
                                 </div>
 
                                 <!-- Notice -->
-                                <div class="flex items-start gap-x-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-4 py-3">
-                                    <svg class="h-4 w-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
-                                    </svg>
-                                    <p class="text-xs text-amber-700 dark:text-amber-400">{{ __('The user will be required to set a new password on their first login.') }}</p>
-                                </div>
+                                <WarningAlert :title="__('The user will be required to set a new password on their first login.')" />
 
                                 <div class="flex justify-end gap-x-3 pt-2">
                                     <button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200" @click="showCreateModal = false">

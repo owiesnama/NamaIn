@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue';
 
 const props = defineProps({
     modelValue: [Object, Array, String, Number],
@@ -56,8 +56,10 @@ const isOpen = ref(false);
 const searchQuery = ref('');
 const selectRef = ref(null);
 const dropdownRef = ref(null);
+const dropdownContainerRef = ref(null);
 const searchInputRef = ref(null);
 const highlightedIndex = ref(-1);
+const dropdownStyle = ref({});
 
 const displayValue = computed(() => {
     if (!props.modelValue && props.modelValue !== 0) return '';
@@ -107,7 +109,7 @@ const filteredOptions = computed(() => {
                 return [
                     {
                         [props.label]: searchQuery.value,
-                        [props.trackBy]: searchQuery.value, // Use name as ID for tags
+                        [props.trackBy]: searchQuery.value,
                         isTag: true
                     },
                     ...options
@@ -132,20 +134,45 @@ const selectedOption = computed(() => {
     return props.options.find(o => String(typeof o === 'object' ? o[props.trackBy] : o) === String(props.modelValue)) ?? null;
 });
 
+const updateDropdownPosition = () => {
+    if (!selectRef.value) return;
+    const rect = selectRef.value.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const dropdownMaxHeight = 300;
+    const openAbove = spaceBelow < dropdownMaxHeight && rect.top > spaceBelow;
+
+    dropdownStyle.value = {
+        position: 'fixed',
+        width: `${rect.width}px`,
+        left: `${rect.left}px`,
+        zIndex: 9999,
+        ...(openAbove
+            ? { bottom: `${window.innerHeight - rect.top + 2}px`, top: 'auto' }
+            : { top: `${rect.bottom + 2}px`, bottom: 'auto' }),
+    };
+};
+
+const handleScroll = () => {
+    if (isOpen.value) {
+        updateDropdownPosition();
+    }
+};
+
 const toggleDropdown = () => {
     if (props.disabled) return;
 
     isOpen.value = !isOpen.value;
 
     if (isOpen.value) {
+        updateDropdownPosition();
         searchQuery.value = '';
         highlightedIndex.value = -1;
         emit('search-change', '');
-        setTimeout(() => {
+        nextTick(() => {
             if (props.searchable && searchInputRef.value) {
                 searchInputRef.value.focus();
             }
-        }, 50);
+        });
     }
 };
 
@@ -207,7 +234,9 @@ const isSelected = (option) => {
 };
 
 const handleClickOutside = (event) => {
-    if (selectRef.value && !selectRef.value.contains(event.target)) {
+    const inTrigger = selectRef.value && selectRef.value.contains(event.target);
+    const inDropdown = dropdownContainerRef.value && dropdownContainerRef.value.contains(event.target);
+    if (!inTrigger && !inDropdown) {
         isOpen.value = false;
     }
 };
@@ -262,10 +291,14 @@ watch(searchQuery, (newValue) => {
 
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    window.addEventListener('scroll', handleScroll, true);
+    window.addEventListener('resize', handleScroll);
 });
 
 onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('scroll', handleScroll, true);
+    window.removeEventListener('resize', handleScroll);
 });
 </script>
 
@@ -290,18 +323,20 @@ onBeforeUnmount(() => {
                 </svg>
             </div>
         </div>
+    </div>
 
-        <Transition name="dropdown">
-            <div v-if="isOpen" class="custom-select__dropdown">
+    <Teleport to="body">
+        <Transition name="cs-dropdown">
+            <div v-if="isOpen" ref="dropdownContainerRef" class="custom-select__dropdown" :style="dropdownStyle">
                 <div v-if="searchable" class="custom-select__search">
-                        <input
-                            ref="searchInputRef"
-                            v-model="searchQuery"
-                            type="text"
-                            class="custom-select__search-input"
-                            :placeholder="placeholder === 'Select option' ? __('Select option') : placeholder"
-                            @keydown="handleKeydown"
-                        />
+                    <input
+                        ref="searchInputRef"
+                        v-model="searchQuery"
+                        type="text"
+                        class="custom-select__search-input"
+                        :placeholder="placeholder === 'Select option' ? __('Select option') : placeholder"
+                        @keydown="handleKeydown"
+                    />
                 </div>
 
                 <div ref="dropdownRef" class="custom-select__options">
@@ -339,10 +374,10 @@ onBeforeUnmount(() => {
                 </div>
             </div>
         </Transition>
-    </div>
+    </Teleport>
 </template>
 
-<style scoped>
+<style>
 .custom-select {
     position: relative;
     width: 100%;
@@ -364,7 +399,7 @@ onBeforeUnmount(() => {
     border-radius: 0.75rem;
     background-color: white;
     cursor: pointer;
-    transition: all 0.15s ease;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dark .custom-select__trigger {
@@ -445,11 +480,6 @@ onBeforeUnmount(() => {
 }
 
 .custom-select__dropdown {
-    position: absolute;
-    top: calc(100% + 2px);
-    left: 0;
-    right: 0;
-    z-index: 9999;
     background-color: white;
     border: 1px solid rgb(229 231 235);
     border-radius: 0.75rem;
@@ -564,18 +594,13 @@ onBeforeUnmount(() => {
 }
 
 /* Dropdown transition */
-.dropdown-enter-active,
-.dropdown-leave-active {
-    transition: opacity 0.15s ease, transform 0.15s ease;
+.cs-dropdown-enter-active,
+.cs-dropdown-leave-active {
+    transition: opacity 0.15s ease;
 }
 
-.dropdown-enter-from {
+.cs-dropdown-enter-from,
+.cs-dropdown-leave-to {
     opacity: 0;
-    transform: translateY(-4px);
-}
-
-.dropdown-leave-to {
-    opacity: 0;
-    transform: translateY(-4px);
 }
 </style>
