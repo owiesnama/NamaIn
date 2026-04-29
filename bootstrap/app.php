@@ -23,7 +23,13 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->redirectGuestsTo('/login');
+        $middleware->redirectGuestsTo(function ($request) {
+            if (in_array('auth:admin', $request->route()?->middleware() ?? [])) {
+                return '/__admin/login';
+            }
+
+            return '/login';
+        });
         $middleware->redirectUsersTo('/dashboard');
 
         $middleware->trustProxies(

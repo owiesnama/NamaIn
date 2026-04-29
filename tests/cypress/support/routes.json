@@ -472,6 +472,201 @@
       "POST"
     ]
   },
+  "admin.login": {
+    "name": "admin.login",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\AuthController@showLogin",
+    "uri": "__admin/login",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "admin.": {
+    "name": "admin.",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\AuthController@login",
+    "uri": "__admin/login",
+    "method": [
+      "POST"
+    ]
+  },
+  "admin.logout": {
+    "name": "admin.logout",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\AuthController@logout",
+    "uri": "__admin/logout",
+    "method": [
+      "POST"
+    ]
+  },
+  "admin.dashboard": {
+    "name": "admin.dashboard",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\DashboardController@index",
+    "uri": "__admin",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "admin.activity": {
+    "name": "admin.activity",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\ActivityLogController@index",
+    "uri": "__admin/activity",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "admin.tenants.index": {
+    "name": "admin.tenants.index",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantsController@index",
+    "uri": "__admin/tenants",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "admin.tenants.store": {
+    "name": "admin.tenants.store",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantsController@store",
+    "uri": "__admin/tenants",
+    "method": [
+      "POST"
+    ]
+  },
+  "admin.tenants.show": {
+    "name": "admin.tenants.show",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantsController@show",
+    "uri": "__admin/tenants/{tenant}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "admin.tenants.update": {
+    "name": "admin.tenants.update",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantsController@update",
+    "uri": "__admin/tenants/{tenant}",
+    "method": [
+      "PUT",
+      "PATCH"
+    ]
+  },
+  "admin.tenants.destroy": {
+    "name": "admin.tenants.destroy",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantsController@destroy",
+    "uri": "__admin/tenants/{tenant}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "admin.tenants.status": {
+    "name": "admin.tenants.status",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantStatusController@update",
+    "uri": "__admin/tenants/{tenant}/status",
+    "method": [
+      "PUT"
+    ]
+  },
+  "admin.tenants.ownership": {
+    "name": "admin.tenants.ownership",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantOwnershipController@update",
+    "uri": "__admin/tenants/{tenant}/ownership",
+    "method": [
+      "PUT"
+    ]
+  },
+  "admin.tenants.users.store": {
+    "name": "admin.tenants.users.store",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantUsersController@store",
+    "uri": "__admin/tenants/{tenant}/users",
+    "method": [
+      "POST"
+    ]
+  },
+  "admin.tenants.users.destroy": {
+    "name": "admin.tenants.users.destroy",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantUsersController@destroy",
+    "uri": "__admin/tenants/{tenant}/users/{user}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "admin.tenants.users.role": {
+    "name": "admin.tenants.users.role",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantUserRoleController@update",
+    "uri": "__admin/tenants/{tenant}/users/{user}/role",
+    "method": [
+      "PUT"
+    ]
+  },
+  "admin.tenants.users.status": {
+    "name": "admin.tenants.users.status",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantUserStatusController@update",
+    "uri": "__admin/tenants/{tenant}/users/{user}/status",
+    "method": [
+      "PUT"
+    ]
+  },
+  "admin.tenants.invitations.store": {
+    "name": "admin.tenants.invitations.store",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantInvitationsController@store",
+    "uri": "__admin/tenants/{tenant}/invitations",
+    "method": [
+      "POST"
+    ]
+  },
+  "admin.tenants.invitations.destroy": {
+    "name": "admin.tenants.invitations.destroy",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantInvitationsController@destroy",
+    "uri": "__admin/tenants/{tenant}/invitations/{invitation}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "admin.impersonate.start": {
+    "name": "admin.impersonate.start",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\ImpersonationController@start",
+    "uri": "__admin/tenants/{tenant}/users/{user}/impersonate",
+    "method": [
+      "POST"
+    ]
+  },
+  "admin.impersonate.stop": {
+    "name": "admin.impersonate.stop",
+    "domain": null,
+    "action": "\\App\\Http\\Controllers\\Admin\\ImpersonationController@stop",
+    "uri": "__admin/impersonate/stop",
+    "method": [
+      "POST"
+    ]
+  },
+  "impersonate.stop": {
+    "name": "impersonate.stop",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Admin\\ImpersonationController@stop",
+    "uri": "stop-impersonating",
+    "method": [
+      "POST"
+    ]
+  },
   "password.change": {
     "name": "password.change",
     "domain": "{tenant}.namain.test",
@@ -669,7 +864,7 @@
   "customer-advances.settle": {
     "name": "customer-advances.settle",
     "domain": "{tenant}.namain.test",
-    "action": "App\\Http\\Controllers\\CustomerAdvancesController@settle",
+    "action": "App\\Http\\Controllers\\CustomerAdvancesController@destroy",
     "uri": "customer-advances/{customerAdvance}/settle",
     "method": [
       "POST"
@@ -1222,6 +1417,15 @@
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Sales\\PosSessionController@store",
     "uri": "pos/open",
+    "method": [
+      "POST"
+    ]
+  },
+  "pos.preflight": {
+    "name": "pos.preflight",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\PosPreflightController@store",
+    "uri": "pos/preflight",
     "method": [
       "POST"
     ]

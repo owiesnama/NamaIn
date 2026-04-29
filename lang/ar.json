@@ -1028,5 +1028,10 @@
     "Payments and cheque operations require these accounts to record transactions correctly.": "تتطلب عمليات المدفوعات والشيكات هذه الحسابات لتسجيل المعاملات بشكل صحيح.",
     "Cheque Clearing": "مقاصة الشيكات",
     "Treasury setup incomplete": "إعداد الخزينة غير مكتمل",
-    "Create missing accounts": "إنشاء الحسابات المفقودة"
+    "Create missing accounts": "إنشاء الحسابات المفقودة",
+
+    "Platform overview": "نظرة عامة على المنصة",
+    "Total Tenants": "إجمالي المؤسسات",
+    "Inactive": "غير نشط",
+    "Total Users": "إجمالي المستخدمين"
 }

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Auth\MustChangePasswordController;
 use App\Http\Controllers\Catalog\ProductExportController;
 use App\Http\Controllers\Catalog\ProductImportController;
@@ -71,6 +72,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware([ResolveTenant::class])->group(function () {
+
+    Route::post('/stop-impersonating', [ImpersonationController::class, 'stop'])
+        ->name('impersonate.stop')
+        ->middleware(['auth:sanctum', config('jetstream.auth_session')]);
 
     Route::middleware([
         'auth:sanctum',

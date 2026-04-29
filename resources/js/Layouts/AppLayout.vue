@@ -3,6 +3,7 @@
     import { router, Head, Link, usePage } from "@inertiajs/vue3";
     import ApplicationLogo from "@/Components/ApplicationLogo.vue";
     import Banner from "@/Components/Banner.vue";
+    import ImpersonationBanner from "@/Components/ImpersonationBanner.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import NavLink from "@/Components/NavLink.vue";
     import SidebarGroup from "@/Components/SidebarGroup.vue";
@@ -43,6 +44,7 @@
     <div :dir="direction">
         <Head :title="__(title)" />
 
+        <ImpersonationBanner />
         <Banner />
 
         <!-- App shell -->

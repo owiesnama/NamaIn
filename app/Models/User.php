@@ -93,12 +93,21 @@ class User extends Authenticatable
     public function roleInCurrentTenant(): ?Role
     {
         return once(function () {
-            if (! $this->current_tenant_id) {
+            $tenantId = $this->current_tenant_id;
+
+            if (app()->bound('currentTenant')) {
+                $resolvedTenantId = app('currentTenant')->id;
+                if ($this->tenants()->where('tenants.id', $resolvedTenantId)->exists()) {
+                    $tenantId = $resolvedTenantId;
+                }
+            }
+
+            if (! $tenantId) {
                 return null;
             }
 
             $roleId = $this->tenants()
-                ->where('tenants.id', $this->current_tenant_id)
+                ->where('tenants.id', $tenantId)
                 ->first()
                 ?->pivot
                 ?->role_id;

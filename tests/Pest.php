@@ -73,6 +73,14 @@ function seedTenantRoles(Tenant $tenant): void
     }
 }
 
+function actingAsSuperAdmin(?User $user = null): TestCase
+{
+    $user = $user ?? User::factory()->create(['role' => 'admin']);
+    $user->markEmailAsVerified();
+
+    return test()->actingAs($user, 'admin');
+}
+
 function actingAsTenantUser(?User $user = null, string $role = 'owner'): TestCase
 {
     $tenant = Tenant::firstOrCreate(

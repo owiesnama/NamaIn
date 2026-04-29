@@ -12,6 +12,11 @@ class EnsureTenantIsActive
         $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
 
         if ($tenant && ! $tenant->isActive()) {
+            if (session('impersonating_from')) {
+                return redirect()->route('admin.dashboard')
+                    ->with('error', __('This tenant is currently deactivated.'));
+            }
+
             auth('web')->logout();
             $request->session()->invalidate();
 

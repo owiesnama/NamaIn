@@ -15,6 +15,10 @@ class EnsureUserIsActiveInTenant
      */
     public function handle(Request $request, Closure $next): Response
     {
+        if (session('impersonating_from')) {
+            return $next($request);
+        }
+
         $user = $request->user();
         $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
 

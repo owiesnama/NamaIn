@@ -1,4 +1,37 @@
 /**
+ * Log in as a super-admin user (role = 'admin').
+ *
+ * The session is created on the tenant subdomain (where Cypress endpoints
+ * are served), then validated on the main domain so the cookie is
+ * established for both origins.
+ *
+ * @example
+ *   beforeEach(() => cy.adminLogin());
+ *   it('visits admin dashboard', () => cy.visit('https://namain.test/admin'));
+ */
+Cypress.Commands.add('adminLogin', () => {
+    cy.session('admin', () => {
+        cy.php(`
+            $user = App\\Models\\User::factory()->create([
+                'role' => 'admin',
+                'email_verified_at' => now(),
+            ]);
+
+            // Log in via the admin guard server-side
+            Illuminate\\Support\\Facades\\Auth::guard('admin')->login($user);
+            session()->save();
+
+            return ['email' => $user->email]
+        `).then(() => {
+            // Validate the session is active on the main domain
+            cy.visit('https://namain.test/__admin');
+            cy.url().should('include', '/__admin');
+            cy.url().should('not.include', 'login');
+        });
+    });
+});
+
+/**
  * Set up a tenant with an owner user and log them in.
  *
  * Uses cy.session() to cache authentication state across tests so test

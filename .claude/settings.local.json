@@ -118,7 +118,8 @@
       "Bash(C:/Users/Owiesnama/.config/herd/bin/php84 vendor/bin/pint --dirty --format agent)",
       "Bash(C:/Users/Owiesnama/.config/herd/bin/php84/php.exe vendor/bin/pint --dirty --format agent)",
       "Bash(ls C:/Users/Owiesnama/Projects/NamaIn/cypress.config.*)",
-      "Bash(herd link:*)"
+      "Bash(herd link:*)",
+      "Bash(ls:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

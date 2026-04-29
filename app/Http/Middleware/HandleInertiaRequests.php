@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\Preference;
 use App\Services\TenantCache;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -64,6 +65,9 @@ class HandleInertiaRequests extends Middleware
                 'error' => session()->get('error'),
                 'response' => session()->get('response'),
             ],
+            'isSuperAdmin' => fn () => Auth::guard('admin')->check(),
+            'isImpersonating' => fn () => (bool) session('impersonating_from'),
+            'impersonatingTenant' => fn () => session('impersonating_tenant_name'),
             'locale' => function () {
                 return app()->getLocale();
             },
