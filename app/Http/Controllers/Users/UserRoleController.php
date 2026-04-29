@@ -15,9 +15,11 @@ class UserRoleController extends Controller
     {
         $this->authorize('assignRole', User::class);
 
+        $tenant = app('currentTenant');
         $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
+        abort_unless($role->tenant_id === $tenant->id, 403);
 
-        $action->handle(app('currentTenant'), $user, $role);
+        $action->handle($tenant, $user, $role);
 
         return back()->with('success', __('Role updated successfully.'));
     }

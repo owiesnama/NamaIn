@@ -11,6 +11,7 @@ class PosPreflightController extends Controller
 {
     public function store(PosPreflightRequest $request, PosPreflightAction $preflight)
     {
+        $this->authorize('create', PosSession::class);
         $session = PosSession::findOrFail($request->session_id);
 
         $result = $preflight->execute($session, $request->items);

@@ -34,6 +34,8 @@ class TenantSelectionController extends Controller
 
     public function switchFrom(Request $request, Tenant $target): RedirectResponse|HttpResponse
     {
+        abort_unless($target->isActive(), 403, 'This organization is not active.');
+
         return $this->redirectToTenant($request, $target);
     }
 

@@ -22,6 +22,12 @@ class StopImpersonationAction
 
         $impersonatedUserId = session('impersonating_user_id');
 
+        if (auth()->id() !== $impersonatedUserId) {
+            throw ValidationException::withMessages([
+                'impersonation' => __('Invalid impersonation session.'),
+            ]);
+        }
+
         if ($impersonatedUserId && session()->has('impersonating_previous_tenant_id')) {
             User::where('id', $impersonatedUserId)
                 ->update(['current_tenant_id' => session('impersonating_previous_tenant_id')]);
@@ -45,6 +51,7 @@ class StopImpersonationAction
         ]);
 
         Auth::guard('web')->login($admin);
+        Auth::guard('admin')->login($admin);
 
         return $admin;
     }

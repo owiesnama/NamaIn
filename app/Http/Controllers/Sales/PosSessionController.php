@@ -17,6 +17,7 @@ class PosSessionController extends Controller
 {
     public function show(FindReplenishmentSourceAction $replenishmentAction)
     {
+        $this->authorize('viewAny', PosSession::class);
         $storage = currentTenant()->storages()->where('type', StorageType::SALE_POINT)->first();
 
         if (! $storage) {
@@ -54,6 +55,7 @@ class PosSessionController extends Controller
 
     public function store(Request $request, OpenPosSessionAction $action)
     {
+        $this->authorize('create', PosSession::class);
         $request->validate([
             'storage_id' => 'required|exists:storages,id',
             'opening_float' => 'required|numeric|min:0',
@@ -68,6 +70,7 @@ class PosSessionController extends Controller
 
     public function destroy(Request $request, ClosePosSessionAction $action)
     {
+        $this->authorize('close', PosSession::class);
         $request->validate([
             'session_id' => 'required|exists:pos_sessions,id',
             'closing_float' => 'required|numeric|min:0',

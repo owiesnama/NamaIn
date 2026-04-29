@@ -14,6 +14,8 @@ class TenantScope implements Scope
 
         if ($tenantId) {
             $builder->where($model->qualifyColumn('tenant_id'), $tenantId);
+        } else {
+            $builder->whereRaw('1 = 0');
         }
     }
 

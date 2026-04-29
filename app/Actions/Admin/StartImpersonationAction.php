@@ -44,6 +44,7 @@ class StartImpersonationAction
 
         $targetUser->update(['current_tenant_id' => $tenant->id]);
 
+        Auth::guard('admin')->logout();
         Auth::guard('web')->login($targetUser);
 
         return $targetUser;

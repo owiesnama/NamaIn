@@ -12,9 +12,12 @@ use App\Models\Expense;
 use App\Models\TreasuryAccount;
 use App\Models\User;
 use App\Queries\ExpenseIndexQuery;
+use App\Traits\HandlesAsyncUploads;
 
 class ExpensesController extends Controller
 {
+    use HandlesAsyncUploads;
+
     public function index(ExpenseFilter $filter, ExpenseIndexQuery $query)
     {
         $this->authorize('viewAny', Expense::class);
@@ -51,7 +54,10 @@ class ExpensesController extends Controller
     {
         $this->authorize('create', Expense::class);
 
-        $action->handle($request);
+        $data = $request->validated();
+        $data['receipt_path'] = $this->resolveTemporaryUpload($request->receipt, 'receipts');
+
+        $action->handle($data, $request->user());
 
         return redirect()->route('expenses.index')->with('success', 'Expense recorded successfully');
     }
@@ -79,7 +85,10 @@ class ExpensesController extends Controller
     {
         $this->authorize('update', $expense);
 
-        $action->handle($request, $expense);
+        $data = $request->validated();
+        $data['receipt_path'] = $this->resolveTemporaryUpload($request->receipt, 'receipts', $expense->receipt_path);
+
+        $action->handle($data, $expense);
 
         return redirect()->route('expenses.index')->with('success', 'Expense updated successfully');
     }

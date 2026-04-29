@@ -150,6 +150,30 @@ it('restores user current_tenant_id when stopping', function () {
     expect($this->tenantOwner->current_tenant_id)->toBe($otherTenant->id);
 });
 
+it('restores admin guard authentication when stopping impersonation', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+    $admin->markEmailAsVerified();
+
+    $this->actingAs($admin, 'admin')
+        ->post(route('admin.impersonate.start', [$this->impersonatedTenant, $this->tenantOwner]));
+
+    URL::defaults([]);
+
+    $response = $this->actingAs($this->tenantOwner)
+        ->withSession([
+            'impersonating_from' => $admin->id,
+            'impersonating_user_id' => $this->tenantOwner->id,
+            'impersonating_tenant_id' => $this->impersonatedTenant->id,
+            'impersonating_tenant_name' => $this->impersonatedTenant->name,
+        ])
+        ->post(route('admin.impersonate.stop'));
+
+    $response->assertRedirect(route('admin.dashboard'));
+
+    // Follow the redirect — the admin guard should be authenticated
+    $this->get(route('admin.dashboard'))->assertOk();
+});
+
 it('logs audit events for impersonation start and stop', function () {
     $admin = User::factory()->create(['role' => 'admin']);
     $admin->markEmailAsVerified();

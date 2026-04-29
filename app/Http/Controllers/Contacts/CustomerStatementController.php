@@ -16,11 +16,15 @@ class CustomerStatementController extends Controller
 
     public function show(Customer $customer, StatementQuery $query)
     {
+        $this->authorize('view', $customer);
+
         return $this->handleStatement($customer, $query);
     }
 
     public function store(Customer $customer, StatementService $statementService)
     {
+        $this->authorize('view', $customer);
+
         return $this->handlePrintStatement($customer, $statementService);
     }
 }

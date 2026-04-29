@@ -22,6 +22,14 @@ class BindTenant
             abort(401, 'Tenant not found.');
         }
 
+        if (! $user->belongsToTenant($tenant)) {
+            abort(403, 'Unauthorized tenant access.');
+        }
+
+        if (! $tenant->isActive()) {
+            abort(403, 'Tenant is deactivated.');
+        }
+
         app()->instance('currentTenant', $tenant);
 
         return $next($request);

@@ -28,6 +28,7 @@ use App\Http\Controllers\Expenses\ExpenseReceiptController;
 use App\Http\Controllers\Expenses\ExpensesController;
 use App\Http\Controllers\Expenses\RecurringExpensesController;
 use App\Http\Controllers\Expenses\RecurringExpenseStatusController;
+use App\Http\Controllers\Exports;
 use App\Http\Controllers\Inventory\StockAdditionController;
 use App\Http\Controllers\Inventory\StockAdjustmentController;
 use App\Http\Controllers\Inventory\StockDeductionController;
@@ -45,6 +46,7 @@ use App\Http\Controllers\Payments\ChequeStatusController;
 use App\Http\Controllers\Payments\PaymentsController;
 use App\Http\Controllers\Purchases\PurchaseReceiptController;
 use App\Http\Controllers\Purchases\PurchasesController;
+use App\Http\Controllers\Reports;
 use App\Http\Controllers\Sales\PosCheckoutController;
 use App\Http\Controllers\Sales\PosInvoicesController;
 use App\Http\Controllers\Sales\PosPreflightController;
@@ -288,6 +290,35 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
         Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
         Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Exports
+        |--------------------------------------------------------------------------
+        | Queued export requests, history, and downloads.
+        */
+        Route::get('/exports', [Exports\ExportController::class, 'index'])->name('exports.index');
+        Route::post('/exports', [Exports\ExportController::class, 'store'])->name('exports.store');
+        Route::get('/exports/{exportLog}/download', [Exports\ExportController::class, 'download'])->name('exports.download');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reports
+        |--------------------------------------------------------------------------
+        | Filterable report pages with export and print support.
+        */
+        Route::prefix('reports')->group(function () {
+            Route::get('/', [Reports\ReportsIndexController::class, 'index'])->name('reports.index');
+            Route::get('/sales', [Reports\SalesReportController::class, 'index'])->name('reports.sales');
+            Route::get('/purchases', [Reports\PurchaseReportController::class, 'index'])->name('reports.purchases');
+            Route::get('/pos-sessions', [Reports\PosSessionReportController::class, 'index'])->name('reports.pos-sessions');
+            Route::get('/inventory-valuation', [Reports\InventoryValuationController::class, 'index'])->name('reports.inventory-valuation');
+            Route::get('/customer-aging', [Reports\CustomerAgingController::class, 'index'])->name('reports.customer-aging');
+            Route::get('/supplier-aging', [Reports\SupplierAgingController::class, 'index'])->name('reports.supplier-aging');
+            Route::get('/treasury-reconciliation', [Reports\TreasuryReconciliationController::class, 'index'])->name('reports.treasury');
+            Route::get('/expense-summary', [Reports\ExpenseSummaryController::class, 'index'])->name('reports.expenses');
+            Route::get('/profit-and-loss', [Reports\ProfitAndLossController::class, 'index'])->name('reports.pnl');
+        });
 
         /*
         |--------------------------------------------------------------------------

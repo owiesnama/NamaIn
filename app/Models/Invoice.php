@@ -103,80 +103,6 @@ class Invoice extends BaseModel
     }
 
     /**
-     * Create a purchase invoice with transactions.
-     */
-    public static function purchase(Collection $attributes): Invoice
-    {
-        return static::createWithTransactions($attributes);
-    }
-
-    /**
-     * Create a sale invoice with transactions.
-     */
-    public static function sale(Collection $attributes): Invoice
-    {
-        return static::createWithTransactions($attributes);
-    }
-
-    /**
-     * Create an invoice and attach product transactions from the given attributes.
-     */
-    private static function createWithTransactions(Collection $attributes): Invoice
-    {
-        $invoice = static::createInvoice($attributes);
-        $products = collect($attributes->get('products'));
-        $unitIds = $products->pluck('unit')->filter()->unique();
-        $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
-
-        $invoice->addTransaction($products->map(function ($product) use ($units) {
-            return [
-                'product_id' => $product['product'],
-                'storage_id' => $product['storage'] ?? null,
-                'unit_id' => $product['unit'] ?? null,
-                'quantity' => $product['quantity'],
-                'price' => $product['price'],
-                'description' => $product['description'] ?? null,
-                'base_quantity' => isset($units[$product['unit'] ?? null])
-                    ? $units[$product['unit']]->conversion_factor * $product['quantity']
-                    : $product['quantity'],
-            ];
-        }));
-
-        return $invoice;
-    }
-
-    /**
-     * Create an invoice for invoice-ables.
-     */
-    public static function createInvoice(Collection $attributes): Invoice
-    {
-        $invocable = $attributes->get('invocable');
-        $invocableClass = $invocable['type'];
-        $invocableId = $invocable['id'];
-        $invocable = $invocableClass::find($invocableId);
-
-        $paymentMethod = $attributes->get('payment_method', 'cash');
-        $discount = $attributes->get('discount', 0);
-
-        return $invocable->invoices()->create([
-            'total' => $attributes->get('total'),
-            'payment_method' => $paymentMethod,
-            'payment_status' => PaymentStatus::Unpaid,
-            'paid_amount' => 0,
-            'discount' => $discount,
-        ]);
-    }
-
-    /**
-     * Add new transactions to this invoice.
-     */
-    public function addTransaction(mixed $products): void
-    {
-        $this->transactions()
-            ->createMany($products);
-    }
-
-    /**
      * Mark the invoice with a given status
      */
     public function markAs(InvoiceStatus $status): Invoice
@@ -185,6 +111,11 @@ class Invoice extends BaseModel
         $this->save();
 
         return $this;
+    }
+
+    public function isSale(): bool
+    {
+        return $this->invocable_type === Customer::class;
     }
 
     /**

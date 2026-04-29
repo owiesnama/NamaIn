@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Purchases;
 
-use App\Actions\StorePurchaseAction;
+use App\Actions\StoreInvoiceAction;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Filters\InvoiceFilter;
@@ -58,11 +58,11 @@ class PurchasesController extends Controller
         ]);
     }
 
-    public function store(CreateInvoiceRequest $request, StorePurchaseAction $storePurchase)
+    public function store(CreateInvoiceRequest $request, StoreInvoiceAction $storeInvoice)
     {
         $this->authorize('create', Invoice::class);
 
-        $storePurchase->handle(collect($request->all()), $request);
+        $storeInvoice->handle(collect($request->validated()));
 
         return redirect()->route('purchases.index')->with('success', 'Purchase created successfully');
     }

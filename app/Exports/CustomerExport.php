@@ -10,6 +10,8 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class CustomerExport implements FromCollection, WithHeadings, WithMapping
 {
+    public function __construct(protected array $filters = []) {}
+
     /**
      * @return Collection
      */

@@ -23,6 +23,7 @@ class CustomerAdvancesController extends Controller
         RecordCustomerAdvanceRequest $request,
         RecordCustomerAdvanceAction $action,
     ): RedirectResponse {
+        $this->authorize('update', $customer);
         $treasury = TreasuryAccount::findOrFail($request->validated('treasury_account_id'));
 
         $action->handle(
@@ -45,6 +46,7 @@ class CustomerAdvancesController extends Controller
         SettleCustomerAdvanceRequest $request,
         SettleCustomerAdvanceAction $action,
     ): RedirectResponse {
+        $this->authorize('update', $customerAdvance->customer);
         $treasury = TreasuryAccount::findOrFail($request->validated('treasury_account_id'));
         $invoice = $request->validated('invoice_id')
             ? Invoice::findOrFail($request->validated('invoice_id'))

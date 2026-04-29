@@ -83,15 +83,23 @@ class DashboardStatsQuery
     public function totalInventoryValue(): float|string
     {
         return Cache::remember($this->cacheKey('total_inventory_value'), $this->cacheTtl('hour'), function () {
-            $totalValue = 0;
-            Product::with(['stock', 'transactions' => function ($query) {
-                $query->where('delivered', true)
-                    ->whereHas('invoice', fn ($q) => $q->where('invocable_type', '!=', Customer::class));
-            }])->get()->each(function ($product) use (&$totalValue) {
-                $totalValue += $product->quantityOnHand() * $product->average_cost;
-            });
+            $result = DB::selectOne('
+                SELECT COALESCE(SUM(qty * avg_cost), 0) as total_value
+                FROM (
+                    SELECT
+                        p.id,
+                        (SELECT COALESCE(SUM(s.quantity), 0) FROM stocks s WHERE s.product_id = p.id AND s.deleted_at IS NULL) as qty,
+                        CASE
+                            WHEN COALESCE((SELECT SUM(t.base_quantity) FROM transactions t INNER JOIN invoices i ON t.invoice_id = i.id WHERE t.product_id = p.id AND t.delivered = true AND i.invocable_type != ?), 0) > 0
+                            THEN (SELECT SUM(t.base_quantity * t.unit_cost) FROM transactions t INNER JOIN invoices i ON t.invoice_id = i.id WHERE t.product_id = p.id AND t.delivered = true AND i.invocable_type != ?) / (SELECT SUM(t.base_quantity) FROM transactions t INNER JOIN invoices i ON t.invoice_id = i.id WHERE t.product_id = p.id AND t.delivered = true AND i.invocable_type != ?)
+                            ELSE COALESCE(p.cost, 0)
+                        END as avg_cost
+                    FROM products p
+                    WHERE p.tenant_id = ?
+                ) inventory
+            ', [Customer::class, Customer::class, Customer::class, app('currentTenant')->id]);
 
-            return $totalValue;
+            return (float) ($result->total_value ?? 0);
         });
     }
 

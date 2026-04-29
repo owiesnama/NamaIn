@@ -10,6 +10,7 @@ class InvoicePrintController extends Controller
 {
     public function show(Invoice $invoice, InvoicePrintService $service)
     {
+        $this->authorize('view', $invoice);
         $pdf = $service->generatePdf($invoice);
 
         $headers = [

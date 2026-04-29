@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Contacts;
 
-use App\Exports\SupplierExport;
+use App\Actions\RequestExportAction;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
 
 class SupplierExportController extends Controller
 {
-    public function store()
+    public function store(RequestExportAction $action)
     {
-        return Excel::download(new SupplierExport, 'suppliers.xlsx');
+        $action->execute('suppliers', 'xlsx');
+
+        return back()->with('flash', [
+            'type' => 'export_queued',
+            'message' => __('Export queued. You will be notified when it is ready.'),
+        ]);
     }
 }

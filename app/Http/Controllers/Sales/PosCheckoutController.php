@@ -12,10 +12,11 @@ class PosCheckoutController extends Controller
 {
     public function store(PosCheckoutRequest $request, ProcessPosCheckoutAction $action)
     {
+        $this->authorize('create', PosSession::class);
         $session = PosSession::findOrFail($request->session_id);
 
         try {
-            $invoice = $action->execute(                $session,
+            $invoice = $action->execute($session,
                 collect($request->validated()),
 
                 $request->user(),

@@ -3,12 +3,10 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class InviteUserRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
@@ -19,7 +17,11 @@ class InviteUserRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email', 'max:255'],
-            'role_id' => ['required', 'integer', 'exists:roles,id'],
+            'role_id' => [
+                'required',
+                'integer',
+                Rule::exists('roles', 'id')->where('tenant_id', app('currentTenant')->id),
+            ],
         ];
     }
 }

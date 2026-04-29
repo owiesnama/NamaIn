@@ -12,6 +12,8 @@ class StoragesController extends Controller
 {
     public function index(StorageFilter $filter)
     {
+        $this->authorize('viewAny', Storage::class);
+
         return inertia('Storages/Index', [
             'storages_count' => Storage::count(),
             'storages' => Storage::filter($filter)
@@ -44,6 +46,7 @@ class StoragesController extends Controller
 
     public function show(Storage $storage, StorageShowQuery $query)
     {
+        $this->authorize('view', $storage);
         $storage->load('stock');
 
         $filters = request()->only(['from_date', 'to_date', 'product_id', 'type', 'search']);
@@ -72,6 +75,7 @@ class StoragesController extends Controller
 
     public function store(StorageRequest $request)
     {
+        $this->authorize('create', Storage::class);
         Storage::create($request->validated());
 
         return back()->with('success', __('Storage created successfully'));
@@ -79,6 +83,7 @@ class StoragesController extends Controller
 
     public function update(Storage $storage, StorageRequest $request)
     {
+        $this->authorize('update', $storage);
         $storage->update($request->validated());
 
         return back()->with('success', __('Storage updated successfully'));

@@ -15,6 +15,8 @@ class CustomerAccountController extends Controller
 
     public function show(Customer $customer, PartyAccountQuery $query)
     {
+        $this->authorize('view', $customer);
+
         return $this->handleAccount($customer, $query);
     }
 }

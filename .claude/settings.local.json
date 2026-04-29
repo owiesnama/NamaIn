@@ -119,7 +119,13 @@
       "Bash(C:/Users/Owiesnama/.config/herd/bin/php84/php.exe vendor/bin/pint --dirty --format agent)",
       "Bash(ls C:/Users/Owiesnama/Projects/NamaIn/cypress.config.*)",
       "Bash(herd link:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(tasklist)",
+      "Bash(find /c/Users/Owiesnama/Projects/NamaIn/app/Models -name \"*.php\" -exec grep -l \"class.*Model\" {} \\\\;)",
+      "Bash(where composer:*)",
+      "Read(//c/ProgramData/ComposerSetup/**)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/composer.bat require:*)",
+      "Bash(npm install:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

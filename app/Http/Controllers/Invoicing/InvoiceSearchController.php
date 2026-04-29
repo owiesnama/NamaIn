@@ -12,6 +12,7 @@ class InvoiceSearchController extends Controller
 {
     public function index()
     {
+        $this->authorize('viewAny', Invoice::class);
         $type = request('type', 'sale');
         $query = Invoice::query()
             ->with(['invocable'])
