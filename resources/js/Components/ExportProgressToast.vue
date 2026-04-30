@@ -1,9 +1,11 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 
 const toasts = ref([]);
 const page = usePage();
+
+const flash = computed(() => page.props.flash);
 
 function addToast(data) {
     const existing = toasts.value.findIndex(t => t.id === data.id);
@@ -22,21 +24,22 @@ function removeToast(id) {
     toasts.value = toasts.value.filter(t => t.id !== id);
 }
 
+// Watch flash prop for export_queued events (fires on every Inertia response)
+watch(flash, (val) => {
+    if (val?.type === 'export_queued') {
+        addToast({
+            id: val.export_id ?? Date.now(),
+            status: 'queued',
+            export_key: val.export_key ?? '',
+            message: val.message,
+        });
+    }
+}, { immediate: true });
+
+// Subscribe to Reverb for real-time updates
 let echoChannel = null;
 
 onMounted(() => {
-    // Listen for flash from export request
-    const flash = page.props.flash;
-    if (flash?.type === 'export_queued') {
-        addToast({
-            id: flash.export_id,
-            status: 'queued',
-            export_key: '',
-            message: flash.message,
-        });
-    }
-
-    // Listen for Reverb updates
     if (window.Echo && page.props.user?.id) {
         echoChannel = window.Echo.private(`exports.user.${page.props.user.id}`)
             .listen('ExportStatusUpdated', (e) => {

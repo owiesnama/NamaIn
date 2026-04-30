@@ -9,7 +9,7 @@
     import SidebarGroup from "@/Components/SidebarGroup.vue";
     import GlobalSearch from "@/Components/GlobalSearch.vue";
     import Flash from "@/Shared/Flash.vue";
-    import ExportProgressToast from "@/Components/ExportProgressToast.vue";
+    import ExportPanel from "@/Components/ExportPanel.vue";
     import { usePermissions } from "@/Composables/usePermissions";
 
     defineProps({
@@ -472,7 +472,7 @@
                 <main class="xl:flex-1 xl:overflow-y-auto">
                     <div class="px-4 py-10 sm:px-6 lg:px-8 2xl:container 2xl:mx-auto">
                         <Flash />
-                        <ExportProgressToast />
+                        <ExportPanel />
                         <slot />
                     </div>
                 </main>

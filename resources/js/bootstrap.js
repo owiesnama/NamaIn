@@ -22,13 +22,19 @@ import Echo from 'laravel-echo';
 
 import Pusher from 'pusher-js';
 window.Pusher = Pusher;
+Pusher.logToConsole = true;
 
-window.Echo = new Echo({
+const echoConfig = {
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
-    wsHost: import.meta.env.VITE_REVERB_HOST,
-    wsPort: import.meta.env.VITE_REVERB_PORT ?? 80,
-    wssPort: import.meta.env.VITE_REVERB_PORT ?? 443,
+    cluster: '',
+    wsHost: window.location.hostname,
+    wsPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
+    wssPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
     enabledTransports: ['ws', 'wss'],
-});
+    disabledTransports: [],
+    authEndpoint: '/broadcasting/auth',
+};
+console.log('Echo config:', JSON.stringify(echoConfig, null, 2));
+window.Echo = new Echo(echoConfig);

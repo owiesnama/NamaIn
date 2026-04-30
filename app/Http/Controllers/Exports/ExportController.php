@@ -48,6 +48,7 @@ class ExportController extends Controller
         return back()->with('flash', [
             'type' => 'export_queued',
             'export_id' => $exportLog->id,
+            'export_key' => $exportLog->export_key,
             'message' => __('Export queued. You will be notified when it is ready.'),
         ]);
     }

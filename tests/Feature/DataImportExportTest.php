@@ -1,5 +1,6 @@
 <?php
 
+use App\Jobs\GenerateExportJob;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Product;
@@ -7,6 +8,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 
 uses(RefreshDatabase::class);
 
@@ -47,13 +49,14 @@ test('can import customers from CSV', function () {
 });
 
 test('can export customers to Excel', function () {
+    Queue::fake();
     Customer::factory()->count(3)->create();
 
     $response = $this->get(route('customers.export'));
 
-    $response->assertStatus(200);
-    $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    $response->assertHeader('Content-Disposition', 'attachment; filename=customers.xlsx');
+    $response->assertRedirect();
+    Queue::assertPushed(GenerateExportJob::class);
+    $this->assertDatabaseHas('export_logs', ['export_key' => 'customers']);
 });
 
 test('can create customer with categories', function () {
@@ -92,13 +95,14 @@ test('can import suppliers from CSV', function () {
 });
 
 test('can export suppliers to Excel', function () {
+    Queue::fake();
     Supplier::factory()->count(3)->create();
 
     $response = $this->get(route('suppliers.export'));
 
-    $response->assertStatus(200);
-    $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    $response->assertHeader('Content-Disposition', 'attachment; filename=suppliers.xlsx');
+    $response->assertRedirect();
+    Queue::assertPushed(GenerateExportJob::class);
+    $this->assertDatabaseHas('export_logs', ['export_key' => 'suppliers']);
 });
 
 test('can create supplier with categories', function () {
@@ -146,13 +150,14 @@ test('can import products with units and categories from CSV', function () {
 });
 
 test('can export products to Excel', function () {
+    Queue::fake();
     Product::factory()->count(3)->create();
 
     $response = $this->get(route('products.export'));
 
-    $response->assertStatus(200);
-    $response->assertHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-    $response->assertHeader('Content-Disposition', 'attachment; filename=products.xlsx');
+    $response->assertRedirect();
+    Queue::assertPushed(GenerateExportJob::class);
+    $this->assertDatabaseHas('export_logs', ['export_key' => 'products']);
 });
 
 test('product export-import roundtrip works', function () {

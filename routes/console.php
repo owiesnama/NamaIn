@@ -22,6 +22,7 @@ Artisan::command('cheques:notify-for-due', function () {
 
 Schedule::command('cheques:notify-for-due')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
+Schedule::command('exports:prune')->daily();
 
 Schedule::call(function () {
     $files = Storage::disk('local')->files('tmp');

@@ -46,6 +46,19 @@ class GenerateExportJob implements ShouldQueue
 
         $export = app()->make($exportClass, ['filters' => $this->exportLog->filters ?? []]);
 
+        $data = method_exists($export, 'array') ? $export->array() : null;
+        $collection = method_exists($export, 'collection') ? $export->collection() : null;
+
+        $isEmpty = ($data !== null && count($data) === 0)
+            || ($collection !== null && $collection->isEmpty());
+
+        if ($isEmpty) {
+            $this->exportLog->markFailed(__('No data to export for the selected filters.'));
+            ExportStatusUpdated::dispatch($this->exportLog);
+
+            return;
+        }
+
         Excel::store($export, $path, 'local');
 
         $this->exportLog->markCompleted($path, $filename);

@@ -1118,5 +1118,15 @@
     "Download ready": "جاهز للتحميل",
     "Export failed.": "فشل التصدير.",
     "Export queued. You will be notified when it is ready.": "تم إدراج التصدير في قائمة الانتظار. سيتم إشعارك عند جاهزيته.",
-    "This export has expired.": "انتهت صلاحية هذا التصدير."
+    "This export has expired.": "انتهت صلاحية هذا التصدير.",
+    "No data to export for the selected filters.": "لا توجد بيانات للتصدير بالفلاتر المحددة.",
+    "Notifications": "الإشعارات",
+    "exports": "تصديرات",
+    "Exports ready": "التصديرات جاهزة",
+    "Latest Exports": "آخر التصديرات",
+    "View All": "عرض الكل",
+    "Your exports will appear here": "ستظهر تصديراتك هنا",
+    "Processing…": "جارٍ المعالجة…",
+    "Queued": "في الانتظار",
+    "Completed": "مكتمل"
 }

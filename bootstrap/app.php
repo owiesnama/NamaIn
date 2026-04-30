@@ -22,6 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->group(base_path('routes/tenant.php'));
         },
     )
+    ->withBroadcasting(
+        __DIR__.'/../routes/channels.php',
+        ['middleware' => ['web', 'auth:sanctum']],
+    )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->redirectGuestsTo(function ($request) {
             if (in_array('auth:admin', $request->route()?->middleware() ?? [])) {
