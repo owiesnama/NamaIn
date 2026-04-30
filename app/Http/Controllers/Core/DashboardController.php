@@ -21,6 +21,7 @@ class DashboardController extends Controller
             'top_products' => $query->topSellingProducts(),
             'top_customers' => $query->topCustomers(),
             'low_stock_products' => $query->lowStockProducts(),
+            'expired_products' => $query->expiredProducts(),
             'upcoming_cheques' => $query->upcomingCheques(),
             'recent_expenses' => $query->recentExpenses(),
             'recent_payments' => $query->recentPayments(),

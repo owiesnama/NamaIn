@@ -8,6 +8,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\TreasuryMovementReason;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Product;
 use App\Models\Unit;
 use App\Traits\HandlesAsyncUploads;
 use Illuminate\Support\Collection;
@@ -23,7 +24,7 @@ class StoreInvoiceAction
     {
         return DB::transaction(function () use ($data) {
             $isSale = $this->isSale($data);
-            $invoice = $this->createInvoiceWithTransactions($data);
+            $invoice = $this->createInvoiceWithTransactions($data, $isSale);
 
             $this->handlePayment($invoice, $data, $isSale);
 
@@ -31,7 +32,7 @@ class StoreInvoiceAction
         });
     }
 
-    private function createInvoiceWithTransactions(Collection $data): Invoice
+    private function createInvoiceWithTransactions(Collection $data, bool $isSale): Invoice
     {
         $invocable = $data->get('invocable');
         $invocableClass = $invocable['type'];
@@ -49,18 +50,30 @@ class StoreInvoiceAction
         $unitIds = $products->pluck('unit')->filter()->unique();
         $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
 
-        $invoice->transactions()->createMany($products->map(function ($product) use ($units) {
-            return [
+        $productModels = $isSale
+            ? Product::whereIn('id', $products->pluck('product')->unique())->get()->keyBy('id')
+            : collect();
+
+        $invoice->transactions()->createMany($products->map(function ($product) use ($units, $isSale, $productModels) {
+            $data = [
                 'product_id' => $product['product'],
                 'storage_id' => $product['storage'] ?? null,
                 'unit_id' => $product['unit'] ?? null,
                 'quantity' => $product['quantity'],
                 'price' => $product['price'],
+                'discount' => $product['discount'] ?? 0,
                 'description' => $product['description'] ?? null,
                 'base_quantity' => isset($units[$product['unit'] ?? null])
                     ? $units[$product['unit']]->conversion_factor * $product['quantity']
                     : $product['quantity'],
             ];
+
+            if ($isSale) {
+                $productModel = $productModels[$product['product']] ?? null;
+                $data['unit_cost'] = $productModel?->average_cost ?? 0;
+            }
+
+            return $data;
         }));
 
         return $invoice;
@@ -107,7 +120,7 @@ class StoreInvoiceAction
         ];
 
         if (! $isSale) {
-            $options['movement_reason'] = TreasuryMovementReason::ExpensePaid;
+            $options['movement_reason'] = TreasuryMovementReason::SupplierPaymentMade;
         }
 
         $this->recordPayment->handle(

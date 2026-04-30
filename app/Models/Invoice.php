@@ -174,7 +174,7 @@ class Invoice extends BaseModel
      */
     public function getSubtotalAttribute(): float
     {
-        return $this->transactions()->sum(\DB::raw('price * quantity'));
+        return $this->transactions()->sum(\DB::raw('(price * quantity) - COALESCE(discount, 0)'));
     }
 
     /**

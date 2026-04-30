@@ -3,7 +3,6 @@
 namespace App\Queries;
 
 use App\Enums\ChequeStatus;
-use App\Enums\ExpenseStatus;
 use App\Models\Cheque;
 use App\Models\Customer;
 use App\Models\Expense;
@@ -29,10 +28,17 @@ class DashboardStatsQuery
 
     public function grossProfit(): float
     {
-        return (float) $this->totalSales()
-            - (float) $this->totalPurchase()
-            - (float) $this->expensesThisMonth()
-            + (float) $this->totalInventoryValue();
+        $revenue = (float) $this->totalSales();
+
+        $cogs = (float) Cache::remember(
+            $this->cacheKey('total_cogs'),
+            $this->cacheTtl('day'),
+            fn () => Transaction::delivered(now()->subDays(30))
+                ->forCustomer()
+                ->sum(DB::raw('base_quantity * COALESCE(unit_cost, 0)'))
+        );
+
+        return $revenue - $cogs - (float) $this->expensesThisMonth();
     }
 
     public function monthlyStatsCached(): array
@@ -48,18 +54,17 @@ class DashboardStatsQuery
 
         $sales = Transaction::delivered(now()->subMonths(6))
             ->forCustomer()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity - COALESCE(discount, 0)) as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
         $purchases = Transaction::delivered(now()->subMonths(6))
             ->forSupplier()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity - COALESCE(discount, 0)) as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
-        $expenses = Expense::where('status', ExpenseStatus::Approved)
-            ->where('expensed_at', '>=', now()->subMonths(6)->startOfMonth())
+        $expenses = Expense::where('expensed_at', '>=', now()->subMonths(6)->startOfMonth())
             ->select(DB::raw("$expenseDateFormat as month"), DB::raw('SUM(amount) as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
@@ -129,10 +134,7 @@ class DashboardStatsQuery
 
     public function expensesThisMonth(): float|string
     {
-        return Cache::remember($this->cacheKey('expenses_this_month'), $this->cacheTtl('hour'), fn () => Expense::where(function ($q) {
-            $q->where('status', ExpenseStatus::Approved)
-                ->orWhereNull('status');
-        })
+        return Cache::remember($this->cacheKey('expenses_this_month'), $this->cacheTtl('hour'), fn () => Expense::query()
             ->where('expensed_at', '>', now()->subDays(30))
             ->sum('amount')
         );
@@ -169,7 +171,6 @@ class DashboardStatsQuery
     public function recentExpenses(): Collection
     {
         return Cache::remember($this->cacheKey('recent_expenses'), $this->cacheTtl('hour'), fn () => Expense::with('createdBy')
-            ->where('status', ExpenseStatus::Approved)
             ->latest('expensed_at')
             ->limit(5)
             ->get()
@@ -181,7 +182,7 @@ class DashboardStatsQuery
         return Cache::remember($this->cacheKey('top_products'), $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
             ->forCustomer()
             ->with('product')
-            ->select('product_id', DB::raw('SUM(base_quantity) as total_quantity'), DB::raw('SUM(price * base_quantity) as total_revenue'))
+            ->select('product_id', DB::raw('SUM(base_quantity) as total_quantity'), DB::raw('SUM(price * base_quantity - COALESCE(discount, 0)) as total_revenue'))
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
             ->limit(5)
@@ -196,7 +197,7 @@ class DashboardStatsQuery
             ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
             ->join('customers', 'invoices.invocable_id', '=', 'customers.id')
             ->where('invoices.invocable_type', Customer::class)
-            ->select('customers.name', DB::raw('SUM(transactions.price * transactions.base_quantity) as total_revenue'))
+            ->select('customers.name', DB::raw('SUM(transactions.price * transactions.base_quantity - COALESCE(transactions.discount, 0)) as total_revenue'))
             ->groupBy('customers.id', 'customers.name')
             ->orderByDesc('total_revenue')
             ->limit(5)
@@ -215,6 +216,20 @@ class DashboardStatsQuery
         return Cache::remember($this->cacheKey('low_stock_products'), $this->cacheTtl('hour'), fn () => Product::with('stock')
             ->whereRaw("$stockSubquery <= COALESCE(products.alert_quantity, ?)", [config('namain.min_quantity_acceptable')])
             ->orderByRaw("$stockSubquery ASC")
+            ->limit(5)
+            ->get()
+        );
+    }
+
+    public function expiredProducts(): Collection
+    {
+        $stockSubquery = '(SELECT COALESCE(SUM(quantity), 0) FROM stocks WHERE stocks.product_id = products.id AND stocks.deleted_at IS NULL)';
+
+        return Cache::remember($this->cacheKey('expired_products'), $this->cacheTtl('hour'), fn () => Product::with('stock')
+            ->whereNotNull('expire_date')
+            ->where('expire_date', '<=', now())
+            ->whereRaw("$stockSubquery > 0")
+            ->orderBy('expire_date')
             ->limit(5)
             ->get()
         );

@@ -23,7 +23,7 @@ beforeEach(function () {
 // ─────────────────────────────────────────────
 
 test('recording an IN payment for a customer credits treasury and reduces customer balance', function () {
-    $customer = Customer::factory()->create(['opening_balance' => 0]);
+    $customer = Customer::factory()->create();
     $balanceBefore = $this->cashAccount->currentBalance();
 
     $this->post(route('payments.store'), [
@@ -48,7 +48,7 @@ test('recording an IN payment for a customer credits treasury and reduces custom
 // ─────────────────────────────────────────────
 
 test('recording an OUT payment for a supplier debits treasury and reduces supplier balance', function () {
-    $supplier = Supplier::factory()->create(['opening_balance' => 0]);
+    $supplier = Supplier::factory()->create();
     $balanceBefore = $this->cashAccount->currentBalance();
 
     $this->post(route('payments.store'), [
@@ -73,7 +73,7 @@ test('recording an OUT payment for a supplier debits treasury and reduces suppli
 // ─────────────────────────────────────────────
 
 test('a supplier refund (IN payment to supplier) increases supplier balance', function () {
-    $supplier = Supplier::factory()->create(['opening_balance' => 0]);
+    $supplier = Supplier::factory()->create();
 
     // First pay supplier 500 (out)
     $this->post(route('payments.store'), [
@@ -104,7 +104,7 @@ test('a supplier refund (IN payment to supplier) increases supplier balance', fu
 // ─────────────────────────────────────────────
 
 test('a customer refund (OUT payment to customer) increases customer balance', function () {
-    $customer = Customer::factory()->create(['opening_balance' => 0]);
+    $customer = Customer::factory()->create();
 
     // Customer pays 500 (in)
     $this->post(route('payments.store'), [
@@ -190,7 +190,7 @@ test('IN payment auto-selects PaymentReceived treasury reason', function () {
     expect($movement->amount)->toBeGreaterThan(0);
 });
 
-test('OUT payment auto-selects ExpensePaid treasury reason', function () {
+test('OUT payment auto-selects SupplierPaymentMade treasury reason', function () {
     $supplier = Supplier::factory()->create();
 
     $this->post(route('payments.store'), [
@@ -204,7 +204,7 @@ test('OUT payment auto-selects ExpensePaid treasury reason', function () {
 
     $movement = TreasuryMovement::where('treasury_account_id', $this->cashAccount->id)->latest()->first();
     expect($movement)->not->toBeNull();
-    expect($movement->reason)->toBe(TreasuryMovementReason::ExpensePaid);
+    expect($movement->reason)->toBe(TreasuryMovementReason::SupplierPaymentMade);
     expect($movement->amount)->toBeLessThan(0);
 });
 

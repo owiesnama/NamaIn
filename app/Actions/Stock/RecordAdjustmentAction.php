@@ -3,6 +3,7 @@
 namespace App\Actions\Stock;
 
 use App\Models\Adjustment;
+use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\User;
@@ -33,6 +34,23 @@ class RecordAdjustmentAction
                 movable: $adjustment,
                 actor: $actor
             );
+
+            if ($newQuantity < $quantityBefore) {
+                $lossQuantity = $quantityBefore - $newQuantity;
+                $lossAmount = round($lossQuantity * $product->average_cost, 2);
+
+                if ($lossAmount > 0) {
+                    $expense = Expense::create([
+                        'title' => "Inventory write-down: {$product->name} ({$type})",
+                        'amount' => $lossAmount,
+                        'expensed_at' => now(),
+                        'notes' => $notes,
+                        'created_by' => $actor->id,
+                    ]);
+
+                    $adjustment->update(['expense_id' => $expense->id]);
+                }
+            }
 
             return $adjustment;
         });

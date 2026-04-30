@@ -89,7 +89,7 @@ test('clearing a debit cheque with invoice records payment on that invoice', fun
 });
 
 test('clearing a credit cheque without invoice creates a direct customer payment', function () {
-    $customer = Customer::factory()->create(['opening_balance' => 0]);
+    $customer = Customer::factory()->create();
 
     $cheque = Cheque::factory()->create([
         'chequeable_id' => $customer->id,
@@ -122,7 +122,7 @@ test('clearing a credit cheque without invoice creates a direct customer payment
 });
 
 test('clearing a debit cheque without invoice creates a direct supplier payment', function () {
-    $supplier = Supplier::factory()->create(['opening_balance' => 0]);
+    $supplier = Supplier::factory()->create();
 
     $cheque = Cheque::factory()->create([
         'chequeable_id' => $supplier->id,

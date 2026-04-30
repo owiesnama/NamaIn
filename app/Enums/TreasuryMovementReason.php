@@ -18,6 +18,7 @@ enum TreasuryMovementReason: string
     case CustomerAdvanceRepaid = 'customer_advance_repaid';
     case ChequeReceived = 'cheque_received';
     case ChequeCleared = 'cheque_cleared';
+    case SupplierPaymentMade = 'supplier_payment_made';
 
     public function label(): string
     {
@@ -36,6 +37,7 @@ enum TreasuryMovementReason: string
             self::CustomerAdvanceRepaid => 'Customer Advance Repaid',
             self::ChequeReceived => 'Cheque Received',
             self::ChequeCleared => 'Cheque Cleared',
+            self::SupplierPaymentMade => 'Supplier Payment Made',
         };
     }
 

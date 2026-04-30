@@ -179,10 +179,11 @@
 
                     <!-- Column headers -->
                     <div class="hidden md:grid md:grid-cols-12 gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-900/50 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700">
-                        <div class="col-span-4">{{ __("Product") }}</div>
+                        <div class="col-span-3">{{ __("Product") }}</div>
                         <div class="col-span-2">{{ __("Unit") }}</div>
                         <div class="col-span-2">{{ __("Qty") }}</div>
                         <div class="col-span-2">{{ __("Price") }}</div>
+                        <div class="col-span-1">{{ __("Discount") }}</div>
                         <div class="col-span-2 text-right pr-8">{{ __("Total") }}</div>
                     </div>
 
@@ -190,7 +191,7 @@
                     <div class="divide-y divide-gray-50 dark:divide-gray-700/50" v-auto-animate>
                         <div v-for="(purchase, index) in purchases" :key="index" class="px-5 py-4">
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
-                                <div class="md:col-span-4">
+                                <div class="md:col-span-3">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
                                     <CustomSelect
                                         v-model="purchase.product"
@@ -246,6 +247,17 @@
                                         required
                                     />
                                     <InputError :message="form.errors[`products.${index}.price`]" class="mt-1" />
+                                </div>
+
+                                <div class="md:col-span-1">
+                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Discount") }}</label>
+                                    <TextInput
+                                        v-model="purchase.discount"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        class="block w-full"
+                                    />
                                 </div>
 
                                 <div class="md:col-span-2 flex items-center justify-between md:justify-end gap-2 md:pt-1.5">

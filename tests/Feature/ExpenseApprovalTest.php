@@ -59,7 +59,7 @@ test('approved expenses count in expenses_this_month', function () {
     );
 });
 
-test('pending expenses do not count in expenses_this_month', function () {
+test('all expenses count in expenses_this_month regardless of status', function () {
     $admin = User::factory()->admin()->create();
     Expense::factory()->create([
         'amount' => 100,
@@ -72,6 +72,6 @@ test('pending expenses do not count in expenses_this_month', function () {
     $response = $this->get(route('dashboard'));
 
     $response->assertInertia(fn ($page) => $page
-        ->where('expenses_this_month', 0)
+        ->where('expenses_this_month', 100)
     );
 });

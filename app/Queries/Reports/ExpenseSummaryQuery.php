@@ -2,7 +2,6 @@
 
 namespace App\Queries\Reports;
 
-use App\Enums\ExpenseStatus;
 use App\Models\Expense;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -38,7 +37,6 @@ class ExpenseSummaryQuery
                     ->where('categorizables.categorizable_type', Expense::class);
             })
             ->leftJoin('categories', 'categorizables.category_id', '=', 'categories.id')
-            ->where('expenses.status', ExpenseStatus::Approved)
             ->whereBetween('expenses.expensed_at', [$from, $to])
             ->where('expenses.tenant_id', app()->has('currentTenant') ? app('currentTenant')->id : 0)
             ->whereNull('expenses.deleted_at')

@@ -2,7 +2,6 @@
 
 namespace App\Queries;
 
-use App\Enums\ExpenseStatus;
 use App\Filters\ExpenseFilter;
 use App\Models\Category;
 use App\Models\Expense;
@@ -25,7 +24,6 @@ class ExpenseIndexQuery
                 'name' => $category->name,
                 'limit' => $category->budget_limit,
                 'spent' => $category->expenses()
-                    ->where('status', ExpenseStatus::Approved)
                     ->whereMonth('expensed_at', now()->month)
                     ->whereYear('expensed_at', now()->year)
                     ->sum('amount'),
@@ -39,7 +37,6 @@ class ExpenseIndexQuery
     public function spendingByCategory(ExpenseFilter $filter): Collection
     {
         return Expense::filter($filter)
-            ->where('status', ExpenseStatus::Approved)
             ->join('categorizables', function ($join) {
                 $join->on('expenses.id', '=', 'categorizables.categorizable_id')
                     ->where('categorizables.categorizable_type', '=', Expense::class);
