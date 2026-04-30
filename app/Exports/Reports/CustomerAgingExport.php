@@ -2,12 +2,16 @@
 
 namespace App\Exports\Reports;
 
+use App\Exports\Concerns\WithExportStyles;
 use App\Queries\Reports\CustomerAgingQuery;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
 
-class CustomerAgingExport implements FromArray, WithHeadings
+class CustomerAgingExport implements FromArray, WithHeadings, WithStyles
 {
+    use WithExportStyles;
+
     public function __construct(protected array $filters = []) {}
 
     public function array(): array
@@ -19,6 +23,6 @@ class CustomerAgingExport implements FromArray, WithHeadings
 
     public function headings(): array
     {
-        return ['Customer ID', 'Customer', '0-30 Days', '31-60 Days', '61-90 Days', '90+ Days', 'Total'];
+        return [__('Customer ID'), __('Customer'), __('0-30 Days'), __('31-60 Days'), __('61-90 Days'), __('90+ Days'), __('Total')];
     }
 }

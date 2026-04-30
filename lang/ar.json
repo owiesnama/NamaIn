@@ -1128,5 +1128,12 @@
     "Your exports will appear here": "ستظهر تصديراتك هنا",
     "Processing…": "جارٍ المعالجة…",
     "Queued": "في الانتظار",
-    "Completed": "مكتمل"
+    "Completed": "مكتمل",
+
+    "Avg Order Value": "متوسط قيمة الطلب",
+    "Product ID": "رقم المنتج",
+    "Customer ID": "رقم العميل",
+    "Supplier ID": "رقم المورد",
+    "Category ID": "رقم التصنيف",
+    "Phone Number": "رقم الهاتف"
 }

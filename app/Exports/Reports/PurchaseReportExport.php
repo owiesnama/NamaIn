@@ -2,14 +2,18 @@
 
 namespace App\Exports\Reports;
 
+use App\Exports\Concerns\WithExportStyles;
 use App\Queries\Reports\PurchaseReportQuery;
 use App\Services\ReportDateResolver;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
 
-class PurchaseReportExport implements FromArray, WithHeadings
+class PurchaseReportExport implements FromArray, WithHeadings, WithStyles
 {
+    use WithExportStyles;
+
     public function __construct(protected array $filters = []) {}
 
     public function array(): array
@@ -22,6 +26,6 @@ class PurchaseReportExport implements FromArray, WithHeadings
 
     public function headings(): array
     {
-        return ['Period', 'Invoices', 'Items Purchased', 'Total Cost'];
+        return [__('Period'), __('Invoices'), __('Items Purchased'), __('Total Cost')];
     }
 }

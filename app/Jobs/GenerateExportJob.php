@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Events\ExportStatusUpdated;
 use App\Models\ExportLog;
+use App\Models\Preference;
 use App\Models\Tenant;
 use App\Services\ExportRegistry;
 use Illuminate\Bus\Queueable;
@@ -77,6 +78,9 @@ class GenerateExportJob implements ShouldQueue
 
         if ($tenant) {
             app()->instance('currentTenant', $tenant);
+
+            $preferences = Preference::where('tenant_id', $tenant->id)->pluck('value', 'key')->toArray();
+            app()->setLocale($preferences['language'] ?? config('app.locale'));
         }
     }
 

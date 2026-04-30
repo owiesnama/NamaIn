@@ -2,14 +2,18 @@
 
 namespace App\Exports;
 
+use App\Exports\Concerns\WithExportStyles;
 use App\Filters\ExpenseFilter;
 use App\Models\Expense;
 use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Concerns\WithStyles;
 
-class ExpenseExport implements FromQuery, WithHeadings, WithMapping
+class ExpenseExport implements FromQuery, WithHeadings, WithMapping, WithStyles
 {
+    use WithExportStyles;
+
     protected ExpenseFilter $filter;
 
     public function __construct(ExpenseFilter|array $filters = [])
@@ -31,16 +35,16 @@ class ExpenseExport implements FromQuery, WithHeadings, WithMapping
     public function headings(): array
     {
         return [
-            'ID',
-            'Title',
-            'Amount',
-            'Currency',
-            'Category',
-            'Status',
-            'Approved By',
-            'Date',
-            'Notes',
-            'Created By',
+            __('ID'),
+            __('Title'),
+            __('Amount'),
+            __('Currency'),
+            __('Category'),
+            __('Status'),
+            __('Approved By'),
+            __('Date'),
+            __('Notes'),
+            __('Created By'),
         ];
     }
 

@@ -2,12 +2,16 @@
 
 namespace App\Exports\Reports;
 
+use App\Exports\Concerns\WithExportStyles;
 use App\Queries\Reports\InventoryValuationQuery;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
 
-class InventoryValuationExport implements FromArray, WithHeadings
+class InventoryValuationExport implements FromArray, WithHeadings, WithStyles
 {
+    use WithExportStyles;
+
     public function __construct(protected array $filters = []) {}
 
     public function array(): array
@@ -20,6 +24,6 @@ class InventoryValuationExport implements FromArray, WithHeadings
 
     public function headings(): array
     {
-        return ['Product ID', 'Product', 'Storage', 'Quantity', 'Avg Cost', 'Total Value'];
+        return [__('Product ID'), __('Product'), __('Storage'), __('Quantity'), __('Avg Cost'), __('Total Value')];
     }
 }
