@@ -54,7 +54,7 @@ before(() => {
             'is_active' => true,
         ]);
 
-        return ['treasury_id' => $treasury->id]
+        return ['treasury_id' => $treasury->id];
     `).then((data) => {
         Cypress.env('treasuryId', data.treasury_id);
     });

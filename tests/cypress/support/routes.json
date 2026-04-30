@@ -640,6 +640,24 @@
       "DELETE"
     ]
   },
+  "admin.tenants.clear-data": {
+    "name": "admin.tenants.clear-data",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantDataController@clear",
+    "uri": "__admin/tenants/{tenant}/clear-data",
+    "method": [
+      "PUT"
+    ]
+  },
+  "admin.tenants.restore-data": {
+    "name": "admin.tenants.restore-data",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\TenantDataController@restore",
+    "uri": "__admin/tenants/{tenant}/restore-data",
+    "method": [
+      "PUT"
+    ]
+  },
   "admin.impersonate.start": {
     "name": "admin.impersonate.start",
     "domain": null,
@@ -2039,6 +2057,135 @@
     "uri": "roles/{role}",
     "method": [
       "DELETE"
+    ]
+  },
+  "exports.index": {
+    "name": "exports.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Exports\\ExportController@index",
+    "uri": "exports",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "exports.store": {
+    "name": "exports.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Exports\\ExportController@store",
+    "uri": "exports",
+    "method": [
+      "POST"
+    ]
+  },
+  "exports.download": {
+    "name": "exports.download",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Exports\\ExportController@download",
+    "uri": "exports/{exportLog}/download",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.index": {
+    "name": "reports.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\ReportsIndexController@index",
+    "uri": "reports",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.sales": {
+    "name": "reports.sales",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\SalesReportController@index",
+    "uri": "reports/sales",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.purchases": {
+    "name": "reports.purchases",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\PurchaseReportController@index",
+    "uri": "reports/purchases",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.pos-sessions": {
+    "name": "reports.pos-sessions",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\PosSessionReportController@index",
+    "uri": "reports/pos-sessions",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.inventory-valuation": {
+    "name": "reports.inventory-valuation",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\InventoryValuationController@index",
+    "uri": "reports/inventory-valuation",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.customer-aging": {
+    "name": "reports.customer-aging",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\CustomerAgingController@index",
+    "uri": "reports/customer-aging",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.supplier-aging": {
+    "name": "reports.supplier-aging",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\SupplierAgingController@index",
+    "uri": "reports/supplier-aging",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.treasury": {
+    "name": "reports.treasury",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\TreasuryReconciliationController@index",
+    "uri": "reports/treasury-reconciliation",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.expenses": {
+    "name": "reports.expenses",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\ExpenseSummaryController@index",
+    "uri": "reports/expense-summary",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "reports.pnl": {
+    "name": "reports.pnl",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Reports\\ProfitAndLossController@index",
+    "uri": "reports/profit-and-loss",
+    "method": [
+      "GET",
+      "HEAD"
     ]
   },
   "uploads.tmp.store": {

@@ -20,7 +20,7 @@ before(() => {
             ->has(App\\Models\\Unit::factory()->state(['name' => 'piece', 'conversion_factor' => 1]), 'units')
             ->create(['name' => 'Cypress Purchase Product']);
 
-        return ['ok' => true]
+        return ['ok' => true];
     `);
 });
 

@@ -38,15 +38,18 @@ class StoreInvoiceAction
         $invocableClass = $invocable['type'];
         $invocableModel = $invocableClass::find($invocable['id']);
 
+        $products = collect($data->get('products'));
+
+        $computedTotal = $products->sum(fn ($p) => ($p['price'] * $p['quantity']) - ($p['discount'] ?? 0));
+
         $invoice = $invocableModel->invoices()->create([
-            'total' => $data->get('total'),
+            'total' => $computedTotal,
             'payment_method' => $data->get('payment_method', 'cash'),
             'payment_status' => PaymentStatus::Unpaid,
             'paid_amount' => 0,
             'discount' => $data->get('discount', 0),
         ]);
 
-        $products = collect($data->get('products'));
         $unitIds = $products->pluck('unit')->filter()->unique();
         $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
 

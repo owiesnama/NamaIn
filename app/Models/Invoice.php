@@ -218,13 +218,19 @@ class Invoice extends BaseModel
         $inverseInvoice->status = InvoiceStatus::Pending;
         $inverseInvoice->save();
 
-        foreach ($attributes->get('products', []) as $productData) {
-            $transaction = Transaction::find($productData['transaction_id']);
+        $products = $attributes->get('products', []);
+
+        // Bulk-load all referenced transactions to avoid N+1 (one query vs one per line).
+        $transactionIds = collect($products)->pluck('transaction_id')->filter()->unique();
+        $transactions = Transaction::findMany($transactionIds)->keyBy('id');
+
+        foreach ($products as $productData) {
+            $transaction = $transactions->get($productData['transaction_id']);
+
             if ($transaction) {
                 $inverseTransaction = $transaction->replicate();
                 $inverseTransaction->invoice_id = $inverseInvoice->id;
                 $inverseTransaction->quantity = $productData['quantity'];
-                // base_quantity should be handled by logic or replicated with conversion factor
                 $inverseTransaction->base_quantity = $productData['quantity'] * ($transaction->base_quantity / $transaction->quantity);
                 $inverseTransaction->save();
             }
@@ -278,18 +284,27 @@ class Invoice extends BaseModel
      */
     public function updatePaymentStatus(): void
     {
-        $this->paid_amount = $this->payments()->sum('amount');
+        $locked = self::lockForUpdate()->find($this->id);
 
-        $netTotal = $this->total - $this->discount;
+        $settlingDirection = $locked->invocable_type === Customer::class ? 'in' : 'out';
+        $reversingDirection = $settlingDirection === 'in' ? 'out' : 'in';
 
-        if ($this->paid_amount >= $netTotal) {
-            $this->payment_status = PaymentStatus::Paid;
-        } elseif ($this->paid_amount > 0) {
-            $this->payment_status = PaymentStatus::PartiallyPaid;
+        $settlingPayments = (float) $locked->payments()->where('direction', $settlingDirection)->sum('amount');
+        $reversingPayments = (float) $locked->payments()->where('direction', $reversingDirection)->sum('amount');
+        $locked->paid_amount = $settlingPayments - $reversingPayments;
+
+        $netTotal = $locked->total - $locked->discount;
+
+        if ($locked->paid_amount >= $netTotal) {
+            $locked->payment_status = PaymentStatus::Paid;
+        } elseif ($locked->paid_amount > 0) {
+            $locked->payment_status = PaymentStatus::PartiallyPaid;
         } else {
-            $this->payment_status = PaymentStatus::Unpaid;
+            $locked->payment_status = PaymentStatus::Unpaid;
         }
 
-        $this->save();
+        $locked->save();
+
+        $this->refresh();
     }
 }

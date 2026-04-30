@@ -6,25 +6,25 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->string('idempotency_key')->nullable();
-            $table->unique(['tenant_id', 'idempotency_key']);
+            $table->decimal('total', 15, 2)->default(0)->change();
+        });
+
+        Schema::table('cheques', function (Blueprint $table) {
+            $table->decimal('amount', 15, 2)->default(0)->change();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->dropUnique(['tenant_id', 'idempotency_key']);
-            $table->dropColumn('idempotency_key');
+            $table->double('total')->change();
+        });
+
+        Schema::table('cheques', function (Blueprint $table) {
+            $table->double('amount')->change();
         });
     }
 };

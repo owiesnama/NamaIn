@@ -6,6 +6,8 @@ module.exports = defineConfig({
     retries: 2,
     defaultCommandTimeout: 5000,
     watchForFileChanges: false,
+    viewportWidth: 1280,
+    viewportHeight: 800,
     videosFolder: 'tests/cypress/videos',
     screenshotsFolder: 'tests/cypress/screenshots',
     fixturesFolder: 'tests/cypress/fixture',

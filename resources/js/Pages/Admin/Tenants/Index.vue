@@ -1,5 +1,5 @@
 <script setup>
-    import { ref, watch } from "vue";
+    import { ref, watch, computed } from "vue";
     import { router, Link, useForm } from "@inertiajs/vue3";
     import AdminLayout from "@/Layouts/AdminLayout.vue";
     import TextInput from "@/Components/TextInput.vue";
@@ -81,6 +81,66 @@
         });
     };
 
+    // Clear Data
+    const confirmingClear = ref(null);
+    const domainConfirmation = ref("");
+    const selectedGroups = ref([]);
+
+    const groupOptions = [
+        { value: "inventory", label: "Inventory", description: "Products, units, stocks, movements, adjustments, transfers, POS sessions" },
+        { value: "financial", label: "Financial", description: "Treasury accounts, movements, transfers, expenses, recurring expenses, banks, categories" },
+        { value: "commercial", label: "Commercial Data", description: "Customers, suppliers, invoices, transactions, payments, cheques, advances" },
+    ];
+
+    const commercialDeps = ["inventory", "financial"];
+
+    const isGroupDisabled = (value) => {
+        return commercialDeps.includes(value) && selectedGroups.value.includes("commercial");
+    };
+
+    const toggleGroup = (value) => {
+        if (isGroupDisabled(value)) return;
+        const idx = selectedGroups.value.indexOf(value);
+        if (idx >= 0) {
+            selectedGroups.value.splice(idx, 1);
+        } else {
+            selectedGroups.value.push(value);
+            if (value === "commercial") {
+                commercialDeps.forEach(dep => {
+                    if (!selectedGroups.value.includes(dep)) selectedGroups.value.push(dep);
+                });
+            }
+        }
+    };
+
+    const isGroupSelected = (value) => selectedGroups.value.includes(value);
+
+    const canSubmitClear = computed(() =>
+        selectedGroups.value.length > 0 && domainConfirmation.value === confirmingClear.value?.slug
+    );
+
+    const openClearModal = (tenant) => {
+        confirmingClear.value = tenant;
+        domainConfirmation.value = "";
+        selectedGroups.value = [];
+    };
+
+    const submitClear = () => {
+        if (!canSubmitClear.value) return;
+        router.put(route("admin.tenants.clear-data", confirmingClear.value.id), {
+            domain_confirmation: domainConfirmation.value,
+            groups: selectedGroups.value,
+        }, {
+            onSuccess: () => { confirmingClear.value = null; },
+            preserveScroll: true,
+        });
+    };
+
+    // Restore
+    const restoreTenant = (tenant) => {
+        router.put(route("admin.tenants.restore-data", tenant.id), {}, { preserveScroll: true });
+    };
+
 
 </script>
 
@@ -127,6 +187,7 @@
                 <option value="">All statuses</option>
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
+                <option value="cleared">Cleared</option>
             </select>
         </div>
 
@@ -162,14 +223,22 @@
                                 {{ tenant.slug }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span
-                                    class="inline-flex items-center px-2.5 py-0.5 text-[11px] font-bold rounded-full"
-                                    :class="tenant.is_active
-                                        ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                                        : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'"
-                                >
-                                    {{ tenant.is_active ? 'Active' : 'Inactive' }}
-                                </span>
+                                <div class="flex items-center gap-x-2">
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 text-[11px] font-bold rounded-full"
+                                        :class="tenant.is_active
+                                            ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                                            : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'"
+                                    >
+                                        {{ tenant.is_active ? 'Active' : 'Inactive' }}
+                                    </span>
+                                    <span v-if="tenant.data_cleared_at"
+                                        class="inline-flex items-center px-2.5 py-0.5 text-[11px] font-bold rounded-full bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400"
+                                        :title="'Hard delete: ' + new Date(tenant.scheduled_hard_delete_at).toLocaleDateString()"
+                                    >
+                                        Data Cleared
+                                    </span>
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                 {{ tenant.users_count }}
@@ -198,6 +267,26 @@
                                         </svg>
                                         <svg v-else class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        v-if="!tenant.is_active && !tenant.data_cleared_at"
+                                        class="inline-flex items-center justify-center p-1.5 text-orange-400 hover:text-orange-600 dark:hover:text-orange-300 rounded-lg hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors duration-200 focus:outline-none"
+                                        title="Clear Data"
+                                        @click="openClearModal(tenant)"
+                                    >
+                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                                        </svg>
+                                    </button>
+                                    <button
+                                        v-if="tenant.data_cleared_at"
+                                        class="inline-flex items-center justify-center p-1.5 text-emerald-400 hover:text-emerald-600 dark:hover:text-emerald-300 rounded-lg hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-colors duration-200 focus:outline-none"
+                                        title="Restore Data"
+                                        @click="restoreTenant(tenant)"
+                                    >
+                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182M2.985 19.644l3.181-3.183" />
                                         </svg>
                                     </button>
                                     <button
@@ -284,6 +373,82 @@
                         </button>
                     </div>
                 </form>
+            </div>
+        </Modal>
+
+        <!-- Clear Data Modal -->
+        <Modal :show="!!confirmingClear" @close="confirmingClear = null" max-width="lg">
+            <div class="p-6">
+                <div class="flex items-center gap-x-3 mb-4">
+                    <div class="flex items-center justify-center w-10 h-10 rounded-full bg-orange-100 dark:bg-orange-900/30">
+                        <svg class="w-5 h-5 text-orange-600 dark:text-orange-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Clear Tenant Data</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">
+                            This will soft-delete all selected data for <strong>{{ confirmingClear?.name }}</strong>. Hard delete is scheduled after 30 days.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 mb-6">
+                    <p class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">Select data groups to clear</p>
+                    <div v-for="group in groupOptions" :key="group.value"
+                        class="flex items-start gap-x-3 p-3 rounded-lg border transition-colors cursor-pointer"
+                        :class="[
+                            isGroupSelected(group.value)
+                                ? 'border-orange-300 bg-orange-50 dark:border-orange-700 dark:bg-orange-900/20'
+                                : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800',
+                            isGroupDisabled(group.value) ? 'opacity-60 cursor-not-allowed' : ''
+                        ]"
+                        @click="toggleGroup(group.value)"
+                    >
+                        <input type="checkbox"
+                            :checked="isGroupSelected(group.value)"
+                            :disabled="isGroupDisabled(group.value)"
+                            class="mt-0.5 border-gray-300 dark:border-gray-600 rounded text-orange-600 focus:ring-orange-500"
+                            @click.stop
+                            @change="toggleGroup(group.value)"
+                        />
+                        <div>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                {{ group.label }}
+                                <span v-if="isGroupDisabled(group.value)" class="text-xs text-orange-500 font-normal">(required by Commercial)</span>
+                            </p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ group.description }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <InputLabel value="Type the tenant domain to confirm" class="mb-1.5" />
+                    <TextInput
+                        v-model="domainConfirmation"
+                        type="text"
+                        class="w-full font-mono"
+                        :placeholder="confirmingClear?.slug"
+                    />
+                    <InputError :message="domainConfirmation && domainConfirmation !== confirmingClear?.slug ? 'Domain does not match' : ''" class="mt-1" />
+                </div>
+
+                <div class="flex justify-end gap-x-3">
+                    <button
+                        type="button"
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+                        @click="confirmingClear = null"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-orange-600 border border-transparent rounded-lg hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                        :disabled="!canSubmitClear"
+                        @click="submitClear"
+                    >
+                        Clear Data
+                    </button>
+                </div>
             </div>
         </Modal>
 

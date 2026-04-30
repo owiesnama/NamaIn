@@ -21,7 +21,7 @@ before(() => {
 
         $storage->addStock($product, 50, 'Initial test stock');
 
-        return ['ok' => true]
+        return ['ok' => true];
     `);
 });
 

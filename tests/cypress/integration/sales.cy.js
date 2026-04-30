@@ -21,7 +21,7 @@ before(() => {
         $storage = App\\Models\\Storage::factory()->create(['type' => 'warehouse']);
         $storage->addStock($product, 100, 'Test setup stock');
 
-        return ['ok' => true]
+        return ['ok' => true];
     `);
 });
 

@@ -11,9 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->string('idempotency_key')->nullable();
-            $table->unique(['tenant_id', 'idempotency_key']);
+        Schema::table('transactions', function (Blueprint $table) {
+            //
         });
     }
 
@@ -22,9 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->dropUnique(['tenant_id', 'idempotency_key']);
-            $table->dropColumn('idempotency_key');
+        Schema::table('transactions', function (Blueprint $table) {
+            //
         });
     }
 };

@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 /.yarn
 /.phpunit.cache
+tests/cypress/screenshots

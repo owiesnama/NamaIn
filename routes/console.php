@@ -24,6 +24,7 @@ Schedule::command('cheques:notify-for-due')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
 Schedule::command('exports:prune')->daily();
 Schedule::command('inventory:flag-expired')->daily();
+Schedule::command('tenants:hard-delete-cleared')->daily();
 
 Schedule::call(function () {
     $files = Storage::disk('local')->files('tmp');

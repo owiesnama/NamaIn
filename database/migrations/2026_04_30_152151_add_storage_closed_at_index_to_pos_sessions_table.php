@@ -11,9 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->string('idempotency_key')->nullable();
-            $table->unique(['tenant_id', 'idempotency_key']);
+        Schema::table('pos_sessions', function (Blueprint $table) {
+            // Covers the most common operational query:
+            // "find active/closed sessions for a given storage"
+            $table->index(['storage_id', 'closed_at']);
         });
     }
 
@@ -22,9 +23,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('invoices', function (Blueprint $table) {
-            $table->dropUnique(['tenant_id', 'idempotency_key']);
-            $table->dropColumn('idempotency_key');
+        Schema::table('pos_sessions', function (Blueprint $table) {
+            $table->dropIndex(['storage_id', 'closed_at']);
         });
     }
 };

@@ -95,8 +95,11 @@ before(() => {
             'treasury_account_id' => $treasury->id,
             'amount' => 5000,
             'balance_after' => 105000,
-            'reason' => 'sale',
+            'reason' => 'payment_received',
             'occurred_at' => now(),
+            'created_by' => App\\Models\\User::first()->id,
+            'movable_type' => App\\Models\\TreasuryAccount::class,
+            'movable_id' => $treasury->id,
         ]);
 
         return ['ok' => true];
