@@ -28,7 +28,7 @@ const echoConfig = {
     broadcaster: 'reverb',
     key: import.meta.env.VITE_REVERB_APP_KEY,
     cluster: '',
-    wsHost: window.location.hostname,
+    wsHost: import.meta.env.VITE_REVERB_HOST ?? window.location.hostname,
     wsPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
     wssPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
     forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
