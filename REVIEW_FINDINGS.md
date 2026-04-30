@@ -1,67 +1,34 @@
 # Review Findings
 
-## Finding 1: Bind Admin Routes To The Main Domain
-
-- **Priority:** P1
-- **File:** `routes/web.php`
-- **Lines:** 62-89
-- **Status:** Added
-
-The admin route group has no domain constraint, so these `__admin` routes can also match on tenant subdomains. That violates the main-domain-only scope and can make impersonation redirects land on `tenant.namain.test/__admin`.
-
-**Recommendation:** Wrap the admin group, including the stop route if kept here, in `Route::domain(config('app.domain'))` or otherwise force URL generation to the main host.
-
-## Finding 2: Restore Null Tenant After Impersonation
+## Finding 1: Restore The Admin Guard When Stopping Impersonation
 
 - **Priority:** P1
 - **File:** `app/Actions/Admin/StopImpersonationAction.php`
-- **Lines:** 23-29
+- **Line:** 53
 - **Status:** Added
 
-When the impersonated user originally had `current_tenant_id = null`, this condition skips restoration because `$previousTenantId !== null` is false. Stopping impersonation then leaves that real user permanently pointed at the impersonated tenant.
+`StartImpersonationAction` logs the admin guard out before logging in as the tenant user, but `StopImpersonationAction` only logs the admin back into the `web` guard. The stop controller then redirects to `admin.dashboard`, which is protected by `auth:admin`, so the admin can be sent to the admin login page after stopping impersonation.
 
-**Recommendation:** Track whether the session key exists and update to null as well.
+**Recommendation:** Log the restored admin into the `admin` guard as well, or avoid logging that guard out in the first place. Add a test that follows the stop redirect and asserts the admin guard is authenticated.
 
-## Finding 3: Group Search Conditions Before Status Filter
+## Finding 2: Invoice Update Authorization Points To Permissions That Do Not Exist
+
+- **Priority:** P1
+- **File:** `app/Policies/InvoicePolicy.php`
+- **Lines:** 27-31
+- **Status:** Added
+
+`update()` now checks `sales.update` and `purchases.update`, but the permission seeder only defines view/create/return/delete permissions for sales and purchases. Because purchase receiving and sale delivery now authorize through this policy, non-owner roles can be locked out of workflows they previously could perform.
+
+**Recommendation:** Either seed and backfill these update permissions and assign them to the right roles, or map this policy to existing domain permissions such as create, receive, or delivery permissions.
+
+## Finding 3: Scope Invoice Payload IDs To The Current Tenant Before Creating Transactions
 
 - **Priority:** P2
-- **File:** `app/Http/Controllers/Admin/TenantsController.php`
-- **Lines:** 25-29
+- **File:** `app/Http/Requests/CreateInvoiceRequest.php`
+- **Lines:** 30-37
 - **Status:** Added
 
-The search callback adds `where name ... orWhere slug ...` directly to the root query. When `status` is also present, SQL precedence allows name matches to bypass the status constraint.
+Invoice creation still accepts raw invocable/product/unit/storage/account IDs without tenant-scoped `exists` validation, then writes those IDs directly into transactions. With the stricter `TenantScope`, a cross-tenant invocable becomes `null` and can cause a 500, while product/storage/unit IDs can still be persisted because the transactions migration does not enforce foreign keys.
 
-**Recommendation:** Wrap the search in a nested `where(fn ($query) => ...)` so status applies to both name and slug matches.
-
-## Finding 4: Tenant-List Impersonation Route Is Missing User
-
-- **Priority:** P2
-- **File:** `resources/js/Pages/Admin/Tenants/Index.vue`
-- **Lines:** 84-87
-- **Status:** Added
-
-`admin.impersonate.start` is registered as `tenants/{tenant}/users/{user}/impersonate`, but this call passes only the tenant ID. Clicking the list-page impersonate button will fail URL generation or post to an invalid route.
-
-**Recommendation:** Either remove this button from the index, include the owner in the tenant payload, or route users through the tenant detail page.
-
-## Finding 5: Registered Route Points To Missing Controller Method
-
-- **Priority:** P2
-- **File:** `routes/web.php`
-- **Line:** 77
-- **Status:** Added
-
-This route targets `TenantUsersController@index`, but that controller currently only defines `store` and `destroy`. A direct visit to `admin.tenants.users.index` will hit a missing method at runtime.
-
-**Recommendation:** Add the method, remove the route, or point it at the existing tenant show flow.
-
-## Finding 6: Invitations Index Renders A Missing Page
-
-- **Priority:** P3
-- **File:** `app/Http/Controllers/Admin/TenantInvitationsController.php`
-- **Line:** 34
-- **Status:** Added
-
-The controller returns `Admin/Tenants/Invitations`, but only `Index.vue` and `Show.vue` exist under `resources/js/Pages/Admin/Tenants`. Visiting this route will fail Inertia component resolution unless the page is added or the route is removed.
-
-**Recommendation:** Add the missing page or remove the route/controller action until the UI exists.
+**Recommendation:** Add tenant-scoped validation for every submitted ID, require a non-empty products array, and reject mismatched product/unit/storage combinations before creating the invoice.

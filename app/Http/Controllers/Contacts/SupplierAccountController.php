@@ -15,6 +15,8 @@ class SupplierAccountController extends Controller
 
     public function show(Supplier $supplier, PartyAccountQuery $query)
     {
+        $this->authorize('view', $supplier);
+
         return $this->handleAccount($supplier, $query);
     }
 }

@@ -12,6 +12,7 @@ class SaleReturnController extends Controller
 {
     public function create(Invoice $invoice)
     {
+        $this->authorize('create', Invoice::class);
         abort_unless($invoice->can_be_inversed, 403, 'This invoice cannot be returned.');
 
         return inertia('Sales/Return', [
@@ -22,6 +23,7 @@ class SaleReturnController extends Controller
 
     public function store(CreateInverseInvoiceRequest $request, Invoice $invoice, CreateInverseInvoiceAction $action)
     {
+        $this->authorize('create', Invoice::class);
         abort_unless($invoice->can_be_inversed, 403, 'This invoice cannot be returned.');
 
         $action->handle($invoice, collect($request->validated()), $request->inverse_reason);

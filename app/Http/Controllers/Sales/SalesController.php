@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Sales;
 
-use App\Actions\StoreSaleAction;
+use App\Actions\StoreInvoiceAction;
 use App\Enums\PaymentMethod;
 use App\Filters\InvoiceFilter;
 use App\Http\Controllers\Controller;
@@ -61,11 +61,11 @@ class SalesController extends Controller
         ]);
     }
 
-    public function store(CreateInvoiceRequest $request, StoreSaleAction $storeSale)
+    public function store(CreateInvoiceRequest $request, StoreInvoiceAction $storeInvoice)
     {
         $this->authorize('create', Invoice::class);
 
-        $storeSale->handle(collect($request->all()), $request);
+        $storeInvoice->handle(collect($request->validated()));
 
         return redirect()->route('sales.index')->with('success', __('Sale created successfully'));
     }

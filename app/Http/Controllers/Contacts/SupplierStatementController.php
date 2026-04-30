@@ -16,11 +16,15 @@ class SupplierStatementController extends Controller
 
     public function show(Supplier $supplier, StatementQuery $query)
     {
+        $this->authorize('view', $supplier);
+
         return $this->handleStatement($supplier, $query);
     }
 
     public function store(Supplier $supplier, StatementService $statementService)
     {
+        $this->authorize('view', $supplier);
+
         return $this->handlePrintStatement($supplier, $statementService);
     }
 }

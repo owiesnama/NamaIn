@@ -12,6 +12,8 @@ class PreferenceController extends Controller
 {
     public function index(): Response
     {
+        abort_unless(auth()->user()->hasRole('owner', 'admin'), 403);
+
         return inertia('Preferences/Show', [
             'preferences' => Preference::asPairs(),
         ]);
@@ -19,6 +21,7 @@ class PreferenceController extends Controller
 
     public function update(PreferenceRequest $request, UpdatePreferences $action)
     {
+        abort_unless(auth()->user()->hasRole('owner', 'admin'), 403);
         $action->handle($request);
 
         return back()->with('success', 'Settings updated successfully');

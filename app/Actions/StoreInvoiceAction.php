@@ -4,11 +4,12 @@ namespace App\Actions;
 
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\TreasuryMovementReason;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Unit;
 use App\Traits\HandlesAsyncUploads;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -18,16 +19,51 @@ class StoreInvoiceAction
 
     public function __construct(private RecordPaymentAction $recordPayment) {}
 
-    public function handle(Collection $data, ?Request $request = null): Invoice
+    public function handle(Collection $data): Invoice
     {
-        return DB::transaction(function () use ($data, $request) {
+        return DB::transaction(function () use ($data) {
             $isSale = $this->isSale($data);
-            $invoice = $isSale ? Invoice::sale($data) : Invoice::purchase($data);
+            $invoice = $this->createInvoiceWithTransactions($data);
 
-            $this->handlePayment($invoice, $data, $request, $isSale);
+            $this->handlePayment($invoice, $data, $isSale);
 
             return $invoice;
         });
+    }
+
+    private function createInvoiceWithTransactions(Collection $data): Invoice
+    {
+        $invocable = $data->get('invocable');
+        $invocableClass = $invocable['type'];
+        $invocableModel = $invocableClass::find($invocable['id']);
+
+        $invoice = $invocableModel->invoices()->create([
+            'total' => $data->get('total'),
+            'payment_method' => $data->get('payment_method', 'cash'),
+            'payment_status' => PaymentStatus::Unpaid,
+            'paid_amount' => 0,
+            'discount' => $data->get('discount', 0),
+        ]);
+
+        $products = collect($data->get('products'));
+        $unitIds = $products->pluck('unit')->filter()->unique();
+        $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
+
+        $invoice->transactions()->createMany($products->map(function ($product) use ($units) {
+            return [
+                'product_id' => $product['product'],
+                'storage_id' => $product['storage'] ?? null,
+                'unit_id' => $product['unit'] ?? null,
+                'quantity' => $product['quantity'],
+                'price' => $product['price'],
+                'description' => $product['description'] ?? null,
+                'base_quantity' => isset($units[$product['unit'] ?? null])
+                    ? $units[$product['unit']]->conversion_factor * $product['quantity']
+                    : $product['quantity'],
+            ];
+        }));
+
+        return $invoice;
     }
 
     private function isSale(Collection $data): bool
@@ -37,7 +73,7 @@ class StoreInvoiceAction
         return ($invocable['type'] ?? null) === Customer::class;
     }
 
-    private function handlePayment(Invoice $invoice, Collection $data, ?Request $request, bool $isSale): void
+    private function handlePayment(Invoice $invoice, Collection $data, bool $isSale): void
     {
         $methodValue = $data->get('payment_method');
 
@@ -62,7 +98,7 @@ class StoreInvoiceAction
                 : $data->get('payment_notes'),
             'metadata' => $method === PaymentMethod::BankTransfer ? ['bank_name' => $data->get('bank_name')] : null,
             'receipt_path' => $method === PaymentMethod::BankTransfer
-                ? $this->resolveTemporaryUpload($request?->receipt, 'receipts', disk: 'public')
+                ? $this->resolveTemporaryUpload($data->get('receipt'), 'receipts', disk: 'public')
                 : null,
             'cheque_due' => $data->get('cheque_due_date'),
             'cheque_bank_id' => $data->get('cheque_bank_id'),

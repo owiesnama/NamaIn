@@ -12,6 +12,7 @@ class PosInvoicesController extends Controller
 {
     public function index(PosInvoiceFilter $filter)
     {
+        $this->authorize('viewAny', Invoice::class);
         $invoicesQuery = Invoice::query()
             ->forCustomer()
             ->fromPos()

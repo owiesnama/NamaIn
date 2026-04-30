@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Invoicing;
 
 use App\Actions\CreateInverseInvoiceAction;
+use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateInverseInvoiceRequest;

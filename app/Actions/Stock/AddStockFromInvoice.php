@@ -6,19 +6,20 @@ use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\Storage;
 use App\Models\Transaction;
+use App\Models\User;
 
 class AddStockFromInvoice
 {
-    public function execute(Invoice $invoice, Storage $storage): void
+    public function execute(Invoice $invoice, Storage $storage, ?User $actor = null): void
     {
-        $invoice->transactions->each(
-            function (Transaction $transaction) use ($storage) {
-                $transaction->for($storage)->add($storage);
+        $actor ??= auth()->user();
 
-                // If we have an actor in context, we should use it.
-                // But this action seems to be used in bulk or automated context.
-                // For now, let's assume we need to mark it delivered without specific actor or use current user.
-                $transaction->deliver(auth()->user() ?? User::first(), $storage);
+        abort_unless($actor instanceof User, 403, 'An authenticated user is required.');
+
+        $invoice->transactions->each(
+            function (Transaction $transaction) use ($storage, $actor) {
+                $transaction->for($storage)->add($storage);
+                $transaction->deliver($actor, $storage);
             }
         );
 

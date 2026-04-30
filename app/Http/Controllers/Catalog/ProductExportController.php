@@ -2,14 +2,18 @@
 
 namespace App\Http\Controllers\Catalog;
 
-use App\Exports\ProductExport;
+use App\Actions\RequestExportAction;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ProductExportController extends Controller
 {
-    public function store()
+    public function store(RequestExportAction $action)
     {
-        return Excel::download(new ProductExport, 'products.xlsx');
+        $action->execute('products', 'xlsx');
+
+        return back()->with('flash', [
+            'type' => 'export_queued',
+            'message' => __('Export queued. You will be notified when it is ready.'),
+        ]);
     }
 }

@@ -45,9 +45,16 @@ class TreasuryTransfersController extends Controller
         return redirect()->route('treasury.show', $from)->with('success', 'Transfer completed successfully.');
     }
 
-    public function show(TreasuryTransfer $transfer)
+    public function show(int $transfer)
     {
         $this->authorize('view', TreasuryAccount::class);
+
+        $tenantAccountIds = TreasuryAccount::pluck('id');
+
+        $transfer = TreasuryTransfer::where(function ($query) use ($tenantAccountIds) {
+            $query->whereIn('from_account_id', $tenantAccountIds)
+                ->orWhereIn('to_account_id', $tenantAccountIds);
+        })->findOrFail($transfer);
 
         return inertia('Treasury/Transfer/Show', [
             'transfer' => $transfer->load(['fromAccount', 'toAccount', 'createdBy']),

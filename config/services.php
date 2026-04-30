@@ -31,4 +31,9 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'mazin_host' => [
+        'api_key' => env('MAZIN_HOST_SMS_API_KEY'),
+        'sender_id' => env('MAZIN_HOST_SENDER_ID'),
+    ],
+
 ];

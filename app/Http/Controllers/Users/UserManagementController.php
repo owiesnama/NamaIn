@@ -58,9 +58,11 @@ class UserManagementController extends Controller
     {
         $this->authorize('invite', User::class);
 
+        $tenant = app('currentTenant');
         $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
+        abort_unless($role->tenant_id === $tenant->id, 403);
 
-        $result = $action->handle(app('currentTenant'), $request->name, $request->email, $role);
+        $result = $action->handle($tenant, $request->name, $request->email, $role);
 
         return back()->with([
             'success' => __('User created successfully.'),
@@ -79,6 +81,7 @@ class UserManagementController extends Controller
         if ($request->has('role_id')) {
             $this->authorize('assignRole', User::class);
             $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
+            abort_unless($role->tenant_id === $tenant->id, 403);
             $action->handle($tenant, $user, $role);
         }
 

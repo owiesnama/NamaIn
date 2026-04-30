@@ -15,6 +15,7 @@ class ExpenseApprovalController extends Controller
      */
     public function update(ExpenseApprovalRequest $request, Expense $expense): RedirectResponse
     {
+        $this->authorize('update', $expense);
         $expense->approve(ExpenseStatus::from($request->validated('status')));
 
         return back()->with('success', 'Expense '.$request->validated('status').' successfully');

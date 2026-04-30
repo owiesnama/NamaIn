@@ -10,7 +10,16 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class ExpenseExport implements FromQuery, WithHeadings, WithMapping
 {
-    public function __construct(protected ExpenseFilter $filter) {}
+    protected ExpenseFilter $filter;
+
+    public function __construct(ExpenseFilter|array $filters = [])
+    {
+        if ($filters instanceof ExpenseFilter) {
+            $this->filter = $filters;
+        } else {
+            $this->filter = app(ExpenseFilter::class);
+        }
+    }
 
     public function query()
     {

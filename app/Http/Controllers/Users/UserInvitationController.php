@@ -16,9 +16,11 @@ class UserInvitationController extends Controller
     {
         $this->authorize('invite', User::class);
 
+        $tenant = app('currentTenant');
         $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
+        abort_unless($role->tenant_id === $tenant->id, 403);
 
-        $action->handle(app('currentTenant'), $request->email, $role, $request->user());
+        $action->handle($tenant, $request->email, $role, $request->user());
 
         return back()->with('success', __('Invitation sent successfully.'));
     }

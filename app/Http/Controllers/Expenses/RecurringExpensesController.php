@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Expenses;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RecurringExpenseRequest;
 use App\Models\Category;
+use App\Models\Expense;
 use App\Models\RecurringExpense;
 
 class RecurringExpensesController extends Controller
@@ -14,6 +15,8 @@ class RecurringExpensesController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Expense::class);
+
         return inertia('Expenses/RecurringIndex', [
             'recurring_expenses' => RecurringExpense::with(['categories', 'createdBy'])
                 ->withCount('expenses')
@@ -27,6 +30,8 @@ class RecurringExpensesController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Expense::class);
+
         return inertia('Expenses/RecurringCreate', [
             'categories' => Category::ofType('expense')->get(),
         ]);
@@ -37,6 +42,7 @@ class RecurringExpensesController extends Controller
      */
     public function store(RecurringExpenseRequest $request)
     {
+        $this->authorize('create', Expense::class);
         $data = $request->safe()->except('category_ids');
         $data['created_by'] = auth()->id();
 
@@ -56,6 +62,7 @@ class RecurringExpensesController extends Controller
      */
     public function edit(RecurringExpense $recurringExpense)
     {
+        $this->authorize('create', Expense::class);
         $recurringExpense->load('categories');
 
         return inertia('Expenses/RecurringEdit', [
@@ -69,6 +76,7 @@ class RecurringExpensesController extends Controller
      */
     public function update(RecurringExpenseRequest $request, RecurringExpense $recurringExpense)
     {
+        $this->authorize('create', Expense::class);
         $recurringExpense->update($request->safe()->except('category_ids'));
 
         $recurringExpense->categories()->sync($request->category_ids ?? []);
@@ -83,6 +91,7 @@ class RecurringExpensesController extends Controller
      */
     public function destroy(RecurringExpense $recurringExpense)
     {
+        $this->authorize('delete', Expense::class);
         $recurringExpense->delete();
 
         return redirect()

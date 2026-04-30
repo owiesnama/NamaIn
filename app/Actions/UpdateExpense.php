@@ -2,33 +2,27 @@
 
 namespace App\Actions;
 
-use App\Http\Requests\ExpenseRequest;
 use App\Models\Expense;
-use App\Traits\HandlesAsyncUploads;
 
 class UpdateExpense
 {
-    use HandlesAsyncUploads;
-
     public function __construct(private SyncCategoriesAction $syncCategories) {}
 
-    public function handle(ExpenseRequest $request, Expense $expense): Expense
+    /**
+     * @param  array{title: string, amount: float, expensed_at: string, notes: ?string, receipt_path: ?string, category_objects: ?array}  $data
+     */
+    public function handle(array $data, Expense $expense): Expense
     {
         $expense->update([
-            'title' => $request->title,
-            'amount' => $request->amount,
-            'expensed_at' => $request->expensed_at,
-            'notes' => $request->notes,
-            'receipt_path' => $this->replaceReceipt($request, $expense),
+            'title' => $data['title'],
+            'amount' => $data['amount'],
+            'expensed_at' => $data['expensed_at'],
+            'notes' => $data['notes'] ?? null,
+            'receipt_path' => $data['receipt_path'] ?? $expense->receipt_path,
         ]);
 
-        $this->syncCategories->handle($expense, $request->category_objects ?? [], 'expense');
+        $this->syncCategories->handle($expense, $data['category_objects'] ?? [], 'expense');
 
         return $expense;
-    }
-
-    private function replaceReceipt(ExpenseRequest $request, Expense $expense): ?string
-    {
-        return $this->resolveTemporaryUpload($request->receipt, 'receipts', $expense->receipt_path);
     }
 }

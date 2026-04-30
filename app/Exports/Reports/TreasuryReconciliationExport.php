@@ -1,0 +1,28 @@
+<?php
+
+namespace App\Exports\Reports;
+
+use App\Queries\Reports\TreasuryReconciliationQuery;
+use App\Services\ReportDateResolver;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+
+class TreasuryReconciliationExport implements FromArray, WithHeadings
+{
+    public function __construct(protected array $filters = []) {}
+
+    public function array(): array
+    {
+        $request = new Request($this->filters);
+        $dates = (new ReportDateResolver)->resolve($request);
+        $accountId = isset($this->filters['treasury_account']) ? (int) $this->filters['treasury_account'] : null;
+
+        return (new TreasuryReconciliationQuery)->getData($dates['from'], $dates['to'], $accountId);
+    }
+
+    public function headings(): array
+    {
+        return ['ID', 'Account', 'Date', 'Reason', 'Amount', 'Balance After'];
+    }
+}

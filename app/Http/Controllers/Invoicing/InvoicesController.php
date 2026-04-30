@@ -10,6 +10,7 @@ class InvoicesController extends Controller
 {
     public function show(Invoice $invoice)
     {
+        $this->authorize('view', $invoice);
         $invoice->load(['transactions.product', 'transactions.unit', 'invocable', 'payments']);
 
         return inertia('Invoice', [

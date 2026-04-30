@@ -12,6 +12,7 @@ class PurchaseReceiptController extends Controller
 {
     public function store(Transaction $transaction, ReceiveGoodsRequest $request, ReceiveGoodsAction $action)
     {
+        $this->authorize('update', $transaction->invoice);
         $storage = Storage::findOrFail($request->storage_id);
 
         $action->execute($transaction, $storage, $request->quantity, $request->user(), $request->notes);

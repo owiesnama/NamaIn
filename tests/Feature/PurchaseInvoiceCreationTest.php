@@ -1,21 +1,23 @@
 <?php
 
-use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
+use App\Models\Supplier;
 
 test('Invoice will be created for every purchase', function () {
     $product = Product::factory()->create();
+    $supplier = Supplier::factory()->create();
 
     $this->assertDatabaseCount(Invoice::class, 0);
 
-    $this->signIn()
+    actingAsTenantUser()
         ->post(route('purchases.store'), [
             'total' => 200,
-            'invocable' => Customer::factory()->create()->toArray(),
+            'invocable' => [
+                'id' => $supplier->id,
+                'name' => $supplier->name,
+                'type' => Supplier::class,
+            ],
             'products' => [[
                 'product' => $product->id,
                 'price' => $product->cost + 100,
@@ -29,7 +31,6 @@ test('Invoice will be created for every purchase', function () {
         ])->assertRedirectToRoute('purchases.index');
 
     $this->assertDatabaseCount(Invoice::class, 1);
-
 });
 /* @TODO
  * Create for validations.

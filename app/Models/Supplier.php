@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Traits\ClassMetaAttributes;
 use App\Traits\HasAccountBalance;
 use App\Traits\HasPaymentHistory;
 use App\Traits\WithTrashScope;
@@ -13,8 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends BaseModel
 {
-    use ClassMetaAttributes,
-        HasAccountBalance,
+    use HasAccountBalance,
         HasFactory,
         HasPaymentHistory,
         SoftDeletes,

@@ -13,6 +13,7 @@ class TransactionDeliveryController extends Controller
 {
     public function store(Transaction $transaction, Request $request, DeliverTransactionAction $action)
     {
+        $this->authorize('update', $transaction->invoice);
         $request->validate([
             'storage_id' => 'required|exists:storages,id',
         ]);

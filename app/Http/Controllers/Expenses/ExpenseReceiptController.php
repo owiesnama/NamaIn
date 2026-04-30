@@ -13,6 +13,7 @@ class ExpenseReceiptController extends Controller
      */
     public function show(Expense $expense)
     {
+        $this->authorize('view', $expense);
         if (! $expense->receipt_path || ! Storage::disk('local')->exists($expense->receipt_path)) {
             abort(404);
         }

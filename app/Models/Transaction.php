@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Actions\Stock\ReverseTransactionAction;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -312,13 +311,5 @@ class Transaction extends BaseModel
             'sales' => $dateLabels->map(fn ($m) => $sales->get($m, 0))->toArray(),
             'purchases' => $dateLabels->map(fn ($m) => $purchases->get($m, 0))->toArray(),
         ];
-    }
-
-    /**
-     * @deprecated Use ReverseTransactionAction instead
-     */
-    public function reverse(): void
-    {
-        app(ReverseTransactionAction::class)->execute($this);
     }
 }

@@ -42,6 +42,7 @@ class HandleInertiaRequests extends Middleware
             'appName' => config('app.name'),
             'appDomain' => config('app.domain'),
             'user' => $request->user() ? [
+                'id' => $request->user()->id,
                 'name' => $request->user()->name,
                 'email' => $request->user()->email,
                 'profile_photo_url' => $request->user()->profile_photo_url,
@@ -60,7 +61,7 @@ class HandleInertiaRequests extends Middleware
             'preferences' => $tenant
                 ? TenantCache::rememberForever('preferences', fn () => Preference::asPairs())
                 : [],
-            'flash' => [
+            'flash' => session()->get('flash') ?? [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
                 'response' => session()->get('response'),
