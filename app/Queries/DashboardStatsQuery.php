@@ -48,13 +48,13 @@ class DashboardStatsQuery
 
         $sales = Transaction::delivered(now()->subMonths(6))
             ->forCustomer()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * quantity) as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
         $purchases = Transaction::delivered(now()->subMonths(6))
             ->forSupplier()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * base_quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * quantity) as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
@@ -181,7 +181,7 @@ class DashboardStatsQuery
         return Cache::remember($this->cacheKey('top_products'), $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
             ->forCustomer()
             ->with('product')
-            ->select('product_id', DB::raw('SUM(base_quantity) as total_quantity'), DB::raw('SUM(price * base_quantity) as total_revenue'))
+            ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(price * quantity) as total_revenue'))
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
             ->limit(5)

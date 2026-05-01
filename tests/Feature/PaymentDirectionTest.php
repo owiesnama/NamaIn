@@ -23,7 +23,7 @@ beforeEach(function () {
 // ─────────────────────────────────────────────
 
 test('recording an IN payment for a customer credits treasury and reduces customer balance', function () {
-    $customer = Customer::factory()->create(['opening_balance' => 0]);
+    $customer = Customer::factory()->create(['opening_debit' => 0, 'opening_credit' => 0]);
     $balanceBefore = $this->cashAccount->currentBalance();
 
     $this->post(route('payments.store'), [
@@ -48,7 +48,7 @@ test('recording an IN payment for a customer credits treasury and reduces custom
 // ─────────────────────────────────────────────
 
 test('recording an OUT payment for a supplier debits treasury and reduces supplier balance', function () {
-    $supplier = Supplier::factory()->create(['opening_balance' => 0]);
+    $supplier = Supplier::factory()->create(['opening_debit' => 0, 'opening_credit' => 0]);
     $balanceBefore = $this->cashAccount->currentBalance();
 
     $this->post(route('payments.store'), [
@@ -73,7 +73,7 @@ test('recording an OUT payment for a supplier debits treasury and reduces suppli
 // ─────────────────────────────────────────────
 
 test('a supplier refund (IN payment to supplier) increases supplier balance', function () {
-    $supplier = Supplier::factory()->create(['opening_balance' => 0]);
+    $supplier = Supplier::factory()->create(['opening_debit' => 0, 'opening_credit' => 0]);
 
     // First pay supplier 500 (out)
     $this->post(route('payments.store'), [
@@ -104,7 +104,7 @@ test('a supplier refund (IN payment to supplier) increases supplier balance', fu
 // ─────────────────────────────────────────────
 
 test('a customer refund (OUT payment to customer) increases customer balance', function () {
-    $customer = Customer::factory()->create(['opening_balance' => 0]);
+    $customer = Customer::factory()->create(['opening_debit' => 0, 'opening_credit' => 0]);
 
     // Customer pays 500 (in)
     $this->post(route('payments.store'), [
