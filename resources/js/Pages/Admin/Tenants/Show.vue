@@ -95,7 +95,7 @@
                 <svg class="h-4 w-4 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                 </svg>
-                Back to Tenants
+                {{ __('Back to Tenants') }}
             </Link>
 
             <div class="w-full lg:flex lg:items-center lg:justify-between">
@@ -108,7 +108,7 @@
                                 ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                                 : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'"
                         >
-                            {{ tenant.is_active ? 'Active' : 'Inactive' }}
+                            {{ tenant.is_active ? __('Active') : __('Inactive') }}
                         </span>
                     </div>
                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 font-mono">{{ tenant.slug }}.{{ $page.props.appDomain }}</p>
@@ -121,7 +121,7 @@
                         <svg class="h-4 w-4 ltr:mr-2 rtl:ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z" />
                         </svg>
-                        Add User
+                        {{ __('Add User') }}
                     </button>
                 </div>
             </div>
@@ -131,25 +131,25 @@
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
                 <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                    Members
+                    {{ __('Members') }}
                     <span class="text-sm font-normal text-gray-500 dark:text-gray-400 ms-1">({{ members.length }})</span>
                 </h3>
                 <button
                     class="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors duration-200"
                     @click="showTransfer = true"
                 >
-                    Transfer Ownership
+                    {{ __('Transfer Ownership') }}
                 </button>
             </div>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50/50 dark:bg-gray-800/40">
                         <tr>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">User</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Role</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Status</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Joined</th>
-                            <th class="px-6 py-4 text-end text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Actions</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('User') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Role') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Status') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Joined') }}</th>
+                            <th class="px-6 py-4 text-end text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
@@ -187,7 +187,7 @@
                                         ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                                         : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'"
                                 >
-                                    {{ member.is_active ? 'Active' : 'Inactive' }}
+                                    {{ member.is_active ? __('Active') : __('Inactive') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -199,7 +199,7 @@
                                     <button
                                         v-if="tenant.is_active"
                                         class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 focus:outline-none"
-                                        title="Impersonate"
+                                        :title="__('Impersonate')"
                                         @click="impersonate(member)"
                                     >
                                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -211,7 +211,7 @@
                                     <template v-if="member.role !== 'owner'">
                                         <button
                                             class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 focus:outline-none"
-                                            title="Change Role"
+                                            :title="__('Change Role')"
                                             @click="openChangeRole(member)"
                                         >
                                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -221,7 +221,7 @@
                                         </button>
                                         <button
                                             class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 focus:outline-none"
-                                            :title="member.is_active ? 'Deactivate' : 'Activate'"
+                                            :title="member.is_active ? __('Deactivate') : __('Activate')"
                                             @click="toggleUserStatus(member)"
                                         >
                                             <svg v-if="member.is_active" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -233,7 +233,7 @@
                                         </button>
                                         <button
                                             class="inline-flex items-center justify-center p-1.5 text-red-400 hover:text-red-600 dark:hover:text-red-300 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 focus:outline-none"
-                                            title="Remove"
+                                            :title="__('Remove')"
                                             @click="confirmingRemove = member"
                                         >
                                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -249,33 +249,33 @@
             </div>
 
             <div v-if="members.length === 0" class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
-                No members found.
+                {{ __('No members found.') }}
             </div>
         </div>
 
         <!-- Add User Modal -->
         <Modal :show="showAddUser" @close="showAddUser = false" max-width="lg">
             <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Add User to Tenant</h3>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Add User to Tenant') }}</h3>
                 <form @submit.prevent="submitAddUser" class="space-y-4">
                     <div>
-                        <InputLabel value="Name" />
+                        <InputLabel :value="__('Name')" />
                         <TextInput v-model="addUserForm.name" type="text" class="w-full mt-1" required />
                         <InputError :message="addUserForm.errors.name" class="mt-1" />
                     </div>
                     <div>
-                        <InputLabel value="Email" />
+                        <InputLabel :value="__('Email')" />
                         <TextInput v-model="addUserForm.email" type="email" class="w-full mt-1" required />
                         <InputError :message="addUserForm.errors.email" class="mt-1" />
                     </div>
                     <div>
-                        <InputLabel value="Role" />
+                        <InputLabel :value="__('Role')" />
                         <select
                             v-model="addUserForm.role_id"
                             class="w-full mt-1 px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
                             required
                         >
-                            <option value="" disabled>Select a role</option>
+                            <option value="" disabled>{{ __('Select a role') }}</option>
                             <option v-for="role in roles.filter(r => r.slug !== 'owner')" :key="role.id" :value="role.id">{{ role.name }}</option>
                         </select>
                         <InputError :message="addUserForm.errors.role_id" class="mt-1" />
@@ -286,14 +286,14 @@
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
                             @click="showAddUser = false"
                         >
-                            Cancel
+                            {{ __('Cancel') }}
                         </button>
                         <button
                             type="submit"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-gray-900 dark:bg-white dark:text-gray-900 border border-transparent rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                             :disabled="addUserForm.processing"
                         >
-                            Add User
+                            {{ __('Add User') }}
                         </button>
                     </div>
                 </form>
@@ -303,8 +303,8 @@
         <!-- Change Role Modal -->
         <Modal :show="!!changingRoleFor" @close="changingRoleFor = null" max-width="sm">
             <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Change Role</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Changing role for <strong>{{ changingRoleFor?.name }}</strong></p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Change Role') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('Changing role for') }} <strong>{{ changingRoleFor?.name }}</strong></p>
                 <form @submit.prevent="submitChangeRole" class="space-y-4">
                     <div>
                         <select
@@ -312,7 +312,7 @@
                             class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
                             required
                         >
-                            <option value="" disabled>Select a role</option>
+                            <option value="" disabled>{{ __('Select a role') }}</option>
                             <option v-for="role in roles.filter(r => r.slug !== 'owner')" :key="role.id" :value="role.id">{{ role.name }}</option>
                         </select>
                         <InputError :message="roleForm.errors.role_id" class="mt-1" />
@@ -323,14 +323,14 @@
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
                             @click="changingRoleFor = null"
                         >
-                            Cancel
+                            {{ __('Cancel') }}
                         </button>
                         <button
                             type="submit"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-gray-900 dark:bg-white dark:text-gray-900 border border-transparent rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                             :disabled="roleForm.processing"
                         >
-                            Update Role
+                            {{ __('Update Role') }}
                         </button>
                     </div>
                 </form>
@@ -340,17 +340,17 @@
         <!-- Transfer Ownership Modal -->
         <Modal :show="showTransfer" @close="showTransfer = false" max-width="sm">
             <div class="p-6">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Transfer Ownership</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">The current owner will be demoted to Manager.</p>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">{{ __('Transfer Ownership') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('The current owner will be demoted to Manager.') }}</p>
                 <form @submit.prevent="submitTransfer" class="space-y-4">
                     <div>
-                        <InputLabel value="New Owner" />
+                        <InputLabel :value="__('New Owner')" />
                         <select
                             v-model="transferForm.user_id"
                             class="w-full mt-1 px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
                             required
                         >
-                            <option value="" disabled>Select a user</option>
+                            <option value="" disabled>{{ __('Select a user') }}</option>
                             <option
                                 v-for="member in members.filter(m => m.role !== 'owner')"
                                 :key="member.id"
@@ -367,14 +367,14 @@
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
                             @click="showTransfer = false"
                         >
-                            Cancel
+                            {{ __('Cancel') }}
                         </button>
                         <button
                             type="submit"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-gray-900 dark:bg-white dark:text-gray-900 border border-transparent rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                             :disabled="transferForm.processing"
                         >
-                            Transfer
+                            {{ __('Transfer') }}
                         </button>
                     </div>
                 </form>
@@ -383,9 +383,9 @@
 
         <!-- Remove User Confirmation -->
         <ConfirmationModal :show="!!confirmingRemove" @close="confirmingRemove = null">
-            <template #title>Remove User</template>
+            <template #title>{{ __('Remove User') }}</template>
             <template #content>
-                Are you sure you want to remove <strong>{{ confirmingRemove?.name }}</strong> from this tenant?
+                {{ __('Are you sure you want to remove') }} <strong>{{ confirmingRemove?.name }}</strong> {{ __('from this tenant?') }}
             </template>
             <template #footer>
                 <div class="flex justify-end gap-x-3">
@@ -399,7 +399,7 @@
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
                         @click="removeUser"
                     >
-                        Remove
+                        {{ __('Remove') }}
                     </button>
                 </div>
             </template>

@@ -10,9 +10,9 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SupplierImportController extends Controller
 {
-    protected array $importHeaders = ['name', 'address', 'phone_number', 'opening_balance'];
+    protected array $importHeaders = ['name', 'address', 'phone_number', 'opening_debit', 'opening_credit'];
 
-    protected array $importSampleData = ['Example Supplier', 'Supplier Address 123', '0123456789', '1000'];
+    protected array $importSampleData = ['Example Supplier', 'Supplier Address 123', '0123456789', '0', '1000'];
 
     public function store()
     {

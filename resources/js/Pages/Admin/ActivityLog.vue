@@ -27,11 +27,11 @@
 
     const actionLabel = (action) => {
         const labels = {
-            'tenant.created': 'Created tenant',
-            'tenant.updated': 'Updated tenant',
-            'tenant.deleted': 'Deleted tenant',
-            'impersonation.started': 'Started impersonation',
-            'impersonation.stopped': 'Stopped impersonation',
+            'tenant.created': __('Created tenant'),
+            'tenant.updated': __('Updated tenant'),
+            'tenant.deleted': __('Deleted tenant'),
+            'impersonation.started': __('Started impersonation'),
+            'impersonation.stopped': __('Stopped impersonation'),
         };
         return labels[action] || action;
     };
@@ -62,11 +62,11 @@
 </script>
 
 <template>
-    <AdminLayout title="Activity Log">
+    <AdminLayout :title="__('Activity Log')">
         <!-- Page header -->
         <div class="mb-8">
-            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Activity Log</h2>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">All admin actions and impersonation sessions</p>
+            <h2 class="text-xl font-semibold text-gray-800 dark:text-white">{{ __('Activity Log') }}</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('All admin actions and impersonation sessions') }}</p>
         </div>
 
         <!-- Filters -->
@@ -75,7 +75,7 @@
                 <TextInput
                     v-model="search"
                     type="text"
-                    placeholder="Search by admin name or email..."
+                    :placeholder="__('Search by admin name or email...')"
                     class="w-full"
                 />
             </div>
@@ -83,7 +83,7 @@
                 v-model="actionFilter"
                 class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
             >
-                <option value="">All actions</option>
+                <option value="">{{ __('All actions') }}</option>
                 <option v-for="action in actions" :key="action" :value="action">
                     {{ actionLabel(action) }}
                 </option>
@@ -96,11 +96,11 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50/50 dark:bg-gray-800/40">
                         <tr>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Admin</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Action</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Details</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">IP</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Date</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Admin') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Action') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Details') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('IP') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Date') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
@@ -144,7 +144,7 @@
 
             <!-- Empty state -->
             <div v-if="logs.data.length === 0" class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
-                No activity recorded yet.
+                {{ __('No activity recorded yet.') }}
             </div>
         </div>
 

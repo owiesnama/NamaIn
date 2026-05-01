@@ -22,7 +22,7 @@
 
 <template>
     <div :dir="direction" class="flex min-h-screen items-center justify-center bg-gray-50 dark:bg-gray-950 px-4">
-        <Head title="Admin Login" />
+        <Head :title="__('Admin Login')" />
 
         <div class="w-full max-w-sm">
             <!-- Logo + title -->
@@ -30,8 +30,8 @@
                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gray-900 dark:bg-white">
                     <ApplicationLogo class="h-8 w-auto brightness-0 invert dark:brightness-100 dark:invert-0" />
                 </div>
-                <h1 class="mt-4 text-xl font-bold text-gray-900 dark:text-white">Admin Panel</h1>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Sign in to manage the platform</p>
+                <h1 class="mt-4 text-xl font-bold text-gray-900 dark:text-white">{{ __('Admin Panel') }}</h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Sign in to manage the platform') }}</p>
             </div>
 
             <!-- Login form -->
@@ -39,7 +39,7 @@
                 <form @submit.prevent="submit" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right">
-                            Email
+                            {{ __('Email') }}
                         </label>
                         <input
                             v-model="form.email"
@@ -54,7 +54,7 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right">
-                            Password
+                            {{ __('Password') }}
                         </label>
                         <input
                             v-model="form.password"
@@ -72,7 +72,7 @@
                             type="checkbox"
                             class="border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
                         />
-                        <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">Remember me</span>
+                        <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Remember me') }}</span>
                     </div>
 
                     <button
@@ -80,7 +80,7 @@
                         class="w-full inline-flex items-center justify-center px-4 py-2.5 text-sm font-medium text-white bg-gray-900 dark:bg-white dark:text-gray-900 border border-transparent rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                         :disabled="form.processing"
                     >
-                        {{ form.processing ? 'Signing in...' : 'Sign in' }}
+                        {{ form.processing ? __('Signing in...') : __('Sign in') }}
                     </button>
                 </form>
             </div>

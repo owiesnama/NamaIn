@@ -85,17 +85,17 @@
 </script>
 
 <template>
-    <AdminLayout title="Tenants">
+    <AdminLayout :title="__('Tenants')">
         <!-- Page header -->
         <div class="w-full lg:flex lg:items-center lg:justify-between mb-8">
             <div>
                 <div class="flex items-center gap-x-3">
-                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Tenants</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 dark:text-white">{{ __('Tenants') }}</h2>
                     <span class="px-3 py-1 text-xs font-semibold rounded-full text-gray-700 bg-gray-100 dark:bg-gray-800 dark:text-gray-300">
-                        {{ tenants.total }} total
+                        {{ tenants.total }} {{ __('total') }}
                     </span>
                 </div>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage all organizations on the platform</p>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Manage all organizations on the platform') }}</p>
             </div>
             <div class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0">
                 <button
@@ -105,7 +105,7 @@
                     <svg class="h-4 w-4 ltr:mr-2 rtl:ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    Create Tenant
+                    {{ __('Create Tenant') }}
                 </button>
             </div>
         </div>
@@ -116,7 +116,7 @@
                 <TextInput
                     v-model="search"
                     type="text"
-                    placeholder="Search tenants..."
+                    :placeholder="__('Search tenants...')"
                     class="w-full"
                 />
             </div>
@@ -124,9 +124,9 @@
                 v-model="statusFilter"
                 class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
             >
-                <option value="">All statuses</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
+                <option value="">{{ __('All statuses') }}</option>
+                <option value="active">{{ __('Active') }}</option>
+                <option value="inactive">{{ __('Inactive') }}</option>
             </select>
         </div>
 
@@ -136,12 +136,12 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50/50 dark:bg-gray-800/40">
                         <tr>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Name</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Slug</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Status</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Users</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Created</th>
-                            <th class="px-6 py-4 text-end text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Actions</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Name') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Slug') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Status') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Users') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Created') }}</th>
+                            <th class="px-6 py-4 text-end text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
@@ -168,7 +168,7 @@
                                         ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                                         : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'"
                                 >
-                                    {{ tenant.is_active ? 'Active' : 'Inactive' }}
+                                    {{ tenant.is_active ? __('Active') : __('Inactive') }}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
@@ -181,7 +181,7 @@
                                 <div class="flex items-center justify-end gap-x-2">
                                     <button
                                         class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 focus:outline-none"
-                                        title="Edit"
+                                        :title="__('Edit')"
                                         @click="openEdit(tenant)"
                                     >
                                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -190,7 +190,7 @@
                                     </button>
                                     <button
                                         class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 focus:outline-none"
-                                        :title="tenant.is_active ? 'Deactivate' : 'Activate'"
+                                        :title="tenant.is_active ? __('Deactivate') : __('Activate')"
                                         @click="toggleStatus(tenant)"
                                     >
                                         <svg v-if="tenant.is_active" class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -203,7 +203,7 @@
                                     <button
                                         v-if="!tenant.is_active"
                                         class="inline-flex items-center justify-center p-1.5 text-red-400 hover:text-red-600 dark:hover:text-red-300 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200 focus:outline-none"
-                                        title="Delete"
+                                        :title="__('Delete')"
                                         @click="confirmingDelete = tenant"
                                     >
                                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -219,7 +219,7 @@
 
             <!-- Empty state -->
             <div v-if="tenants.data.length === 0" class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
-                No tenants found.
+                {{ __('No tenants found.') }}
             </div>
         </div>
 
@@ -247,24 +247,24 @@
         <Modal :show="showFormModal" @close="showFormModal = false" max-width="lg">
             <div class="p-6">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                    {{ editingTenant ? 'Edit Tenant' : 'Create Tenant' }}
+                    {{ editingTenant ? __('Edit Tenant') : __('Create Tenant') }}
                 </h3>
                 <form @submit.prevent="submitForm" class="space-y-4">
                     <div>
-                        <InputLabel value="Name" />
+                        <InputLabel :value="__('Name')" />
                         <TextInput v-model="form.name" type="text" class="w-full mt-1" required />
                         <InputError :message="form.errors.name" class="mt-1" />
                     </div>
                     <div>
-                        <InputLabel value="Slug" />
+                        <InputLabel :value="__('Slug')" />
                         <TextInput v-model="form.slug" type="text" class="w-full mt-1 font-mono" required />
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Used in the subdomain: slug.{{ $page.props.appDomain }}</p>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('Used in the subdomain') }}: slug.{{ $page.props.appDomain }}</p>
                         <InputError :message="form.errors.slug" class="mt-1" />
                     </div>
                     <div v-if="!editingTenant">
-                        <InputLabel value="Owner Email" />
+                        <InputLabel :value="__('Owner Email')" />
                         <TextInput v-model="form.owner_email" type="email" class="w-full mt-1" required />
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Must be an existing user</p>
+                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __('Must be an existing user') }}</p>
                         <InputError :message="form.errors.owner_email" class="mt-1" />
                     </div>
                     <div class="flex justify-end gap-x-3 pt-2">
@@ -273,14 +273,14 @@
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
                             @click="showFormModal = false"
                         >
-                            Cancel
+                            {{ __('Cancel') }}
                         </button>
                         <button
                             type="submit"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-gray-900 dark:bg-white dark:text-gray-900 border border-transparent rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
                             :disabled="form.processing"
                         >
-                            {{ editingTenant ? 'Update' : 'Create' }}
+                            {{ editingTenant ? __('Update') : __('Create') }}
                         </button>
                     </div>
                 </form>
@@ -289,10 +289,10 @@
 
         <!-- Delete Confirmation -->
         <ConfirmationModal :show="!!confirmingDelete" @close="confirmingDelete = null">
-            <template #title>Delete Tenant</template>
+            <template #title>{{ __('Delete Tenant') }}</template>
             <template #content>
-                Are you sure you want to permanently delete <strong>{{ confirmingDelete?.name }}</strong>?
-                This action cannot be undone and all associated data will be lost.
+                {{ __('Are you sure you want to permanently delete') }} <strong>{{ confirmingDelete?.name }}</strong>{{ __('?') }}
+                {{ __('This action cannot be undone and all associated data will be lost.') }}
             </template>
             <template #footer>
                 <div class="flex justify-end gap-x-3">
@@ -300,13 +300,13 @@
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
                         @click="confirmingDelete = null"
                     >
-                        Cancel
+                        {{ __('Cancel') }}
                     </button>
                     <button
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors duration-200"
                         @click="deleteTenant"
                     >
-                        Delete Permanently
+                        {{ __('Delete Permanently') }}
                     </button>
                 </div>
             </template>

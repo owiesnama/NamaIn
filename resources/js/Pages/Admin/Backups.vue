@@ -70,7 +70,7 @@
     };
 
     const deleteBackup = (backup) => {
-        if (!confirm('Are you sure you want to delete this backup?')) return;
+        if (!confirm(__('Are you sure you want to delete this backup?'))) return;
         router.delete(route('admin.backups.destroy', backup.id), {
             preserveScroll: true,
         });
@@ -87,7 +87,7 @@
     };
 
     const frequencyLabel = (freq) => {
-        const labels = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', custom: 'Custom' };
+        const labels = { daily: __('Daily'), weekly: __('Weekly'), monthly: __('Monthly'), custom: __('Custom') };
         return labels[freq] || freq;
     };
 
@@ -95,29 +95,29 @@
 </script>
 
 <template>
-    <AdminLayout title="Backups">
+    <AdminLayout :title="__('Backups')">
         <!-- Page header -->
         <div class="mb-8">
             <div class="flex items-center gap-x-3">
-                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Backups</h2>
+                <h2 class="text-xl font-semibold text-gray-800 dark:text-white">{{ __('Backups') }}</h2>
                 <span class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400">
-                    {{ backups.total }} Total
+                    {{ backups.total }} {{ __('Total') }}
                 </span>
             </div>
-            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Manage database backups for tenants and the full system</p>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Manage database backups for tenants and the full system') }}</p>
         </div>
 
         <!-- Schedule Settings -->
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl mb-6">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Scheduled Backup</h3>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Configure automatic full database backups</p>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Scheduled Backup') }}</h3>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Configure automatic full database backups') }}</p>
             </div>
             <div class="p-6">
                 <div class="flex flex-wrap items-end gap-4">
                     <!-- Enable toggle -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">Status</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">{{ __('Status') }}</label>
                         <button
                             type="button"
                             class="inline-flex items-center gap-x-2 px-4 py-2 text-sm border rounded-lg transition-colors duration-200"
@@ -127,27 +127,27 @@
                             @click="settingsForm.is_enabled = !settingsForm.is_enabled"
                         >
                             <span class="h-2 w-2 rounded-full" :class="settingsForm.is_enabled ? 'bg-emerald-500' : 'bg-gray-400'"></span>
-                            {{ settingsForm.is_enabled ? 'Enabled' : 'Disabled' }}
+                            {{ settingsForm.is_enabled ? __('Enabled') : __('Disabled') }}
                         </button>
                     </div>
 
                     <!-- Frequency -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">Frequency</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">{{ __('Frequency') }}</label>
                         <select
                             v-model="settingsForm.frequency"
                             class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                         >
-                            <option value="daily">Daily</option>
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="custom">Custom Cron</option>
+                            <option value="daily">{{ __('Daily') }}</option>
+                            <option value="weekly">{{ __('Weekly') }}</option>
+                            <option value="monthly">{{ __('Monthly') }}</option>
+                            <option value="custom">{{ __('Custom Cron') }}</option>
                         </select>
                     </div>
 
                     <!-- Cron expression (shown for custom) -->
                     <div v-if="settingsForm.frequency === 'custom'">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">Cron Expression</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">{{ __('Cron Expression') }}</label>
                         <input
                             v-model="settingsForm.cron_expression"
                             type="text"
@@ -158,7 +158,7 @@
 
                     <!-- Retention count -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">Keep Last</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">{{ __('Keep Last') }}</label>
                         <input
                             v-model.number="settingsForm.retention_count"
                             type="number"
@@ -175,7 +175,7 @@
                         :disabled="settingsForm.processing"
                         @click="saveSettings"
                     >
-                        Save Settings
+                        {{ __('Save Settings') }}
                     </button>
                 </div>
                 <p v-if="settingsForm.errors && Object.keys(settingsForm.errors).length" class="mt-2 text-sm text-red-600 dark:text-red-400">
@@ -187,18 +187,18 @@
         <!-- On-demand Backup Actions -->
         <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl mb-6">
             <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-base font-semibold text-gray-900 dark:text-white">On-Demand Backup</h3>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('On-Demand Backup') }}</h3>
             </div>
             <div class="p-6">
                 <div class="flex flex-wrap items-end gap-4">
                     <!-- Tenant backup -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">Tenant</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">{{ __('Tenant') }}</label>
                         <select
                             v-model="selectedTenantId"
                             class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                         >
-                            <option value="">Select tenant...</option>
+                            <option value="">{{ __('Select tenant...') }}</option>
                             <option v-for="tenant in tenants" :key="tenant.id" :value="tenant.id">
                                 {{ tenant.name }}
                             </option>
@@ -206,7 +206,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">Format</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">{{ __('Format') }}</label>
                         <select
                             v-model="selectedFormat"
                             class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
@@ -226,7 +226,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Backup Tenant
+                        {{ __('Backup Tenant') }}
                     </button>
 
                     <!-- Divider -->
@@ -243,7 +243,7 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        Full Database Backup
+                        {{ __('Full Database Backup') }}
                     </button>
                 </div>
             </div>
@@ -255,19 +255,19 @@
                 v-model="typeFilter"
                 class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
             >
-                <option value="">All types</option>
-                <option value="tenant">Tenant</option>
-                <option value="full">Full</option>
+                <option value="">{{ __('All types') }}</option>
+                <option value="tenant">{{ __('Tenant') }}</option>
+                <option value="full">{{ __('Full') }}</option>
             </select>
             <select
                 v-model="statusFilter"
                 class="px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-gray-400 focus:ring focus:ring-gray-200 focus:ring-opacity-50"
             >
-                <option value="">All statuses</option>
-                <option value="completed">Completed</option>
-                <option value="running">Running</option>
-                <option value="pending">Pending</option>
-                <option value="failed">Failed</option>
+                <option value="">{{ __('All statuses') }}</option>
+                <option value="completed">{{ __('Completed') }}</option>
+                <option value="running">{{ __('Running') }}</option>
+                <option value="pending">{{ __('Pending') }}</option>
+                <option value="failed">{{ __('Failed') }}</option>
             </select>
         </div>
 
@@ -277,14 +277,14 @@
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50/50 dark:bg-gray-800/40">
                         <tr>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Type</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Tenant</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Format</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Size</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Status</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Created By</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Date</th>
-                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">Actions</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Type') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Tenant') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Format') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Size') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Status') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Created By') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Date') }}</th>
+                            <th class="px-6 py-4 text-start text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">{{ __('Actions') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
@@ -297,7 +297,7 @@
                                 <div class="flex items-center gap-x-2">
                                     <span class="text-sm font-medium text-gray-900 dark:text-white capitalize">{{ backup.type }}</span>
                                     <span v-if="backup.is_scheduled" class="px-1.5 py-0.5 text-[9px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md">
-                                        Scheduled
+                                        {{ __('Scheduled') }}
                                     </span>
                                 </div>
                             </td>
@@ -321,7 +321,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {{ backup.creator?.name || 'System' }}
+                                {{ backup.creator?.name || __('System') }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                 {{ formatDate(backup.created_at) }}
@@ -333,7 +333,7 @@
                                         v-if="backup.status === 'completed'"
                                         :href="route('admin.backups.show', backup.id)"
                                         class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-                                        title="Download"
+                                        :title="__('Download')"
                                     >
                                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -343,7 +343,7 @@
                                     <button
                                         type="button"
                                         class="inline-flex items-center justify-center p-1.5 text-gray-400 hover:text-red-600 dark:hover:text-red-400 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
-                                        title="Delete"
+                                        :title="__('Delete')"
                                         @click="deleteBackup(backup)"
                                     >
                                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -359,7 +359,7 @@
 
             <!-- Empty state -->
             <div v-if="backups.data.length === 0" class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
-                No backups yet.
+                {{ __('No backups yet.') }}
             </div>
         </div>
 
