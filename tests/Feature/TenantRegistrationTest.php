@@ -1,6 +1,9 @@
 <?php
 
+use App\Models\Customer;
+use App\Models\Storage;
 use App\Models\Tenant;
+use App\Models\TreasuryAccount;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -32,6 +35,11 @@ test('user can register with a new tenant', function () {
     expect($user->belongsToTenant($tenant))->toBeTrue();
     expect($tenant->users()->first()->pivot->role)->toBe('owner');
     expect($tenant->users()->first()->pivot->role_id)->not->toBeNull();
+
+    // Default resources seeded
+    expect(Storage::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count())->toBe(2);
+    expect(TreasuryAccount::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count())->toBe(3);
+    expect(Customer::withoutGlobalScopes()->where('tenant_id', $tenant->id)->where('is_system', true)->count())->toBe(1);
 });
 
 test('registration requires tenant name and slug', function () {

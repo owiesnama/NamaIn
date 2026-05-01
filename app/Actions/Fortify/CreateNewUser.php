@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\DefaultRolesService;
+use App\Services\SeedTenantDefaultsService;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Process;
@@ -50,6 +51,7 @@ class CreateNewUser implements CreatesNewUsers
 
         (new PermissionSeeder)->run();
         (new DefaultRolesService)->seedForTenant($tenant);
+        (new SeedTenantDefaultsService)->seedForTenant($tenant);
 
         $ownerRole = Role::withoutGlobalScopes()
             ->where('tenant_id', $tenant->id)

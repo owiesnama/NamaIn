@@ -1235,5 +1235,9 @@
     "Select a user": "اختر مستخدم",
     "Remove User": "إزالة المستخدم",
     "Are you sure you want to remove": "هل أنت متأكد من إزالة",
-    "from this tenant?": "من هذا المستأجر؟"
+    "from this tenant?": "من هذا المستأجر؟",
+    "Main Warehouse": "المستودع الرئيسي",
+    "Point of Sale": "نقطة البيع",
+    "Cash Register": "صندوق النقد",
+    "Main Cash": "النقد الرئيسي"
 }

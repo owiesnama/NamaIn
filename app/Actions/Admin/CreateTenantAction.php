@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\DefaultRolesService;
+use App\Services\SeedTenantDefaultsService;
 
 class CreateTenantAction
 {
@@ -20,6 +21,7 @@ class CreateTenantAction
         ]);
 
         $this->rolesService->seedForTenant($tenant);
+        (new SeedTenantDefaultsService)->seedForTenant($tenant);
 
         $ownerRole = Role::withoutGlobalScopes()
             ->where('tenant_id', $tenant->id)
