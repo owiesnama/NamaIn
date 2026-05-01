@@ -8,7 +8,6 @@ use App\Enums\PaymentStatus;
 use App\Enums\TreasuryMovementReason;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Product;
 use App\Models\Unit;
 use App\Traits\HandlesAsyncUploads;
 use Illuminate\Support\Collection;
@@ -24,7 +23,7 @@ class StoreInvoiceAction
     {
         return DB::transaction(function () use ($data) {
             $isSale = $this->isSale($data);
-            $invoice = $this->createInvoiceWithTransactions($data, $isSale);
+            $invoice = $this->createInvoiceWithTransactions($data);
 
             $this->handlePayment($invoice, $data, $isSale);
 
@@ -32,51 +31,36 @@ class StoreInvoiceAction
         });
     }
 
-    private function createInvoiceWithTransactions(Collection $data, bool $isSale): Invoice
+    private function createInvoiceWithTransactions(Collection $data): Invoice
     {
         $invocable = $data->get('invocable');
         $invocableClass = $invocable['type'];
         $invocableModel = $invocableClass::find($invocable['id']);
 
-        $products = collect($data->get('products'));
-
-        $computedTotal = $products->sum(fn ($p) => ($p['price'] * $p['quantity']) - ($p['discount'] ?? 0));
-
         $invoice = $invocableModel->invoices()->create([
-            'total' => $computedTotal,
+            'total' => $data->get('total'),
             'payment_method' => $data->get('payment_method', 'cash'),
             'payment_status' => PaymentStatus::Unpaid,
             'paid_amount' => 0,
             'discount' => $data->get('discount', 0),
         ]);
 
+        $products = collect($data->get('products'));
         $unitIds = $products->pluck('unit')->filter()->unique();
         $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
 
-        $productModels = $isSale
-            ? Product::whereIn('id', $products->pluck('product')->unique())->get()->keyBy('id')
-            : collect();
-
-        $invoice->transactions()->createMany($products->map(function ($product) use ($units, $isSale, $productModels) {
-            $data = [
+        $invoice->transactions()->createMany($products->map(function ($product) use ($units) {
+            return [
                 'product_id' => $product['product'],
                 'storage_id' => $product['storage'] ?? null,
                 'unit_id' => $product['unit'] ?? null,
                 'quantity' => $product['quantity'],
                 'price' => $product['price'],
-                'discount' => $product['discount'] ?? 0,
                 'description' => $product['description'] ?? null,
                 'base_quantity' => isset($units[$product['unit'] ?? null])
                     ? $units[$product['unit']]->conversion_factor * $product['quantity']
                     : $product['quantity'],
             ];
-
-            if ($isSale) {
-                $productModel = $productModels[$product['product']] ?? null;
-                $data['unit_cost'] = $productModel?->average_cost ?? 0;
-            }
-
-            return $data;
         }));
 
         return $invoice;
@@ -123,7 +107,7 @@ class StoreInvoiceAction
         ];
 
         if (! $isSale) {
-            $options['movement_reason'] = TreasuryMovementReason::SupplierPaymentMade;
+            $options['movement_reason'] = TreasuryMovementReason::ExpensePaid;
         }
 
         $this->recordPayment->handle(

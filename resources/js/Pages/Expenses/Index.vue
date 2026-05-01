@@ -21,6 +21,7 @@ const showSidebar = ref(true);
 const filters = ref({
     search: useQueryString("search").value,
     category: useQueryString("category").value,
+    status: useQueryString("status").value,
     from_date: useQueryString("from_date").value,
     to_date: useQueryString("to_date").value,
     min_amount: useQueryString("min_amount").value,
@@ -32,6 +33,7 @@ const resetFilters = () => {
     filters.value = {
         search: null,
         category: null,
+        status: null,
         from_date: null,
         to_date: null,
         min_amount: null,
@@ -62,6 +64,18 @@ const formatDate = (date) => {
     return new Intl.DateTimeFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
         dateStyle: 'medium',
     }).format(new Date(date));
+};
+
+const approveExpense = (expenseId) => {
+    if (confirm(__("Are you sure you want to approve this expense?"))) {
+        router.put(route("expenses.approval", expenseId), { status: 'approved' });
+    }
+};
+
+const rejectExpense = (expenseId) => {
+    if (confirm(__("Are you sure you want to reject this expense?"))) {
+        router.put(route("expenses.approval", expenseId), { status: 'rejected' });
+    }
 };
 
 const getBudgetColor = (budget) => {
@@ -153,6 +167,24 @@ const getBudgetColor = (budget) => {
                 >
                     <template #extra-filters>
                         <div class="space-y-2">
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Status") }}</label>
+                            <VueMultiselect
+                                :model-value="[{ id: 'pending', label: __('Pending') }, { id: 'approved', label: __('Approved') }, { id: 'rejected', label: __('Rejected') }].find(o => o.id === filters.status)"
+                                :options="[{ id: 'pending', label: __('Pending') }, { id: 'approved', label: __('Approved') }, { id: 'rejected', label: __('Rejected') }]"
+                                :multiple="false"
+                                :close-on-select="true"
+                                :placeholder="__('All Statuses')"
+                                label="label"
+                                track-by="id"
+                                class="w-full"
+                                :select-label="''"
+                                :deselect-label="''"
+                                :selected-label="__('Selected')"
+                                @update:model-value="option => filters.status = option?.id || null"
+                            />
+                        </div>
+
+                        <div class="space-y-2">
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("From Date") }}</label>
                             <DatePicker v-model="filters.from_date" class="block w-full text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40" />
                         </div>
@@ -217,6 +249,9 @@ const getBudgetColor = (budget) => {
                                                 {{ __("Amount") }}
                                             </th>
                                             <th scope="col" class="px-4 py-3.5 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                                                {{ __("Status") }}
+                                            </th>
+                                            <th scope="col" class="px-4 py-3.5 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
                                                 {{ __("Date") }}
                                             </th>
                                             <th scope="col" class="px-4 py-3.5 text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest">
@@ -240,6 +275,16 @@ const getBudgetColor = (budget) => {
                                             <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap font-bold">
                                                 {{ formatCurrency(expense.amount, expense.currency) }}
                                             </td>
+                                            <td class="px-4 py-4 text-sm whitespace-nowrap">
+                                                <span :class="[
+                                                    'px-2 py-1 text-xs font-semibold rounded-full',
+                                                    expense.status === 'approved' ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                                    expense.status === 'rejected' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
+                                                    'text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400'
+                                                ]">
+                                                    {{ __(expense.status.charAt(0).toUpperCase() + expense.status.slice(1)) }}
+                                                </span>
+                                            </td>
                                             <td class="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                                                 {{ formatDate(expense.expensed_at) }}
                                             </td>
@@ -252,6 +297,18 @@ const getBudgetColor = (budget) => {
                                             </td>
                                             <td class="px-4 py-4 text-sm whitespace-nowrap text-right rtl:text-left">
                                                 <div class="flex items-center justify-end gap-x-2" @click.stop>
+                                                    <template v-if="expense.status === 'pending'">
+                                                        <button @click="approveExpense(expense.id)" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Approve')">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                                            </svg>
+                                                        </button>
+                                                        <button @click="rejectExpense(expense.id)" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-all" :title="__('Reject')">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </template>
                                                     <Link :href="route('expenses.show', expense.id)" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Details')">
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                             <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
@@ -267,7 +324,7 @@ const getBudgetColor = (budget) => {
                                             </td>
                                         </tr>
                                         <tr v-if="expenses.data.length === 0">
-                                            <td colspan="5" class="px-4 py-12">
+                                            <td colspan="6" class="px-4 py-12">
                                                 <EmptySearch :data="expenses.data" />
                                             </td>
                                         </tr>

@@ -27,7 +27,7 @@ class PaymentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'invoice_id' => ['required_without:payable_id', 'nullable', Rule::exists('invoices', 'id')->where('tenant_id', app('currentTenant')->id)],
+            'invoice_id' => 'required_without:payable_id|nullable|exists:invoices,id',
             'payable_id' => 'required_without:invoice_id|nullable|integer',
             'payable_type' => ['required_with:payable_id', 'nullable', 'string', Rule::in([Customer::class, Supplier::class])],
             'amount' => 'required|numeric|min:0.01',
@@ -47,7 +47,7 @@ class PaymentRequest extends FormRequest
             'cheque_number' => 'required_if:payment_method,cheque|nullable|string|max:255',
 
             // Treasury
-            'treasury_account_id' => ['nullable', Rule::exists('treasury_accounts', 'id')->where('tenant_id', app('currentTenant')->id)],
+            'treasury_account_id' => 'nullable|exists:treasury_accounts,id',
         ];
     }
 

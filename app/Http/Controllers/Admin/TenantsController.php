@@ -26,14 +26,10 @@ class TenantsController extends Controller
             ->withCount('users')
             ->when(request('search'), fn ($q, $search) => $q->where(fn ($q) => $q->where('name', 'like', "%{$search}%")
                 ->orWhere('slug', 'like', "%{$search}%")))
-            ->when(request('status') === 'cleared', fn ($q) => $q->whereNotNull('data_cleared_at'))
-            ->when(request('status') !== null && request('status') !== 'cleared', fn ($q) => $q->where('is_active', request('status') === 'active')->whereNull('data_cleared_at'))
+            ->when(request('status') !== null, fn ($q) => $q->where('is_active', request('status') === 'active'))
             ->latest()
             ->paginate(15)
-            ->withQueryString()
-            ->through(fn (Tenant $tenant) => array_merge($tenant->toArray(), [
-                'scheduled_hard_delete_at' => $tenant->scheduledHardDeleteAt()?->toDateTimeString(),
-            ]));
+            ->withQueryString();
 
         return inertia('Admin/Tenants/Index', [
             'tenants' => $tenants,

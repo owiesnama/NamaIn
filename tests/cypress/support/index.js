@@ -20,22 +20,6 @@ import './laravel-routes';
 import './assertions';
 import './tenant-commands';
 
-/**
- * Suppress known third-party initialisation errors that are irrelevant to
- * the test assertions but would otherwise abort the test suite.
- *
- * - Pusher: app key is intentionally empty in the Cypress env file;
- *   Echo is not under test and its absence must not break navigation tests.
- */
-Cypress.on('uncaught:exception', (err) => {
-    if (err.message && err.message.includes('app key')) {
-        return false;
-    }
-
-    // Let all other errors propagate so real bugs are still caught.
-    return true;
-});
-
 before(() => {
     cy.task('activateCypressEnvFile', {}, { log: false });
     cy.artisan('config:clear', {}, { log: false });

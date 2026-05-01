@@ -77,12 +77,12 @@ const formatDate = (dateString) => {
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
-                                {{ __("Opening Debit") }} / {{ __("Credit") }}
+                                {{ __("Opening Balance") }}
                             </p>
                             <p
                                 class="text-2xl font-bold text-gray-800 dark:text-gray-200"
                             >
-                                {{ formatCurrency(supplier.opening_debit || 0) }} / {{ formatCurrency(supplier.opening_credit || 0) }}
+                                {{ formatCurrency(supplier.opening_balance || 0) }}
                             </p>
                         </div>
                         <div

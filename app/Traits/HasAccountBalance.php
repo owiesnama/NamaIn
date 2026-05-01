@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Models\Payment;
 use Illuminate\Support\Facades\DB;
 
 trait HasAccountBalance
@@ -28,7 +29,7 @@ trait HasAccountBalance
             ? $this->getTotalPaidAsOf($asOfDate)
             : $this->getCurrentTotalPaid();
 
-        return $invoicedTotal - $totalPaid + (float) ($this->opening_debit ?? 0) - (float) ($this->opening_credit ?? 0);
+        return $invoicedTotal - $totalPaid - (float) ($this->opening_balance ?? 0);
     }
 
     /**
@@ -59,7 +60,13 @@ trait HasAccountBalance
             ->where('paid_at', '<', $asOfDate)
             ->sum('amount');
 
-        return $directSettling - $directReversing;
+        $paymentsOnInvoices = (float) Payment::whereHas('invoice', function ($query) {
+            $query->where('invocable_id', $this->id)
+                ->where('invocable_type', static::class);
+        })->where('paid_at', '<', $asOfDate)
+            ->sum('amount');
+
+        return ($directSettling + $paymentsOnInvoices) - $directReversing;
     }
 
     /**
@@ -72,7 +79,8 @@ trait HasAccountBalance
 
         $directSettling = (float) $this->payments()->where('direction', $settling)->sum('amount');
         $directReversing = (float) $this->payments()->where('direction', $reversing)->sum('amount');
+        $invoicePayments = (float) $this->invoices()->sum('paid_amount');
 
-        return $directSettling - $directReversing;
+        return ($directSettling + $invoicePayments) - $directReversing;
     }
 }

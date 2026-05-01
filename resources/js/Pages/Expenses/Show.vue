@@ -1,6 +1,6 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
-import { Link } from "@inertiajs/vue3";
+import { Link, router } from "@inertiajs/vue3";
 
 const props = defineProps({
     expense: Object,
@@ -24,6 +24,17 @@ const formatDate = (date) => {
     }).format(new Date(date));
 };
 
+const approveExpense = () => {
+    if (confirm(__("Are you sure you want to approve this expense?"))) {
+        router.put(route("expenses.approval", props.expense.id), { status: 'approved' });
+    }
+};
+
+const rejectExpense = () => {
+    if (confirm(__("Are you sure you want to reject this expense?"))) {
+        router.put(route("expenses.approval", props.expense.id), { status: 'rejected' });
+    }
+};
 </script>
 
 <template>
@@ -43,6 +54,14 @@ const formatDate = (date) => {
                 </div>
 
                 <div class="flex items-center gap-3">
+                    <template v-if="expense.status === 'pending'">
+                        <button @click="approveExpense" class="px-5 py-2 text-sm font-bold text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors">
+                            {{ __("Approve") }}
+                        </button>
+                        <button @click="rejectExpense" class="px-5 py-2 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors">
+                            {{ __("Reject") }}
+                        </button>
+                    </template>
                     <Link :href="route('expenses.edit', expense.id)" class="px-5 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors">
                         {{ __("Edit") }}
                     </Link>
@@ -63,6 +82,17 @@ const formatDate = (date) => {
                             <div>
                                 <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">{{ __("Date") }}</label>
                                 <p class="text-lg font-bold text-gray-700 dark:text-gray-200">{{ formatDate(expense.expensed_at) }}</p>
+                            </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">{{ __("Status") }}</label>
+                                <span :class="[
+                                    'px-3 py-1 text-xs font-bold rounded-full inline-block mt-1',
+                                    expense.status === 'approved' ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                    expense.status === 'rejected' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
+                                    'text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400'
+                                ]">
+                                    {{ __(expense.status.charAt(0).toUpperCase() + expense.status.slice(1)) }}
+                                </span>
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">{{ __("Categories") }}</label>
@@ -95,6 +125,14 @@ const formatDate = (date) => {
                                 <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">{{ __("Created By") }}</label>
                                 <p class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ expense.created_by?.name }}</p>
                                 <p class="text-xs text-gray-500">{{ formatDate(expense.created_at) }}</p>
+                            </div>
+
+                            <div v-if="expense.status !== 'pending'">
+                                <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1">
+                                    {{ expense.status === 'approved' ? __("Approved By") : __("Rejected By") }}
+                                </label>
+                                <p class="text-sm font-bold text-gray-700 dark:text-gray-200">{{ expense.approved_by?.name }}</p>
+                                <p class="text-xs text-gray-500">{{ formatDate(expense.approved_at) }}</p>
                             </div>
 
                             <div v-if="expense.recurring_expense_id">

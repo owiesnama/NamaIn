@@ -31,8 +31,7 @@ class Supplier extends BaseModel
     protected function casts(): array
     {
         return [
-            'opening_debit' => 'decimal:2',
-            'opening_credit' => 'decimal:2',
+            'opening_balance' => 'decimal:2',
         ];
     }
 

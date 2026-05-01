@@ -40,7 +40,6 @@ class Transaction extends BaseModel
             'delivered' => 'boolean',
             'created_at' => 'datetime',
             'delivered_at' => 'datetime',
-            'discount' => 'decimal:2',
         ];
     }
 
@@ -106,7 +105,7 @@ class Transaction extends BaseModel
      */
     public function total(): float
     {
-        return ($this->quantity * $this->price) - ($this->discount ?? 0);
+        return $this->quantity * $this->price;
     }
 
     /**
@@ -198,7 +197,7 @@ class Transaction extends BaseModel
 
     public function scopeTotalValue(Builder $query): float|int|string
     {
-        return $query->sum(DB::raw('price * base_quantity - COALESCE(discount, 0)'));
+        return $query->sum(DB::raw('price * base_quantity'));
     }
 
     public function scopeOfType(Builder $builder, string $type): Builder

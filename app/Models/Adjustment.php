@@ -23,9 +23,4 @@ class Adjustment extends BaseModel
     {
         return $this->belongsTo(User::class, 'created_by');
     }
-
-    public function expense(): BelongsTo
-    {
-        return $this->belongsTo(Expense::class);
-    }
 }

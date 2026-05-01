@@ -9,6 +9,7 @@ use App\Enums\PaymentMethod;
 use App\Enums\TreasuryMovementReason;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Supplier;
 use App\Models\TreasuryAccount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +47,7 @@ class RecordPaymentAction
             if ($method === PaymentMethod::Cheque && isset($options['cheque_due'])) {
                 $this->createCheque->handle($payable, [
                     'amount' => $amount,
-                    'type' => $direction === PaymentDirection::Out ? ChequeType::Payable : ChequeType::Receivable,
+                    'type' => $payable instanceof Supplier ? ChequeType::Payable : ChequeType::Receivable,
                     'due' => $options['cheque_due'],
                     'bank_id' => $options['cheque_bank_id'] ?? null,
                     'reference_number' => $options['cheque_reference'] ?? null,
@@ -61,7 +62,7 @@ class RecordPaymentAction
                 $reason = $options['movement_reason']
                     ?? ($direction === PaymentDirection::In
                         ? TreasuryMovementReason::PaymentReceived
-                        : TreasuryMovementReason::SupplierPaymentMade);
+                        : TreasuryMovementReason::ExpensePaid);
 
                 $this->recordMovement->handle(
                     account: $account,

@@ -8,8 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class Stock extends Pivot
 {
-    protected $table = 'stocks';
-
     protected $guarded = [];
 
     protected static function booted(): void
@@ -30,10 +28,6 @@ class Stock extends Pivot
      */
     public function getAverageCostAttribute(): float|int
     {
-        if ($this->relationLoaded('product') && $this->product->computed_average_cost !== null) {
-            return (float) $this->product->computed_average_cost;
-        }
-
         $totalPurchasedQty = $this->product->transactions()
             ->where('delivered', true)
             ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))

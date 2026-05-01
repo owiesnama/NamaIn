@@ -43,20 +43,6 @@ Cypress.Commands.add('adminLogin', () => {
  *   beforeEach(() => cy.tenantLogin());
  *   it('visits products', () => cy.visit('/products'));
  */
-/**
- * Validate that the current browser session is still authenticated
- * against the server. Used as the validate function for cy.session() so
- * stale sessions (e.g. after cy.refreshDatabase()) are automatically
- * re-established without manual cache-busting.
- */
-function validateSession() {
-    cy.request({
-        url: '/dashboard',
-        failOnStatusCode: false,
-        followRedirect: false,
-    }).its('status').should('eq', 200);
-}
-
 Cypress.Commands.add('tenantLogin', (slug = 'cypress-test') => {
     cy.session(slug, () => {
         cy.php(`
@@ -99,7 +85,7 @@ Cypress.Commands.add('tenantLogin', (slug = 'cypress-test') => {
         `).then((result) => {
             cy.login({ attributes: { email: result.email } });
         });
-    }, { validate: validateSession });
+    });
 });
 
 /**
@@ -156,5 +142,5 @@ Cypress.Commands.add('tenantLoginAs', (roleSlug, slug = 'cypress-test') => {
         `).then((result) => {
             cy.login({ attributes: { email: result.email } });
         });
-    }, { validate: validateSession });
+    });
 });

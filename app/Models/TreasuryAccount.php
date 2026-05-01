@@ -41,9 +41,7 @@ class TreasuryAccount extends BaseModel
 
     public function currentBalance(): int
     {
-        $lastBalance = $this->movements()->latest('id')->value('balance_after');
-
-        return $lastBalance ?? $this->opening_balance;
+        return $this->opening_balance + (int) $this->movements()->sum('amount');
     }
 
     public function isCashDrawer(): bool

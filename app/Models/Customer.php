@@ -36,8 +36,7 @@ class Customer extends BaseModel
     {
         return [
             'credit_limit' => 'decimal:2',
-            'opening_debit' => 'decimal:2',
-            'opening_credit' => 'decimal:2',
+            'opening_balance' => 'decimal:2',
             'is_system' => 'boolean',
         ];
     }

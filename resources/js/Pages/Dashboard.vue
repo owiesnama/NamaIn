@@ -38,7 +38,6 @@
         "top_products",
         "top_customers",
         "low_stock_products",
-        "expired_products",
         "upcoming_cheques",
         "monthly_stats",
     ]);
@@ -110,10 +109,8 @@
     const daysUntilDue = (cheque) => Math.ceil((new Date(cheque.due) - new Date()) / (1000 * 60 * 60 * 24));
 
     const attentionCount = computed(() =>
-        (props.low_stock_products?.length || 0) + (props.expired_products?.length || 0) + (props.upcoming_cheques?.length || 0)
+        (props.low_stock_products?.length || 0) + (props.upcoming_cheques?.length || 0)
     );
-
-    const daysSinceExpiry = (product) => Math.abs(Math.floor((new Date() - new Date(product.expire_date)) / (1000 * 60 * 60 * 24)));
 </script>
 
 <template>
@@ -272,27 +269,6 @@
                                         </Link>
                                         <span class="text-xs font-semibold text-red-500 flex-shrink-0">
                                             {{ product.stock.reduce((a, s) => a + s.pivot.quantity, 0) }} {{ __("left") }}
-                                        </span>
-                                    </div>
-                                </li>
-                            </ul>
-                        </template>
-
-                        <!-- Expired Products -->
-                        <template v-if="expired_products?.length > 0">
-                            <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                                {{ __("Expired Products") }}
-                            </p>
-                            <ul role="list" class="divide-y divide-gray-50 dark:divide-gray-800">
-                                <li v-for="product in expired_products" :key="product.id"
-                                    class="px-5 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                    <div class="flex items-center justify-between gap-3">
-                                        <Link :href="route('products.index', { search: product.name })"
-                                              class="text-sm font-medium text-gray-900 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 truncate">
-                                            {{ product.name }}
-                                        </Link>
-                                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 flex-shrink-0">
-                                            {{ __('Expired :days d ago', { days: daysSinceExpiry(product) }) }}
                                         </span>
                                     </div>
                                 </li>

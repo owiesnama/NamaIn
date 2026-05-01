@@ -2,6 +2,7 @@
 
 namespace App\Queries\Reports;
 
+use App\Enums\ExpenseStatus;
 use App\Models\Expense;
 use App\Models\Transaction;
 use Carbon\Carbon;
@@ -39,7 +40,7 @@ class ProfitAndLossQuery
             ->whereBetween('transactions.created_at', [$from, $to])
             ->select(
                 DB::raw("$dateFormat as period"),
-                DB::raw('SUM(transactions.price * transactions.base_quantity - COALESCE(transactions.discount, 0)) as amount'),
+                DB::raw('SUM(transactions.price * transactions.base_quantity) as amount'),
             )
             ->groupBy('period')
             ->pluck('amount', 'period');
@@ -54,7 +55,8 @@ class ProfitAndLossQuery
             ->groupBy('period')
             ->pluck('amount', 'period');
 
-        $expenses = Expense::whereBetween('expensed_at', [$from, $to])
+        $expenses = Expense::where('status', ExpenseStatus::Approved)
+            ->whereBetween('expensed_at', [$from, $to])
             ->select(
                 DB::raw($this->dateFormat('month', 'expensed_at').' as period'),
                 DB::raw('SUM(amount) as amount'),
@@ -92,14 +94,15 @@ class ProfitAndLossQuery
         $revenue = (float) Transaction::delivered()
             ->forCustomer()
             ->whereBetween('transactions.created_at', [$from, $to])
-            ->sum(DB::raw('transactions.price * transactions.base_quantity - COALESCE(transactions.discount, 0)'));
+            ->sum(DB::raw('transactions.price * transactions.base_quantity'));
 
         $cogs = (float) Transaction::delivered()
             ->forCustomer()
             ->whereBetween('transactions.created_at', [$from, $to])
             ->sum(DB::raw('transactions.base_quantity * COALESCE(transactions.unit_cost, 0)'));
 
-        $expenses = (float) Expense::whereBetween('expensed_at', [$from, $to])
+        $expenses = (float) Expense::where('status', ExpenseStatus::Approved)
+            ->whereBetween('expensed_at', [$from, $to])
             ->sum('amount');
 
         $grossProfit = $revenue - $cogs;

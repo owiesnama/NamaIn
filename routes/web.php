@@ -4,7 +4,6 @@ use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
-use App\Http\Controllers\Admin\TenantDataController;
 use App\Http\Controllers\Admin\TenantInvitationsController;
 use App\Http\Controllers\Admin\TenantOwnershipController;
 use App\Http\Controllers\Admin\TenantsController as AdminTenantsController;
@@ -87,9 +86,6 @@ Route::prefix('__admin')->name('admin.')->group(function () {
 
         Route::post('tenants/{tenant}/invitations', [TenantInvitationsController::class, 'store'])->name('tenants.invitations.store');
         Route::delete('tenants/{tenant}/invitations/{invitation}', [TenantInvitationsController::class, 'destroy'])->name('tenants.invitations.destroy');
-
-        Route::put('tenants/{tenant}/clear-data', [TenantDataController::class, 'clear'])->name('tenants.clear-data');
-        Route::put('tenants/{tenant}/restore-data', [TenantDataController::class, 'restore'])->name('tenants.restore-data');
 
         Route::post('tenants/{tenant}/users/{user}/impersonate', [ImpersonationController::class, 'start'])->name('impersonate.start');
     });

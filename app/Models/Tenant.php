@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Carbon\Carbon;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -26,24 +25,7 @@ class Tenant extends Model
     {
         return [
             'is_active' => 'boolean',
-            'data_cleared_at' => 'datetime',
-            'cleared_groups' => 'array',
         ];
-    }
-
-    public function isDataCleared(): bool
-    {
-        return $this->data_cleared_at !== null;
-    }
-
-    public function scheduledHardDeleteAt(): ?Carbon
-    {
-        return $this->data_cleared_at?->addDays(30);
-    }
-
-    public function hasClearedGroup(string $group): bool
-    {
-        return in_array($group, $this->cleared_groups ?? []);
     }
 
     public function users(): BelongsToMany

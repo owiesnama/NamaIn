@@ -43,6 +43,13 @@ const submit = () => {
     });
 };
 
+const formatDate = (date) => {
+    if (!date) return "";
+    return new Intl.DateTimeFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+    }).format(new Date(date));
+};
 </script>
 
 <template>
@@ -53,6 +60,22 @@ const submit = () => {
                     {{ __("Edit Expense") }}
                 </h2>
 
+                <div class="flex items-center gap-2">
+                    <span :class="[
+                        'px-3 py-1 text-xs font-semibold rounded-full',
+                        expense.status === 'approved' ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                        expense.status === 'rejected' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
+                        'text-amber-700 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400'
+                    ]">
+                        {{ __(expense.status.charAt(0).toUpperCase() + expense.status.slice(1)) }}
+                    </span>
+                </div>
+            </div>
+
+            <div v-if="expense.status === 'rejected'" class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl shadow-none">
+                <p class="text-sm text-red-700 dark:text-red-400">
+                    {{ __("This expense was rejected by") }} <strong>{{ expense.approved_by?.name }}</strong> {{ __("on") }} {{ formatDate(expense.approved_at) }}
+                </p>
             </div>
 
             <form

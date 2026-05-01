@@ -11,16 +11,6 @@ const rootOrigin = `https://${appDomain}`;
 
 before(() => {
     cy.refreshDatabase();
-
-    // Ensure the cypress-test tenant exists so the subdomain middleware
-    // can resolve it (otherwise it returns 404 instead of redirecting to /login).
-    cy.php(`
-        App\\Models\\Tenant::firstOrCreate(
-            ['slug' => 'cypress-test'],
-            ['name' => 'Cypress Test', 'is_active' => true]
-        );
-        return true;
-    `);
 });
 
 describe('Subdomain Login', () => {

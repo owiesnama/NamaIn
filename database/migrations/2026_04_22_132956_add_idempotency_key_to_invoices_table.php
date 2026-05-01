@@ -23,8 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('invoices', function (Blueprint $table) {
-            $table->dropUnique(['tenant_id', 'idempotency_key']);
-            $table->dropColumn('idempotency_key');
+            //
         });
     }
 };

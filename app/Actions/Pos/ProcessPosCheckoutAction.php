@@ -63,13 +63,9 @@ class ProcessPosCheckoutAction
                 }
             }
 
-            // Bulk-load all units referenced in this cart to avoid N+1 inside the loops.
-            $unitIds = collect($data->get('items'))->pluck('unit_id')->filter()->unique();
-            $units = Unit::findMany($unitIds)->keyBy('id');
-
             // 1. Replenish if needed
             foreach ($data->get('items') as $item) {
-                $unit = $units->get($item['unit_id'] ?? null);
+                $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
                 $quantity = $item['quantity'] * ($unit->conversion_factor ?? 1);
 
                 $available = $session->storage->quantityOf($item['product_id']);
@@ -111,7 +107,7 @@ class ProcessPosCheckoutAction
 
             // 4. Create Transactions & Deduct Stock
             foreach ($data->get('items') as $item) {
-                $unit = $units->get($item['unit_id'] ?? null);
+                $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
                 $quantity = $item['quantity'] * ($unit->conversion_factor ?? 1);
 
                 $transaction = $invoice->transactions()->create([

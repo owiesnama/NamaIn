@@ -24,8 +24,7 @@
         address: props.customer?.address,
         phone_number: props.customer?.phone_number,
         credit_limit: props.customer?.credit_limit || 0,
-        opening_debit: props.customer?.opening_debit || 0,
-        opening_credit: props.customer?.opening_credit || 0,
+        opening_balance: props.customer?.opening_balance || 0,
         categories: props.customer?.categories || [],
     });
 
@@ -219,45 +218,25 @@
                                     />
                                 </div>
 
-                                <div class="mt-4 grid grid-cols-2 gap-4">
-                                    <div>
-                                        <InputLabel
-                                            for="opening_debit"
-                                            :value="__('Opening Debit')"
-                                        />
-                                        <TextInput
-                                            id="opening_debit"
-                                            v-model="customer.opening_debit"
-                                            type="number"
-                                            step="0.01"
-                                            class="block w-full mt-1"
-                                            :disabled="props.customer"
-                                        />
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __("Amount owed to you") }}</p>
-                                        <InputError
-                                            class="mt-2"
-                                            :message="customer.errors.opening_debit"
-                                        />
-                                    </div>
-                                    <div>
-                                        <InputLabel
-                                            for="opening_credit"
-                                            :value="__('Opening Credit')"
-                                        />
-                                        <TextInput
-                                            id="opening_credit"
-                                            v-model="customer.opening_credit"
-                                            type="number"
-                                            step="0.01"
-                                            class="block w-full mt-1"
-                                            :disabled="props.customer"
-                                        />
-                                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ __("Advance or credit given") }}</p>
-                                        <InputError
-                                            class="mt-2"
-                                            :message="customer.errors.opening_credit"
-                                        />
-                                    </div>
+                                <div
+                                    class="mt-4"
+                                >
+                                    <InputLabel
+                                        for="opening_balance"
+                                        :value="__('Opening Balance')"
+                                    />
+                                    <TextInput
+                                        id="opening_balance"
+                                        v-model="customer.opening_balance"
+                                        type="number"
+                                        step="0.01"
+                                        class="block w-full mt-1"
+                                        :disabled="props.customer"
+                                    />
+                                    <InputError
+                                        class="mt-2"
+                                        :message="customer.errors.opening_balance"
+                                    />
                                 </div>
 
                                 <div class="mt-4">

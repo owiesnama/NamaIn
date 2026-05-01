@@ -19,8 +19,7 @@ class CustomerImport implements ToModel, WithHeadingRow
             'address' => $row['address'] ?? '',
             'phone_number' => $row['phone_number'] ?? '',
             'credit_limit' => $row['credit_limit'] ?? 0,
-            'opening_debit' => $row['opening_debit'] ?? 0,
-            'opening_credit' => $row['opening_credit'] ?? 0,
+            'opening_balance' => $row['opening_balance'] ?? 0,
         ]);
     }
 }
