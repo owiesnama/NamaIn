@@ -3,6 +3,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import WarningAlert from "@/Components/WarningAlert.vue";
 import { Link } from "@inertiajs/vue3";
 import { usePermissions } from "@/Composables/usePermissions";
+import { useDate } from '@/Composables/useDate';
 
 const { can } = usePermissions();
 
@@ -27,12 +28,7 @@ const formatBalance = (amount, currency = "SDG") => {
     }).format(amount / 100);
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return null;
-    return new Intl.DateTimeFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
-        dateStyle: "medium",
-    }).format(new Date(dateString));
-};
+const { formatDate } = useDate();
 
 const typeColors = {
     cash: "emerald",

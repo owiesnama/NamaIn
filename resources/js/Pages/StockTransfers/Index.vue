@@ -3,6 +3,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
 import { Link } from "@inertiajs/vue3";
 import { usePermissions } from "@/Composables/usePermissions";
+import { useDate } from '@/Composables/useDate';
 
 const { can } = usePermissions();
 
@@ -10,10 +11,7 @@ defineProps({
     transfers: Object
 });
 
-const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString(window.lang === 'ar' ? 'ar-SA' : 'en-US');
-};
+const { formatDate } = useDate();
 </script>
 
 <template>

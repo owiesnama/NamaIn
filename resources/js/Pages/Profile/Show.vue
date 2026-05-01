@@ -5,6 +5,7 @@ import LogoutOtherBrowserSessionsForm from '@/Pages/Profile/Partials/LogoutOther
 import SectionBorder from '@/Components/SectionBorder.vue';
 import TwoFactorAuthenticationForm from '@/Pages/Profile/Partials/TwoFactorAuthenticationForm.vue';
 import UpdatePasswordForm from '@/Pages/Profile/Partials/UpdatePasswordForm.vue';
+import UpdatePersonalPreferencesForm from '@/Pages/Profile/Partials/UpdatePersonalPreferencesForm.vue';
 import UpdateProfileInformationForm from '@/Pages/Profile/Partials/UpdateProfileInformationForm.vue';
 
 defineProps({
@@ -42,6 +43,10 @@ defineProps({
 
                 <SectionBorder />
             </div>
+
+            <UpdatePersonalPreferencesForm class="mt-10 sm:mt-0" />
+
+            <SectionBorder />
 
             <LogoutOtherBrowserSessionsForm :sessions="sessions" class="mt-10 sm:mt-0" />
 

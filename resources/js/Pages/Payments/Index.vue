@@ -8,6 +8,7 @@ import DatePicker from "@/Components/DatePicker.vue";
 import { watch, ref, computed, onMounted, onUnmounted } from "vue";
 import { useQueryString } from "@/Composables/useQueryString";
 import { debounce } from "lodash";
+import { useDate } from '@/Composables/useDate';
 
 const props = defineProps({
     payments: Object,
@@ -87,14 +88,7 @@ const formatCurrency = (amount, currency = null) => {
     }).format(amount || 0);
 };
 
-const formatDate = (dateStr) => {
-    if (!dateStr) return "—";
-    return new Intl.DateTimeFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-    }).format(new Date(dateStr));
-};
+const { formatDate } = useDate();
 
 function partyType(payment) {
     const type = payment.payable_type || payment.invoice?.invocable_type || "";

@@ -640,20 +640,49 @@
       "DELETE"
     ]
   },
-  "admin.tenants.clear-data": {
-    "name": "admin.tenants.clear-data",
+  "admin.backups.index": {
+    "name": "admin.backups.index",
     "domain": null,
-    "action": "App\\Http\\Controllers\\Admin\\TenantDataController@clear",
-    "uri": "__admin/tenants/{tenant}/clear-data",
+    "action": "App\\Http\\Controllers\\Admin\\BackupsController@index",
+    "uri": "__admin/backups",
     "method": [
-      "PUT"
+      "GET",
+      "HEAD"
     ]
   },
-  "admin.tenants.restore-data": {
-    "name": "admin.tenants.restore-data",
+  "admin.backups.store": {
+    "name": "admin.backups.store",
     "domain": null,
-    "action": "App\\Http\\Controllers\\Admin\\TenantDataController@restore",
-    "uri": "__admin/tenants/{tenant}/restore-data",
+    "action": "App\\Http\\Controllers\\Admin\\BackupsController@store",
+    "uri": "__admin/backups",
+    "method": [
+      "POST"
+    ]
+  },
+  "admin.backups.show": {
+    "name": "admin.backups.show",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\BackupsController@show",
+    "uri": "__admin/backups/{backup}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "admin.backups.destroy": {
+    "name": "admin.backups.destroy",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\BackupsController@destroy",
+    "uri": "__admin/backups/{backup}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "admin.backups.settings": {
+    "name": "admin.backups.settings",
+    "domain": null,
+    "action": "App\\Http\\Controllers\\Admin\\BackupSettingsController@update",
+    "uri": "__admin/backups/settings",
     "method": [
       "PUT"
     ]
@@ -741,6 +770,15 @@
     "uri": "preferences",
     "method": [
       "POST"
+    ]
+  },
+  "user-preferences.update": {
+    "name": "user-preferences.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Profile\\UserPreferencesController@update",
+    "uri": "user/preferences",
+    "method": [
+      "PUT"
     ]
   },
   "customers.export": {

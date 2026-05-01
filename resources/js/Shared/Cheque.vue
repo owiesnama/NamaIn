@@ -265,23 +265,28 @@
                 </div>
 
                 <!-- Bank treasury account fallback (shown when bank has no linked treasury account) -->
-                <div v-if="bankTreasuryAccounts.length && !hasLinkedBankAccount" class="mt-4">
+                <div v-if="!hasLinkedBankAccount" class="mt-4">
                     <InputLabel :value="__('Deposit Into')" />
-                    <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">{{ __("No treasury account linked to this bank. Select one manually:") }}</p>
-                    <CustomSelect
-                        v-model="selectedBankAccount"
-                        :options="bankTreasuryAccounts"
-                        label="name"
-                        track-by="id"
-                        :placeholder="__('Select bank account...')"
-                        :close-on-select="true"
-                        :multiple="false"
-                        :select-label="''"
-                        :deselect-label="''"
-                        :selected-label="__('Selected')"
-                        class="mt-1"
-                        @update:model-value="form.treasury_account_id = selectedBankAccount?.id ?? null"
-                    />
+                    <template v-if="bankTreasuryAccounts.length > 0">
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mb-1">{{ __("No treasury account linked to this bank. Select one manually:") }}</p>
+                        <CustomSelect
+                            v-model="selectedBankAccount"
+                            :options="bankTreasuryAccounts"
+                            label="name"
+                            track-by="id"
+                            :placeholder="__('Select bank account...')"
+                            :close-on-select="true"
+                            :multiple="false"
+                            :select-label="''"
+                            :deselect-label="''"
+                            :selected-label="__('Selected')"
+                            class="mt-1"
+                            @update:model-value="form.treasury_account_id = selectedBankAccount?.id ?? null"
+                        />
+                    </template>
+                    <p v-else class="text-sm text-red-600 dark:text-red-400">
+                        {{ __("No bank treasury accounts found. Please create one in Treasury settings first.") }}
+                    </p>
                 </div>
 
                 <div class="mt-6 flex justify-end">
@@ -292,7 +297,7 @@
                     <PrimaryButton
                         class="ml-3"
                         :class="{ 'opacity-25': form.processing }"
-                        :disabled="form.processing"
+                        :disabled="form.processing || (!hasLinkedBankAccount && !form.treasury_account_id && bankTreasuryAccounts.length > 0)"
                         @click="confirmClearance"
                     >
                         {{ __("Confirm") }}

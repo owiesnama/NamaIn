@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\BackupSetting;
 use App\Models\Cheque;
 use App\Models\User;
 use App\Notifications\ChequeDueNotification;
@@ -23,6 +24,14 @@ Artisan::command('cheques:notify-for-due', function () {
 Schedule::command('cheques:notify-for-due')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
 Schedule::command('exports:prune')->daily();
+try {
+    $backupSettings = BackupSetting::resolve();
+    if ($backupSettings->is_enabled) {
+        Schedule::command('backup:scheduled')->cron($backupSettings->cronExpression());
+    }
+} catch (Throwable) {
+    // Table may not exist yet (e.g., during migrations or testing)
+}
 
 Schedule::call(function () {
     $files = Storage::disk('local')->files('tmp');

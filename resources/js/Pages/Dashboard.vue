@@ -108,8 +108,9 @@
 
     const daysUntilDue = (cheque) => Math.ceil((new Date(cheque.due) - new Date()) / (1000 * 60 * 60 * 24));
 
+    const alertsEnabled = preferences('alerts', true);
     const attentionCount = computed(() =>
-        (props.low_stock_products?.length || 0) + (props.upcoming_cheques?.length || 0)
+        (alertsEnabled ? (props.low_stock_products?.length || 0) : 0) + (props.upcoming_cheques?.length || 0)
     );
 </script>
 
@@ -255,7 +256,7 @@
                     <div class="flex-grow overflow-y-auto">
 
                         <!-- Low Stock -->
-                        <template v-if="low_stock_products?.length > 0">
+                        <template v-if="preferences('alerts', true) && low_stock_products?.length > 0">
                             <p class="px-5 pt-4 pb-1 text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                                 {{ __("Low Stock") }}
                             </p>

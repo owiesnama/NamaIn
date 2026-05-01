@@ -11,6 +11,7 @@
  */
 
 before(() => {
+    Cypress.session.clearAllSavedSessions();
     cy.refreshDatabase();
 });
 

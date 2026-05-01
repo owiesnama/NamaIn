@@ -8,6 +8,7 @@ import DeleteStorage from "@/Components/Storages/DeleteStorage.vue";
 import AdjustmentModal from "@/Components/Storages/AdjustmentModal.vue";
 import { Link, router, usePage } from "@inertiajs/vue3";
 import Tooltip from "@/Components/Tooltip.vue";
+import { useDate } from '@/Composables/useDate';
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -54,20 +55,7 @@ const formatCurrency = (amount, currency = 'SDG') => {
     }).format(amount);
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    try {
-        const date = new Date(dateString);
-        if (isNaN(date.getTime())) return "-";
-        return date.toLocaleDateString(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-        });
-    } catch (e) {
-        return "-";
-    }
-};
+const { formatDate } = useDate();
 
 const chartData = computed(() => ({
     labels: props.chart_data.labels,

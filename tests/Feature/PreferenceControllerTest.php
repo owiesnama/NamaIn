@@ -26,11 +26,11 @@ test('it displays the preferences page', function () {
 test('it updates preferences', function () {
     $this->post(route('preferences.update'), [
         'currency' => 'USD',
-        'language' => 'ar',
+        'pecentage' => 70,
     ])->assertRedirect();
 
     $this->assertDatabaseHas('preferences', ['key' => 'currency', 'value' => 'USD']);
-    $this->assertDatabaseHas('preferences', ['key' => 'language', 'value' => 'ar']);
+    $this->assertDatabaseHas('preferences', ['key' => 'pecentage', 'value' => '70']);
 });
 
 test('it skips null values when updating preferences', function () {

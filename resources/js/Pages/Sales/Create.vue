@@ -92,8 +92,12 @@
         form.cheque_bank_id = newTag;
     };
 
+    const selectCustomer = (customer) => {
+        return customer ? { ...customer, type: 'App\\Models\\Customer' } : null;
+    };
+
     const onCustomerCreated = (customer) => {
-        form.invocable = customer;
+        form.invocable = selectCustomer(customer);
         localCustomers.value.unshift(customer);
     };
 
@@ -141,7 +145,7 @@
                             :options="localCustomers"
                             label="name"
                             track-by="id"
-                            @update:model-value="id => { form.invocable = localCustomers.find(c => c.id === id) ?? null }"
+                            @update:model-value="id => { form.invocable = selectCustomer(localCustomers.find(c => c.id === id)) }"
                             @search-change="searchCustomer"
                             :placeholder="__('Search customer...')"
                         >

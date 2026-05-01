@@ -22,19 +22,18 @@ import Echo from 'laravel-echo';
 
 import Pusher from 'pusher-js';
 window.Pusher = Pusher;
-Pusher.logToConsole = true;
 
-const echoConfig = {
-    broadcaster: 'reverb',
-    key: import.meta.env.VITE_REVERB_APP_KEY,
-    cluster: '',
-    wsHost: import.meta.env.VITE_REVERB_HOST ?? window.location.hostname,
-    wsPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
-    wssPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
-    forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
-    enabledTransports: ['ws', 'wss'],
-    disabledTransports: [],
-    authEndpoint: '/broadcasting/auth',
-};
-console.log('Echo config:', JSON.stringify(echoConfig, null, 2));
-window.Echo = new Echo(echoConfig);
+if (import.meta.env.VITE_REVERB_APP_KEY) {
+    window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: import.meta.env.VITE_REVERB_APP_KEY,
+        cluster: '',
+        wsHost: import.meta.env.VITE_REVERB_HOST ?? window.location.hostname,
+        wsPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
+        wssPort: parseInt(import.meta.env.VITE_REVERB_PORT ?? 443),
+        forceTLS: (import.meta.env.VITE_REVERB_SCHEME ?? 'https') === 'https',
+        enabledTransports: ['ws', 'wss'],
+        disabledTransports: [],
+        authEndpoint: '/broadcasting/auth',
+    });
+}

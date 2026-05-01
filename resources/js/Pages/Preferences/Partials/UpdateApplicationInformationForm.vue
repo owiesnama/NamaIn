@@ -14,7 +14,6 @@
         logo: preferences('logo'),
         invoicesHeadline: preferences('invoicesHeadline'),
         alerts: alertsToggle.value,
-        language: preferences('language', 'en'),
         currency: preferences('currency', 'SDG'),
         pecentage: preferences('pecentage', 60),
     });
@@ -170,47 +169,6 @@
                 </div>
                 <InputError
                     :message="form.errors.alerts"
-                    class="mt-2"
-                />
-            </div>
-
-            <!-- Language -->
-            <div class="col-span-6 sm:col-span-4">
-                <InputLabel
-                    for="language"
-                    :value="__('Language')"
-                />
-                <div
-                    class="inline-flex mt-1 overflow-hidden bg-white border border-gray-200 divide-x rounded-lg rtl:flex-row-reverse"
-                >
-                    <button
-                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 sm:text-base sm:px-6"
-                        :class="
-                            form.language == 'ar'
-                                ? ' bg-emerald-500 hover:bg-emerald-400  text-white'
-                                : 'hover:bg-gray-100  text-gray-600 '
-                        "
-                        @click="form.language = 'ar'"
-                        type="button"
-                    >
-                        {{ __("Arabic") }}
-                    </button>
-
-                    <button
-                        class="px-4 py-2 text-sm font-medium transition-colors duration-200 sm:text-base sm:px-6"
-                        :class="
-                            form.language == 'en'
-                                ? ' bg-emerald-500 hover:bg-emerald-400  text-white'
-                                : 'hover:bg-gray-100  text-gray-600 '
-                        "
-                        @click="form.language = 'en'"
-                        type="button"
-                    >
-                        {{ __("English") }}
-                    </button>
-                </div>
-                <InputError
-                    :message="form.errors.language"
                     class="mt-2"
                 />
             </div>

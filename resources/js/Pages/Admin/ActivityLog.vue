@@ -3,6 +3,7 @@
     import { router } from "@inertiajs/vue3";
     import AdminLayout from "@/Layouts/AdminLayout.vue";
     import TextInput from "@/Components/TextInput.vue";
+    import { useDate } from '@/Composables/useDate';
 
     const props = defineProps({
         logs: Object,
@@ -45,9 +46,7 @@
         return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     };
 
-    const formatDate = (date) => {
-        return new Date(date).toLocaleString();
-    };
+    const { formatDate } = useDate();
 
     const metadataSummary = (log) => {
         if (!log.metadata) return null;

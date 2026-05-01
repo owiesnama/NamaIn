@@ -8,6 +8,7 @@
 const ADMIN_URL = 'https://namain.test/__admin';
 
 before(() => {
+    Cypress.session.clearAllSavedSessions();
     cy.refreshDatabase();
 });
 

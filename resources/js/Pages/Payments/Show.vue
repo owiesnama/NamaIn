@@ -1,6 +1,7 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
+import { useDate } from '@/Composables/useDate';
 
 defineProps({
     payment: Object,
@@ -16,13 +17,7 @@ const formatCurrency = (amount, currency = null) => {
     }).format(amount || 0);
 };
 
-const formatDate = (date) => {
-    if (!date) return "";
-    return new Intl.DateTimeFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-    }).format(new Date(date));
-};
+const { formatDate } = useDate();
 </script>
 
 <template>

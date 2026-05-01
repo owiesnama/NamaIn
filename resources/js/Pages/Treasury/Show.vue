@@ -4,6 +4,7 @@ import Pagination from "@/Shared/Pagination.vue";
 import { Link, useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
 import { usePermissions } from "@/Composables/usePermissions";
+import { useDate } from '@/Composables/useDate';
 
 const { can } = usePermissions();
 
@@ -37,13 +38,7 @@ const formatBalance = (amount, currency = "SDG") => {
     }).format(amount / 100);
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Intl.DateTimeFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
-        dateStyle: "medium",
-        timeStyle: "short",
-    }).format(new Date(dateString));
-};
+const { formatDate } = useDate();
 
 const reasonLabels = {
     payment_received: "Payment Received",

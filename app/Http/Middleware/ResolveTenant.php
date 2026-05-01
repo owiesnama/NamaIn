@@ -31,7 +31,16 @@ class ResolveTenant
         URL::defaults(['tenant' => $slug]);
 
         $preferences = TenantCache::rememberForever('preferences', fn () => Preference::asPairs());
-        App::setLocale($preferences['language'] ?? config('app.locale'));
+        $tenantLocale = $preferences['language'] ?? config('app.locale');
+        App::setLocale($tenantLocale);
+
+        if (auth()->check()) {
+            $userLocale = auth()->user()->user_preferences['language'] ?? null;
+
+            if ($userLocale) {
+                App::setLocale($userLocale);
+            }
+        }
 
         if (auth()->check() && ! auth()->user()->belongsToTenant($tenant)) {
             abort(403, 'You do not have access to this tenant.');

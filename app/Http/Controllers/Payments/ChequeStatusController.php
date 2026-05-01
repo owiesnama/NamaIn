@@ -16,14 +16,18 @@ class ChequeStatusController extends Controller
     ) {
         $this->authorize('update', $cheque);
 
-        $updateChequeStatus->handle(
-            cheque: $cheque,
-            status: $request->status(),
-            clearedAmount: $request->clearedAmount(),
-            treasuryAccountId: $request->treasuryAccountId(),
-            actor: $request->user(),
-        );
+        try {
+            $updateChequeStatus->handle(
+                cheque: $cheque,
+                status: $request->status(),
+                clearedAmount: $request->clearedAmount(),
+                treasuryAccountId: $request->treasuryAccountId(),
+                actor: $request->user(),
+            );
+        } catch (\RuntimeException $e) {
+            return back()->with('error', __('Cannot clear cheque: no bank treasury account is linked. Please link a treasury account to this bank or select one manually.'));
+        }
 
-        return back()->with('success', 'Cheque status updated');
+        return back()->with('success', __('Cheque status updated'));
     }
 }

@@ -1,12 +1,25 @@
 import { usePage } from "@inertiajs/vue3";
+
+const USER_LEVEL_KEYS = ['language', 'timezone', 'dateFormat'];
+
 export default {
     install: (app) => {
         let preferences = (key, defaultValue = "") => {
-            let preferences = usePage().props.preferences;
-            if (!preferences.hasOwnProperty(key)) {
-                return defaultValue;
+            const page = usePage().props;
+
+            if (USER_LEVEL_KEYS.includes(key)) {
+                const userValue = page.userPreferences?.[key];
+                if (userValue !== undefined && userValue !== null) {
+                    return userValue;
+                }
             }
-            return preferences[key] ? preferences[key] : defaultValue;
+
+            const tenantPrefs = page.preferences;
+            if (tenantPrefs && tenantPrefs.hasOwnProperty(key)) {
+                return tenantPrefs[key] ? tenantPrefs[key] : defaultValue;
+            }
+
+            return defaultValue;
         };
         app.config.globalProperties.preferences = window.preferences =
             preferences;

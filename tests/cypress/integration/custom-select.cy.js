@@ -9,6 +9,7 @@
  */
 
 before(() => {
+    Cypress.session.clearAllSavedSessions();
     cy.refreshDatabase();
     cy.tenantLogin();
 

@@ -44,6 +44,7 @@ use App\Http\Controllers\Payments\ChequePayeeInvoiceController;
 use App\Http\Controllers\Payments\ChequesController;
 use App\Http\Controllers\Payments\ChequeStatusController;
 use App\Http\Controllers\Payments\PaymentsController;
+use App\Http\Controllers\Profile\UserPreferencesController;
 use App\Http\Controllers\Purchases\PurchaseReceiptController;
 use App\Http\Controllers\Purchases\PurchasesController;
 use App\Http\Controllers\Reports;
@@ -120,6 +121,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/preferences', [PreferenceController::class, 'index'])->name('preferences.index');
         Route::post('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
         Route::put('/preferences', [PreferenceController::class, 'update']);
+        Route::put('/user/preferences', [UserPreferencesController::class, 'update'])->name('user-preferences.update');
 
         /*
         |--------------------------------------------------------------------------

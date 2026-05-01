@@ -1135,5 +1135,23 @@
     "Customer ID": "رقم العميل",
     "Supplier ID": "رقم المورد",
     "Category ID": "رقم التصنيف",
-    "Phone Number": "رقم الهاتف"
+    "Phone Number": "رقم الهاتف",
+
+    "Personal Preferences": "التفضيلات الشخصية",
+    "Organization Settings": "إعدادات المؤسسة",
+    "Customize your personal display settings. These override the organization defaults for your account only.": "خصّص إعدادات العرض الشخصية. هذه تتجاوز إعدادات المؤسسة لحسابك فقط.",
+    "Personal preferences updated.": "تم تحديث التفضيلات الشخصية.",
+    "Timezone": "المنطقة الزمنية",
+    "Date Format": "صيغة التاريخ",
+    "No bank treasury accounts found. Please create one in Treasury settings first.": "لا توجد حسابات خزينة بنكية. يرجى إنشاء واحد في إعدادات الخزينة أولاً.",
+    "Cannot clear cheque: no bank treasury account is linked. Please link a treasury account to this bank or select one manually.": "لا يمكن تصفية الشيك: لا يوجد حساب خزينة بنكي مرتبط. يرجى ربط حساب خزينة بهذا البنك أو اختيار واحد يدوياً.",
+    "Cheque status updated": "تم تحديث حالة الشيك",
+    "Super Admin": "المدير العام",
+    "Tenants": "المستأجرين",
+    "Backups": "النسخ الاحتياطية",
+    "Administrator": "مدير النظام",
+    "Registration Trends": "اتجاهات التسجيل",
+    "Most Active Tenants": "أكثر المستأجرين نشاطاً",
+    "Tenant": "المستأجر",
+    "No active tenants yet.": "لا يوجد مستأجرين نشطين بعد."
 }

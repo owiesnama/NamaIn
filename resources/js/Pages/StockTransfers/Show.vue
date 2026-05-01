@@ -1,21 +1,13 @@
 <script setup>
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
+import { useDate } from '@/Composables/useDate';
 
 defineProps({
     transfer: Object
 });
 
-const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
+const { formatDate } = useDate();
 </script>
 
 <template>

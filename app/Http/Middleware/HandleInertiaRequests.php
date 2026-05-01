@@ -59,8 +59,9 @@ class HandleInertiaRequests extends Middleware
                 'managesProfilePhotos' => true,
             ],
             'preferences' => $tenant
-                ? TenantCache::rememberForever('preferences', fn () => Preference::asPairs())
+                ? $this->resolvePreferences()
                 : [],
+            'userPreferences' => fn () => $request->user()?->user_preferences ?? [],
             'flash' => session()->get('flash') ?? [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
@@ -78,6 +79,17 @@ class HandleInertiaRequests extends Middleware
                 );
             },
         ]);
+    }
+
+    private function resolvePreferences(): array
+    {
+        $prefs = collect(TenantCache::rememberForever('preferences', fn () => Preference::asPairs()))->toArray();
+
+        if (! empty($prefs['logo']) && ! str_starts_with($prefs['logo'], 'http') && ! str_starts_with($prefs['logo'], '/')) {
+            $prefs['logo'] = asset('storage/'.$prefs['logo']);
+        }
+
+        return $prefs;
     }
 
     public function getJsonFileContent($path)

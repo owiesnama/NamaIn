@@ -31,6 +31,7 @@ test('user can register with a new tenant', function () {
     expect($user->current_tenant_id)->toBe($tenant->id);
     expect($user->belongsToTenant($tenant))->toBeTrue();
     expect($tenant->users()->first()->pivot->role)->toBe('owner');
+    expect($tenant->users()->first()->pivot->role_id)->not->toBeNull();
 });
 
 test('registration requires tenant name and slug', function () {

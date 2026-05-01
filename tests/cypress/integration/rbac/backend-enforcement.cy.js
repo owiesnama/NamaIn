@@ -26,6 +26,7 @@
 let seedData = {};
 
 before(() => {
+    Cypress.session.clearAllSavedSessions();
     cy.refreshDatabase();
 
     // Seed as owner to create test records

@@ -7,6 +7,7 @@
 
 describe('Tenant Security', () => {
     before(() => {
+        Cypress.session.clearAllSavedSessions();
         cy.refreshDatabase();
     });
 

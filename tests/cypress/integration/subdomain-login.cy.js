@@ -10,6 +10,7 @@ const appDomain = 'namain.test';
 const rootOrigin = `https://${appDomain}`;
 
 before(() => {
+    Cypress.session.clearAllSavedSessions();
     cy.refreshDatabase();
 });
 

@@ -2,6 +2,7 @@
 
 namespace App\Actions\Fortify;
 
+use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\DefaultRolesService;
@@ -50,7 +51,10 @@ class CreateNewUser implements CreatesNewUsers
         (new PermissionSeeder)->run();
         (new DefaultRolesService)->seedForTenant($tenant);
 
-        $ownerRole = $tenant->roles()->where('slug', 'owner')->first();
+        $ownerRole = Role::withoutGlobalScopes()
+            ->where('tenant_id', $tenant->id)
+            ->where('slug', 'owner')
+            ->firstOrFail();
 
         $tenant->users()->attach($user->id, [
             'role' => 'owner',

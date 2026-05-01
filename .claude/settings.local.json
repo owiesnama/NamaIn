@@ -133,7 +133,20 @@
       "WebFetch(domain:api.anthropic.com)",
       "Read(//c/Users/Owiesnama/.claude/projects/C--Users-Owiesnama-Projects-NamaIn/9a916af3-40e9-4b0a-9e3d-2af73c62a6f5/tool-results/**)",
       "Bash(gunzip -c webfetch-1777485134325-88jlpw.bin)",
-      "Bash(tar xzf:*)"
+      "Bash(tar xzf:*)",
+      "Bash(cp .env .env.cypress)",
+      "Bash(cp .env.backup .env)",
+      "Bash(taskkill //F //IM Cypress.exe)",
+      "Bash(find /c/Users/Owiesnama/Projects/NamaIn -type f \\\\\\( -name \"*.php\" -o -name \"*.json\" \\\\\\) -exec grep -l \"backup\" {} \\\\;)",
+      "Bash(mv .env .env.cypress)",
+      "Bash(mv .env.backup .env)",
+      "Bash(psql -U postgres -lqt)",
+      "Bash(psql -U postgres -c \"CREATE DATABASE namain_cypress_testing;\")",
+      "Bash(where psql:*)",
+      "Read(//c/Users/Owiesnama/.config/herd/**)",
+      "Bash(herd services:*)",
+      "Bash(cp .env .env.backup)",
+      "Bash(cp .env.cypress .env)"
     ]
   },
   "enableAllProjectMcpServers": true,

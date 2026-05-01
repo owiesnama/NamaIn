@@ -92,8 +92,12 @@
         form.cheque_bank_id = newTag;
     };
 
+    const selectSupplier = (supplier) => {
+        return supplier ? { ...supplier, type: 'App\\Models\\Supplier' } : null;
+    };
+
     const onSupplierCreated = (supplier) => {
-        form.invocable = supplier;
+        form.invocable = selectSupplier(supplier);
         localSuppliers.value.unshift(supplier);
     };
 
@@ -141,7 +145,7 @@
                             :options="localSuppliers"
                             label="name"
                             track-by="id"
-                            @update:model-value="id => { form.invocable = localSuppliers.find(s => s.id === id) ?? null }"
+                            @update:model-value="id => { form.invocable = selectSupplier(localSuppliers.find(s => s.id === id)) }"
                             @search-change="searchSupplier"
                             class="modern-select"
                             :placeholder="__('Search supplier...')"

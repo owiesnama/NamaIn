@@ -7,6 +7,7 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import InputError from "@/Components/InputError.vue";
     import DialogModal from "@/Components/DialogModal.vue";
+    import { useDate } from '@/Composables/useDate';
 
 
     const props = defineProps({
@@ -47,16 +48,9 @@
         deductingFromStorage.value = null;
     };
 
-    const lang = window.lang || 'en';
+    const { formatDate } = useDate();
 
-    const formatDate = (dateString) => {
-        if (!dateString) return "-";
-        return new Date(dateString).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    };
+    const lang = window.lang || 'en';
 
     const formatCurrency = (amount, currency = null) => {
         const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
@@ -74,7 +68,7 @@
 <template>
     <Head :title="__('Invoice')" />
     <div class="m-2">
-        <card v-if="invoice.invocable.type_string == 'Supplier'"
+        <card v-if="invoice.invocable_type?.includes('Supplier')"
               :invoice="invoice"
               :storages="storages"
               @moveToStorage="moveToStorage"

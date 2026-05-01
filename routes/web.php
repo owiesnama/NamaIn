@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\BackupsController as AdminBackupsController;
+use App\Http\Controllers\Admin\BackupSettingsController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\TenantInvitationsController;
@@ -86,6 +88,9 @@ Route::prefix('__admin')->name('admin.')->group(function () {
 
         Route::post('tenants/{tenant}/invitations', [TenantInvitationsController::class, 'store'])->name('tenants.invitations.store');
         Route::delete('tenants/{tenant}/invitations/{invitation}', [TenantInvitationsController::class, 'destroy'])->name('tenants.invitations.destroy');
+
+        Route::resource('backups', AdminBackupsController::class)->only(['index', 'store', 'show', 'destroy']);
+        Route::put('backups/settings', [BackupSettingsController::class, 'update'])->name('backups.settings');
 
         Route::post('tenants/{tenant}/users/{user}/impersonate', [ImpersonationController::class, 'start'])->name('impersonate.start');
     });

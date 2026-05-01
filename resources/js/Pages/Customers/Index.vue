@@ -12,6 +12,7 @@
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import FileUploadButton from "@/Shared/FileUploadButton.vue";
     import Tooltip from "@/Components/Tooltip.vue";
+    import { useDate } from '@/Composables/useDate';
 
     const { can } = usePermissions();
 
@@ -28,16 +29,7 @@
         }).format(amount);
     };
 
-    const lang = window.lang || 'en';
-
-    const formatDate = (dateString) => {
-        if (!dateString) return __("No transactions");
-        return new Date(dateString).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en-US', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
-    };
+    const { formatDate } = useDate();
 
     const showSidebar = ref(true);
 

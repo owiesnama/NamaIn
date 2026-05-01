@@ -6,12 +6,15 @@
  */
 
 before(() => {
+    Cypress.session.clearAllSavedSessions();
     cy.refreshDatabase();
     cy.tenantLogin();
 
     // Seed data for reports
     cy.php(`
         $tenant = App\\Models\\Tenant::where('slug', 'cypress-test')->first();
+        app()->instance('currentTenant', $tenant);
+
         $storage = App\\Models\\Storage::factory()->create();
         $customer = App\\Models\\Customer::factory()->create(['name' => 'Cypress Customer']);
         $supplier = App\\Models\\Supplier::factory()->create(['name' => 'Cypress Supplier']);
@@ -26,7 +29,6 @@ before(() => {
             'discount' => 0,
             'serial_number' => 'CYP-SALE-001',
             'status' => 'delivered',
-            'delivered' => true,
             'payment_status' => 'partially_paid',
         ]);
 
@@ -51,7 +53,6 @@ before(() => {
             'discount' => 0,
             'serial_number' => 'CYP-PUR-001',
             'status' => 'delivered',
-            'delivered' => true,
             'payment_status' => 'unpaid',
         ]);
 
@@ -67,12 +68,8 @@ before(() => {
             'created_at' => now(),
         ]);
 
-        // Create stock
-        App\\Models\\Stock::create([
-            'product_id' => $product->id,
-            'storage_id' => $storage->id,
-            'quantity' => 50,
-        ]);
+        // Create stock via storage relationship
+        $storage->stock()->attach($product->id, ['quantity' => 50]);
 
         // Create expense
         App\\Models\\Expense::create([

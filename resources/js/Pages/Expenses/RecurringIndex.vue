@@ -2,6 +2,7 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, router } from "@inertiajs/vue3";
 import Pagination from "@/Shared/Pagination.vue";
+import { useDate } from '@/Composables/useDate';
 
 defineProps({
     recurring_expenses: Object,
@@ -17,12 +18,7 @@ const formatCurrency = (amount, currency = null) => {
     }).format(amount || 0);
 };
 
-const formatDate = (date) => {
-    if (!date) return __("Never");
-    return new Intl.DateTimeFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        dateStyle: 'medium',
-    }).format(new Date(date));
-};
+const { formatDate } = useDate();
 
 const toggleStatus = (id) => {
     router.put(route("recurring-expenses.toggle", id));

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\TenantCache;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -46,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'must_change_password' => 'boolean',
+            'user_preferences' => 'array',
         ];
     }
 
@@ -149,5 +151,14 @@ class User extends Authenticatable
             ->first()
             ?->pivot
             ?->is_active;
+    }
+
+    public function preference(string $key, mixed $default = null): mixed
+    {
+        return ($this->user_preferences[$key] ?? null)
+            ?? (app()->bound('currentTenant')
+                ? TenantCache::rememberForever('preferences', fn () => Preference::asPairs())[$key] ?? null
+                : null)
+            ?? $default;
     }
 }

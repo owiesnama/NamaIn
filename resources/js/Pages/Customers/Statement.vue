@@ -3,6 +3,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import { ref, computed } from "vue";
 import { router } from "@inertiajs/vue3";
 import { format, parseISO } from "date-fns";
+import { useDate } from '@/Composables/useDate';
 
 const props = defineProps({
     customer: Object,
@@ -28,14 +29,7 @@ const formatCurrency = (amount, currency = null) => {
     }).format(amount || 0);
 };
 
-const formatDate = (dateString) => {
-    if (!dateString) return "-";
-    try {
-        return format(parseISO(dateString), "yyyy-MM-dd");
-    } catch (e) {
-        return "-";
-    }
-};
+const { formatDate } = useDate();
 
 const applyFilters = () => {
     router.get(route('customers.statement', props.customer.id), filters.value, {

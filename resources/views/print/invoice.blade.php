@@ -1,8 +1,9 @@
 <x-print>
     @php
-        $currency = $invoice->currency ?: preference('currency', 'SDG');
-        $logo     = preference('logo', '/images/logo.svg');
-        $isPaid   = $invoice->payment_status === \App\Enums\PaymentStatus::Paid;
+        $currency  = $invoice->currency ?: preference('currency', 'SDG');
+        $logo      = preference('logo', '/images/logo.svg');
+        $headline  = preference('invoicesHeadline');
+        $isPaid    = $invoice->payment_status === \App\Enums\PaymentStatus::Paid;
 
         $statusBadgeClass = match($invoice->payment_status) {
             \App\Enums\PaymentStatus::Paid          => 'badge-paid',
@@ -32,7 +33,12 @@
             <div class="logo">
                 <img src="{{ $logo }}" alt="Logo">
             </div>
-            <div class="doc-title">{{ __('Invoice') }}</div>
+            <div>
+                <div class="doc-title">{{ __('Invoice') }}</div>
+                @if($headline)
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 2px; white-space: pre-line;">{{ $headline }}</div>
+                @endif
+            </div>
         </div>
 
         {{-- ── Meta strip ──────────────────────────────── --}}
