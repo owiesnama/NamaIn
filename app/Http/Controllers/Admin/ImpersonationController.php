@@ -17,10 +17,9 @@ class ImpersonationController extends Controller
 
         $action->handle(request()->user(), $tenant, $user);
 
-        $tenantDomain = $tenant->slug.'.'.config('app.domain');
-        $protocol = str_starts_with(config('app.url'), 'https') ? 'https' : 'http';
+        session()->save();
 
-        return redirect("{$protocol}://{$tenantDomain}/dashboard");
+        return redirect()->away(tenant_route('dashboard', $tenant->slug));
     }
 
     public function stop(StopImpersonationAction $action): RedirectResponse
