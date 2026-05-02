@@ -7,11 +7,12 @@ use App\Actions\Admin\StopImpersonationAction;
 use App\Http\Controllers\Controller;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 class ImpersonationController extends Controller
 {
-    public function start(Tenant $tenant, User $user, StartImpersonationAction $action): RedirectResponse
+    public function start(Tenant $tenant, User $user, StartImpersonationAction $action): Response
     {
         $this->authorize('view', $tenant);
 
@@ -19,13 +20,15 @@ class ImpersonationController extends Controller
 
         session()->save();
 
-        return redirect()->away(tenant_route('dashboard', $tenant->slug));
+        return Inertia::location(tenant_route('dashboard', $tenant->slug));
     }
 
-    public function stop(StopImpersonationAction $action): RedirectResponse
+    public function stop(StopImpersonationAction $action): Response
     {
         $action->handle();
 
-        return redirect()->route('admin.dashboard');
+        session()->save();
+
+        return Inertia::location(route('admin.dashboard'));
     }
 }
