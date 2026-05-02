@@ -54,6 +54,7 @@ Route::middleware([
 | Invitation Routes (Public)
 |--------------------------------------------------------------------------
 */
+Route::view('/offline', 'offline');
 Route::get('/invitations/{token}', [InvitationController::class, 'show'])->name('invitations.accept');
 Route::post('/invitations/{token}', [InvitationController::class, 'accept'])->name('invitations.accept.store');
 
