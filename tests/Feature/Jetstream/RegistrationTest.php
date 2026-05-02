@@ -5,13 +5,11 @@ namespace Tests\Feature\Jetstream;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
 use Laravel\Jetstream\Jetstream;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class RegistrationTest extends TestCase
+class RegistrationTest extends MainDomainTestCase
 {
     use RefreshDatabase;
-
-    protected bool $withTenantSubdomain = false;
 
     public function test_registration_screen_can_be_rendered(): void
     {

@@ -4,9 +4,9 @@ namespace Tests\Feature\Jetstream;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class PasswordConfirmationTest extends TestCase
+class PasswordConfirmationTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 

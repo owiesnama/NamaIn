@@ -7,9 +7,9 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Laravel\Fortify\Features;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class PasswordResetTest extends TestCase
+class PasswordResetTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 

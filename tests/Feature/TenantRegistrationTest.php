@@ -119,7 +119,7 @@ test('tenant switch always redirects to configured app domain regardless of requ
 
     $response = $this->actingAs($user)
         ->withHeader('X-Inertia', 'true')
-        ->post('https://erp.example.com/tenants/is/select');
+        ->post('https://'.config('app.domain').'/tenants/is/select');
 
     $response->assertStatus(409);
     $response->assertHeader('X-Inertia-Location', 'https://is.'.config('app.domain').'/dashboard');

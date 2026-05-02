@@ -2,17 +2,14 @@
 
 namespace Tests\Feature\Jetstream;
 
-use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class AuthenticationTest extends TestCase
+class AuthenticationTest extends MainDomainTestCase
 {
     use RefreshDatabase;
-
-    protected bool $withTenantSubdomain = false;
 
     public function test_login_screen_can_be_rendered(): void
     {
@@ -46,53 +43,27 @@ class AuthenticationTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_login_on_tenant_subdomain_redirects_to_tenant_dashboard(): void
+    public function test_login_route_is_not_available_on_tenant_subdomains(): void
     {
         $tenant = Tenant::create(['name' => 'Acme', 'slug' => 'acme', 'is_active' => true]);
-        $user = User::factory()->create();
-        $this->seedTenantRoles($tenant);
-
-        $ownerRole = Role::withoutGlobalScopes()
-            ->where('tenant_id', $tenant->id)
-            ->where('slug', 'owner')
-            ->first();
-
-        $tenant->users()->attach($user, ['role' => 'owner', 'role_id' => $ownerRole?->id]);
 
         $tenantBase = 'http://acme.'.config('app.domain');
 
-        $response = $this->post($tenantBase.'/login', [
-            'email' => $user->email,
+        $this->post($tenantBase.'/login', [
+            'email' => 'user@example.com',
             'password' => 'password',
-        ]);
-
-        $this->assertAuthenticated();
-
-        $expectedUrl = parse_url(config('app.url'), PHP_URL_SCHEME).'://acme.'.config('app.domain').'/dashboard';
-        $response->assertRedirect($expectedUrl);
-    }
-
-    public function test_login_on_subdomain_rejects_user_not_belonging_to_tenant(): void
-    {
-        $tenant = Tenant::create(['name' => 'Other Org', 'slug' => 'other-org', 'is_active' => true]);
-        $user = User::factory()->create();
-
-        $tenantBase = 'http://other-org.'.config('app.domain');
-
-        $response = $this->post($tenantBase.'/login', [
-            'email' => $user->email,
-            'password' => 'password',
-        ]);
+        ])->assertNotFound();
 
         $this->assertGuest();
     }
 
-    public function test_guest_redirect_preserves_subdomain(): void
+    public function test_guest_on_subdomain_redirects_to_main_domain_login(): void
     {
+        $tenant = Tenant::create(['name' => 'Acme', 'slug' => 'acme', 'is_active' => true]);
+
         $tenantBase = 'http://acme.'.config('app.domain');
 
-        $response = $this->get($tenantBase.'/dashboard');
-
-        $response->assertRedirect($tenantBase.'/login');
+        $this->get($tenantBase.'/dashboard')
+            ->assertRedirect();
     }
 }

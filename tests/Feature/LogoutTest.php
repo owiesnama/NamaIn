@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
+beforeEach(function () {
+    test()->withoutTenantSubdomain();
+});
+
 test('logout destroys all sessions for the user', function () {
     $user = User::factory()->create();
 

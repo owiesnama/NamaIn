@@ -6,9 +6,9 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Laravel\Jetstream\Features;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class DeleteApiTokenTest extends TestCase
+class DeleteApiTokenTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 

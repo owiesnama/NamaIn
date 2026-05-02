@@ -9,9 +9,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
 use Laravel\Fortify\Features;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class EmailVerificationTest extends TestCase
+class EmailVerificationTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 

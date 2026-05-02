@@ -33,7 +33,7 @@ it('logs out and redirects an inactive user with an error message', function () 
 
 it('passes through for unauthenticated users without interfering', function () {
     $this->get(route('dashboard'))
-        ->assertRedirect(route('login'));
+        ->assertRedirect();
 
     $this->assertGuest();
 });

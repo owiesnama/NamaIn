@@ -4,9 +4,9 @@ namespace Tests\Feature\Jetstream;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class BrowserSessionsTest extends TestCase
+class BrowserSessionsTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 

@@ -5,9 +5,9 @@ namespace Tests\Feature\Jetstream;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Fortify\Features;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class TwoFactorAuthenticationSettingsTest extends TestCase
+class TwoFactorAuthenticationSettingsTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 

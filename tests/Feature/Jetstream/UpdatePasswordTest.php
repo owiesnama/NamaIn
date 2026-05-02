@@ -5,9 +5,9 @@ namespace Tests\Feature\Jetstream;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class UpdatePasswordTest extends TestCase
+class UpdatePasswordTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 

@@ -5,9 +5,9 @@ namespace Tests\Feature\Jetstream;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Jetstream\Features;
-use Tests\TestCase;
+use Tests\MainDomainTestCase;
 
-class DeleteAccountTest extends TestCase
+class DeleteAccountTest extends MainDomainTestCase
 {
     use RefreshDatabase;
 
