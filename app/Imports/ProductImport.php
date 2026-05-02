@@ -11,8 +11,11 @@ use Maatwebsite\Excel\Row;
 
 class ProductImport implements OnEachRow, WithHeadingRow
 {
+    private int $rowCount = 0;
+
     public function onRow(Row $row)
     {
+        $this->rowCount++;
         $data = $row->toArray();
 
         $product = Product::create([
@@ -36,5 +39,10 @@ class ProductImport implements OnEachRow, WithHeadingRow
             });
             $product->categories()->sync($categoryIds);
         }
+    }
+
+    public function getRowCount(): int
+    {
+        return $this->rowCount;
     }
 }

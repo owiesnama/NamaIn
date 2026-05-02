@@ -18,7 +18,7 @@ class ExportStatusUpdated implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel("exports.user.{$this->exportLog->user_id}"),
+            new PrivateChannel("operations.user.{$this->exportLog->user_id}"),
         ];
     }
 

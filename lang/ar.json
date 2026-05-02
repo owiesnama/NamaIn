@@ -1239,5 +1239,13 @@
     "Main Warehouse": "المستودع الرئيسي",
     "Point of Sale": "نقطة البيع",
     "Cash Register": "صندوق النقد",
-    "Main Cash": "النقد الرئيسي"
+    "Main Cash": "النقد الرئيسي",
+    "Import": "استيراد",
+    "Importing data...": "جاري استيراد البيانات...",
+    "Import completed": "تم الاستيراد بنجاح",
+    "rows": "صف",
+    "Import failed.": "فشل الاستيراد.",
+    "Product import queued for processing.": "تم وضع استيراد المنتجات في قائمة الانتظار.",
+    "Supplier import queued for processing.": "تم وضع استيراد الموردين في قائمة الانتظار.",
+    "Customer import queued for processing.": "تم وضع استيراد العملاء في قائمة الانتظار."
 }

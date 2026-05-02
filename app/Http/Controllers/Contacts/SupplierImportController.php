@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Contacts;
 
 use App\Http\Controllers\Controller;
-use App\Imports\SupplierImport;
+use App\Jobs\ProcessImportJob;
+use App\Models\ImportLog;
 use App\Services\CsvSampleGenerator;
-use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class SupplierImportController extends Controller
@@ -16,9 +16,26 @@ class SupplierImportController extends Controller
 
     public function store()
     {
-        Excel::import(new SupplierImport, request()->file('file'));
+        request()->validate(['file' => 'required|file|mimes:csv,xlsx,xls']);
 
-        return back()->with('success', 'Imported successfully');
+        $path = request()->file('file')->store('imports');
+
+        $importLog = ImportLog::create([
+            'user_id' => auth()->id(),
+            'tenant_id' => auth()->user()->current_tenant_id,
+            'import_type' => 'suppliers',
+            'original_filename' => request()->file('file')->getClientOriginalName(),
+            'stored_path' => $path,
+        ]);
+
+        ProcessImportJob::dispatch($importLog);
+
+        return back()->with('flash', [
+            'type' => 'import_queued',
+            'import_id' => $importLog->id,
+            'import_type' => 'suppliers',
+            'message' => __('Supplier import queued for processing.'),
+        ]);
     }
 
     public function show(): BinaryFileResponse
@@ -26,7 +43,7 @@ class SupplierImportController extends Controller
         return (new CsvSampleGenerator)->generate(
             'suppliers_import_sample.csv',
             $this->importHeaders,
-            $this->importSampleData
+            $this->importSampleData,
         );
     }
 }

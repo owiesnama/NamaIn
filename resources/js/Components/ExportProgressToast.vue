@@ -24,7 +24,7 @@ function removeToast(id) {
     toasts.value = toasts.value.filter(t => t.id !== id);
 }
 
-// Watch flash prop for export_queued events (fires on every Inertia response)
+// Watch flash prop for export/import queued events (fires on every Inertia response)
 watch(flash, (val) => {
     if (val?.type === 'export_queued') {
         addToast({
@@ -34,23 +34,40 @@ watch(flash, (val) => {
             message: val.message,
         });
     }
+    if (val?.type === 'import_queued') {
+        addToast({
+            id: `import-${val.import_id ?? Date.now()}`,
+            status: 'queued',
+            import_type: val.import_type ?? '',
+            kind: 'import',
+            message: val.message,
+        });
+    }
 }, { immediate: true });
 
-// Subscribe to Reverb for real-time updates
-let echoChannel = null;
+// Subscribe to a single operations channel for all background tasks
+let channel = null;
 
 onMounted(() => {
     if (window.Echo && page.props.user?.id) {
-        echoChannel = window.Echo.private(`exports.user.${page.props.user.id}`)
+        channel = window.Echo.private(`operations.user.${page.props.user.id}`)
             .listen('ExportStatusUpdated', (e) => {
                 addToast(e);
+            })
+            .listen('ImportStatusUpdated', (e) => {
+                addToast({
+                    ...e,
+                    id: `import-${e.id}`,
+                    kind: 'import',
+                });
             });
     }
 });
 
 onUnmounted(() => {
-    if (echoChannel) {
-        echoChannel.stopListening('ExportStatusUpdated');
+    if (channel) {
+        channel.stopListening('ExportStatusUpdated');
+        channel.stopListening('ImportStatusUpdated');
     }
 });
 
@@ -90,17 +107,29 @@ const statusColor = {
                     </svg>
                     <div class="min-w-0 flex-1">
                         <p class="text-sm font-medium text-gray-900 dark:text-white">
-                            {{ toast.export_key ? __(toast.export_key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())) : __('Export') }}
+                            <template v-if="toast.kind === 'import'">
+                                {{ toast.import_type ? __(toast.import_type.replace(/\b\w/g, l => l.toUpperCase())) : __('Import') }} — {{ __('Import') }}
+                            </template>
+                            <template v-else>
+                                {{ toast.export_key ? __(toast.export_key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())) : __('Export') }}
+                            </template>
                         </p>
                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                             <template v-if="toast.status === 'queued'">{{ __('Queued for processing...') }}</template>
-                            <template v-else-if="toast.status === 'processing'">{{ __('Generating export...') }}</template>
+                            <template v-else-if="toast.status === 'processing'">{{ toast.kind === 'import' ? __('Importing data...') : __('Generating export...') }}</template>
                             <template v-else-if="toast.status === 'completed'">
-                                <a :href="route('exports.download', toast.id)" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
-                                    {{ __('Download ready') }}
-                                </a>
+                                <template v-if="toast.kind === 'import'">
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">
+                                        {{ __('Import completed') }} ({{ toast.rows_imported ?? 0 }} {{ __('rows') }})
+                                    </span>
+                                </template>
+                                <template v-else>
+                                    <a :href="route('exports.download', toast.id)" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium">
+                                        {{ __('Download ready') }}
+                                    </a>
+                                </template>
                             </template>
-                            <template v-else-if="toast.status === 'failed'">{{ toast.failure_message || __('Export failed.') }}</template>
+                            <template v-else-if="toast.status === 'failed'">{{ toast.failure_message || (toast.kind === 'import' ? __('Import failed.') : __('Export failed.')) }}</template>
                         </p>
                     </div>
                     <button @click="removeToast(toast.id)" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">

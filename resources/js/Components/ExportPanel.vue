@@ -63,7 +63,7 @@ let echoChannel = null;
 
 onMounted(() => {
     if (window.Echo && page.props.user?.id) {
-        echoChannel = window.Echo.private(`exports.user.${page.props.user.id}`)
+        echoChannel = window.Echo.private(`operations.user.${page.props.user.id}`)
             .listen('ExportStatusUpdated', (e) => {
                 addOrUpdate(e);
                 hasBeenTriggered.value = true;
