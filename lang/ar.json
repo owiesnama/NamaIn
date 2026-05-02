@@ -1247,5 +1247,8 @@
     "Import failed.": "فشل الاستيراد.",
     "Product import queued for processing.": "تم وضع استيراد المنتجات في قائمة الانتظار.",
     "Supplier import queued for processing.": "تم وضع استيراد الموردين في قائمة الانتظار.",
-    "Customer import queued for processing.": "تم وضع استيراد العملاء في قائمة الانتظار."
+    "Customer import queued for processing.": "تم وضع استيراد العملاء في قائمة الانتظار.",
+    "Monitoring": "أدوات النظام",
+    "Queues": "المهام المجدولة",
+    "Monitor": "سجل الأداء"
 }
