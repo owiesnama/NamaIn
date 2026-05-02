@@ -24,7 +24,10 @@ class GenerateExportJob implements ShouldQueue
 
     public array $backoff = [10, 30, 60];
 
-    public function __construct(public ExportLog $exportLog) {}
+    public function __construct(public ExportLog $exportLog)
+    {
+        $this->onQueue('exports');
+    }
 
     public function handle(): void
     {

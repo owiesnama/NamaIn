@@ -31,7 +31,10 @@ class ProcessImportJob implements ShouldQueue
         'customers' => CustomerImport::class,
     ];
 
-    public function __construct(public ImportLog $importLog) {}
+    public function __construct(public ImportLog $importLog)
+    {
+        $this->onQueue('imports');
+    }
 
     public function handle(): void
     {

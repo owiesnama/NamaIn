@@ -2,17 +2,12 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Tenant;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreTenantRequest extends FormRequest
 {
-    /** @var string[] */
-    private const RESERVED_SLUGS = [
-        'admin', 'www', 'api', 'app', 'mail',
-        'support', 'login', 'register', 'help',
-    ];
-
     public function authorize(): bool
     {
         return $this->user()->isAdmin();
@@ -26,7 +21,7 @@ class StoreTenantRequest extends FormRequest
             'slug' => [
                 'required', 'string', 'max:63', 'alpha_dash:ascii',
                 Rule::unique('tenants', 'slug'),
-                Rule::notIn(self::RESERVED_SLUGS),
+                Rule::notIn(Tenant::RESERVED_SLUGS),
             ],
             'owner_email' => ['required', 'email', 'exists:users,email'],
         ];

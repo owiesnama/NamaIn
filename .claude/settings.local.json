@@ -148,7 +148,12 @@
       "Bash(cp .env .env.backup)",
       "Bash(cp .env.cypress .env)",
       "Bash(npx --yes sharp-cli -- -i public/images/logo.svg -o public/images/icons/icon-192.png resize 192 192)",
-      "Bash(npx sharp-cli:*)"
+      "Bash(npx sharp-cli:*)",
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" -m)",
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" \"C:/Users/Owiesnama/.config/herd/bin/composer.phar\" require laravel/horizon laravel/telescope)",
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" \"C:/Users/Owiesnama/.config/herd/bin/composer.phar\" require laravel/horizon laravel/telescope --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix)",
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" \"C:/Users/Owiesnama/.config/herd/bin/composer.phar\" remove itsgoingd/clockwork --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix)",
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" \"C:/Users/Owiesnama/.config/herd/bin/composer.phar\" require --dev itsgoingd/clockwork --ignore-platform-req=ext-pcntl --ignore-platform-req=ext-posix)"
     ]
   },
   "enableAllProjectMcpServers": true,

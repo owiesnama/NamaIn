@@ -24,6 +24,8 @@ Artisan::command('cheques:notify-for-due', function () {
 Schedule::command('cheques:notify-for-due')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
 Schedule::command('exports:prune')->daily();
+Schedule::command('telescope:prune --hours=48')->daily();
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
 try {
     $backupSettings = BackupSetting::resolve();
     if ($backupSettings->is_enabled) {
@@ -32,8 +34,6 @@ try {
 } catch (Throwable) {
     // Table may not exist yet (e.g., during migrations or testing)
 }
-
-Schedule::command('clockwork:clean --expiration=1440')->daily();
 
 Schedule::call(function () {
     $files = Storage::disk('local')->files('tmp');

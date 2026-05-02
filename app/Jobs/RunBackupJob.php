@@ -15,7 +15,10 @@ class RunBackupJob implements ShouldQueue
 
     public int $timeout = 900;
 
-    public function __construct(public Backup $backup) {}
+    public function __construct(public Backup $backup)
+    {
+        $this->onQueue('backups');
+    }
 
     public function handle(BackupTenantAction $tenantAction, BackupDatabaseAction $databaseAction): void
     {

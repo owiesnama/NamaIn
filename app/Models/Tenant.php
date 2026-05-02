@@ -13,6 +13,17 @@ class Tenant extends Model
     /** @use HasFactory<TenantFactory> */
     use HasFactory;
 
+    /** @var string[] */
+    public const RESERVED_SLUGS = [
+        'admin', 'www', 'api', 'app', 'mail',
+        'support', 'login', 'register', 'help',
+        'queue', 'monitor', 'status', 'docs',
+        'billing', 'webhook', 'webhooks', 'cdn',
+        'static', 'assets', 'media', 'staging',
+        'dev', 'test', 'demo', 'sandbox',
+        'dashboard', 'auth', 'sso', 'oauth', 'cloud',
+    ];
+
     protected static function booted(): void
     {
         static::unguard();
