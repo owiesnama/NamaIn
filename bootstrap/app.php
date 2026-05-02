@@ -3,6 +3,7 @@
 use App\Exceptions\InsufficientStockException;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLocale;
+use App\Models\Tenant;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -17,8 +18,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         channels: __DIR__.'/../routes/channels.php',
         then: function () {
+            $excluded = implode('|', Tenant::RESERVED_SLUGS);
+
             Route::middleware('web')
                 ->domain('{tenant}.'.config('app.domain'))
+                ->where(['tenant' => "^(?!(?:{$excluded})$).+$"])
                 ->group(base_path('routes/tenant.php'));
         },
     )
