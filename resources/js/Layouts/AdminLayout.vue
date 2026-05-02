@@ -16,6 +16,10 @@
         return page.props.locale === "ar" ? "rtl" : "ltr";
     });
 
+    const appDomain = computed(() => page.props.appDomain);
+    const horizonUrl = computed(() => `https://queue.${appDomain.value}`);
+    const telescopeUrl = computed(() => `https://monitor.${appDomain.value}`);
+
     const logout = () => {
         router.post(route("admin.logout"));
     };
@@ -135,7 +139,7 @@
 
                         <!-- Horizon (Queue) -->
                         <a
-                            :href="`${window.location.protocol}//queue.${page.props.appDomain}`"
+                            :href="horizonUrl"
                             target="_blank"
                             class="flex items-center gap-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
                         >
@@ -150,7 +154,7 @@
 
                         <!-- Telescope (Monitor) -->
                         <a
-                            :href="`${window.location.protocol}//monitor.${page.props.appDomain}`"
+                            :href="telescopeUrl"
                             target="_blank"
                             class="flex items-center gap-x-3 px-3 py-2 rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white"
                         >
