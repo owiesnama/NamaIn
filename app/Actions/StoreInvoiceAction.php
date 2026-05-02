@@ -8,6 +8,7 @@ use App\Enums\PaymentStatus;
 use App\Enums\TreasuryMovementReason;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Product;
 use App\Models\Unit;
 use App\Traits\HandlesAsyncUploads;
 use Illuminate\Support\Collection;
@@ -49,7 +50,15 @@ class StoreInvoiceAction
         $unitIds = $products->pluck('unit')->filter()->unique();
         $units = Unit::whereIn('id', $unitIds)->get()->keyBy('id');
 
-        $invoice->transactions()->createMany($products->map(function ($product) use ($units) {
+        $isSale = $this->isSale($data);
+        $averageCosts = $isSale
+            ? Product::withAverageCost()
+                ->whereIn('id', $products->pluck('product')->unique())
+                ->get()
+                ->keyBy('id')
+            : collect();
+
+        $invoice->transactions()->createMany($products->map(function ($product) use ($units, $isSale, $averageCosts) {
             return [
                 'product_id' => $product['product'],
                 'storage_id' => $product['storage'] ?? null,
@@ -57,6 +66,9 @@ class StoreInvoiceAction
                 'quantity' => $product['quantity'],
                 'price' => $product['price'],
                 'description' => $product['description'] ?? null,
+                'unit_cost' => $isSale
+                    ? ($averageCosts[$product['product']]->average_cost ?? 0)
+                    : null,
                 'base_quantity' => isset($units[$product['unit'] ?? null])
                     ? $units[$product['unit']]->conversion_factor * $product['quantity']
                     : $product['quantity'],

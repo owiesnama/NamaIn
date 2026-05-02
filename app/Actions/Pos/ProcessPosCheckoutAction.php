@@ -106,6 +106,12 @@ class ProcessPosCheckoutAction
             ]);
 
             // 4. Create Transactions & Deduct Stock
+            $productIds = collect($data->get('items'))->pluck('product_id')->unique();
+            $averageCosts = Product::withAverageCost()
+                ->whereIn('id', $productIds)
+                ->get()
+                ->keyBy('id');
+
             foreach ($data->get('items') as $item) {
                 $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
                 $quantity = $item['quantity'] * ($unit->conversion_factor ?? 1);
@@ -118,6 +124,7 @@ class ProcessPosCheckoutAction
                     'unit_id' => $item['unit_id'] ?? null,
                     'base_quantity' => $quantity,
                     'price' => $item['price'],
+                    'unit_cost' => $averageCosts[$item['product_id']]->average_cost ?? 0,
                     'delivered' => false,
                 ]);
 
