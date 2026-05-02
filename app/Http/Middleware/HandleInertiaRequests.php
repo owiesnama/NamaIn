@@ -74,9 +74,11 @@ class HandleInertiaRequests extends Middleware
                 return app()->getLocale();
             },
             'translations' => function () {
-                return $this->getJsonFileContent(
-                    base_path('lang/'.app()->getLocale().'.json')
-                );
+                $locale = app()->getLocale();
+
+                return cache()->rememberForever("translations.{$locale}", fn () => $this->getJsonFileContent(
+                    base_path("lang/{$locale}.json")
+                ));
             },
         ]);
     }

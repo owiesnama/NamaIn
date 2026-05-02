@@ -16,36 +16,28 @@
     });
 
     const selectedStorage = ref(null);
+    const showDeliveryModal = ref(false);
+    const deliveryMode = ref(null); // 'add' or 'deduct'
 
-    let movingToStorage = ref(false);
-
-    let form = useForm({
+    const form = useForm({
         invoice: null,
-        storage: null
+        storage: null,
     });
 
-    let moveToStorage = (invoice) => {
-        movingToStorage.value = true;
+    const openDeliveryModal = (invoice, mode) => {
+        deliveryMode.value = mode;
         form.invoice = invoice.id;
+        showDeliveryModal.value = true;
     };
 
-
-    let confirmMoving = () => {
-        form.put(route("stock.add", form.storage), {
-            onFinish: () => closeModal()
-        }).then();
-    };
-
-    let deductingFromStorage = ref(false);
-
-    let deductFromStorage = (invoice) => {
-        deductingFromStorage.value = true;
-        form.invoice = invoice.id;
-    };
-
-    let closeModal = () => {
-        movingToStorage.value = null;
-        deductingFromStorage.value = null;
+    const confirmDelivery = () => {
+        const routeName = deliveryMode.value === 'add' ? 'stock.add' : 'stock.deduct';
+        form.put(route(routeName, form.storage), {
+            onFinish: () => {
+                showDeliveryModal.value = false;
+                selectedStorage.value = null;
+            },
+        });
     };
 
     const { formatDate } = useDate();
@@ -71,12 +63,12 @@
         <card v-if="invoice.invocable_type?.includes('Supplier')"
               :invoice="invoice"
               :storages="storages"
-              @moveToStorage="moveToStorage"
+              @moveToStorage="(inv) => openDeliveryModal(inv, 'add')"
               :actionTitle="__('Deliver to Storage')" :printable="false"></card>
         <card v-else
               :invoice="invoice"
               :storages="storages"
-              @moveToStorage="deductFromStorage"
+              @moveToStorage="(inv) => openDeliveryModal(inv, 'deduct')"
               :actionTitle="__('Deduct From Storage')" :printable="false"></card>
 
         <!-- Payment Information -->
@@ -174,10 +166,12 @@
     </div>
 
     <DialogModal
-        :show="deductingFromStorage"
-        @close="closeModal"
+        :show="showDeliveryModal"
+        @close="showDeliveryModal = false"
     >
-        <template #title></template>
+        <template #title>
+            {{ deliveryMode === 'add' ? __('Deliver to Storage') : __('Deduct From Storage') }}
+        </template>
         <template #content>
             <div
                 v-if="form.errors.storage"
@@ -204,48 +198,13 @@
             />
         </template>
         <template #footer>
-            <SecondaryButton @click="closeModal"> {{ __("Cancel") }}</SecondaryButton>
+            <SecondaryButton @click="showDeliveryModal = false">{{ __("Cancel") }}</SecondaryButton>
 
             <PrimaryButton
                 class="ml-3 rtl:mr-3 rtl:ml-0"
                 :class="{ 'opacity-25': form.processing }"
                 :disabled="form.processing"
-                @click="confirmDeduct"
-            >
-                {{ __("Confirm") }}
-            </PrimaryButton>
-        </template>
-    </DialogModal>
-
-    <DialogModal
-        :show="movingToStorage"
-        @close="closeModal"
-    >
-        <template #title></template>
-        <template #content>
-            <VueMultiselect
-                v-model="selectedStorage"
-                :options="storages"
-                :multiple="false"
-                :close-on-select="true"
-                :placeholder="__('Select Storage')"
-                label="name"
-                track-by="id"
-                class="w-full"
-                :select-label="''"
-                :deselect-label="''"
-                :selected-label="__('Selected')"
-                @update:model-value="form.storage = selectedStorage?.id || null"
-            />
-        </template>
-        <template #footer>
-            <SecondaryButton @click="closeModal"> {{ __("Cancel") }}</SecondaryButton>
-
-            <PrimaryButton
-                class="ml-3 rtl:mr-3 rtl:ml-0"
-                :class="{ 'opacity-25': form.processing }"
-                :disabled="form.processing"
-                @click="confirmMoving"
+                @click="confirmDelivery"
             >
                 {{ __("Confirm") }}
             </PrimaryButton>

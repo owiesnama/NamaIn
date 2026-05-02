@@ -33,6 +33,8 @@ try {
     // Table may not exist yet (e.g., during migrations or testing)
 }
 
+Schedule::command('clockwork:clean --expiration=1440')->daily();
+
 Schedule::call(function () {
     $files = Storage::disk('local')->files('tmp');
     foreach ($files as $file) {
