@@ -17,7 +17,7 @@
     const { can } = usePermissions();
 
     defineProps({
-        customers: Array,
+        customers: Object,
         categories: Array
     });
 
@@ -118,7 +118,7 @@
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                        >{{ customers.length }} {{ __("Customer") }}</span
+                        >{{ customers.total }} {{ __("Customer") }}</span
                         >
                     </div>
                 </div>
@@ -211,7 +211,7 @@
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                <tr v-for="customer in customers" :key="customer.id" @click="router.visit(route('customers.account', customer.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
+                                <tr v-for="customer in customers.data" :key="customer.id" @click="router.visit(route('customers.account', customer.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-x-3">
                                             <div>
@@ -274,10 +274,10 @@
                         </div>
                     </div>
 
-                    <EmptySearch :data="customers" />
+                    <EmptySearch :data="customers.data" />
 
                     <div class="mt-6 flex justify-center">
-                        <Pagination :links="[]" v-if="false" />
+                        <Pagination :links="customers.links" />
                     </div>
                 </div>
             </div>

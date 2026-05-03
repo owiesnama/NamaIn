@@ -28,8 +28,9 @@ class CustomersController extends Controller
                 ->withCount(['invoices', 'payments'])
                 ->withSum('invoices as total_invoiced', \DB::raw('total - discount'))
                 ->withMax('invoices as last_transaction_date', 'created_at')
-                ->get()
-                ->map(fn ($customer) => [
+                ->paginate(parent::ELEMENTS_PER_PAGE)
+                ->withQueryString()
+                ->through(fn ($customer) => [
                     ...$customer->toArray(),
                     'account_balance' => (float) $customer->account_balance,
                     'total_invoiced' => (float) $customer->total_invoiced,
