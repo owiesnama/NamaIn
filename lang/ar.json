@@ -1251,5 +1251,20 @@
     "Monitoring": "أدوات النظام",
     "Queues": "المهام المجدولة",
     "Monitor": "سجل الأداء",
-    "Sign in to your account": "سجّل الدخول إلى حسابك"
+    "Sign in to your account": "سجّل الدخول إلى حسابك",
+    "Upload a CSV or Excel file to import records.": "ارفع ملف CSV أو Excel لاستيراد السجلات.",
+    "Template": "القالب",
+    "Drop a file here or click to browse": "اسحب ملف هنا أو انقر للتصفح",
+    "Click to change file": "انقر لتغيير الملف",
+    "Download sample file": "تحميل ملف نموذجي",
+    "System Template": "القالب الافتراضي",
+    "QuickBooks": "كويك بوكس",
+    "Operations": "العمليات",
+    "operation": "عملية",
+    "operations": "عمليات",
+    "No operations yet": "لا توجد عمليات بعد",
+    "Background tasks will appear here": "ستظهر المهام الخلفية هنا",
+    "in progress": "قيد التنفيذ",
+    "Imported": "تم استيراد",
+    "Ready": "جاهز"
 }

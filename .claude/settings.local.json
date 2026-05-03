@@ -158,7 +158,8 @@
       "Bash(where php8.4)",
       "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" inspect_xlsx.php)",
       "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__plugin_context7_context7__query-docs"
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" test_broadcast.php)"
     ]
   },
   "enableAllProjectMcpServers": true,

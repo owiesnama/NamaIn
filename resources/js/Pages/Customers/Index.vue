@@ -10,7 +10,7 @@
     import { useQueryString } from "@/Composables/useQueryString";
     import { usePermissions } from "@/Composables/usePermissions";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
-    import FileUploadButton from "@/Shared/FileUploadButton.vue";
+    import ImportModal from "@/Shared/ImportModal.vue";
     import Tooltip from "@/Components/Tooltip.vue";
     import { useDate } from '@/Composables/useDate';
 
@@ -33,17 +33,24 @@
 
     const showSidebar = ref(true);
 
-    const selectedTemplate = ref('default');
+    const showImportModal = ref(false);
 
-    let importForm = useForm({
+    const importForm = useForm({
         file: null,
         template: 'default',
     });
 
-    let submitImport = (files) => {
-        importForm.file = files[0];
-        importForm.template = selectedTemplate.value;
-        importForm.post(route("customers.import"));
+    const importTemplates = [
+        { value: 'default', label: __('System Template') },
+        { value: 'quickbooks', label: __('QuickBooks') },
+    ];
+
+    const submitImport = ({ file, template }) => {
+        importForm.file = file;
+        importForm.template = template;
+        importForm.post(route("customers.import"), {
+            onSuccess: () => { showImportModal.value = false; },
+        });
     };
 
     const {
@@ -133,28 +140,25 @@
                     </button>
 
                     <div class="flex items-center gap-x-2">
-                        <select
-                            v-model="selectedTemplate"
-                            class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                        >
-                            <option value="default">{{ __("System Template") }}</option>
-                            <option value="quickbooks">{{ __("QuickBooks") }}</option>
-                        </select>
-
-                        <FileUploadButton
-                            @input="submitImport"
-                        >{{ __("Import") }}
-                        </FileUploadButton>
-
-                        <a
-                            :href="route('customers.import.sample')"
-                            class="inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
-                            :title="__('Download Sample')"
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center gap-x-2 px-4 py-2.5 text-sm font-semibold tracking-widest text-gray-700 capitalize border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors"
+                            @click="showImportModal = true"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                             </svg>
-                        </a>
+                            {{ __("Import") }}
+                        </button>
+
+                        <ImportModal
+                            :show="showImportModal"
+                            :templates="importTemplates"
+                            :sample-url="route('customers.import.sample')"
+                            :processing="importForm.processing"
+                            @close="showImportModal = false"
+                            @submit="submitImport"
+                        />
 
                         <a
                             :href="route('customers.export')"
