@@ -33,12 +33,16 @@
 
     const showSidebar = ref(true);
 
+    const selectedTemplate = ref('default');
+
     let importForm = useForm({
-        file: null
+        file: null,
+        template: 'default',
     });
 
     let submitImport = (files) => {
         importForm.file = files[0];
+        importForm.template = selectedTemplate.value;
         importForm.post(route("customers.import"));
     };
 
@@ -129,6 +133,14 @@
                     </button>
 
                     <div class="flex items-center gap-x-2">
+                        <select
+                            v-model="selectedTemplate"
+                            class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                        >
+                            <option value="default">{{ __("System Template") }}</option>
+                            <option value="quickbooks">{{ __("QuickBooks") }}</option>
+                        </select>
+
                         <FileUploadButton
                             @input="submitImport"
                         >{{ __("Import") }}

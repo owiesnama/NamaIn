@@ -43,18 +43,44 @@ class AuthenticationTest extends MainDomainTestCase
         $this->assertGuest();
     }
 
-    public function test_login_route_is_not_available_on_tenant_subdomains(): void
+    public function test_tenant_login_rejects_non_member_users(): void
     {
         $tenant = Tenant::create(['name' => 'Acme', 'slug' => 'acme', 'is_active' => true]);
+        $user = User::factory()->create();
 
         $tenantBase = 'http://acme.'.config('app.domain');
 
         $this->post($tenantBase.'/login', [
-            'email' => 'user@example.com',
+            'email' => $user->email,
             'password' => 'password',
-        ])->assertNotFound();
+        ])->assertSessionHasErrors('email');
 
         $this->assertGuest();
+    }
+
+    public function test_tenant_login_allows_member_users(): void
+    {
+        $tenant = Tenant::create(['name' => 'Acme', 'slug' => 'acme', 'is_active' => true]);
+        $user = User::factory()->create();
+        $tenant->users()->attach($user, ['role' => 'owner']);
+
+        $tenantBase = 'http://acme.'.config('app.domain');
+
+        $this->post($tenantBase.'/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect();
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_tenant_login_page_is_accessible(): void
+    {
+        Tenant::create(['name' => 'Acme Corp', 'slug' => 'acme', 'is_active' => true]);
+
+        $tenantBase = 'http://acme.'.config('app.domain');
+
+        $this->get($tenantBase.'/login')->assertOk();
     }
 
     public function test_guest_on_subdomain_redirects_to_main_domain_login(): void

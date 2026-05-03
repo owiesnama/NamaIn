@@ -25,6 +25,7 @@ class ImportLog extends Model
         return [
             'status' => ExportStatus::class,
             'rows_imported' => 'integer',
+            'failures' => 'array',
         ];
     }
 

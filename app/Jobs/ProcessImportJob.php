@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Events\ImportStatusUpdated;
 use App\Imports\CustomerImport;
 use App\Imports\ProductImport;
+use App\Imports\QuickBooksCustomerImport;
 use App\Imports\SupplierImport;
 use App\Models\ImportLog;
 use App\Models\Preference;
@@ -24,11 +25,14 @@ class ProcessImportJob implements ShouldQueue
 
     public int $timeout = 300;
 
-    /** @var array<string, class-string> */
+    /** @var array<string, array<string, class-string>> */
     private const IMPORT_MAP = [
-        'products' => ProductImport::class,
-        'suppliers' => SupplierImport::class,
-        'customers' => CustomerImport::class,
+        'products' => ['default' => ProductImport::class],
+        'suppliers' => ['default' => SupplierImport::class],
+        'customers' => [
+            'default' => CustomerImport::class,
+            'quickbooks' => QuickBooksCustomerImport::class,
+        ],
     ];
 
     public function __construct(public ImportLog $importLog)
@@ -43,10 +47,11 @@ class ProcessImportJob implements ShouldQueue
         $this->importLog->markProcessing();
         ImportStatusUpdated::dispatch($this->importLog);
 
-        $importClass = self::IMPORT_MAP[$this->importLog->import_type] ?? null;
+        $template = $this->importLog->template ?? 'default';
+        $importClass = self::IMPORT_MAP[$this->importLog->import_type][$template] ?? null;
 
         if (! $importClass) {
-            $this->importLog->markFailed("Unknown import type: {$this->importLog->import_type}");
+            $this->importLog->markFailed("Unknown import type or template: {$this->importLog->import_type}/{$template}");
             ImportStatusUpdated::dispatch($this->importLog);
 
             return;
@@ -60,6 +65,8 @@ class ProcessImportJob implements ShouldQueue
             ? $import->getRowCount()
             : 0;
 
+        $this->storeFailures($import);
+
         $this->importLog->markCompleted($rowsImported);
         ImportStatusUpdated::dispatch($this->importLog);
 
@@ -70,6 +77,27 @@ class ProcessImportJob implements ShouldQueue
     {
         $this->importLog->markFailed($exception->getMessage());
         ImportStatusUpdated::dispatch($this->importLog);
+    }
+
+    private function storeFailures(object $import): void
+    {
+        if (! method_exists($import, 'failures')) {
+            return;
+        }
+
+        $failures = $import->failures();
+
+        if (empty($failures)) {
+            return;
+        }
+
+        $this->importLog->update([
+            'failures' => collect($failures)->map(fn ($failure) => [
+                'row' => $failure->row(),
+                'attribute' => $failure->attribute(),
+                'errors' => $failure->errors(),
+            ])->toArray(),
+        ]);
     }
 
     private function bindTenantContext(): void

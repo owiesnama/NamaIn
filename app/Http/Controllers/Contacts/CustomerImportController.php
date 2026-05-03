@@ -16,7 +16,10 @@ class CustomerImportController extends Controller
 
     public function store()
     {
-        request()->validate(['file' => 'required|file|mimes:csv,xlsx,xls']);
+        request()->validate([
+            'file' => 'required|file|mimes:csv,xlsx,xls',
+            'template' => 'sometimes|string|in:default,quickbooks',
+        ]);
 
         $path = request()->file('file')->store('imports');
 
@@ -24,6 +27,7 @@ class CustomerImportController extends Controller
             'user_id' => auth()->id(),
             'tenant_id' => auth()->user()->current_tenant_id,
             'import_type' => 'customers',
+            'template' => request('template', 'default'),
             'original_filename' => request()->file('file')->getClientOriginalName(),
             'stored_path' => $path,
         ]);

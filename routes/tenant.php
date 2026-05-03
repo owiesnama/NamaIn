@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Auth\MustChangePasswordController;
+use App\Http\Controllers\Auth\TenantLoginController;
 use App\Http\Controllers\Catalog\ProductExportController;
 use App\Http\Controllers\Catalog\ProductImportController;
 use App\Http\Controllers\Catalog\ProductsController;
@@ -75,6 +76,12 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::middleware([ResolveTenant::class])->group(function () {
+
+    // Tenant-specific login (guest only)
+    Route::middleware('guest')->group(function () {
+        Route::get('/login', [TenantLoginController::class, 'show'])->name('tenant.login');
+        Route::post('/login', [TenantLoginController::class, 'store']);
+    });
 
     Route::post('/stop-impersonating', [ImpersonationController::class, 'stop'])
         ->name('impersonate.stop')
