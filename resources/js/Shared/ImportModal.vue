@@ -54,13 +54,19 @@
                             v-for="tpl in templates"
                             :key="tpl.value"
                             type="button"
-                            class="px-4 py-2 text-sm rounded-lg border transition-colors duration-200"
-                            :class="selectedTemplate === tpl.value
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 font-medium'
-                                : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
-                            @click="selectedTemplate = tpl.value"
+                            class="relative px-4 py-2 text-sm rounded-lg border transition-colors duration-200"
+                            :class="tpl.disabled
+                                ? 'bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500 border-gray-200 dark:border-gray-700 cursor-not-allowed opacity-60'
+                                : selectedTemplate === tpl.value
+                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800 font-medium'
+                                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'"
+                            :disabled="tpl.disabled"
+                            @click="!tpl.disabled && (selectedTemplate = tpl.value)"
                         >
                             {{ tpl.label }}
+                            <span v-if="tpl.badge" class="ms-1.5 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                                {{ tpl.badge }}
+                            </span>
                         </button>
                     </div>
                 </div>

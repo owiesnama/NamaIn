@@ -9,7 +9,7 @@
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import { useQueryString } from "@/Composables/useQueryString";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
-    import FileUploadButton from "@/Shared/FileUploadButton.vue";
+    import ImportModal from "@/Shared/ImportModal.vue";
     import Tooltip from "@/Components/Tooltip.vue";
     import { useDate } from '@/Composables/useDate';
 
@@ -29,14 +29,17 @@
     const { formatDate } = useDate();
 
     const showSidebar = ref(true);
+    const showImportModal = ref(false);
 
-    let importForm = useForm({
-        file: null
+    const importForm = useForm({
+        file: null,
     });
 
-    let submitImport = (files) => {
-        importForm.file = files[0];
-        importForm.post(route("suppliers.import"));
+    const submitImport = ({ file }) => {
+        importForm.file = file;
+        importForm.post(route("suppliers.import"), {
+            onSuccess: () => { showImportModal.value = false; },
+        });
     };
 
     const filters = ref({
@@ -111,20 +114,28 @@
                     </button>
 
                     <div class="flex items-center gap-x-2">
-                        <FileUploadButton
-                            @input="submitImport"
-                        >{{ __("Import") }}
-                        </FileUploadButton>
-
-                        <a
-                            :href="route('suppliers.import.sample')"
-                            class="inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
-                            :title="__('Download Sample')"
+                        <button
+                            type="button"
+                            class="inline-flex items-center justify-center gap-x-2 px-4 py-2.5 text-sm font-semibold tracking-widest text-gray-700 capitalize border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors"
+                            @click="showImportModal = true"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
                             </svg>
-                        </a>
+                            {{ __("Import") }}
+                        </button>
+
+                        <ImportModal
+                            :show="showImportModal"
+                            :templates="[
+                                { value: 'default', label: __('System Template') },
+                                { value: 'quickbooks', label: __('QuickBooks'), disabled: true, badge: __('Coming Soon') },
+                            ]"
+                            :sample-url="route('suppliers.import.sample')"
+                            :processing="importForm.processing"
+                            @close="showImportModal = false"
+                            @submit="submitImport"
+                        />
 
                         <a
                             :href="route('suppliers.export')"
