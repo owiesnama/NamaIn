@@ -26,8 +26,9 @@ class SuppliersController extends Controller
                 ->withCount(['invoices', 'payments'])
                 ->withSum('invoices as total_invoiced', \DB::raw('total - discount'))
                 ->withMax('invoices as last_transaction_date', 'created_at')
-                ->get()
-                ->map(fn ($supplier) => [
+                ->paginate(parent::ELEMENTS_PER_PAGE)
+                ->withQueryString()
+                ->through(fn ($supplier) => [
                     ...$supplier->toArray(),
                     'account_balance' => (float) $supplier->account_balance,
                     'total_invoiced' => (float) $supplier->total_invoiced,

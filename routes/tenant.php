@@ -83,6 +83,10 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::post('/login', [TenantLoginController::class, 'store']);
     });
 
+    Route::post('/logout', [TenantLoginController::class, 'destroy'])
+        ->name('tenant.logout')
+        ->middleware('auth');
+
     Route::post('/stop-impersonating', [ImpersonationController::class, 'stop'])
         ->name('impersonate.stop')
         ->middleware(['auth:sanctum', config('jetstream.auth_session')]);

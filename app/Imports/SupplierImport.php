@@ -4,17 +4,20 @@ namespace App\Imports;
 
 use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Model;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Validators\Failure;
 
-class SupplierImport implements ToModel, WithHeadingRow
+class SupplierImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithValidation
 {
     private int $rowCount = 0;
 
-    /**
-     * @return Model|null
-     */
-    public function model(array $row)
+    /** @var Failure[] */
+    private array $failures = [];
+
+    public function model(array $row): ?Model
     {
         $this->rowCount++;
 
@@ -25,6 +28,28 @@ class SupplierImport implements ToModel, WithHeadingRow
             'opening_debit' => $row['opening_debit'] ?? 0,
             'opening_credit' => $row['opening_credit'] ?? 0,
         ]);
+    }
+
+    public function rules(): array
+    {
+        return [
+            'name' => 'required|string',
+            'opening_debit' => 'nullable|numeric|min:0',
+            'opening_credit' => 'nullable|numeric|min:0',
+        ];
+    }
+
+    public function onFailure(Failure ...$failures): void
+    {
+        foreach ($failures as $failure) {
+            $this->failures[] = $failure;
+        }
+    }
+
+    /** @return Failure[] */
+    public function failures(): array
+    {
+        return $this->failures;
     }
 
     public function getRowCount(): int

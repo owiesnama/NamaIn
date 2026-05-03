@@ -14,7 +14,7 @@
     import { useDate } from '@/Composables/useDate';
 
     defineProps({
-        suppliers: Array,
+        suppliers: Object,
         categories: Array
     });
 
@@ -89,7 +89,7 @@
 
                         <span
                             class="px-3 py-1 text-xs font-semibold rounded-full text-emerald-700 bg-emerald-100/60 dark:bg-gray-800 dark:text-emerald-400"
-                        >{{ suppliers.length }} {{ __("Supplier") }}</span
+                        >{{ suppliers.total }} {{ __("Supplier") }}</span
                         >
                     </div>
                 </div>
@@ -177,7 +177,7 @@
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                <tr v-for="supplier in suppliers" :key="supplier.id" @click="router.visit(route('suppliers.account', supplier.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
+                                <tr v-for="supplier in suppliers.data" :key="supplier.id" @click="router.visit(route('suppliers.account', supplier.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-x-3">
                                             <div>
@@ -238,10 +238,10 @@
                         </div>
                     </div>
 
-                    <EmptySearch :data="suppliers" />
+                    <EmptySearch :data="suppliers.data" />
 
                     <div class="mt-6 flex justify-center">
-                        <Pagination :links="[]" v-if="false" />
+                        <Pagination :links="suppliers.links" />
                     </div>
                 </div>
             </div>

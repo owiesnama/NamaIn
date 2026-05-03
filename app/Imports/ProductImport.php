@@ -5,18 +5,42 @@ namespace App\Imports;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Row;
+use Maatwebsite\Excel\Validators\Failure;
 
 class ProductImport implements OnEachRow, WithHeadingRow
 {
     private int $rowCount = 0;
 
-    public function onRow(Row $row)
+    /** @var Failure[] */
+    private array $failures = [];
+
+    public function onRow(Row $row): void
     {
-        $this->rowCount++;
         $data = $row->toArray();
+
+        $validator = Validator::make($data, [
+            'name' => 'required|string',
+            'cost' => 'nullable|numeric|min:0',
+        ]);
+
+        if ($validator->fails()) {
+            foreach ($validator->errors()->messages() as $attribute => $errors) {
+                $this->failures[] = new Failure(
+                    $row->getIndex(),
+                    $attribute,
+                    $errors,
+                    $data,
+                );
+            }
+
+            return;
+        }
+
+        $this->rowCount++;
 
         $product = Product::create([
             'name' => $data['name'],
@@ -39,6 +63,12 @@ class ProductImport implements OnEachRow, WithHeadingRow
             });
             $product->categories()->sync($categoryIds);
         }
+    }
+
+    /** @return Failure[] */
+    public function failures(): array
+    {
+        return $this->failures;
     }
 
     public function getRowCount(): int

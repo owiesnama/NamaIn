@@ -25,7 +25,7 @@
     const page = usePage();
 
     const logout = () => {
-        router.post(route("logout"));
+        router.post(route("tenant.logout"));
     };
 
     const { can } = usePermissions();
