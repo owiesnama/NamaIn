@@ -159,7 +159,8 @@
       "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" inspect_xlsx.php)",
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
-      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" test_broadcast.php)"
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" test_broadcast.php)",
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" -r \"var_dump\\(isset\\(['treasury_account_id' => null]['treasury_account_id']\\)\\); var_dump\\(isset\\(['treasury_account_id' => 5]['treasury_account_id']\\)\\);\")"
     ]
   },
   "enableAllProjectMcpServers": true,

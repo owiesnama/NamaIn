@@ -392,7 +392,7 @@
                                 :select-label="''"
                                 :deselect-label="''"
                                 :selected-label="__('Selected')"
-                                @update:model-value="form.treasury_account_id = selectedTreasuryAccount?.id ?? null"
+                                @update:model-value="form.treasury_account_id = $event ?? null"
                             >
                                 <template #option="{ option }">
                                     <span>{{ option.name }}</span>
