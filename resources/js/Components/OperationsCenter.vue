@@ -4,15 +4,17 @@ import { usePage } from '@inertiajs/vue3';
 
 const page = usePage();
 const flash = computed(() => page.props.flash);
+const sharedOperations = computed(() => page.props.operations ?? []);
 const isRtl = computed(() => page.props.locale === 'ar');
 
 // ─── State ──────────────────────────────────────────────────────────
 const operations = ref([]);
 const panelOpen = ref(false);
+let restoredSharedOperations = false;
 
 // ─── Derived ────────────────────────────────────────────────────────
-const active = computed(() => operations.value.filter(o => o.status === 'processing' || o.status === 'queued'));
-const done = computed(() => operations.value.filter(o => o.status === 'completed' || o.status === 'failed'));
+const active = computed(() => operations.value.filter(o => isActiveStatus(o.status)));
+const done = computed(() => operations.value.filter(o => isFinishedStatus(o.status)));
 const pillState = computed(() => {
     if (active.value.length > 0) return 'active';
     if (operations.value.length > 0) return 'done';
@@ -33,6 +35,20 @@ function addOrUpdate(data) {
     }
     if (operations.value.length > 10) {
         operations.value = operations.value.slice(0, 10);
+    }
+}
+
+function hydrateOperations(items) {
+    if (restoredSharedOperations) return;
+
+    restoredSharedOperations = true;
+
+    if (!Array.isArray(items) || items.length === 0) return;
+
+    [...items].reverse().forEach(addOrUpdate);
+
+    if (!panelOpen.value) {
+        panelOpen.value = true;
     }
 }
 
@@ -61,6 +77,9 @@ const eventHandlers = {
 };
 
 // ─── Flash watcher ──────────────────────────────────────────────────
+// Shared operation snapshot
+watch(sharedOperations, hydrateOperations, { immediate: true });
+
 watch(flash, (val) => {
     if (!val?.type) return;
     const handler = eventHandlers[val.type];
@@ -100,6 +119,14 @@ onUnmounted(() => {
 });
 
 // ─── Helpers ────────────────────────────────────────────────────────
+function isActiveStatus(status) {
+    return status === 'processing' || status === 'queued';
+}
+
+function isFinishedStatus(status) {
+    return status === 'completed' || status === 'failed';
+}
+
 function title(op) {
     const label = __(op.label?.replace(/[-_]/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || '');
     const kindLabel = op.kind === 'import' ? __('Import') : __('Export');
@@ -113,7 +140,8 @@ function statusText(op) {
         if (op.kind === 'import') return `${__('Imported')} ${op.rows_imported ?? 0} ${__('rows')}`;
         return __('Ready');
     }
-    return op.failure_message || __('Failed');
+    if (op.kind === 'import') return op.failure_message || __('Import failed. Please check the file and try again.');
+    return op.failure_message || __('Export failed. Please try again.');
 }
 
 const ringCircumference = 2 * Math.PI * 13;

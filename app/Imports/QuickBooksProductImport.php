@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\ParsesSpreadsheetDates;
 use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Category;
 use App\Models\Product;
@@ -15,6 +16,7 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class QuickBooksProductImport implements OnEachRow, WithHeadingRow, WithMultipleSheets
 {
+    use ParsesSpreadsheetDates;
     use TracksImportProgress;
 
     public function sheets(): array
@@ -99,17 +101,7 @@ class QuickBooksProductImport implements OnEachRow, WithHeadingRow, WithMultiple
     private function parseExpireDate(array $data): ?Carbon
     {
         // maatwebsite normalizes Arabic header تاريخ الانتهاء to tarykh_alanthaaa
-        $raw = $data['tarykh_alanthaaa'] ?? null;
-
-        if (! $raw) {
-            return null;
-        }
-
-        try {
-            return Carbon::parse($raw);
-        } catch (\Throwable) {
-            return null;
-        }
+        return $this->parseSpreadsheetDate($data['tarykh_alanthaaa'] ?? null);
     }
 
     /**

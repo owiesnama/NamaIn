@@ -1,5 +1,5 @@
 <script setup>
-    import { ref } from "vue";
+    import { computed, ref, watch } from "vue";
     import Modal from "@/Components/Modal.vue";
 
     const props = defineProps({
@@ -11,9 +11,23 @@
 
     const emit = defineEmits(["close", "submit"]);
 
-    const selectedTemplate = ref(props.templates[0]?.value || "default");
+    const defaultTemplate = computed(() => {
+        return props.templates.find((template) => !template.disabled)?.value || "default";
+    });
+
+    const selectedTemplate = ref(defaultTemplate.value);
     const selectedFile = ref(null);
     const dragOver = ref(false);
+
+    const selectedTemplateIsAvailable = computed(() => {
+        if (props.templates.length === 0) {
+            return selectedTemplate.value === "default";
+        }
+
+        return props.templates.some((template) => {
+            return template.value === selectedTemplate.value && !template.disabled;
+        });
+    });
 
     const onFileSelected = (event) => {
         selectedFile.value = event.target.files[0] || null;
@@ -28,15 +42,27 @@
     };
 
     const submit = () => {
-        if (!selectedFile.value) return;
+        if (!selectedFile.value || !selectedTemplateIsAvailable.value) return;
         emit("submit", { file: selectedFile.value, template: selectedTemplate.value });
     };
 
-    const close = () => {
+    const reset = () => {
         selectedFile.value = null;
-        selectedTemplate.value = props.templates[0]?.value || "default";
+        selectedTemplate.value = defaultTemplate.value;
+    };
+
+    const close = () => {
+        reset();
         emit("close");
     };
+
+    watch(() => props.show, () => reset());
+
+    watch(defaultTemplate, (template) => {
+        if (!selectedTemplateIsAvailable.value) {
+            selectedTemplate.value = template;
+        }
+    });
 </script>
 
 <template>
@@ -134,7 +160,7 @@
                 <button
                     type="button"
                     class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
-                    :disabled="!selectedFile || processing"
+                    :disabled="!selectedFile || !selectedTemplateIsAvailable || processing"
                     @click="submit"
                 >
                     <svg v-if="processing" class="animate-spin ltr:-ml-1 rtl:-mr-1 ltr:mr-2 rtl:ml-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

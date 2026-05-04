@@ -2,10 +2,10 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\ParsesSpreadsheetDates;
 use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -14,6 +14,7 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class ProductImport implements OnEachRow, WithHeadingRow
 {
+    use ParsesSpreadsheetDates;
     use TracksImportProgress;
 
     public function onRow(Row $row): void
@@ -33,13 +34,26 @@ class ProductImport implements OnEachRow, WithHeadingRow
             return;
         }
 
+        $expireDate = $this->parseSpreadsheetDate($data['expire_date'] ?? null);
+
+        if (! empty($data['expire_date']) && $expireDate === null) {
+            $this->failures[] = new Failure(
+                $row->getIndex(),
+                'expire_date',
+                [__('Expiry date must be a valid date.')],
+                $data,
+            );
+
+            return;
+        }
+
         $this->incrementRowCount();
 
         $product = Product::create([
             'name' => $data['name'],
             'cost' => $data['cost'] ?? null,
             'price' => $data['price'] ?? $data['cost'] ?? 0,
-            'expire_date' => Carbon::parse($data['expire_date']),
+            'expire_date' => $expireDate,
             'currency' => $data['currency'] ?? preference('currency', '$'),
         ]);
 

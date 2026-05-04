@@ -1267,5 +1267,13 @@
     "in progress": "قيد التنفيذ",
     "Imported": "تم استيراد",
     "Ready": "جاهز",
-    "Coming Soon": "قريبًا"
+    "Coming Soon": "قريبًا",
+    "Import failed. Please check the file format and try again.": "فشل الاستيراد. يرجى التحقق من تنسيق الملف والمحاولة مرة أخرى.",
+    "Import failed. Unsupported file template.": "فشل الاستيراد. قالب الملف غير مدعوم.",
+    "Import failed. Please check the file and try again.": "فشل الاستيراد. يرجى التحقق من الملف والمحاولة مرة أخرى.",
+    "Import failed. The selected file does not contain any rows to import.": "فشل الاستيراد. الملف المحدد لا يحتوي على أي صفوف للاستيراد.",
+    "Export failed. Please try again.": "فشل التصدير. يرجى المحاولة مرة أخرى.",
+    "Export failed. Unsupported export type.": "فشل التصدير. نوع التصدير غير مدعوم.",
+    "Expiry date must be a valid date.": "تاريخ الانتهاء يجب أن يكون تاريخًا صالحًا.",
+    "Expiry date must be a valid date, for example 2026-12-31.": "تاريخ الانتهاء يجب أن يكون تاريخًا صالحًا، مثال: 2026-12-31."
 }

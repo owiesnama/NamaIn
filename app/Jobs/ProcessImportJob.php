@@ -17,6 +17,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Maatwebsite\Excel\Facades\Excel;
+use Throwable;
 
 class ProcessImportJob implements ShouldQueue
 {
@@ -55,7 +56,7 @@ class ProcessImportJob implements ShouldQueue
         $importClass = self::IMPORT_MAP[$this->importLog->import_type][$template] ?? null;
 
         if (! $importClass) {
-            $this->importLog->markFailed("Unknown import type or template: {$this->importLog->import_type}/{$template}");
+            $this->importLog->markFailed(__('Import failed. Unsupported file template.'));
             ImportStatusUpdated::dispatch($this->importLog);
 
             return;
@@ -63,7 +64,13 @@ class ProcessImportJob implements ShouldQueue
 
         $import = new $importClass;
 
-        Excel::import($import, storage_path("app/{$this->importLog->stored_path}"));
+        try {
+            Excel::import($import, storage_path("app/{$this->importLog->stored_path}"));
+        } catch (Throwable $exception) {
+            $this->failImport($exception);
+
+            return;
+        }
 
         $rowsImported = method_exists($import, 'getRowCount')
             ? $import->getRowCount()
@@ -74,13 +81,37 @@ class ProcessImportJob implements ShouldQueue
         $this->importLog->markCompleted($rowsImported);
         ImportStatusUpdated::dispatch($this->importLog);
 
-        @unlink(storage_path("app/{$this->importLog->stored_path}"));
+        $this->deleteStoredFile();
     }
 
-    public function failed(\Throwable $exception): void
+    public function failed(Throwable $exception): void
     {
-        $this->importLog->markFailed($exception->getMessage());
+        $this->failImport($exception);
+    }
+
+    private function failImport(Throwable $exception): void
+    {
+        report($exception);
+
+        $this->importLog->markFailed($this->failureMessageFor($exception));
         ImportStatusUpdated::dispatch($this->importLog);
+        $this->deleteStoredFile();
+    }
+
+    private function failureMessageFor(Throwable $exception): string
+    {
+        $message = $exception->getMessage();
+        clock()->error('Import failed with error: {error}', ['error' => $message]);
+        if (str_contains($message, 'Start row') && str_contains($message, 'beyond highest row')) {
+            return __('Import failed. The selected file does not contain any rows to import.');
+        }
+
+        return __('Import failed. Please check the file format and try again.');
+    }
+
+    private function deleteStoredFile(): void
+    {
+        @unlink(storage_path("app/{$this->importLog->stored_path}"));
     }
 
     private function storeFailures(object $import): void

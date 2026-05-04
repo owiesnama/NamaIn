@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Preference;
+use App\Services\OperationFeed;
 use App\Services\TenantCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -62,6 +63,7 @@ class HandleInertiaRequests extends Middleware
                 ? $this->resolvePreferences()
                 : [],
             'userPreferences' => fn () => $request->user()?->user_preferences ?? [],
+            'operations' => fn () => $this->operations($request),
             'flash' => session()->get('flash') ?? [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
@@ -92,6 +94,17 @@ class HandleInertiaRequests extends Middleware
         }
 
         return $prefs;
+    }
+
+    private function operations(Request $request): array
+    {
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+
+        if (! $tenant || ! $request->user()) {
+            return [];
+        }
+
+        return app(OperationFeed::class)->forUser($request->user(), $tenant);
     }
 
     public function getJsonFileContent($path)

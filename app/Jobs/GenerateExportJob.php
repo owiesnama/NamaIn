@@ -39,7 +39,7 @@ class GenerateExportJob implements ShouldQueue
         $exportClass = ExportRegistry::resolve($this->exportLog->export_key);
 
         if (! $exportClass) {
-            $this->exportLog->markFailed("Unknown export key: {$this->exportLog->export_key}");
+            $this->exportLog->markFailed(__('Export failed. Unsupported export type.'));
             ExportStatusUpdated::dispatch($this->exportLog);
 
             return;
@@ -71,7 +71,9 @@ class GenerateExportJob implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        $this->exportLog->markFailed($exception->getMessage());
+        report($exception);
+
+        $this->exportLog->markFailed(__('Export failed. Please try again.'));
         ExportStatusUpdated::dispatch($this->exportLog);
     }
 

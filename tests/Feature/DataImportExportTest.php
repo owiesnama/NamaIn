@@ -66,6 +66,82 @@ function createQuickBooksXlsx(array $rows): UploadedFile
     return new UploadedFile($filePath, 'quickbooks.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
 }
 
+function createQuickBooksProductXlsx(array $rows): UploadedFile
+{
+    $spreadsheet = new Spreadsheet;
+
+    $sheet0 = $spreadsheet->getActiveSheet();
+    $sheet0->setTitle('Sheet0');
+
+    $sheet1 = $spreadsheet->createSheet(1);
+    $sheet1->setTitle('Products');
+
+    $headers = [
+        'B1' => 'Active Status',
+        'C1' => 'Type',
+        'D1' => 'Item',
+        'E1' => 'Cost',
+        'F1' => 'Price',
+        'G1' => 'UM',
+    ];
+
+    foreach ($headers as $cell => $value) {
+        $sheet1->setCellValue($cell, $value);
+    }
+
+    foreach ($rows as $i => $row) {
+        $rowNum = $i + 2;
+        $sheet1->setCellValue("B{$rowNum}", $row['active_status'] ?? 'Active');
+        $sheet1->setCellValue("C{$rowNum}", $row['type'] ?? 'Inventory Part');
+        $sheet1->setCellValue("D{$rowNum}", $row['item'] ?? '');
+        $sheet1->setCellValue("E{$rowNum}", $row['cost'] ?? 0);
+        $sheet1->setCellValue("F{$rowNum}", $row['price'] ?? 0);
+        $sheet1->setCellValue("G{$rowNum}", $row['um'] ?? '');
+    }
+
+    $filePath = tempnam(sys_get_temp_dir(), 'qb-products').'.xlsx';
+    (new Xlsx($spreadsheet))->save($filePath);
+
+    return new UploadedFile($filePath, 'quickbooks-products.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+}
+
+function createProductXlsx(array $rows): UploadedFile
+{
+    $spreadsheet = new Spreadsheet;
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Products');
+
+    $headers = [
+        'A1' => 'name',
+        'B1' => 'cost',
+        'C1' => 'currency',
+        'D1' => 'expire_date',
+        'E1' => 'unit_name',
+        'F1' => 'unit_conversion_factor',
+        'G1' => 'categories',
+    ];
+
+    foreach ($headers as $cell => $value) {
+        $sheet->setCellValue($cell, $value);
+    }
+
+    foreach ($rows as $i => $row) {
+        $rowNum = $i + 2;
+        $sheet->setCellValue("A{$rowNum}", $row['name'] ?? '');
+        $sheet->setCellValue("B{$rowNum}", $row['cost'] ?? '');
+        $sheet->setCellValue("C{$rowNum}", $row['currency'] ?? 'SDG');
+        $sheet->setCellValue("D{$rowNum}", $row['expire_date'] ?? '');
+        $sheet->setCellValue("E{$rowNum}", $row['unit_name'] ?? '');
+        $sheet->setCellValue("F{$rowNum}", $row['unit_conversion_factor'] ?? '');
+        $sheet->setCellValue("G{$rowNum}", $row['categories'] ?? '');
+    }
+
+    $filePath = tempnam(sys_get_temp_dir(), 'products').'.xlsx';
+    (new Xlsx($spreadsheet))->save($filePath);
+
+    return new UploadedFile($filePath, 'products.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', null, true);
+}
+
 // ============================================
 // Import Sample Templates
 // ============================================
@@ -198,6 +274,52 @@ test('can import products with units and categories from CSV', function () {
     expect($product->categories->contains('name', 'Cat2'))->toBeTrue();
 });
 
+test('can import products with day first spreadsheet expiry dates', function () {
+    $file = createProductXlsx([
+        [
+            'name' => 'Day First Product',
+            'cost' => 250,
+            'expire_date' => '31/12/2027',
+            'unit_name' => 'Bag',
+            'unit_conversion_factor' => 5,
+            'categories' => 'Cat1',
+        ],
+    ]);
+
+    $response = $this->post(route('products.import'), [
+        'file' => $file,
+    ]);
+
+    $response->assertStatus(302);
+
+    $product = Product::where('name', 'Day First Product')->first();
+
+    expect($product)->not->toBeNull();
+    expect(substr((string) $product->expire_date, 0, 10))->toBe('2027-12-31');
+    expect($product->units)->toHaveCount(1);
+    expect($product->categories->contains('name', 'Cat1'))->toBeTrue();
+});
+
+test('product import expiry date failure message does not require a specific format', function () {
+    $file = createProductXlsx([
+        [
+            'name' => 'Invalid Date Product',
+            'cost' => 250,
+            'expire_date' => 'not a date',
+        ],
+    ]);
+
+    $response = $this->post(route('products.import'), [
+        'file' => $file,
+    ]);
+
+    $response->assertStatus(302);
+
+    $importLog = ImportLog::latest()->first();
+
+    expect($importLog->failures[0]['errors'])->toContain(__('Expiry date must be a valid date.'));
+});
+
 test('can export products to Excel', function () {
     Queue::fake();
     Product::factory()->count(3)->create();
@@ -240,6 +362,59 @@ test('product export-import roundtrip works', function () {
     if (file_exists($tempFile)) {
         unlink($tempFile);
     }
+});
+
+test('can import products from quickbooks excel file', function () {
+    $file = createQuickBooksProductXlsx([
+        ['item' => 'Food:QB Product One', 'cost' => 120, 'price' => 150, 'um' => 'each (piece)'],
+        ['item' => 'QB Product Two', 'cost' => 80, 'price' => 0],
+    ]);
+
+    $response = $this->post(route('products.import'), [
+        'file' => $file,
+        'template' => 'quickbooks',
+    ]);
+
+    $response->assertStatus(302);
+
+    $this->assertDatabaseHas('products', [
+        'name' => 'QB Product One',
+        'cost' => 120,
+        'price' => 150,
+    ]);
+
+    $this->assertDatabaseHas('categories', ['name' => 'Food']);
+    $this->assertDatabaseHas('units', ['name' => 'each']);
+
+    $this->assertDatabaseHas('products', [
+        'name' => 'QB Product Two',
+        'cost' => 80,
+        'price' => 80,
+    ]);
+
+    $this->assertDatabaseHas('import_logs', [
+        'import_type' => 'products',
+        'template' => 'quickbooks',
+        'status' => 'completed',
+    ]);
+});
+
+test('quickbooks product import reports an empty sheet with a translated failure message', function () {
+    $file = createQuickBooksProductXlsx([]);
+
+    $response = $this->post(route('products.import'), [
+        'file' => $file,
+        'template' => 'quickbooks',
+    ]);
+
+    $response->assertStatus(302);
+
+    $this->assertDatabaseHas('import_logs', [
+        'import_type' => 'products',
+        'template' => 'quickbooks',
+        'status' => 'failed',
+        'failure_message' => __('Import failed. The selected file does not contain any rows to import.'),
+    ]);
 });
 
 // ============================================
