@@ -1,0 +1,3 @@
+name,address,phone_number,credit_limit,opening_debit,opening_credit
+Cypress Customer A,Khartoum Street 1,0912345678,5000,1000,0
+Cypress Customer B,Omdurman Street 2,0987654321,3000,0,500

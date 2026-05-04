@@ -162,7 +162,9 @@
       "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" test_broadcast.php)",
       "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" -r \"var_dump\\(isset\\(['treasury_account_id' => null]['treasury_account_id']\\)\\); var_dump\\(isset\\(['treasury_account_id' => 5]['treasury_account_id']\\)\\);\")",
       "Bash(find:*)",
-      "Bash('C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat' -r 'require '\\\\''vendor/autoload.php'\\\\''; $app = require '\\\\''bootstrap/app.php'\\\\''; $app->make\\(\\\\Illuminate\\\\Contracts\\\\Console\\\\Kernel::class\\)->bootstrap\\(\\); echo get_class\\(\\\\Illuminate\\\\Support\\\\Facades\\\\DB::raw\\('\\\\''test'\\\\''\\)\\) . PHP_EOL; echo \\\\Illuminate\\\\Support\\\\Facades\\\\DB::raw\\('\\\\''test'\\\\''\\) . PHP_EOL;')"
+      "Bash('C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat' -r 'require '\\\\''vendor/autoload.php'\\\\''; $app = require '\\\\''bootstrap/app.php'\\\\''; $app->make\\(\\\\Illuminate\\\\Contracts\\\\Console\\\\Kernel::class\\)->bootstrap\\(\\); echo get_class\\(\\\\Illuminate\\\\Support\\\\Facades\\\\DB::raw\\('\\\\''test'\\\\''\\)\\) . PHP_EOL; echo \\\\Illuminate\\\\Support\\\\Facades\\\\DB::raw\\('\\\\''test'\\\\''\\) . PHP_EOL;')",
+      "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" generate_qb_fixtures.php)",
+      "Bash(rm generate_qb_fixtures.php)"
     ]
   },
   "enableAllProjectMcpServers": true,

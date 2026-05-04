@@ -9,10 +9,8 @@ use App\Enums\StorageType;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Models\PosSession;
-use App\Models\Preference;
 use App\Models\Product;
 use App\Models\Storage;
-use App\Services\TenantCache;
 use Illuminate\Http\Request;
 
 class PosSessionController extends Controller
@@ -38,21 +36,21 @@ class PosSessionController extends Controller
 
         return inertia('Pos/Session', [
             'session' => $session->load(['storage', 'openedBy']),
-            'products' => Product::with('units')->get()->map(function (Product $product) use ($storage, $replenishmentAction) {
-                $prefs = collect(TenantCache::rememberForever('preferences', fn () => Preference::asPairs()));
-                $margin = (float) ($prefs['pecentage'] ?? 60);
-                $cost = $product->cost ?? 0;
-                $suggestedPrice = $cost > 0 ? $cost * (1 + $margin / 100) : 0;
-
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $suggestedPrice / 100,
-                    'sale_point_qty' => $storage->quantityOf($product),
-                    'replenishment' => $this->buildReplenishmentInfo($product, $replenishmentAction),
-                    'units' => $product->units,
-                ];
-            }),
+            'initialProducts' => Product::with('units')
+                ->when(request('search'), fn ($q, $search) => $q->where('name', 'ilike', "%{$search}%"))
+                ->orderBy('name')
+                ->paginate(24)
+                ->withQueryString()
+                ->through(function (Product $product) use ($storage, $replenishmentAction) {
+                    return [
+                        'id' => $product->id,
+                        'name' => $product->name,
+                        'price' => $product->price / 100,
+                        'sale_point_qty' => $storage->quantityOf($product),
+                        'replenishment' => $this->buildReplenishmentInfo($product, $replenishmentAction),
+                        'units' => $product->units,
+                    ];
+                }),
             'customers' => Customer::where('is_system', false)->get(),
             'session_stats' => [
                 'opening_float' => $session->opening_float / 100,

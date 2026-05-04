@@ -67,7 +67,7 @@ describe('Report Pages', () => {
     it('loads the purchase report', () => {
         cy.visit('/reports/purchases');
         cy.url().should('include', '/reports/purchases');
-        cy.contains('Purchase Report').should('exist');
+        cy.contains('Purchases Report').should('exist');
         cy.contains('Total Cost').should('exist');
     });
 
@@ -150,12 +150,18 @@ describe('Report Date Filters', () => {
     });
 
     it('can change group-by on the sales report', () => {
+        cy.viewport(1280, 720);
         cy.visit('/reports/sales');
 
-        cy.contains('button', 'Week').click();
+        // Target group-by buttons specifically (inside the "Group By" section)
+        cy.contains('p', 'Group By').parent().within(() => {
+            cy.contains('button', 'Week').click();
+        });
         cy.url().should('include', 'group_by=week');
 
-        cy.contains('button', 'Month').click();
+        cy.contains('p', 'Group By').parent().within(() => {
+            cy.contains('button', 'Month').click();
+        });
         cy.url().should('include', 'group_by=month');
     });
 
@@ -176,6 +182,7 @@ describe('Report Navigation', () => {
     beforeEach(() => cy.tenantLoginAs('owner'));
 
     it('has a back link to reports hub from each report', () => {
+        cy.viewport(1280, 720);
         cy.visit('/reports/sales');
         cy.get('a[href*="/reports"]').first().click();
         cy.url().should('match', /\/reports$/);
@@ -196,6 +203,27 @@ describe('Report Exports', () => {
     });
 
     it('clicking export triggers a queued export request', () => {
+        // Seed a sale so the Export button is enabled (disabled when no data)
+        cy.php(`
+            $tenant = App\\Models\\Tenant::where('slug', 'cypress-test')->first();
+            app()->instance('currentTenant', $tenant);
+            $storage = App\\Models\\Storage::factory()->create();
+            $customer = App\\Models\\Customer::factory()->create();
+            $product = App\\Models\\Product::factory()->create(['cost' => 50]);
+            $invoice = App\\Models\\Invoice::create([
+                'invocable_id' => $customer->id,
+                'invocable_type' => App\\Models\\Customer::class,
+                'total' => 1000, 'paid_amount' => 1000, 'discount' => 0,
+                'serial_number' => 'CYP-EXP-001', 'status' => 'delivered', 'payment_status' => 'paid',
+            ]);
+            App\\Models\\Transaction::create([
+                'product_id' => $product->id, 'storage_id' => $storage->id,
+                'invoice_id' => $invoice->id, 'quantity' => 10, 'base_quantity' => 10,
+                'price' => 100, 'unit_cost' => 50, 'delivered' => true, 'created_at' => now(),
+            ]);
+            return 'seeded';
+        `);
+
         cy.visit('/reports/sales');
         cy.contains('button', 'Export').click();
 

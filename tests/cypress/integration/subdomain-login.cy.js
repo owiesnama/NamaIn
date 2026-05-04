@@ -87,17 +87,12 @@ describe('Subdomain Login', () => {
         });
     });
 
-    it('register link on subdomain login page points to root domain', () => {
+    it('subdomain login page does not show register links (auth is main-domain only)', () => {
         cy.visit('/login');
 
-        // The "Register now" link at the bottom of the login form
-        cy.contains('a', 'Register now')
-            .should('have.attr', 'href')
-            .and('include', rootOrigin + '/register');
-
-        // The "Create Your Organization" nav button
-        cy.contains('a', 'Create Your Organization')
-            .should('have.attr', 'href')
-            .and('include', rootOrigin + '/register');
+        // Since auth routes are restricted to the main domain,
+        // the subdomain login page should not contain register links
+        cy.contains('a', 'Register now').should('not.exist');
+        cy.contains('a', 'Create Your Organization').should('not.exist');
     });
 });

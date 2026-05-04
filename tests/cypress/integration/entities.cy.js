@@ -23,6 +23,7 @@ describe('Products', () => {
 
         cy.get('#name').clear().type('Cypress Test Product');
         cy.get('#cost').clear().type('1500');
+        cy.get('#price').clear().type('2000');
 
         // Flatpickr: click to open calendar, pick a date from the open calendar
         cy.get('#expire_date').click();

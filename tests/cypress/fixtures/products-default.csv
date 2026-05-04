@@ -1,0 +1,3 @@
+name,cost,price,currency,expire_date,unit_name,unit_conversion_factor,categories
+Cypress Product A,100,120,SDG,2027-06-15,Box,10,"Drinks,Juice"
+Cypress Product B,250,300,SDG,2027-12-31,Piece,1,Food

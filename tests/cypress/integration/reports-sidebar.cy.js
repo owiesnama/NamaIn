@@ -24,6 +24,7 @@ describe('Reports sidebar link visibility', () => {
     });
 
     it('owner can click Reports link and reach reports hub', () => {
+        cy.viewport(1280, 720);
         cy.tenantLoginAs('owner');
         cy.visit('/dashboard');
 

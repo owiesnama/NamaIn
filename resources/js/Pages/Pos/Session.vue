@@ -1,6 +1,7 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
+import { debounce } from "lodash";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import TextInput from "@/Components/TextInput.vue";
@@ -12,7 +13,7 @@ import InputLabel from "@/Components/InputLabel.vue";
 
 const props = defineProps({
     session: Object,
-    products: Array,
+    initialProducts: Object,
     customers: Array,
     session_stats: Object,
     flash: Object,
@@ -24,13 +25,68 @@ const page = usePage();
 const currency = window.preferences?.('currency') || 'SDG';
 const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${currency}`;
 
-// ── Product search ────────────────────────────────────────────────────────────
+// ── Product search & infinite scroll ──────────────────────────────────────────
 const search = ref('');
-const filteredProducts = computed(() => {
-    if (!search.value) return props.products;
-    return props.products.filter(p =>
-        p.name.toLowerCase().includes(search.value.toLowerCase())
+const products = ref(props.initialProducts.data);
+const loadingMore = ref(false);
+const productLandmark = ref(null);
+
+const loadMore = () => {
+    if (!props.initialProducts.next_page_url || loadingMore.value) return;
+    loadingMore.value = true;
+
+    router.get(
+        props.initialProducts.next_page_url,
+        { search: search.value || undefined },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['initialProducts'],
+            onSuccess() {
+                products.value = [...products.value, ...props.initialProducts.data];
+                loadingMore.value = false;
+            },
+            onError() {
+                loadingMore.value = false;
+            },
+        }
     );
+};
+
+const searchProducts = debounce(() => {
+    router.get(
+        route('pos.index'),
+        { search: search.value || undefined },
+        {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['initialProducts'],
+            onSuccess() {
+                products.value = props.initialProducts.data;
+            },
+        }
+    );
+}, 300);
+
+watch(search, searchProducts);
+
+const scrollObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+        if (entry.isIntersecting) loadMore();
+    });
+});
+
+onMounted(() => {
+    if (productLandmark.value) scrollObserver.observe(productLandmark.value);
+});
+
+watch(productLandmark, (el, oldEl) => {
+    if (oldEl) scrollObserver.unobserve(oldEl);
+    if (el) scrollObserver.observe(el);
+});
+
+onUnmounted(() => {
+    scrollObserver.disconnect();
 });
 
 // ── Cart ──────────────────────────────────────────────────────────────────────
@@ -306,7 +362,7 @@ const closeSession = () => closeSessionForm.post(route('pos.close'));
                 <!-- Grid -->
                 <div class="flex-grow overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-1 auto-rows-max">
                     <button
-                        v-for="product in filteredProducts"
+                        v-for="product in products"
                         :key="product.id"
                         type="button"
                         :disabled="product.sale_point_qty === 0 && !product.replenishment"
@@ -342,6 +398,17 @@ const closeSession = () => closeSessionForm.post(route('pos.close'));
                             <span v-else-if="product.replenishment" class="text-[10px] font-medium text-amber-500">{{ __('via warehouse') }}</span>
                         </div>
                     </button>
+
+                    <!-- Scroll sentinel -->
+                    <div ref="productLandmark" class="col-span-full h-1"></div>
+
+                    <!-- Loading indicator -->
+                    <div v-if="loadingMore" class="col-span-full flex justify-center py-4">
+                        <svg class="animate-spin h-5 w-5 text-emerald-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
 

@@ -8,6 +8,43 @@
 before(() => {
     Cypress.session.clearAllSavedSessions();
     cy.refreshDatabase();
+    cy.tenantLogin();
+
+    // Seed data so report Export buttons are enabled (disabled when no data)
+    cy.php(`
+        $tenant = App\\Models\\Tenant::where('slug', 'cypress-test')->first();
+        app()->instance('currentTenant', $tenant);
+        $storage = App\\Models\\Storage::factory()->create();
+        $customer = App\\Models\\Customer::factory()->create();
+        $supplier = App\\Models\\Supplier::factory()->create();
+        $product = App\\Models\\Product::factory()->create(['cost' => 50]);
+
+        $saleInvoice = App\\Models\\Invoice::create([
+            'invocable_id' => $customer->id,
+            'invocable_type' => App\\Models\\Customer::class,
+            'total' => 1000, 'paid_amount' => 1000, 'discount' => 0,
+            'serial_number' => 'CYP-EXP-SALE', 'status' => 'delivered', 'payment_status' => 'paid',
+        ]);
+        App\\Models\\Transaction::create([
+            'product_id' => $product->id, 'storage_id' => $storage->id,
+            'invoice_id' => $saleInvoice->id, 'quantity' => 10, 'base_quantity' => 10,
+            'price' => 100, 'unit_cost' => 50, 'delivered' => true, 'created_at' => now(),
+        ]);
+
+        $purchaseInvoice = App\\Models\\Invoice::create([
+            'invocable_id' => $supplier->id,
+            'invocable_type' => App\\Models\\Supplier::class,
+            'total' => 500, 'paid_amount' => 0, 'discount' => 0,
+            'serial_number' => 'CYP-EXP-PUR', 'status' => 'delivered', 'payment_status' => 'unpaid',
+        ]);
+        App\\Models\\Transaction::create([
+            'product_id' => $product->id, 'storage_id' => $storage->id,
+            'invoice_id' => $purchaseInvoice->id, 'quantity' => 10, 'base_quantity' => 10,
+            'price' => 50, 'unit_cost' => 50, 'delivered' => true, 'created_at' => now(),
+        ]);
+
+        return 'seeded';
+    `);
 });
 
 /*
@@ -124,8 +161,10 @@ describe('Export Access Control', () => {
                     format: 'xlsx',
                 },
                 failOnStatusCode: false,
+                followRedirect: false,
             }).then((response) => {
-                expect(response.status).to.eq(302); // Redirect back with errors
+                // Validation failure returns 302 redirect back with errors
+                expect(response.status).to.eq(302);
             });
         });
     });

@@ -83,15 +83,6 @@
       "POST"
     ]
   },
-  "boost.browser-logs": {
-    "name": "boost.browser-logs",
-    "domain": null,
-    "action": "Closure",
-    "uri": "_boost/browser-logs",
-    "method": [
-      "POST"
-    ]
-  },
   "dusk.login": {
     "name": "dusk.login",
     "domain": null,
@@ -124,7 +115,7 @@
   },
   "login": {
     "name": "login",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@create",
     "uri": "login",
     "method": [
@@ -134,7 +125,7 @@
   },
   "login.store": {
     "name": "login.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@store",
     "uri": "login",
     "method": [
@@ -143,7 +134,7 @@
   },
   "logout": {
     "name": "logout",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@destroy",
     "uri": "logout",
     "method": [
@@ -152,7 +143,7 @@
   },
   "password.request": {
     "name": "password.request",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@create",
     "uri": "forgot-password",
     "method": [
@@ -162,7 +153,7 @@
   },
   "password.reset": {
     "name": "password.reset",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@create",
     "uri": "reset-password/{token}",
     "method": [
@@ -172,7 +163,7 @@
   },
   "password.email": {
     "name": "password.email",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@store",
     "uri": "forgot-password",
     "method": [
@@ -181,7 +172,7 @@
   },
   "password.update": {
     "name": "password.update",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@store",
     "uri": "reset-password",
     "method": [
@@ -190,7 +181,7 @@
   },
   "register": {
     "name": "register",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@create",
     "uri": "register",
     "method": [
@@ -200,7 +191,7 @@
   },
   "register.store": {
     "name": "register.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@store",
     "uri": "register",
     "method": [
@@ -209,7 +200,7 @@
   },
   "user-profile-information.update": {
     "name": "user-profile-information.update",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\ProfileInformationController@update",
     "uri": "user/profile-information",
     "method": [
@@ -218,7 +209,7 @@
   },
   "user-password.update": {
     "name": "user-password.update",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordController@update",
     "uri": "user/password",
     "method": [
@@ -227,7 +218,7 @@
   },
   "password.confirm": {
     "name": "password.confirm",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@show",
     "uri": "user/confirm-password",
     "method": [
@@ -237,7 +228,7 @@
   },
   "password.confirmation": {
     "name": "password.confirmation",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedPasswordStatusController@show",
     "uri": "user/confirmed-password-status",
     "method": [
@@ -247,7 +238,7 @@
   },
   "password.confirm.store": {
     "name": "password.confirm.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@store",
     "uri": "user/confirm-password",
     "method": [
@@ -256,7 +247,7 @@
   },
   "two-factor.login": {
     "name": "two-factor.login",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@create",
     "uri": "two-factor-challenge",
     "method": [
@@ -266,7 +257,7 @@
   },
   "two-factor.login.store": {
     "name": "two-factor.login.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@store",
     "uri": "two-factor-challenge",
     "method": [
@@ -275,7 +266,7 @@
   },
   "two-factor.enable": {
     "name": "two-factor.enable",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@store",
     "uri": "user/two-factor-authentication",
     "method": [
@@ -284,7 +275,7 @@
   },
   "two-factor.confirm": {
     "name": "two-factor.confirm",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedTwoFactorAuthenticationController@store",
     "uri": "user/confirmed-two-factor-authentication",
     "method": [
@@ -293,7 +284,7 @@
   },
   "two-factor.disable": {
     "name": "two-factor.disable",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@destroy",
     "uri": "user/two-factor-authentication",
     "method": [
@@ -302,7 +293,7 @@
   },
   "two-factor.qr-code": {
     "name": "two-factor.qr-code",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorQrCodeController@show",
     "uri": "user/two-factor-qr-code",
     "method": [
@@ -312,7 +303,7 @@
   },
   "two-factor.secret-key": {
     "name": "two-factor.secret-key",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorSecretKeyController@show",
     "uri": "user/two-factor-secret-key",
     "method": [
@@ -322,7 +313,7 @@
   },
   "two-factor.recovery-codes": {
     "name": "two-factor.recovery-codes",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@index",
     "uri": "user/two-factor-recovery-codes",
     "method": [
@@ -332,11 +323,227 @@
   },
   "two-factor.regenerate-recovery-codes": {
     "name": "two-factor.regenerate-recovery-codes",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@store",
     "uri": "user/two-factor-recovery-codes",
     "method": [
       "POST"
+    ]
+  },
+  "horizon.stats.index": {
+    "name": "horizon.stats.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\DashboardStatsController@index",
+    "uri": "api/stats",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.workload.index": {
+    "name": "horizon.workload.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\WorkloadController@index",
+    "uri": "api/workload",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.masters.index": {
+    "name": "horizon.masters.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MasterSupervisorController@index",
+    "uri": "api/masters",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.monitoring.index": {
+    "name": "horizon.monitoring.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@index",
+    "uri": "api/monitoring",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.monitoring.store": {
+    "name": "horizon.monitoring.store",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@store",
+    "uri": "api/monitoring",
+    "method": [
+      "POST"
+    ]
+  },
+  "horizon.monitoring-tag.paginate": {
+    "name": "horizon.monitoring-tag.paginate",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@paginate",
+    "uri": "api/monitoring/{tag}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.monitoring-tag.destroy": {
+    "name": "horizon.monitoring-tag.destroy",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@destroy",
+    "uri": "api/monitoring/{tag}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "horizon.jobs-metrics.index": {
+    "name": "horizon.jobs-metrics.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\JobMetricsController@index",
+    "uri": "api/metrics/jobs",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-metrics.show": {
+    "name": "horizon.jobs-metrics.show",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\JobMetricsController@show",
+    "uri": "api/metrics/jobs/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.queues-metrics.index": {
+    "name": "horizon.queues-metrics.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\QueueMetricsController@index",
+    "uri": "api/metrics/queues",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.queues-metrics.show": {
+    "name": "horizon.queues-metrics.show",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\QueueMetricsController@show",
+    "uri": "api/metrics/queues/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-batches.index": {
+    "name": "horizon.jobs-batches.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@index",
+    "uri": "api/batches",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-batches.show": {
+    "name": "horizon.jobs-batches.show",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@show",
+    "uri": "api/batches/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-batches.retry": {
+    "name": "horizon.jobs-batches.retry",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@retry",
+    "uri": "api/batches/retry/{id}",
+    "method": [
+      "POST"
+    ]
+  },
+  "horizon.pending-jobs.index": {
+    "name": "horizon.pending-jobs.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\PendingJobsController@index",
+    "uri": "api/jobs/pending",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.completed-jobs.index": {
+    "name": "horizon.completed-jobs.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\CompletedJobsController@index",
+    "uri": "api/jobs/completed",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.silenced-jobs.index": {
+    "name": "horizon.silenced-jobs.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\SilencedJobsController@index",
+    "uri": "api/jobs/silenced",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.failed-jobs.index": {
+    "name": "horizon.failed-jobs.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\FailedJobsController@index",
+    "uri": "api/jobs/failed",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.failed-jobs.show": {
+    "name": "horizon.failed-jobs.show",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\FailedJobsController@show",
+    "uri": "api/jobs/failed/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.retry-jobs.show": {
+    "name": "horizon.retry-jobs.show",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\RetryController@store",
+    "uri": "api/jobs/retry/{id}",
+    "method": [
+      "POST"
+    ]
+  },
+  "horizon.jobs.show": {
+    "name": "horizon.jobs.show",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\JobsController@show",
+    "uri": "api/jobs/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.index": {
+    "name": "horizon.index",
+    "domain": "queue.namain.test",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\HomeController@index",
+    "uri": "{view?}",
+    "method": [
+      "GET",
+      "HEAD"
     ]
   },
   "profile.show": {
@@ -426,7 +633,7 @@
   },
   "welcome": {
     "name": "welcome",
-    "domain": null,
+    "domain": "namain.test",
     "action": "Closure",
     "uri": "/",
     "method": [
@@ -436,7 +643,7 @@
   },
   "tenants.select": {
     "name": "tenants.select",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Core\\TenantSelectionController@index",
     "uri": "tenants/select",
     "method": [
@@ -446,7 +653,7 @@
   },
   "tenants.switch": {
     "name": "tenants.switch",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Core\\TenantSelectionController@select",
     "uri": "tenants/{tenant}/select",
     "method": [
@@ -455,7 +662,7 @@
   },
   "invitations.accept": {
     "name": "invitations.accept",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Users\\InvitationController@show",
     "uri": "invitations/{token}",
     "method": [
@@ -465,7 +672,7 @@
   },
   "invitations.accept.store": {
     "name": "invitations.accept.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Users\\InvitationController@accept",
     "uri": "invitations/{token}",
     "method": [
@@ -474,7 +681,7 @@
   },
   "admin.login": {
     "name": "admin.login",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\AuthController@showLogin",
     "uri": "__admin/login",
     "method": [
@@ -484,7 +691,7 @@
   },
   "admin.": {
     "name": "admin.",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\AuthController@login",
     "uri": "__admin/login",
     "method": [
@@ -493,7 +700,7 @@
   },
   "admin.logout": {
     "name": "admin.logout",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\AuthController@logout",
     "uri": "__admin/logout",
     "method": [
@@ -502,7 +709,7 @@
   },
   "admin.dashboard": {
     "name": "admin.dashboard",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\DashboardController@index",
     "uri": "__admin",
     "method": [
@@ -512,7 +719,7 @@
   },
   "admin.activity": {
     "name": "admin.activity",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\ActivityLogController@index",
     "uri": "__admin/activity",
     "method": [
@@ -522,7 +729,7 @@
   },
   "admin.tenants.index": {
     "name": "admin.tenants.index",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantsController@index",
     "uri": "__admin/tenants",
     "method": [
@@ -532,7 +739,7 @@
   },
   "admin.tenants.store": {
     "name": "admin.tenants.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantsController@store",
     "uri": "__admin/tenants",
     "method": [
@@ -541,7 +748,7 @@
   },
   "admin.tenants.show": {
     "name": "admin.tenants.show",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantsController@show",
     "uri": "__admin/tenants/{tenant}",
     "method": [
@@ -551,7 +758,7 @@
   },
   "admin.tenants.update": {
     "name": "admin.tenants.update",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantsController@update",
     "uri": "__admin/tenants/{tenant}",
     "method": [
@@ -561,7 +768,7 @@
   },
   "admin.tenants.destroy": {
     "name": "admin.tenants.destroy",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantsController@destroy",
     "uri": "__admin/tenants/{tenant}",
     "method": [
@@ -570,7 +777,7 @@
   },
   "admin.tenants.status": {
     "name": "admin.tenants.status",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantStatusController@update",
     "uri": "__admin/tenants/{tenant}/status",
     "method": [
@@ -579,7 +786,7 @@
   },
   "admin.tenants.ownership": {
     "name": "admin.tenants.ownership",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantOwnershipController@update",
     "uri": "__admin/tenants/{tenant}/ownership",
     "method": [
@@ -588,7 +795,7 @@
   },
   "admin.tenants.users.store": {
     "name": "admin.tenants.users.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantUsersController@store",
     "uri": "__admin/tenants/{tenant}/users",
     "method": [
@@ -597,7 +804,7 @@
   },
   "admin.tenants.users.destroy": {
     "name": "admin.tenants.users.destroy",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantUsersController@destroy",
     "uri": "__admin/tenants/{tenant}/users/{user}",
     "method": [
@@ -606,7 +813,7 @@
   },
   "admin.tenants.users.role": {
     "name": "admin.tenants.users.role",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantUserRoleController@update",
     "uri": "__admin/tenants/{tenant}/users/{user}/role",
     "method": [
@@ -615,7 +822,7 @@
   },
   "admin.tenants.users.status": {
     "name": "admin.tenants.users.status",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantUserStatusController@update",
     "uri": "__admin/tenants/{tenant}/users/{user}/status",
     "method": [
@@ -624,7 +831,7 @@
   },
   "admin.tenants.invitations.store": {
     "name": "admin.tenants.invitations.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantInvitationsController@store",
     "uri": "__admin/tenants/{tenant}/invitations",
     "method": [
@@ -633,7 +840,7 @@
   },
   "admin.tenants.invitations.destroy": {
     "name": "admin.tenants.invitations.destroy",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\TenantInvitationsController@destroy",
     "uri": "__admin/tenants/{tenant}/invitations/{invitation}",
     "method": [
@@ -642,7 +849,7 @@
   },
   "admin.backups.index": {
     "name": "admin.backups.index",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\BackupsController@index",
     "uri": "__admin/backups",
     "method": [
@@ -652,7 +859,7 @@
   },
   "admin.backups.store": {
     "name": "admin.backups.store",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\BackupsController@store",
     "uri": "__admin/backups",
     "method": [
@@ -661,7 +868,7 @@
   },
   "admin.backups.show": {
     "name": "admin.backups.show",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\BackupsController@show",
     "uri": "__admin/backups/{backup}",
     "method": [
@@ -671,7 +878,7 @@
   },
   "admin.backups.destroy": {
     "name": "admin.backups.destroy",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\BackupsController@destroy",
     "uri": "__admin/backups/{backup}",
     "method": [
@@ -680,7 +887,7 @@
   },
   "admin.backups.settings": {
     "name": "admin.backups.settings",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\BackupSettingsController@update",
     "uri": "__admin/backups/settings",
     "method": [
@@ -689,7 +896,7 @@
   },
   "admin.impersonate.start": {
     "name": "admin.impersonate.start",
-    "domain": null,
+    "domain": "namain.test",
     "action": "App\\Http\\Controllers\\Admin\\ImpersonationController@start",
     "uri": "__admin/tenants/{tenant}/users/{user}/impersonate",
     "method": [
@@ -698,9 +905,28 @@
   },
   "admin.impersonate.stop": {
     "name": "admin.impersonate.stop",
-    "domain": null,
+    "domain": "namain.test",
     "action": "\\App\\Http\\Controllers\\Admin\\ImpersonationController@stop",
     "uri": "__admin/impersonate/stop",
+    "method": [
+      "POST"
+    ]
+  },
+  "tenant.login": {
+    "name": "tenant.login",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Auth\\TenantLoginController@show",
+    "uri": "login",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "tenant.logout": {
+    "name": "tenant.logout",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Auth\\TenantLoginController@destroy",
+    "uri": "logout",
     "method": [
       "POST"
     ]

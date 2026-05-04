@@ -1,0 +1,3 @@
+name,address,phone_number,credit_limit
+,Missing Name,0123456789,1000
+Valid Row,Address 123,0987654321,2000
