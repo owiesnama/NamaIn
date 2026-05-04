@@ -11,7 +11,7 @@ class InventoryValuationQuery
 {
     use ResolvesReportDates;
 
-    public function getData(?int $storageId = null, ?int $categoryId = null): array
+    public function get(?int $storageId = null, ?int $categoryId = null): array
     {
         $key = "inventory_data_{$storageId}_{$categoryId}";
 
@@ -22,7 +22,7 @@ class InventoryValuationQuery
         );
     }
 
-    public function getSummary(?int $storageId = null, ?int $categoryId = null): array
+    public function summary(?int $storageId = null, ?int $categoryId = null): array
     {
         $key = "inventory_summary_{$storageId}_{$categoryId}";
 

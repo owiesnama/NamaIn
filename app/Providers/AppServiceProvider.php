@@ -53,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
             return $this;
         });
 
+        $this->registerDatabaseMacros();
+
         Event::listen(
             Registered::class,
             SendEmailVerificationNotification::class,
@@ -73,6 +75,39 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+    }
+
+    private function registerDatabaseMacros(): void
+    {
+        DB::macro('dateFormat', function (string $groupBy, string $column = 'transactions.created_at'): string {
+            $driver = DB::getDriverName();
+
+            return match ($groupBy) {
+                'week' => match ($driver) {
+                    'sqlite' => "strftime('%Y-W%W', $column)",
+                    'pgsql' => "TO_CHAR($column, 'IYYY-\"W\"IW')",
+                    default => "DATE_FORMAT($column, '%Y-W%v')",
+                },
+                'month' => match ($driver) {
+                    'sqlite' => "strftime('%Y-%m', $column)",
+                    'pgsql' => "TO_CHAR($column, 'YYYY-MM')",
+                    default => "DATE_FORMAT($column, '%Y-%m')",
+                },
+                default => match ($driver) {
+                    'sqlite' => "strftime('%Y-%m-%d', $column)",
+                    'pgsql' => "TO_CHAR($column, 'YYYY-MM-DD')",
+                    default => "DATE_FORMAT($column, '%Y-%m-%d')",
+                },
+            };
+        });
+
+        DB::macro('dateDiff', function (string $column = 'invoices.created_at'): string {
+            return match (DB::getDriverName()) {
+                'sqlite' => "CAST(julianday('now') - julianday($column) AS INTEGER)",
+                'pgsql' => "EXTRACT(DAY FROM NOW() - $column)::INTEGER",
+                default => "DATEDIFF(NOW(), $column)",
+            };
         });
     }
 }

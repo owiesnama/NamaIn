@@ -25,6 +25,7 @@
     const product = useForm({
         name: props.product?.name,
         cost: props.product?.cost ? String(props.product?.cost) : "",
+        price: props.product?.price ? String(props.product?.price) : "",
         expire_date: props.product?.expire_date,
         currency: props.product?.currency || preferences("currency") || "SDG",
         alert_quantity: props.product?.alert_quantity || "",
@@ -191,6 +192,30 @@
                                             <InputError
                                                 class="mt-2"
                                                 :message="product.errors.cost"
+                                            />
+                                        </div>
+
+                                        <div class="mt-4">
+                                            <InputLabel
+                                                for="price"
+                                                :value="__('Price')"
+                                            />
+                                            <div class="flex gap-x-2">
+                                                <TextInput
+                                                    id="price"
+                                                    v-model="product.price"
+                                                    type="number"
+                                                    min="0"
+                                                    step="0.01"
+                                                    class="block w-full mt-1"
+                                                />
+                                                <div class="block w-20 mt-1 uppercase bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500 text-center font-bold">
+                                                    {{ product.currency }}
+                                                </div>
+                                            </div>
+                                            <InputError
+                                                class="mt-2"
+                                                :message="product.errors.price"
                                             />
                                         </div>
 

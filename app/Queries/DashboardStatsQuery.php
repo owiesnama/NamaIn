@@ -43,8 +43,8 @@ class DashboardStatsQuery
     public function getMonthlyStats(): array
     {
         $months = collect(range(5, 0))->map(fn ($i) => now()->subMonths($i)->format('Y-m'));
-        $dateFormat = $this->monthlyDateFormat();
-        $expenseDateFormat = $this->monthlyDateFormat('expensed_at');
+        $dateFormat = DB::dateFormat('month', 'created_at');
+        $expenseDateFormat = DB::dateFormat('month', 'expensed_at');
 
         $sales = Transaction::delivered(now()->subMonths(6))
             ->forCustomer()
@@ -239,15 +239,6 @@ class DashboardStatsQuery
         return match ($duration) {
             'day' => now()->addDay(),
             default => now()->addHour(),
-        };
-    }
-
-    private function monthlyDateFormat(string $column = 'created_at'): string
-    {
-        return match (DB::getDriverName()) {
-            'sqlite' => "strftime('%Y-%m', $column)",
-            'pgsql' => "TO_CHAR($column, 'YYYY-MM')",
-            default => "DATE_FORMAT($column, '%Y-%m')",
         };
     }
 }

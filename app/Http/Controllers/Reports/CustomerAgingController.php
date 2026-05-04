@@ -16,8 +16,8 @@ class CustomerAgingController extends Controller
         $customerId = $request->input('customer') ? (int) $request->input('customer') : null;
 
         return inertia('Reports/CustomerAging', [
-            'data' => $query->getData($customerId),
-            'summary' => $query->getSummary($customerId),
+            'data' => $query->get($customerId),
+            'summary' => $query->summary($customerId),
             'filters' => $request->only(['customer']),
             'customers' => fn () => Customer::pluck('name', 'id'),
         ]);

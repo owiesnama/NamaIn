@@ -11,7 +11,7 @@ class SupplierAgingQuery
 {
     use ResolvesReportDates;
 
-    public function getData(?int $supplierId = null): array
+    public function get(?int $supplierId = null): array
     {
         return Cache::remember(
             $this->cacheKey("supplier_aging_data_{$supplierId}"),
@@ -20,7 +20,7 @@ class SupplierAgingQuery
         );
     }
 
-    public function getSummary(?int $supplierId = null): array
+    public function summary(?int $supplierId = null): array
     {
         return Cache::remember(
             $this->cacheKey("supplier_aging_summary_{$supplierId}"),

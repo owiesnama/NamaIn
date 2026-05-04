@@ -25,6 +25,7 @@ class ProductRequest extends FormRequest
         return [
             'name' => 'required',
             'cost' => 'required|numeric|gt:0',
+            'price' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|max:3',
             'expire_date' => 'required',
             'alert_quantity' => 'nullable|numeric|min:0',

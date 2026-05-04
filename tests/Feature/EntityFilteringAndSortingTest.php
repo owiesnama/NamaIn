@@ -30,8 +30,8 @@ test('can filter customers by category', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
-        ->has('customers', 1)
-        ->where('customers.0.name', 'VIP Customer')
+        ->has('customers.data', 1)
+        ->where('customers.data.0.name', 'VIP Customer')
     );
 });
 
@@ -43,8 +43,8 @@ test('can sort customers by name', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
-        ->where('customers.0.name', 'Apple')
-        ->where('customers.1.name', 'Zebra')
+        ->where('customers.data.0.name', 'Apple')
+        ->where('customers.data.1.name', 'Zebra')
     );
 });
 
@@ -59,8 +59,8 @@ test('can filter suppliers by category', function () {
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
-        ->has('suppliers', 1)
-        ->where('suppliers.0.name', 'Main Supplier')
+        ->has('suppliers.data', 1)
+        ->where('suppliers.data.0.name', 'Main Supplier')
     );
 });
 

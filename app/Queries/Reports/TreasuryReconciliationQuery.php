@@ -12,7 +12,7 @@ class TreasuryReconciliationQuery
 {
     use ResolvesReportDates;
 
-    public function getData(Carbon $from, Carbon $to, ?int $accountId = null): array
+    public function get(Carbon $from, Carbon $to, ?int $accountId = null): array
     {
         return Cache::remember(
             $this->cacheKey("treasury_data_{$from->toDateString()}_{$to->toDateString()}_{$accountId}"),
@@ -21,7 +21,7 @@ class TreasuryReconciliationQuery
         );
     }
 
-    public function getSummary(Carbon $from, Carbon $to, ?int $accountId = null): array
+    public function summary(Carbon $from, Carbon $to, ?int $accountId = null): array
     {
         return Cache::remember(
             $this->cacheKey("treasury_summary_{$from->toDateString()}_{$to->toDateString()}_{$accountId}"),

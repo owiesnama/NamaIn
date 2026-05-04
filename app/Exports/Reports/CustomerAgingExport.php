@@ -18,7 +18,7 @@ class CustomerAgingExport implements FromArray, WithHeadings, WithStyles
     {
         $customerId = isset($this->filters['customer']) ? (int) $this->filters['customer'] : null;
 
-        return (new CustomerAgingQuery)->getData($customerId);
+        return (new CustomerAgingQuery)->get($customerId);
     }
 
     public function headings(): array

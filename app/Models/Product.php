@@ -174,6 +174,7 @@ class Product extends BaseModel
     {
         return [
             'expire_date' => 'date',
+            'price' => 'integer',
         ];
     }
 

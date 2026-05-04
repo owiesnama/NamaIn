@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Customer;
 use Maatwebsite\Excel\Concerns\OnEachRow;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
@@ -9,14 +10,10 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Row;
-use Maatwebsite\Excel\Validators\Failure;
 
 class QuickBooksCustomerImport implements OnEachRow, SkipsOnFailure, WithHeadingRow, WithMultipleSheets, WithValidation
 {
-    private int $rowCount = 0;
-
-    /** @var Failure[] */
-    private array $failures = [];
+    use TracksImportProgress;
 
     public function sheets(): array
     {
@@ -48,7 +45,7 @@ class QuickBooksCustomerImport implements OnEachRow, SkipsOnFailure, WithHeading
             'opening_credit' => $balance < 0 ? abs($balance) : 0,
         ]);
 
-        $this->rowCount++;
+        $this->incrementRowCount();
     }
 
     public function rules(): array
@@ -56,23 +53,5 @@ class QuickBooksCustomerImport implements OnEachRow, SkipsOnFailure, WithHeading
         return [
             'customer' => 'required|string',
         ];
-    }
-
-    public function onFailure(Failure ...$failures): void
-    {
-        foreach ($failures as $failure) {
-            $this->failures[] = $failure;
-        }
-    }
-
-    /** @return Failure[] */
-    public function failures(): array
-    {
-        return $this->failures;
-    }
-
-    public function getRowCount(): int
-    {
-        return $this->rowCount;
     }
 }

@@ -6,6 +6,7 @@ use App\Events\ImportStatusUpdated;
 use App\Imports\CustomerImport;
 use App\Imports\ProductImport;
 use App\Imports\QuickBooksCustomerImport;
+use App\Imports\QuickBooksProductImport;
 use App\Imports\SupplierImport;
 use App\Models\ImportLog;
 use App\Models\Preference;
@@ -27,7 +28,10 @@ class ProcessImportJob implements ShouldQueue
 
     /** @var array<string, array<string, class-string>> */
     private const IMPORT_MAP = [
-        'products' => ['default' => ProductImport::class],
+        'products' => [
+            'default' => ProductImport::class,
+            'quickbooks' => QuickBooksProductImport::class,
+        ],
         'suppliers' => ['default' => SupplierImport::class],
         'customers' => [
             'default' => CustomerImport::class,

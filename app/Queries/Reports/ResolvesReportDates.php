@@ -25,33 +25,11 @@ trait ResolvesReportDates
 
     private function dateFormat(string $groupBy, string $column = 'transactions.created_at'): string
     {
-        $driver = DB::getDriverName();
-
-        return match ($groupBy) {
-            'week' => match ($driver) {
-                'sqlite' => "strftime('%Y-W%W', $column)",
-                'pgsql' => "TO_CHAR($column, 'IYYY-\"W\"IW')",
-                default => "DATE_FORMAT($column, '%Y-W%v')",
-            },
-            'month' => match ($driver) {
-                'sqlite' => "strftime('%Y-%m', $column)",
-                'pgsql' => "TO_CHAR($column, 'YYYY-MM')",
-                default => "DATE_FORMAT($column, '%Y-%m')",
-            },
-            default => match ($driver) { // day
-                'sqlite' => "strftime('%Y-%m-%d', $column)",
-                'pgsql' => "TO_CHAR($column, 'YYYY-MM-DD')",
-                default => "DATE_FORMAT($column, '%Y-%m-%d')",
-            },
-        };
+        return DB::dateFormat($groupBy, $column);
     }
 
     private function dateDiff(string $column = 'invoices.created_at'): string
     {
-        return match (DB::getDriverName()) {
-            'sqlite' => "CAST(julianday('now') - julianday($column) AS INTEGER)",
-            'pgsql' => "EXTRACT(DAY FROM NOW() - $column)::INTEGER",
-            default => "DATEDIFF(NOW(), $column)",
-        };
+        return DB::dateDiff($column);
     }
 }

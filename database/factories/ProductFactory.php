@@ -64,9 +64,12 @@ class ProductFactory extends Factory
             'كاوية لحام',
         ];
 
+        $cost = $this->faker->numberBetween(400, 10000);
+
         return [
             'name' => $this->faker->randomElement($products),
-            'cost' => $this->faker->numberBetween(400, 10000),
+            'cost' => $cost,
+            'price' => (int) round($cost * 1.2),
             'expire_date' => $this->faker->dateTimeBetween('+1 month', '+2 years'),
         ];
     }

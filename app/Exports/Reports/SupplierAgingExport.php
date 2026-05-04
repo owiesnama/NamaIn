@@ -18,7 +18,7 @@ class SupplierAgingExport implements FromArray, WithHeadings, WithStyles
     {
         $supplierId = isset($this->filters['supplier']) ? (int) $this->filters['supplier'] : null;
 
-        return (new SupplierAgingQuery)->getData($supplierId);
+        return (new SupplierAgingQuery)->get($supplierId);
     }
 
     public function headings(): array

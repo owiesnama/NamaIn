@@ -2,24 +2,21 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
-use Maatwebsite\Excel\Validators\Failure;
 
 class CustomerImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithValidation
 {
-    private int $rowCount = 0;
-
-    /** @var Failure[] */
-    private array $failures = [];
+    use TracksImportProgress;
 
     public function model(array $row): ?Model
     {
-        $this->rowCount++;
+        $this->incrementRowCount();
 
         return new Customer([
             'name' => $row['name'],
@@ -39,23 +36,5 @@ class CustomerImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
             'opening_debit' => 'nullable|numeric|min:0',
             'opening_credit' => 'nullable|numeric|min:0',
         ];
-    }
-
-    public function onFailure(Failure ...$failures): void
-    {
-        foreach ($failures as $failure) {
-            $this->failures[] = $failure;
-        }
-    }
-
-    /** @return Failure[] */
-    public function failures(): array
-    {
-        return $this->failures;
-    }
-
-    public function getRowCount(): int
-    {
-        return $this->rowCount;
     }
 }

@@ -11,7 +11,7 @@ class CustomerAgingQuery
 {
     use ResolvesReportDates;
 
-    public function getData(?int $customerId = null): array
+    public function get(?int $customerId = null): array
     {
         return Cache::remember(
             $this->cacheKey("customer_aging_data_{$customerId}"),
@@ -20,7 +20,7 @@ class CustomerAgingQuery
         );
     }
 
-    public function getSummary(?int $customerId = null): array
+    public function summary(?int $customerId = null): array
     {
         return Cache::remember(
             $this->cacheKey("customer_aging_summary_{$customerId}"),

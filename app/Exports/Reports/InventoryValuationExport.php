@@ -19,7 +19,7 @@ class InventoryValuationExport implements FromArray, WithHeadings, WithStyles
         $storageId = isset($this->filters['storage']) ? (int) $this->filters['storage'] : null;
         $categoryId = isset($this->filters['category']) ? (int) $this->filters['category'] : null;
 
-        return (new InventoryValuationQuery)->getData($storageId, $categoryId);
+        return (new InventoryValuationQuery)->get($storageId, $categoryId);
     }
 
     public function headings(): array

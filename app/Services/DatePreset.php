@@ -5,10 +5,10 @@ namespace App\Services;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class ReportDateResolver
+class DatePreset
 {
     /** @return array{from: Carbon, to: Carbon} */
-    public function resolve(Request $request): array
+    public function fromRequest(Request $request): array
     {
         if ($request->filled('from_date') && $request->filled('to_date')) {
             return [
@@ -17,11 +17,11 @@ class ReportDateResolver
             ];
         }
 
-        return $this->resolvePreset($request->input('preset', 'this_month'));
+        return $this->resolve($request->input('preset', 'this_month'));
     }
 
     /** @return array{from: Carbon, to: Carbon} */
-    public function resolvePreset(string $preset): array
+    public function resolve(string $preset): array
     {
         return match ($preset) {
             'today' => [

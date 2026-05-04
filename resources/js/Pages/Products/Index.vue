@@ -24,8 +24,14 @@
 
     const showImportModal = ref(false);
 
+    const importTemplates = [
+        { value: 'default', label: __('System Template') },
+        { value: 'quickbooks', label: __('QuickBooks') },
+    ];
+
     const importForm = useForm({
         file: null,
+        template: 'default',
     });
 
     const filters = ref({
@@ -101,8 +107,9 @@
         }).format(amount);
     };
 
-    const submitImport = ({ file }) => {
+    const submitImport = ({ file, template }) => {
         importForm.file = file;
+        importForm.template = template;
         importForm.post(route("products.import"), {
             onSuccess: () => { showImportModal.value = false; },
         });
@@ -166,10 +173,7 @@
 
                         <ImportModal
                             :show="showImportModal"
-                            :templates="[
-                                { value: 'default', label: __('System Template') },
-                                { value: 'quickbooks', label: __('QuickBooks'), disabled: true, badge: __('Coming Soon') },
-                            ]"
+                            :templates="importTemplates"
                             :sample-url="route('products.import.sample')"
                             :processing="importForm.processing"
                             @close="showImportModal = false"
@@ -243,6 +247,7 @@
                                         </div>
                                     </th>
                                     <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Avg Cost") }}</th>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Price") }}</th>
                                     <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Total Value") }}</th>
                                     <th scope="col" class="px-6 py-4 text-[10px] font-bold text-end text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"></th>
                                 </tr>
@@ -309,6 +314,9 @@
                                         <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-400/5 px-2 py-1 rounded-md w-fit leading-tight">
                                             {{ formatCurrency(product.average_cost, product.currency) }}
                                         </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        {{ formatCurrency(product.price, product.currency) }}
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm font-bold text-gray-900 dark:text-white leading-tight">

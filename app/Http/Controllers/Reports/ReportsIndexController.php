@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
-use App\Services\ReportDateResolver;
+use App\Services\DatePreset;
 
 class ReportsIndexController extends Controller
 {
@@ -12,7 +12,7 @@ class ReportsIndexController extends Controller
         abort_unless(auth()->user()->hasPermission('reports.view'), 403);
 
         return inertia('Reports/Index', [
-            'presets' => ReportDateResolver::presets(),
+            'presets' => DatePreset::presets(),
         ]);
     }
 }

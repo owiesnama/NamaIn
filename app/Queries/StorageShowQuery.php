@@ -73,7 +73,7 @@ class StorageShowQuery
             $months->push(Carbon::now()->subMonths($i)->format('Y-m'));
         }
 
-        $dateFormat = $this->monthlyDateFormat();
+        $dateFormat = DB::dateFormat('month', 'created_at');
 
         $chartSales = Transaction::where('storage_id', $this->storage->id)
             ->whereHas('invoice', fn ($q) => $q->where('invocable_type', Customer::class))
@@ -94,15 +94,6 @@ class StorageShowQuery
             'sales' => $months->map(fn ($m) => $chartSales->get($m, 0))->toArray(),
             'purchases' => $months->map(fn ($m) => $chartPurchases->get($m, 0))->toArray(),
         ];
-    }
-
-    private function monthlyDateFormat(): string
-    {
-        return match (DB::getDriverName()) {
-            'sqlite' => "strftime('%Y-%m', created_at)",
-            'pgsql' => "TO_CHAR(created_at, 'YYYY-MM')",
-            default => "DATE_FORMAT(created_at, '%Y-%m')",
-        };
     }
 
     /**

@@ -11,7 +11,7 @@ class PosSessionReportQuery
 {
     use ResolvesReportDates;
 
-    public function getData(Carbon $from, Carbon $to): array
+    public function get(Carbon $from, Carbon $to): array
     {
         return Cache::remember(
             $this->cacheKey("pos_sessions_data_{$from->toDateString()}_{$to->toDateString()}"),
@@ -20,7 +20,7 @@ class PosSessionReportQuery
         );
     }
 
-    public function getSummary(Carbon $from, Carbon $to): array
+    public function summary(Carbon $from, Carbon $to): array
     {
         return Cache::remember(
             $this->cacheKey("pos_sessions_summary_{$from->toDateString()}_{$to->toDateString()}"),

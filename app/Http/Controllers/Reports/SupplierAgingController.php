@@ -16,8 +16,8 @@ class SupplierAgingController extends Controller
         $supplierId = $request->input('supplier') ? (int) $request->input('supplier') : null;
 
         return inertia('Reports/SupplierAging', [
-            'data' => $query->getData($supplierId),
-            'summary' => $query->getSummary($supplierId),
+            'data' => $query->get($supplierId),
+            'summary' => $query->summary($supplierId),
             'filters' => $request->only(['supplier']),
             'suppliers' => fn () => Supplier::pluck('name', 'id'),
         ]);

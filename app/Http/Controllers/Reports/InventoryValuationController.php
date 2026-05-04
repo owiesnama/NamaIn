@@ -18,8 +18,8 @@ class InventoryValuationController extends Controller
         $categoryId = $request->input('category') ? (int) $request->input('category') : null;
 
         return inertia('Reports/InventoryValuation', [
-            'data' => $query->getData($storageId, $categoryId),
-            'summary' => $query->getSummary($storageId, $categoryId),
+            'data' => $query->get($storageId, $categoryId),
+            'summary' => $query->summary($storageId, $categoryId),
             'filters' => $request->only(['storage', 'category']),
             'storages' => fn () => Storage::pluck('name', 'id'),
             'categories' => fn () => Category::pluck('name', 'id'),

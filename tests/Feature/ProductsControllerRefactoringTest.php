@@ -96,7 +96,7 @@ test('can download product import sample', function () {
     $response = $this->actingAs($user)->get(route('products.import.sample'));
 
     $response->assertStatus(200);
-    $response->assertHeader('Content-Disposition', 'attachment; filename=product_import_sample.csv');
+    $response->assertHeader('Content-Disposition', 'attachment; filename=products_import_sample.csv');
     $response->assertHeader('Content-Type', 'text/csv; charset=UTF-8');
 
     $content = $response->streamedContent();
@@ -104,6 +104,6 @@ test('can download product import sample', function () {
     $headers = str_getcsv($rows[0]);
     $data = str_getcsv($rows[1]);
 
-    expect($headers)->toBe(['name', 'cost', 'currency', 'expire_date', 'unit_name', 'unit_conversion_factor', 'categories']);
-    expect($data)->toBe(['Example Product', '100', 'SDG', '2026-12-31', 'Box', '10', 'Category1,Category2']);
+    expect($headers)->toBe(['name', 'cost', 'price', 'currency', 'expire_date', 'unit_name', 'unit_conversion_factor', 'categories']);
+    expect($data)->toBe(['Example Product', '100', '120', 'SDG', '2026-12-31', 'Box', '10', 'Category1,Category2']);
 });

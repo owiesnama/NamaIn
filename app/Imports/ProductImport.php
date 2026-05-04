@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Support\Carbon;
@@ -13,10 +14,7 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class ProductImport implements OnEachRow, WithHeadingRow
 {
-    private int $rowCount = 0;
-
-    /** @var Failure[] */
-    private array $failures = [];
+    use TracksImportProgress;
 
     public function onRow(Row $row): void
     {
@@ -29,22 +27,18 @@ class ProductImport implements OnEachRow, WithHeadingRow
 
         if ($validator->fails()) {
             foreach ($validator->errors()->messages() as $attribute => $errors) {
-                $this->failures[] = new Failure(
-                    $row->getIndex(),
-                    $attribute,
-                    $errors,
-                    $data,
-                );
+                $this->failures[] = new Failure($row->getIndex(), $attribute, $errors, $data);
             }
 
             return;
         }
 
-        $this->rowCount++;
+        $this->incrementRowCount();
 
         $product = Product::create([
             'name' => $data['name'],
             'cost' => $data['cost'] ?? null,
+            'price' => $data['price'] ?? $data['cost'] ?? 0,
             'expire_date' => Carbon::parse($data['expire_date']),
             'currency' => $data['currency'] ?? preference('currency', '$'),
         ]);
@@ -63,16 +57,5 @@ class ProductImport implements OnEachRow, WithHeadingRow
             });
             $product->categories()->sync($categoryIds);
         }
-    }
-
-    /** @return Failure[] */
-    public function failures(): array
-    {
-        return $this->failures;
-    }
-
-    public function getRowCount(): int
-    {
-        return $this->rowCount;
     }
 }

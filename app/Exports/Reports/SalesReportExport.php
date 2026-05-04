@@ -4,7 +4,7 @@ namespace App\Exports\Reports;
 
 use App\Exports\Concerns\WithExportStyles;
 use App\Queries\Reports\SalesReportQuery;
-use App\Services\ReportDateResolver;
+use App\Services\DatePreset;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -19,10 +19,10 @@ class SalesReportExport implements FromArray, WithHeadings, WithStyles
     public function array(): array
     {
         $request = new Request($this->filters);
-        $dates = (new ReportDateResolver)->resolve($request);
+        $dates = (new DatePreset)->fromRequest($request);
         $groupBy = $this->filters['group_by'] ?? 'day';
 
-        return (new SalesReportQuery)->getData($dates['from'], $dates['to'], $groupBy);
+        return (new SalesReportQuery)->get($dates['from'], $dates['to'], $groupBy);
     }
 
     public function headings(): array

@@ -11,7 +11,7 @@ class PurchaseReportQuery
 {
     use ResolvesReportDates;
 
-    public function getData(Carbon $from, Carbon $to, string $groupBy = 'day'): array
+    public function get(Carbon $from, Carbon $to, string $groupBy = 'day'): array
     {
         return Cache::remember(
             $this->cacheKey("purchase_data_{$groupBy}_{$from->toDateString()}_{$to->toDateString()}"),
@@ -20,7 +20,7 @@ class PurchaseReportQuery
         );
     }
 
-    public function getSummary(Carbon $from, Carbon $to): array
+    public function summary(Carbon $from, Carbon $to): array
     {
         return Cache::remember(
             $this->cacheKey("purchase_summary_{$from->toDateString()}_{$to->toDateString()}"),

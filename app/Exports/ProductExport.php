@@ -26,6 +26,7 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
         return [
             __('Name'),
             __('Cost'),
+            __('Price'),
             __('Currency'),
             __('Expire Date'),
             __('Categories'),
@@ -38,6 +39,7 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
         return [
             $product->name,
             $product->cost,
+            $product->price,
             $product->currency,
             $product->expire_date,
             $product->categories->pluck('name')->implode(', '),
