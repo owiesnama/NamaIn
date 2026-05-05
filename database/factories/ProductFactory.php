@@ -70,6 +70,7 @@ class ProductFactory extends Factory
             'name' => $this->faker->randomElement($products),
             'cost' => $cost,
             'price' => (int) round($cost * 1.2),
+            'average_cost' => $cost,
             'expire_date' => $this->faker->dateTimeBetween('+1 month', '+2 years'),
         ];
     }

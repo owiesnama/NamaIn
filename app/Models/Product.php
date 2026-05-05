@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 /**
  * @property Pivot $pivot
@@ -42,46 +43,25 @@ class Product extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['expired_at'];
+    protected $appends = ['expired_at', 'pending_sales', 'available_qty'];
 
-    /**
-     * Get the average cost of this product across all storages.
-     */
-    public function getAverageCostAttribute(): float|int
+    public function recalculateAverageCost(): void
     {
-        if (isset($this->attributes['computed_average_cost'])) {
-            return (float) $this->attributes['computed_average_cost'] ?: ($this->cost ?? 0);
-        }
+        $result = DB::table('transactions')
+            ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
+            ->where('transactions.product_id', $this->id)
+            ->where('transactions.delivered', true)
+            ->where('invoices.invocable_type', Supplier::class)
+            ->selectRaw('SUM(transactions.base_quantity) as total_qty, SUM(transactions.base_quantity * transactions.unit_cost) as total_cost')
+            ->first();
 
-        $totalPurchasedQty = $this->transactions()
-            ->where('delivered', true)
-            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
-            ->sum('base_quantity');
+        $newCost = ($result && $result->total_qty > 0)
+            ? (int) round($result->total_cost / $result->total_qty)
+            : ($this->cost ?? 0);
 
-        if ($totalPurchasedQty <= 0) {
-            return $this->cost ?? 0;
-        }
+        DB::table('products')->where('id', $this->id)->update(['average_cost' => $newCost]);
 
-        $totalPurchasedCost = $this->transactions()
-            ->where('delivered', true)
-            ->whereHas('invoice', fn ($query) => $query->where('invocable_type', Supplier::class))
-            ->sum(\DB::raw('base_quantity * unit_cost'));
-
-        return $totalPurchasedCost / $totalPurchasedQty;
-    }
-
-    /**
-     * Scope to add average cost as a subselect (avoids N+1 on lists).
-     */
-    public function scopeWithAverageCost(Builder $query): Builder
-    {
-        return $query->addSelect([
-            'computed_average_cost' => Transaction::query()
-                ->whereColumn('product_id', 'products.id')
-                ->where('delivered', true)
-                ->whereHas('invoice', fn ($q) => $q->where('invocable_type', Supplier::class))
-                ->selectRaw('CASE WHEN COALESCE(SUM(base_quantity), 0) > 0 THEN SUM(base_quantity * unit_cost) / SUM(base_quantity) ELSE 0 END'),
-        ]);
+        $this->average_cost = $newCost;
     }
 
     /**
@@ -143,7 +123,6 @@ class Product extends BaseModel
     public function scopeWithStockAggregates(Builder $query): Builder
     {
         return $query
-            ->withAverageCost()
             ->addSelect([
                 'pending_sales_qty' => Transaction::query()
                     ->whereColumn('product_id', 'products.id')
@@ -175,6 +154,7 @@ class Product extends BaseModel
         return [
             'expire_date' => 'date',
             'price' => 'integer',
+            'average_cost' => 'integer',
         ];
     }
 

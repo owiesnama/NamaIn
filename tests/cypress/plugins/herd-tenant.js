@@ -1,44 +1,54 @@
 /**
  * Cypress plugin tasks for managing Herd tenant site links.
  *
- * Each tenant subdomain needs a symlink in the Herd Sites directory before
- * Cypress can visit it. These tasks create and remove that link by calling
- * `herd link` / `herd unlink` from the project root.
+ * Creates symlinks directly in the Herd Sites directory instead of
+ * calling `herd link` (which requires UAC elevation on Windows).
  */
 
-const { execSync } = require('child_process');
+const fs = require('fs');
 const path = require('path');
 
 const PROJECT_ROOT = path.resolve(__dirname, '../../../');
-const HERD_BIN = path.join(
+const SITES_DIR = path.join(
     process.env.USERPROFILE || process.env.HOME,
-    '.config', 'herd', 'bin', 'herd.bat'
+    '.config', 'herd', 'config', 'valet', 'Sites'
 );
-
-function runHerd(args) {
-    const cmd = `"${HERD_BIN}" ${args}`;
-    try {
-        execSync(cmd, { cwd: PROJECT_ROOT, stdio: 'pipe', shell: true });
-    } catch (_) {
-        // Ignore errors (e.g. already linked / already unlinked)
-    }
-    return null;
-}
 
 module.exports = {
     /**
-     * Link {slug}.namain → project root in Herd Sites.
-     * @param {string} slug  e.g. 'cypress-test'
+     * Ensure {slug}.namain symlink exists in Herd Sites directory.
+     * Creates it if missing; silently succeeds if already linked.
      */
     linkTenantSite(slug) {
-        return runHerd(`link ${slug}.namain`);
+        const linkPath = path.join(SITES_DIR, `${slug}.namain`);
+
+        if (fs.existsSync(linkPath)) {
+            return null; // Already linked
+        }
+
+        try {
+            fs.symlinkSync(PROJECT_ROOT, linkPath, 'junction');
+        } catch (_) {
+            // Ignore — may already exist or lack permissions
+        }
+
+        return null;
     },
 
     /**
-     * Remove the {slug}.namain Herd link.
-     * @param {string} slug
+     * Remove the {slug}.namain symlink from Herd Sites.
      */
     unlinkTenantSite(slug) {
-        return runHerd(`unlink ${slug}.namain`);
+        const linkPath = path.join(SITES_DIR, `${slug}.namain`);
+
+        try {
+            if (fs.existsSync(linkPath)) {
+                fs.unlinkSync(linkPath);
+            }
+        } catch (_) {
+            // Ignore
+        }
+
+        return null;
     },
 };

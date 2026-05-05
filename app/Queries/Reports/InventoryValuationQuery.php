@@ -2,7 +2,6 @@
 
 namespace App\Queries\Reports;
 
-use App\Models\Customer;
 use App\Models\Product;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -48,8 +47,8 @@ class InventoryValuationQuery
                 'products.name as product_name',
                 'storages.name as storage_name',
                 'stocks.quantity',
-                DB::raw('('.$this->averageCostExpression().') as average_cost'),
-                DB::raw('stocks.quantity * ('.$this->averageCostExpression().') as total_value'),
+                DB::raw('COALESCE(products.average_cost, products.cost, 0) as average_cost'),
+                DB::raw('stocks.quantity * COALESCE(products.average_cost, products.cost, 0) as total_value'),
             );
 
         if ($storageId) {
@@ -88,24 +87,6 @@ class InventoryValuationQuery
             'total_value' => round(array_sum(array_column($data, 'total_value')), 2),
             'product_count' => count(array_unique(array_column($data, 'product_id'))),
         ];
-    }
-
-    private function averageCostExpression(): string
-    {
-        $customerClass = addslashes(Customer::class);
-
-        return "COALESCE((
-            SELECT CASE
-                WHEN SUM(t.base_quantity) > 0
-                THEN SUM(t.base_quantity * t.unit_cost) / SUM(t.base_quantity)
-                ELSE products.cost
-            END
-            FROM transactions t
-            INNER JOIN invoices i ON t.invoice_id = i.id
-            WHERE t.product_id = products.id
-            AND t.delivered = true
-            AND i.invocable_type != '{$customerClass}'
-        ), COALESCE(products.cost, 0))";
     }
 
     private function longCacheTtl(): \DateTimeInterface|int

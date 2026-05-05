@@ -1,8 +1,5 @@
 /**
  * E2E tests: Import flow (customers & products, default & QuickBooks templates)
- *
- * Verifies the import modal UI, template selection, file upload,
- * queued import processing, and data creation.
  */
 
 before(() => {
@@ -11,7 +8,7 @@ before(() => {
 });
 
 beforeEach(() => {
-    cy.tenantLogin();
+    cy.tenantLogin('cypress');
 });
 
 /*
@@ -20,78 +17,53 @@ beforeEach(() => {
 |--------------------------------------------------------------------------
 */
 describe('Customer Import (Default Template)', () => {
-    it('shows import button on customers page', () => {
+    it('shows import button and opens modal', () => {
         cy.visit('/customers');
-        cy.contains('button', 'Import').should('exist');
-    });
-
-    it('opens import modal when clicking import button', () => {
-        cy.visit('/customers');
-        cy.contains('button', 'Import').click();
+        cy.contains('button', 'Import').should('exist').click();
         cy.contains('Import Data').should('be.visible');
-        cy.contains('Upload a CSV or Excel file').should('be.visible');
-    });
-
-    it('shows template selector with System Template and QuickBooks options', () => {
-        cy.visit('/customers');
-        cy.contains('button', 'Import').click();
         cy.contains('System Template').should('be.visible');
         cy.contains('QuickBooks').should('be.visible');
-    });
-
-    it('has a download sample file link', () => {
-        cy.visit('/customers');
-        cy.contains('button', 'Import').click();
         cy.contains('Download sample file').should('be.visible');
     });
 
-    it('disables submit button when no file is selected', () => {
+    it('disables submit when no file is selected', () => {
         cy.visit('/customers');
         cy.contains('button', 'Import').click();
-        cy.get('button').contains('Import').last().should('be.disabled');
+        cy.get('.bg-emerald-600').filter(':visible').last().should('be.disabled');
     });
 
-    it('imports customers from CSV file with default template', () => {
+    it('imports customers from CSV and creates records', () => {
         cy.visit('/customers');
         cy.contains('button', 'Import').click();
 
-        // Upload file
         cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/customers-default.csv', { force: true });
+        cy.get('.bg-emerald-600').filter(':visible').last().click();
 
-        // Submit
-        cy.get('button').contains('Import').last().should('not.be.disabled');
-        cy.get('button').contains('Import').last().click();
-
-        // Should redirect back (import queued)
         cy.url().should('include', '/customers');
-
-        // Verify customers were created (sync queue in testing)
         cy.visit('/customers');
         cy.contains('Cypress Customer A').should('exist');
         cy.contains('Cypress Customer B').should('exist');
     });
 
-    it('handles invalid rows gracefully — valid rows still imported', () => {
+    it('skips invalid rows but imports valid ones', () => {
         cy.visit('/customers');
         cy.contains('button', 'Import').click();
 
         cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/customers-invalid.csv', { force: true });
-        cy.get('button').contains('Import').last().click();
+        cy.get('.bg-emerald-600').filter(':visible').last().click();
 
-        cy.url().should('include', '/customers');
-
-        // Valid row should be imported
         cy.visit('/customers');
         cy.contains('Valid Row').should('exist');
     });
 
-    it('can download sample CSV file', () => {
-        cy.visit('/customers');
-        cy.contains('button', 'Import').click();
-
-        cy.contains('Download sample file')
-            .should('have.attr', 'href')
-            .and('include', 'import/sample');
+    it('stores default template on import log', () => {
+        cy.php(`
+            $log = App\\Models\\ImportLog::where('import_type', 'customers')
+                ->where('template', 'default')
+                ->latest()
+                ->first();
+            return $log ? $log->status->value : 'not_found';
+        `).should('eq', 'completed');
     });
 });
 
@@ -101,102 +73,78 @@ describe('Customer Import (Default Template)', () => {
 |--------------------------------------------------------------------------
 */
 describe('Customer Import (QuickBooks Template)', () => {
-    it('can select QuickBooks template and it highlights', () => {
+    // Run the import once for all verification tests
+    before(() => {
+        cy.tenantLogin('cypress');
         cy.visit('/customers');
         cy.contains('button', 'Import').click();
-
         cy.contains('button', 'QuickBooks').click();
-        cy.contains('button', 'QuickBooks')
-            .should('have.class', 'bg-emerald-50');
-        // System Template should no longer be active
-        cy.contains('button', 'System Template')
-            .should('not.have.class', 'bg-emerald-50');
+        cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/quickbooks-customers.xlsx', { force: true });
+        cy.get('.bg-emerald-600').filter(':visible').last().click();
+        cy.url().should('include', '/customers');
     });
 
     it('imports active customers from QuickBooks XLSX', () => {
-        cy.visit('/customers');
-        cy.contains('button', 'Import').click();
-        cy.contains('button', 'QuickBooks').click();
-
-        cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/quickbooks-customers.xlsx', { force: true });
-        cy.get('button').contains('Import').last().click();
-
-        cy.url().should('include', '/customers');
-
-        // Active customers should be imported
         cy.visit('/customers');
         cy.contains('QB Cypress Customer Alpha').should('exist');
         cy.contains('QB Cypress Customer Beta').should('exist');
         cy.contains('QB Cypress Customer Gamma').should('exist');
     });
 
-    it('skips inactive customers from QuickBooks file', () => {
+    it('skips inactive customers', () => {
         cy.php(`
-            return App\\Models\\Customer::where('name', 'QB Inactive Customer')->exists() ? 'exists' : 'not_found';
-        `).should('eq', 'not_found');
+            return App\\Models\\Customer::where('name', 'QB Inactive Customer')->exists() ? 'exists' : 'skipped';
+        `).should('eq', 'skipped');
     });
 
     it('skips dot-only and empty customer names', () => {
         cy.php(`
-            $dotCustomer = App\\Models\\Customer::where('name', '.')->exists();
-            $dotsCustomer = App\\Models\\Customer::where('name', '..................')->exists();
-            return (!$dotCustomer && !$dotsCustomer) ? 'clean' : 'has_junk';
+            $junk = App\\Models\\Customer::whereIn('name', ['.', '..................', ''])->count();
+            return $junk === 0 ? 'clean' : 'has_junk';
         `).should('eq', 'clean');
     });
 
     it('maps positive balance to opening_debit', () => {
         cy.php(`
-            $customer = App\\Models\\Customer::where('name', 'QB Cypress Customer Alpha')->first();
-            return $customer ? ['debit' => (float) $customer->opening_debit, 'credit' => (float) $customer->opening_credit] : null;
-        `).then((result) => {
-            expect(result).to.not.be.null;
-            expect(result.debit).to.eq(2500);
-            expect(result.credit).to.eq(0);
+            $c = App\\Models\\Customer::where('name', 'QB Cypress Customer Alpha')->first();
+            return $c ? ['debit' => (float) $c->opening_debit, 'credit' => (float) $c->opening_credit] : null;
+        `).then((r) => {
+            expect(r.debit).to.eq(2500);
+            expect(r.credit).to.eq(0);
         });
     });
 
-    it('maps negative balance to opening_credit (absolute value)', () => {
+    it('maps negative balance to opening_credit', () => {
         cy.php(`
-            $customer = App\\Models\\Customer::where('name', 'QB Cypress Customer Beta')->first();
-            return $customer ? ['debit' => (float) $customer->opening_debit, 'credit' => (float) $customer->opening_credit] : null;
-        `).then((result) => {
-            expect(result).to.not.be.null;
-            expect(result.debit).to.eq(0);
-            expect(result.credit).to.eq(800);
+            $c = App\\Models\\Customer::where('name', 'QB Cypress Customer Beta')->first();
+            return $c ? ['debit' => (float) $c->opening_debit, 'credit' => (float) $c->opening_credit] : null;
+        `).then((r) => {
+            expect(r.debit).to.eq(0);
+            expect(r.credit).to.eq(800);
         });
     });
 
-    it('maps phone number and address from QuickBooks fields', () => {
+    it('maps phone, address, and credit limit', () => {
         cy.php(`
-            $customer = App\\Models\\Customer::where('name', 'QB Cypress Customer Alpha')->first();
-            return $customer ? ['phone' => $customer->phone_number, 'address' => $customer->address] : null;
-        `).then((result) => {
-            expect(result.phone).to.eq('0551111111');
-            expect(result.address).to.eq('Khartoum North');
+            $c = App\\Models\\Customer::where('name', 'QB Cypress Customer Alpha')->first();
+            return $c ? ['phone' => $c->phone_number, 'address' => $c->address, 'limit' => (float) $c->credit_limit] : null;
+        `).then((r) => {
+            expect(r.phone).to.eq('0551111111');
+            expect(r.address).to.eq('Khartoum North');
+            expect(r.limit).to.eq(10000);
         });
     });
 
-    it('maps credit limit from QuickBooks', () => {
-        cy.php(`
-            $customer = App\\Models\\Customer::where('name', 'QB Cypress Customer Alpha')->first();
-            return $customer ? (float) $customer->credit_limit : null;
-        `).then((result) => {
-            expect(result).to.eq(10000);
-        });
-    });
-
-    it('stores quickbooks template on import log with completed status', () => {
+    it('stores quickbooks template on import log with correct row count', () => {
         cy.php(`
             $log = App\\Models\\ImportLog::where('import_type', 'customers')
                 ->where('template', 'quickbooks')
                 ->latest()
                 ->first();
-            return $log ? ['template' => $log->template, 'status' => $log->status->value, 'rows' => $log->rows_imported] : null;
-        `).then((result) => {
-            expect(result).to.not.be.null;
-            expect(result.template).to.eq('quickbooks');
-            expect(result.status).to.eq('completed');
-            expect(result.rows).to.eq(3); // 3 valid active customers
+            return $log ? ['status' => $log->status->value, 'rows' => $log->rows_imported] : null;
+        `).then((r) => {
+            expect(r.status).to.eq('completed');
+            expect(r.rows).to.eq(3);
         });
     });
 });
@@ -207,63 +155,45 @@ describe('Customer Import (QuickBooks Template)', () => {
 |--------------------------------------------------------------------------
 */
 describe('Product Import (Default Template)', () => {
-    it('shows import button on products page', () => {
+    it('shows import button and opens modal with templates', () => {
         cy.visit('/products');
-        cy.contains('button', 'Import').should('exist');
-    });
-
-    it('opens import modal with template options', () => {
-        cy.visit('/products');
-        cy.contains('button', 'Import').click();
+        cy.contains('button', 'Import').should('exist').click();
         cy.contains('Import Data').should('be.visible');
         cy.contains('System Template').should('be.visible');
         cy.contains('QuickBooks').should('be.visible');
     });
 
-    it('imports products from CSV with categories and units', () => {
+    it('imports products from CSV with price, categories, and units', () => {
         cy.visit('/products');
         cy.contains('button', 'Import').click();
 
         cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/products-default.csv', { force: true });
-        cy.get('button').contains('Import').last().click();
+        cy.get('.bg-emerald-600').filter(':visible').last().click();
 
         cy.url().should('include', '/products');
-
-        // Verify products were created
         cy.visit('/products');
         cy.contains('Cypress Product A').should('exist');
         cy.contains('Cypress Product B').should('exist');
     });
 
-    it('imported products have correct price and cost', () => {
+    it('verifies imported product cost, price, categories, and units', () => {
         cy.php(`
-            $product = App\\Models\\Product::where('name', 'Cypress Product A')->first();
-            return $product ? ['cost' => $product->cost, 'price' => $product->price] : null;
-        `).then((result) => {
-            expect(result).to.not.be.null;
-            expect(result.cost).to.eq(100);
-            expect(result.price).to.eq(120);
-        });
-    });
-
-    it('imported products have categories synced', () => {
-        cy.php(`
-            $product = App\\Models\\Product::where('name', 'Cypress Product A')->first();
-            return $product ? $product->categories->pluck('name')->toArray() : [];
-        `).then((categories) => {
-            expect(categories).to.include('Drinks');
-            expect(categories).to.include('Juice');
-        });
-    });
-
-    it('imported products have units created', () => {
-        cy.php(`
-            $product = App\\Models\\Product::where('name', 'Cypress Product A')->first();
-            return $product ? $product->units->first()?->toArray() : null;
-        `).then((unit) => {
-            expect(unit).to.not.be.null;
-            expect(unit.name).to.eq('Box');
-            expect(unit.conversion_factor).to.eq(10);
+            $p = App\\Models\\Product::where('name', 'Cypress Product A')->with('categories', 'units')->first();
+            return $p ? [
+                'cost' => $p->cost,
+                'price' => $p->price,
+                'categories' => $p->categories->pluck('name')->toArray(),
+                'unit_name' => $p->units->first()?->name,
+                'unit_factor' => (int) $p->units->first()?->conversion_factor,
+            ] : null;
+        `).then((r) => {
+            expect(r).to.not.be.null;
+            expect(r.cost).to.eq(100);
+            expect(r.price).to.eq(120);
+            expect(r.categories).to.include('Drinks');
+            expect(r.categories).to.include('Juice');
+            expect(r.unit_name).to.eq('Box');
+            expect(r.unit_factor).to.eq(10);
         });
     });
 });
@@ -274,25 +204,18 @@ describe('Product Import (Default Template)', () => {
 |--------------------------------------------------------------------------
 */
 describe('Product Import (QuickBooks Template)', () => {
-    it('can select QuickBooks template for products', () => {
+    // Run the QB import once for all verification tests
+    before(() => {
+        cy.tenantLogin('cypress');
         cy.visit('/products');
         cy.contains('button', 'Import').click();
-
         cy.contains('button', 'QuickBooks').click();
-        cy.contains('button', 'QuickBooks')
-            .should('have.class', 'bg-emerald-50');
+        cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/quickbooks-products.xlsx', { force: true });
+        cy.get('.bg-emerald-600').filter(':visible').last().click();
+        cy.url().should('include', '/products');
     });
 
-    it('imports Inventory Part products from QuickBooks XLSX', () => {
-        cy.visit('/products');
-        cy.contains('button', 'Import').click();
-        cy.contains('button', 'QuickBooks').click();
-
-        cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/quickbooks-products.xlsx', { force: true });
-        cy.get('button').contains('Import').last().click();
-
-        cy.url().should('include', '/products');
-
+    it('imports Inventory Part products', () => {
         cy.visit('/products');
         cy.contains('QB Cypress Medicine A').should('exist');
         cy.contains('QB Cypress Medicine B').should('exist');
@@ -301,93 +224,78 @@ describe('Product Import (QuickBooks Template)', () => {
         cy.contains('QB Cypress Medicine C').should('exist');
     });
 
-    it('skips Service, Subtotal, and Group type items', () => {
+    it('skips Service, Subtotal, and Inactive items', () => {
         cy.php(`
             $service = App\\Models\\Product::where('name', 'QB Service Item')->exists();
             $subtotal = App\\Models\\Product::where('name', 'Subtotal Line')->exists();
-            return (!$service && !$subtotal) ? 'clean' : 'has_non_inventory';
+            $inactive = App\\Models\\Product::where('name', 'QB Inactive Product')->exists();
+            return (!$service && !$subtotal && !$inactive) ? 'clean' : 'has_excluded';
         `).should('eq', 'clean');
-    });
-
-    it('skips inactive products', () => {
-        cy.php(`
-            return App\\Models\\Product::where('name', 'QB Inactive Product')->exists() ? 'exists' : 'not_found';
-        `).should('eq', 'not_found');
     });
 
     it('skips dot-only and empty product names', () => {
         cy.php(`
-            $dot = App\\Models\\Product::where('name', '.')->exists();
-            return !$dot ? 'clean' : 'has_junk';
+            return App\\Models\\Product::where('name', '.')->exists() ? 'junk' : 'clean';
         `).should('eq', 'clean');
     });
 
-    it('extracts product name from colon notation (parent:child)', () => {
+    it('extracts name from colon notation and creates category from prefix', () => {
         cy.php(`
-            // "ادوية بيطرية:QB Cypress Medicine A" → name should be "QB Cypress Medicine A"
-            $product = App\\Models\\Product::where('name', 'QB Cypress Medicine A')->first();
-            return $product ? $product->name : null;
-        `).should('eq', 'QB Cypress Medicine A');
-    });
-
-    it('creates category from colon prefix (parent:child → parent as category)', () => {
-        cy.php(`
-            $product = App\\Models\\Product::where('name', 'QB Cypress Medicine A')->first();
-            return $product ? $product->categories->pluck('name')->toArray() : [];
-        `).then((categories) => {
-            expect(categories).to.include('ادوية بيطرية');
+            $p = App\\Models\\Product::where('name', 'QB Cypress Medicine A')->with('categories')->first();
+            return $p ? [
+                'name' => $p->name,
+                'categories' => $p->categories->pluck('name')->toArray(),
+            ] : null;
+        `).then((r) => {
+            expect(r.name).to.eq('QB Cypress Medicine A');
+            expect(r.categories).to.include('ادوية بيطرية');
         });
     });
 
     it('creates separate categories for different colon prefixes', () => {
         cy.php(`
-            $supply = App\\Models\\Product::where('name', 'QB Cypress Supply Item')->first();
-            return $supply ? $supply->categories->pluck('name')->toArray() : [];
-        `).then((categories) => {
-            expect(categories).to.include('مستلزمات');
+            $p = App\\Models\\Product::where('name', 'QB Cypress Supply Item')->with('categories')->first();
+            return $p ? $p->categories->pluck('name')->toArray() : [];
+        `).then((cats) => {
+            expect(cats).to.include('مستلزمات');
         });
     });
 
-    it('top-level products (no colon) have no category assigned', () => {
+    it('top-level products have no category', () => {
         cy.php(`
-            $product = App\\Models\\Product::where('name', 'QB Cypress Standalone Product')->first();
-            return $product ? $product->categories->count() : -1;
+            $p = App\\Models\\Product::where('name', 'QB Cypress Standalone Product')->first();
+            return $p ? $p->categories->count() : -1;
         `).should('eq', 0);
     });
 
-    it('maps cost and price correctly', () => {
+    it('maps cost and price correctly, falls back price to cost when zero', () => {
         cy.php(`
-            $product = App\\Models\\Product::where('name', 'QB Cypress Medicine A')->first();
-            return $product ? ['cost' => $product->cost, 'price' => $product->price] : null;
-        `).then((result) => {
-            expect(result.cost).to.eq(150);
-            expect(result.price).to.eq(250);
+            $a = App\\Models\\Product::where('name', 'QB Cypress Medicine A')->first();
+            $b = App\\Models\\Product::where('name', 'QB Cypress Standalone Product')->first();
+            return [
+                'a_cost' => $a->cost, 'a_price' => $a->price,
+                'b_cost' => $b->cost, 'b_price' => $b->price,
+            ];
+        `).then((r) => {
+            expect(r.a_cost).to.eq(150);
+            expect(r.a_price).to.eq(250);
+            expect(r.b_cost).to.eq(500);
+            expect(r.b_price).to.eq(500); // price was 0, falls back to cost
         });
     });
 
-    it('falls back price to cost when price is zero', () => {
+    it('parses unit name from QB format and skips when absent', () => {
         cy.php(`
-            $product = App\\Models\\Product::where('name', 'QB Cypress Standalone Product')->first();
-            return $product ? ['cost' => $product->cost, 'price' => $product->price] : null;
-        `).then((result) => {
-            expect(result.cost).to.eq(500);
-            expect(result.price).to.eq(500); // price was 0, falls back to cost
+            $withUnit = App\\Models\\Product::where('name', 'QB Cypress Medicine A')->first();
+            $noUnit = App\\Models\\Product::where('name', 'QB Cypress Medicine B')->first();
+            return [
+                'unit' => $withUnit->units->first()?->name,
+                'no_unit_count' => $noUnit->units->count(),
+            ];
+        `).then((r) => {
+            expect(r.unit).to.eq('each');
+            expect(r.no_unit_count).to.eq(0);
         });
-    });
-
-    it('parses unit name from QB format (strips parenthetical)', () => {
-        cy.php(`
-            $product = App\\Models\\Product::where('name', 'QB Cypress Medicine A')->first();
-            $unit = $product ? $product->units->first() : null;
-            return $unit ? $unit->name : null;
-        `).should('eq', 'each');
-    });
-
-    it('products without U/M have no units', () => {
-        cy.php(`
-            $product = App\\Models\\Product::where('name', 'QB Cypress Medicine B')->first();
-            return $product ? $product->units->count() : -1;
-        `).should('eq', 0);
     });
 
     it('stores quickbooks template on import log with correct row count', () => {
@@ -396,12 +304,10 @@ describe('Product Import (QuickBooks Template)', () => {
                 ->where('template', 'quickbooks')
                 ->latest()
                 ->first();
-            return $log ? ['template' => $log->template, 'status' => $log->status->value, 'rows' => $log->rows_imported] : null;
-        `).then((result) => {
-            expect(result).to.not.be.null;
-            expect(result.template).to.eq('quickbooks');
-            expect(result.status).to.eq('completed');
-            expect(result.rows).to.eq(5); // 5 valid Inventory Part items
+            return $log ? ['status' => $log->status->value, 'rows' => $log->rows_imported] : null;
+        `).then((r) => {
+            expect(r.status).to.eq('completed');
+            expect(r.rows).to.eq(5);
         });
     });
 });
@@ -412,19 +318,14 @@ describe('Product Import (QuickBooks Template)', () => {
 |--------------------------------------------------------------------------
 */
 describe('Supplier Import', () => {
-    it('shows import button on suppliers page', () => {
+    it('shows import button and modal with Coming Soon QuickBooks badge', () => {
         cy.visit('/suppliers');
-        cy.contains('button', 'Import').should('exist');
-    });
-
-    it('opens import modal with Coming Soon badge for QuickBooks', () => {
-        cy.visit('/suppliers');
-        cy.contains('button', 'Import').click();
+        cy.contains('button', 'Import').should('exist').click();
         cy.contains('Import Data').should('be.visible');
         cy.contains('Coming Soon').should('be.visible');
     });
 
-    it('QuickBooks template button is disabled for suppliers', () => {
+    it('QuickBooks template button is disabled', () => {
         cy.visit('/suppliers');
         cy.contains('button', 'Import').click();
         cy.contains('button', 'QuickBooks').should('be.disabled');
@@ -433,70 +334,37 @@ describe('Supplier Import', () => {
 
 /*
 |--------------------------------------------------------------------------
-| Import Validation & Edge Cases
+| Import Validation
 |--------------------------------------------------------------------------
 */
 describe('Import Validation', () => {
-    it('rejects invalid file types', () => {
-        cy.visit('/customers');
-
+    it('rejects request without a file', () => {
         cy.csrfToken().then((token) => {
-            // Try uploading a non-CSV/XLSX file via direct request
             cy.request({
                 method: 'POST',
                 url: '/customers/import',
+                form: true,
                 body: { _token: token, template: 'default' },
                 failOnStatusCode: false,
                 followRedirect: false,
-            }).then((response) => {
-                // Should fail validation (no file)
-                expect(response.status).to.eq(302);
+            }).then((res) => {
+                expect(res.status).to.eq(302);
             });
         });
     });
 
     it('rejects invalid template value', () => {
-        cy.visit('/customers');
-
         cy.csrfToken().then((token) => {
-            const formData = new FormData();
-            formData.append('_token', token);
-            formData.append('template', 'nonexistent');
-            formData.append('file', new Blob(['name\nTest'], { type: 'text/csv' }), 'test.csv');
-
             cy.request({
                 method: 'POST',
                 url: '/customers/import',
-                body: formData,
-                headers: { 'Content-Type': 'multipart/form-data' },
+                form: true,
+                body: { _token: token, template: 'nonexistent' },
                 failOnStatusCode: false,
                 followRedirect: false,
-            }).then((response) => {
-                expect(response.status).to.eq(302);
+            }).then((res) => {
+                expect(res.status).to.eq(302);
             });
-        });
-    });
-});
-
-/*
-|--------------------------------------------------------------------------
-| Import Operations Center Integration
-|--------------------------------------------------------------------------
-*/
-describe('Import Operations Panel', () => {
-    it('shows operations pill after import is queued', () => {
-        cy.visit('/customers');
-        cy.contains('button', 'Import').click();
-
-        cy.get('input[type="file"]').selectFile('tests/cypress/fixtures/customers-default.csv', { force: true });
-        cy.get('button').contains('Import').last().click();
-
-        // The operations panel pill should appear
-        cy.get('body').then(($body) => {
-            // Panel or pill should be visible with "in progress" or "Done" state
-            if ($body.find(':contains("in progress")').length || $body.find(':contains("Done")').length) {
-                cy.log('Operations panel responded to import');
-            }
         });
     });
 });

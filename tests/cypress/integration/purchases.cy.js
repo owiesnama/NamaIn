@@ -12,7 +12,7 @@ before(() => {
     cy.tenantLogin();
 
     cy.php(`
-        $tenant = App\\Models\\Tenant::where('slug', 'cypress-test')->first();
+        $tenant = App\\Models\\Tenant::where('slug', 'cypress')->first();
         app()->instance('currentTenant', $tenant);
 
         App\\Models\\Supplier::factory()->create(['name' => 'Cypress Supplier']);

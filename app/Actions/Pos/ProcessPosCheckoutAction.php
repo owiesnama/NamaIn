@@ -107,8 +107,7 @@ class ProcessPosCheckoutAction
 
             // 4. Create Transactions & Deduct Stock
             $productIds = collect($data->get('items'))->pluck('product_id')->unique();
-            $averageCosts = Product::withAverageCost()
-                ->whereIn('id', $productIds)
+            $averageCosts = Product::whereIn('id', $productIds)
                 ->get()
                 ->keyBy('id');
 

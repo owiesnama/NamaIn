@@ -205,7 +205,7 @@ describe('Report Exports', () => {
     it('clicking export triggers a queued export request', () => {
         // Seed a sale so the Export button is enabled (disabled when no data)
         cy.php(`
-            $tenant = App\\Models\\Tenant::where('slug', 'cypress-test')->first();
+            $tenant = App\\Models\\Tenant::where('slug', 'cypress')->first();
             app()->instance('currentTenant', $tenant);
             $storage = App\\Models\\Storage::factory()->create();
             $customer = App\\Models\\Customer::factory()->create();

@@ -1,5 +1,4 @@
 const { defineConfig } = require('cypress')
-const herdTenant = require('./tests/cypress/plugins/herd-tenant')
 
 module.exports = defineConfig({
     chromeWebSecurity: false,
@@ -8,19 +7,12 @@ module.exports = defineConfig({
     watchForFileChanges: false,
     videosFolder: 'tests/cypress/videos',
     screenshotsFolder: 'tests/cypress/screenshots',
-    fixturesFolder: 'tests/cypress/fixture',
+    fixturesFolder: 'tests/cypress/fixtures',
     e2e: {
         setupNodeEvents(on, config) {
-            // Link the test tenant site in Herd before Cypress validates baseUrl
-            herdTenant.linkTenantSite('cypress-test')
-
             require('./tests/cypress/plugins/index.js')(on, config)
-
-            on('after:run', () => {
-                herdTenant.unlinkTenantSite('cypress-test')
-            })
         },
-        baseUrl: 'https://cypress-test.namain.test',
+        baseUrl: 'https://cypress.namain.test',
         specPattern: 'tests/cypress/integration/**/*.cy.{js,jsx,ts,tsx}',
         supportFile: 'tests/cypress/support/index.js',
     },

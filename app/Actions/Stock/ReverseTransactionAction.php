@@ -25,6 +25,8 @@ class ReverseTransactionAction
                 reason: 'purchase_return',
                 movable: $transaction
             );
+
+            $transaction->product->recalculateAverageCost();
         }
     }
 }

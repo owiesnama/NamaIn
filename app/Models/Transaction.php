@@ -170,6 +170,10 @@ class Transaction extends BaseModel
             movable: $this
         );
 
+        if ($this->getTypeAttribute() === 'Purchases') {
+            $this->product->recalculateAverageCost();
+        }
+
         return $this;
     }
 

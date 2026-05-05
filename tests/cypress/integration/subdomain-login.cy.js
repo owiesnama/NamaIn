@@ -21,7 +21,7 @@ describe('Subdomain Login', () => {
 
         cy.url().should('include', '/login');
         // Should stay on the tenant subdomain, not redirect to root domain
-        cy.url().should('include', 'cypress-test.');
+        cy.url().should('include', 'cypress.');
     });
 
     it('logs in on tenant subdomain and lands on tenant dashboard', () => {
@@ -30,14 +30,14 @@ describe('Subdomain Login', () => {
         cy.visit('/dashboard');
 
         cy.url().should('include', '/dashboard');
-        cy.url().should('include', 'cypress-test.');
+        cy.url().should('include', 'cypress.');
     });
 
     it('login form posts to current subdomain, not root domain', () => {
         // Set up tenant and user via PHP
         cy.php(`
             $tenant = App\\Models\\Tenant::firstOrCreate(
-                ['slug' => 'cypress-test'],
+                ['slug' => 'cypress'],
                 ['name' => 'Cypress Test', 'is_active' => true]
             );
 
@@ -83,7 +83,7 @@ describe('Subdomain Login', () => {
 
             // Should land on the tenant dashboard, not the tenant selector
             cy.url().should('include', '/dashboard');
-            cy.url().should('include', 'cypress-test.');
+            cy.url().should('include', 'cypress.');
         });
     });
 

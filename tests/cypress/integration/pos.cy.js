@@ -8,7 +8,7 @@ before(() => {
     cy.tenantLogin();
 
     cy.php(`
-        $tenant = App\\Models\\Tenant::where('slug', 'cypress-test')->first();
+        $tenant = App\\Models\\Tenant::where('slug', 'cypress')->first();
         app()->instance('currentTenant', $tenant);
 
         $storage = App\\Models\\Storage::factory()->create([

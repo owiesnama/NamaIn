@@ -14,6 +14,7 @@ uses(RefreshDatabase::class);
 
 test('calculates average cost correctly after multiple purchases', function () {
     $user = User::factory()->create();
+    $this->actingAs($user);
     $storage = Storage::factory()->create();
     $product = Product::factory()->create(['cost' => 10]); // Initial default cost
 
@@ -57,7 +58,7 @@ test('calculates average cost correctly after multiple purchases', function () {
     // Total Qty = 10 + 20 = 30
     // Avg Cost = 600 / 30 = 20
 
-    $product->refresh();
+    $product->recalculateAverageCost();
     expect((float) $product->average_cost)->toBe(20.0);
 });
 
@@ -132,6 +133,8 @@ test('inventory value uses average cost', function () {
         'unit_cost' => 20,
         'delivered' => true,
     ]);
+
+    $product->recalculateAverageCost();
 
     $query = new DashboardStatsQuery;
     // 10 units * $20 avg cost = $200

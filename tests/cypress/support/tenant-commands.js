@@ -43,7 +43,7 @@ Cypress.Commands.add('adminLogin', () => {
  *   beforeEach(() => cy.tenantLogin());
  *   it('visits products', () => cy.visit('/products'));
  */
-Cypress.Commands.add('tenantLogin', (slug = 'cypress-test') => {
+Cypress.Commands.add('tenantLogin', (slug = 'cypress') => {
     cy.session(slug, () => {
         cy.php(`
             $tenant = App\\Models\\Tenant::firstOrCreate(
@@ -95,13 +95,13 @@ Cypress.Commands.add('tenantLogin', (slug = 'cypress-test') => {
  * independently and doesn't interfere with other role sessions.
  *
  * @param {string} roleSlug  One of: owner, manager, cashier, staff (or any custom role slug)
- * @param {string} slug      Tenant slug (defaults to 'cypress-test')
+ * @param {string} slug      Tenant slug (defaults to 'cypress')
  *
  * @example
  *   beforeEach(() => cy.tenantLoginAs('cashier'));
  *   beforeEach(() => cy.tenantLoginAs('staff'));
  */
-Cypress.Commands.add('tenantLoginAs', (roleSlug, slug = 'cypress-test') => {
+Cypress.Commands.add('tenantLoginAs', (roleSlug, slug = 'cypress') => {
     cy.session(`${slug}-${roleSlug}`, () => {
         cy.php(`
             $tenant = App\\Models\\Tenant::firstOrCreate(

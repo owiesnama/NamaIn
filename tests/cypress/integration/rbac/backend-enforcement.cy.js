@@ -33,7 +33,7 @@ before(() => {
     cy.tenantLoginAs('owner');
 
     cy.php(`
-        $tenant = App\\Models\\Tenant::where('slug', 'cypress-test')->first();
+        $tenant = App\\Models\\Tenant::where('slug', 'cypress')->first();
         app()->instance('currentTenant', $tenant);
 
         $customer = App\\Models\\Customer::factory()->create(['tenant_id' => $tenant->id]);

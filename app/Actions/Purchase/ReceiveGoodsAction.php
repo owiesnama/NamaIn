@@ -40,6 +40,8 @@ class ReceiveGoodsAction
                 actor: $actor
             );
 
+            $transaction->product->recalculateAverageCost();
+
             if ($transaction->isFullyReceived()) {
                 $transaction->deliver($actor, $storage);
             }

@@ -52,8 +52,7 @@ class StoreInvoiceAction
 
         $isSale = $this->isSale($data);
         $averageCosts = $isSale
-            ? Product::withAverageCost()
-                ->whereIn('id', $products->pluck('product')->unique())
+            ? Product::whereIn('id', $products->pluck('product')->unique())
                 ->get()
                 ->keyBy('id')
             : collect();
