@@ -136,6 +136,17 @@ Route::middleware([ResolveTenant::class])->group(function () {
 
         /*
         |--------------------------------------------------------------------------
+        | Resource Search (paginated JSON for dropdowns)
+        |--------------------------------------------------------------------------
+        */
+        Route::middleware('throttle:60,1')->group(function () {
+            Route::get('/api/customers', App\Http\Controllers\Api\CustomersController::class)->name('api.customers.index');
+            Route::get('/api/products', App\Http\Controllers\Api\ProductsController::class)->name('api.products.index');
+            Route::get('/api/suppliers', App\Http\Controllers\Api\SuppliersController::class)->name('api.suppliers.index');
+        });
+
+        /*
+        |--------------------------------------------------------------------------
         | Customers
         |--------------------------------------------------------------------------
         | Customer management including CRUD, account ledger, account statement,

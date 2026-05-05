@@ -22,14 +22,14 @@
         loading: suppliersLoading,
         loadMore: loadMoreSuppliers,
         onSearch: searchSupplier,
-    } = useAsyncOptions('/api/suppliers');
+    } = useAsyncOptions(route('api.suppliers.index'));
 
     const {
         options: productOptions,
         loading: productsLoading,
         loadMore: loadMoreProducts,
         onSearch: searchProduct,
-    } = useAsyncOptions('/api/products');
+    } = useAsyncOptions(route('api.products.index'));
 
     const purchases = ref([new PurchaseProduct()]);
 

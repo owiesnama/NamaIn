@@ -1,6 +1,5 @@
 import { ref } from 'vue';
 import { debounce } from 'lodash';
-import axios from 'axios';
 
 export function useAsyncOptions(url, { debounceMs = 300 } = {}) {
     const options = ref([]);
@@ -23,7 +22,7 @@ export function useAsyncOptions(url, { debounceMs = 300 } = {}) {
         abortController = new AbortController();
 
         try {
-            const response = await axios.get(url, {
+            const response = await window.axios.get(url, {
                 params: {
                     search: search.value || undefined,
                     page: page.value,
