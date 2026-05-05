@@ -2,7 +2,7 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link, router } from "@inertiajs/vue3";
 import { ref, watch } from "vue";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import Pagination from "@/Shared/Pagination.vue";
 import EmptySearch from "@/Shared/EmptySearch.vue";
 import FilterSidebar from "@/Shared/FilterSidebar.vue";

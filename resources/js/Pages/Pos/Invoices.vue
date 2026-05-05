@@ -3,7 +3,7 @@ import { ref, watch, computed } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 
 const props = defineProps({
     invoices: Object,

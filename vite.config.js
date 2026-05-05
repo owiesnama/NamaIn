@@ -9,6 +9,26 @@ export default defineConfig({
             'ziggy-js': resolve(__dirname, 'vendor/tightenco/ziggy'),
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('chart.js') || id.includes('vue-chartjs')) {
+                        return 'vendor-charts';
+                    }
+                    if (id.includes('filepond')) {
+                        return 'vendor-filepond';
+                    }
+                    if (id.includes('flatpickr')) {
+                        return 'vendor-flatpickr';
+                    }
+                    if (id.includes('pusher-js') || id.includes('laravel-echo')) {
+                        return 'vendor-echo';
+                    }
+                },
+            },
+        },
+    },
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],

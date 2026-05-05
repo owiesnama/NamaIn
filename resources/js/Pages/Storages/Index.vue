@@ -7,7 +7,7 @@
     import DeleteStorage from "@/Components/Storages/DeleteStorage.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import { watch, ref } from "vue";
-    import { debounce } from "lodash";
+    import debounce from "lodash/debounce";
     import { router, Link } from "@inertiajs/vue3";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import { useDate } from '@/Composables/useDate';

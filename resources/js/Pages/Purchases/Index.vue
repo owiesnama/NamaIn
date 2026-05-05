@@ -12,7 +12,7 @@
     import DropdownLink from "@/Components/DropdownLink.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import { useQueryString } from "@/Composables/useQueryString";
-    import { debounce } from "lodash";
+    import debounce from "lodash/debounce";
     import axios from "axios";
     import VueMultiselect from "vue-multiselect";
 

@@ -4,7 +4,7 @@
     import Cheque from "@/Shared/Cheque.vue";
     import { useQueryString } from "@/Composables/useQueryString";
     import { watch, ref, onMounted, onUnmounted } from "vue";
-    import { debounce } from "lodash";
+    import debounce from "lodash/debounce";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import VueMultiselect from "vue-multiselect";

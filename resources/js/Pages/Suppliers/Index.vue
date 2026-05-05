@@ -2,7 +2,7 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { watch, ref } from "vue";
     import { router, useForm, Link } from "@inertiajs/vue3";
-    import { debounce } from "lodash";
+    import debounce from "lodash/debounce";
     import SupplierForm from "@/Components/Suppliers/SupplierForm.vue";
     import DeleteSupplier from "@/Components/Suppliers/DeleteSupplier.vue";
     import Pagination from "@/Shared/Pagination.vue";

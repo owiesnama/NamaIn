@@ -7,8 +7,9 @@ import { ZiggyVue } from "../../vendor/tightenco/ziggy/dist/index.esm.js";
 import translations from "./Plugins/translations";
 import preferences from "./Plugins/preferences";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
+import { defineAsyncComponent } from 'vue'
 import CustomSelect from './Components/CustomSelect.vue'
-import DatePicker from './Components/DatePicker.vue'
+const DatePicker = defineAsyncComponent(() => import('./Components/DatePicker.vue'))
 
 
 import { translate } from "./Plugins/translations";

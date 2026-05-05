@@ -1,6 +1,3 @@
-import _ from "lodash";
-window._ = _;
-
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
  * to our Laravel back-end. This library automatically handles sending the
@@ -18,6 +15,9 @@ window.axios.defaults.withXSRFToken = true;
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting
  * allows your team to easily build robust real-time web applications.
+ *
+ * Pusher and Echo are split into a separate chunk (vendor-echo) by Vite
+ * so they don't block the main bundle's initial parse/execute.
  */
 
 import Echo from 'laravel-echo';

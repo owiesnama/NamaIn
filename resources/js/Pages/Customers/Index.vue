@@ -2,7 +2,7 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { watch, ref } from "vue";
     import { router, useForm, Link } from "@inertiajs/vue3";
-    import { debounce } from "lodash";
+    import debounce from "lodash/debounce";
     import CustomerForm from "@/Components/Customers/CustomerForm.vue";
     import Pagination from "@/Shared/Pagination.vue";
     import EmptySearch from "@/Shared/EmptySearch.vue";

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import TextInput from "@/Components/TextInput.vue";

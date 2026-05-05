@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 
 export function useAsyncOptions(url, { debounceMs = 300 } = {}) {
     const options = ref([]);

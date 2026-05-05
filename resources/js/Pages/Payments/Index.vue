@@ -7,7 +7,7 @@ import FilterSidebar from "@/Shared/FilterSidebar.vue";
 import DatePicker from "@/Components/DatePicker.vue";
 import { watch, ref, computed, onMounted, onUnmounted } from "vue";
 import { useQueryString } from "@/Composables/useQueryString";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import { useDate } from '@/Composables/useDate';
 
 const props = defineProps({

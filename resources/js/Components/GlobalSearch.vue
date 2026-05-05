@@ -2,7 +2,7 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
 import { router } from '@inertiajs/vue3';
 import axios from 'axios';
-import { debounce } from 'lodash';
+import debounce from "lodash/debounce";
 
 defineProps({
     placeholder: {
