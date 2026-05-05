@@ -172,7 +172,8 @@
       "Bash(\"C:/Users/Owiesnama/.config/herd/bin/herd.bat\" parked:*)",
       "Bash(\"C:/Users/Owiesnama/.config/herd/bin/herd.bat\" paths:*)",
       "Bash(\"C:\\\\Users\\\\Owiesnama\\\\.config\\\\herd\\\\bin\\\\php.bat\" inspect_product.php)",
-      "Bash(rm inspect_product.php)"
+      "Bash(rm inspect_product.php)",
+      "Bash(npx vite:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

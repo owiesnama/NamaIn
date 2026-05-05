@@ -28,7 +28,7 @@ it('returns only customers belonging to the authenticated user tenant', function
         ->getJson('/api/customers')
         ->assertOk();
 
-    expect($response->json())->toHaveCount(3);
+    expect($response->json('data'))->toHaveCount(3);
 });
 
 it('excludes system customers from the API response', function () {
@@ -46,5 +46,5 @@ it('excludes system customers from the API response', function () {
         ->getJson('/api/customers')
         ->assertOk();
 
-    expect($response->json())->toHaveCount(1);
+    expect($response->json('data'))->toHaveCount(1);
 });

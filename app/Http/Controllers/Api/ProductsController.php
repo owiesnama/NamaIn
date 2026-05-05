@@ -3,20 +3,20 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
+use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class CustomersController extends Controller
+class ProductsController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
-        $customers = Customer::query()
-            ->where('is_system', false)
+        $products = Product::query()
+            ->with('units')
             ->search($request->get('search'))
             ->latest()
             ->simplePaginate(20);
 
-        return response()->json($customers);
+        return response()->json($products);
     }
 }

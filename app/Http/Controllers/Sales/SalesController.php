@@ -8,9 +8,7 @@ use App\Filters\InvoiceFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Bank;
-use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Product;
 use App\Models\Storage;
 use App\Models\TreasuryAccount;
 
@@ -40,15 +38,7 @@ class SalesController extends Controller
     {
         $this->authorize('create', Invoice::class);
 
-        $query = Customer::query()->where('is_system', false);
-
-        if (request('customer')) {
-            $query->search(request('customer'));
-        }
-
         return inertia('Sales/Create', [
-            'products' => Product::with('units')->get(),
-            'customers' => $query->latest()->limit(10)->get(),
             'payment_methods' => PaymentMethod::casesWithLabels(),
             'banks' => Bank::all(),
             'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [

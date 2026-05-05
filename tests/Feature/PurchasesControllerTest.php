@@ -35,16 +35,11 @@ test('it can list purchases', function () {
 });
 
 test('it can show create purchase page', function () {
-    Product::factory()->count(3)->create();
-    Supplier::factory()->count(5)->create();
-
     $response = $this->get(route('purchases.create'));
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
         ->component('Purchases/Create')
-        ->has('products')
-        ->has('suppliers')
         ->has('payment_methods')
     );
 });

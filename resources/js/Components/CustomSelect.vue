@@ -47,10 +47,14 @@ const props = defineProps({
     remote: {
         type: Boolean,
         default: false
+    },
+    loading: {
+        type: Boolean,
+        default: false
     }
 });
 
-const emit = defineEmits(['update:modelValue', 'search-change', 'tag']);
+const emit = defineEmits(['update:modelValue', 'search-change', 'tag', 'scroll-end']);
 
 const isOpen = ref(false);
 const searchQuery = ref('');
@@ -284,6 +288,13 @@ const scrollToHighlighted = () => {
     }
 };
 
+const handleOptionsScroll = (event) => {
+    const el = event.target;
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+        emit('scroll-end');
+    }
+};
+
 watch(searchQuery, (newValue) => {
     emit('search-change', newValue);
     highlightedIndex.value = 0;
@@ -339,7 +350,7 @@ onBeforeUnmount(() => {
                     />
                 </div>
 
-                <div ref="dropdownRef" class="custom-select__options">
+                <div ref="dropdownRef" class="custom-select__options" @scroll="handleOptionsScroll">
                     <template v-if="filteredOptions.length > 0">
                         <div
                             v-for="(option, index) in filteredOptions"
@@ -365,12 +376,26 @@ onBeforeUnmount(() => {
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                             </svg>
                         </div>
+                        <div v-if="loading" class="custom-select__loading">
+                            <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
                     </template>
-                    <div v-else class="custom-select__no-results">
-                        <slot name="noResult">
-                            <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">{{ __('No results found') }}</p>
-                        </slot>
-                    </div>
+                    <template v-else>
+                        <div v-if="loading" class="custom-select__loading">
+                            <svg class="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                        <div v-else class="custom-select__no-results">
+                            <slot name="noResult">
+                                <p class="text-sm text-gray-500 dark:text-gray-400 text-center py-2">{{ __('No results found') }}</p>
+                            </slot>
+                        </div>
+                    </template>
                 </div>
             </div>
         </Transition>
@@ -591,6 +616,13 @@ onBeforeUnmount(() => {
 
 .custom-select__no-results {
     padding: 1rem;
+}
+
+.custom-select__loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem;
 }
 
 /* Dropdown transition */

@@ -6,24 +6,30 @@
     import FileUploader from "@/Components/FileUploader.vue";
     import PurchaseProduct from "@/Models/PurchaseProduct";
     import { ref, computed, watch } from "vue";
-    import { router, useForm, Link } from "@inertiajs/vue3";
-    import { debounce } from "lodash";
+    import { useForm, Link } from "@inertiajs/vue3";
     import QuickAddPartyModal from "@/Components/QuickAddPartyModal.vue";
+    import { useAsyncOptions } from "@/Composables/useAsyncOptions";
 
     const props = defineProps({
         storages: Object,
-        products: Object,
-        suppliers: Array,
         payment_methods: Object,
         banks: Array,
         treasury_accounts: Array,
     });
 
-    const localSuppliers = ref([...props.suppliers]);
+    const {
+        options: supplierOptions,
+        loading: suppliersLoading,
+        loadMore: loadMoreSuppliers,
+        onSearch: searchSupplier,
+    } = useAsyncOptions('/api/suppliers');
 
-    watch(() => props.suppliers, (newSuppliers) => {
-        localSuppliers.value = [...newSuppliers];
-    }, { deep: true });
+    const {
+        options: productOptions,
+        loading: productsLoading,
+        loadMore: loadMoreProducts,
+        onSearch: searchProduct,
+    } = useAsyncOptions('/api/products');
 
     const purchases = ref([new PurchaseProduct()]);
 
@@ -38,7 +44,7 @@
     const netTotal = computed(() => totalCost.value - Number(form.discount || 0));
 
     let productUnits = (id) => {
-        let product = props.products.filter((product) => product.id == id)[0];
+        let product = productOptions.value.find((product) => product.id == id);
         if (!product) return;
         return product.units;
     };
@@ -79,13 +85,6 @@
         form.treasury_account_id = null;
     });
 
-    const searchSupplier = debounce(function(search) {
-        router.get(route("purchases.create"), { supplier: search }, {
-            preserveScroll: true,
-            preserveState: true
-        });
-    }, 300);
-
     const showQuickAddModal = ref(false);
 
     const addBank = (newTag) => {
@@ -98,7 +97,7 @@
 
     const onSupplierCreated = (supplier) => {
         form.invocable = selectSupplier(supplier);
-        localSuppliers.value.unshift(supplier);
+        supplierOptions.value.unshift(supplier);
     };
 
     const submit = () => {
@@ -142,29 +141,20 @@
                     <div class="max-w-sm" v-auto-animate>
                         <CustomSelect
                             :model-value="form.invocable"
-                            :options="localSuppliers"
+                            :options="supplierOptions"
                             label="name"
                             track-by="id"
-                            @update:model-value="id => { form.invocable = selectSupplier(localSuppliers.find(s => s.id === id)) }"
+                            :remote="true"
+                            :loading="suppliersLoading"
+                            @update:model-value="id => { form.invocable = selectSupplier(supplierOptions.find(s => s.id === id)) }"
                             @search-change="searchSupplier"
+                            @scroll-end="loadMoreSuppliers"
                             class="modern-select"
                             :placeholder="__('Search supplier...')"
                         >
                             <template #noResult>
                                 <div class="p-2 space-y-2 text-center">
                                     <p class="text-sm text-gray-500">{{ __("No elements found. Consider changing the search query.") }}</p>
-                                    <button
-                                        type="button"
-                                        @click="showQuickAddModal = true"
-                                        class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm"
-                                    >
-                                        + {{ __("Add New Supplier") }}
-                                    </button>
-                                </div>
-                            </template>
-                            <template #noOptions>
-                                <div class="p-2 space-y-2 text-center">
-                                    <p class="text-sm text-gray-500">{{ __("List is empty.") }}</p>
                                     <button
                                         type="button"
                                         @click="showQuickAddModal = true"
@@ -211,12 +201,16 @@
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
                                     <CustomSelect
                                         v-model="purchase.product"
-                                        :options="products"
+                                        :options="productOptions"
                                         :multiple="false"
                                         :close-on-select="true"
                                         :placeholder="__('Select Product')"
                                         label="name"
                                         track-by="id"
+                                        :remote="true"
+                                        :loading="productsLoading"
+                                        @search-change="searchProduct"
+                                        @scroll-end="loadMoreProducts"
                                         class="w-full"
                                         @update:model-value="purchase.unit = null"
                                     />

@@ -33,31 +33,12 @@ test('it can list sales', function () {
 });
 
 test('it can show create sale page', function () {
-    Product::factory()->count(3)->create();
-    Customer::factory()->count(5)->create();
-
     $response = $this->get(route('sales.create'));
 
     $response->assertStatus(200);
     $response->assertInertia(fn ($page) => $page
         ->component('Sales/Create')
-        ->has('products')
-        ->has('customers')
         ->has('payment_methods')
-    );
-});
-
-test('it can search customers in create sale page', function () {
-    Customer::factory()->create(['name' => 'John Doe']);
-    Customer::factory()->create(['name' => 'Jane Smith']);
-
-    $response = $this->get(route('sales.create', ['customer' => 'John']));
-
-    $response->assertStatus(200);
-    $response->assertInertia(fn ($page) => $page
-        ->component('Sales/Create')
-        ->has('customers', 1)
-        ->where('customers.0.name', 'John Doe')
     );
 });
 

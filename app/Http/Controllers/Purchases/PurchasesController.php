@@ -10,9 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Bank;
 use App\Models\Invoice;
-use App\Models\Product;
 use App\Models\Storage;
-use App\Models\Supplier;
 use App\Models\TreasuryAccount;
 
 class PurchasesController extends Controller
@@ -44,8 +42,6 @@ class PurchasesController extends Controller
         $this->authorize('create', Invoice::class);
 
         return inertia('Purchases/Create', [
-            'products' => Product::with('units')->get(),
-            'suppliers' => Supplier::search(request('supplier'))->latest()->limit(10)->get(),
             'payment_methods' => PaymentMethod::casesWithLabels(),
             'banks' => Bank::all(),
             'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
