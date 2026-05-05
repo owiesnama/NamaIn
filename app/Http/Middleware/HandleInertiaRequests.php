@@ -3,10 +3,12 @@
 namespace App\Http\Middleware;
 
 use App\Models\Preference;
+use App\Models\Tenant;
 use App\Services\OperationFeed;
 use App\Services\TenantCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -38,6 +40,10 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+
+        if (! $tenant) {
+            $tenant = $this->resolveTenantFromHost($request);
+        }
 
         return array_merge(parent::share($request), [
             'appName' => config('app.name'),
@@ -83,6 +89,31 @@ class HandleInertiaRequests extends Middleware
                 ));
             },
         ]);
+    }
+
+    private function resolveTenantFromHost(Request $request): ?Tenant
+    {
+        $domain = config('app.domain');
+        $host = $request->getHost();
+
+        if (! str_ends_with($host, '.'.$domain)) {
+            return null;
+        }
+
+        $slug = str_replace('.'.$domain, '', $host);
+
+        if (! $slug || $slug === $host) {
+            return null;
+        }
+
+        $tenant = Tenant::where('slug', $slug)->first();
+
+        if ($tenant) {
+            app()->instance('currentTenant', $tenant);
+            URL::defaults(['tenant' => $slug]);
+        }
+
+        return $tenant;
     }
 
     private function resolvePreferences(): array
