@@ -24,7 +24,7 @@ class ProductsController extends Controller
             'products' => Product::filter($filter)
                 ->with(['units', 'categories', 'stock'])
                 ->withStockAggregates()
-                ->orderBy(request('sort_by', 'created_at'), request('sort_order', 'desc'))
+                ->orderBy(request('sort_by', 'quantity_on_hand'), request('sort_order', 'desc'))
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);

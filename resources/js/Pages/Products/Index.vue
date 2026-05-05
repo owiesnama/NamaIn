@@ -42,7 +42,7 @@
         max_cost: useQueryString("max_cost").value,
         expire_from: useQueryString("expire_from").value,
         expire_to: useQueryString("expire_to").value,
-        sort_by: useQueryString("sort_by").value || "created_at",
+        sort_by: useQueryString("sort_by").value || "quantity_on_hand",
         sort_order: useQueryString("sort_order").value || "desc"
     });
 
@@ -55,14 +55,15 @@
             max_cost: null,
             expire_from: null,
             expire_to: null,
-            sort_by: "created_at",
+            sort_by: "quantity_on_hand",
             sort_order: "desc"
         };
     };
 
     const sortByOptions = [
-        { label: __("Added Time"), value: "created_at" },
+        { label: __("Availability"), value: "quantity_on_hand" },
         { label: __("Name"), value: "name" },
+        { label: __("Added Time"), value: "created_at" },
         { label: __("Avg Cost"), value: "average_cost" },
         { label: __("Expire Date"), value: "expire_date" },
     ];

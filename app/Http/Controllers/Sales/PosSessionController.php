@@ -38,7 +38,14 @@ class PosSessionController extends Controller
             'session' => $session->load(['storage', 'openedBy']),
             'initialProducts' => Product::with('units')
                 ->when(request('search'), fn ($q, $search) => $q->where('name', 'ilike', "%{$search}%"))
-                ->orderBy('name')
+                ->leftJoin('stocks', function ($join) use ($storage) {
+                    $join->on('stocks.product_id', '=', 'products.id')
+                        ->where('stocks.storage_id', $storage->id)
+                        ->whereNull('stocks.deleted_at');
+                })
+                ->select('products.*')
+                ->orderByDesc('stocks.quantity')
+                ->orderBy('products.name')
                 ->paginate(24)
                 ->withQueryString()
                 ->through(function (Product $product) use ($storage, $replenishmentAction) {

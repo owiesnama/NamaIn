@@ -1275,5 +1275,6 @@
     "Export failed. Please try again.": "فشل التصدير. يرجى المحاولة مرة أخرى.",
     "Export failed. Unsupported export type.": "فشل التصدير. نوع التصدير غير مدعوم.",
     "Expiry date must be a valid date.": "تاريخ الانتهاء يجب أن يكون تاريخًا صالحًا.",
-    "Expiry date must be a valid date, for example 2026-12-31.": "تاريخ الانتهاء يجب أن يكون تاريخًا صالحًا، مثال: 2026-12-31."
+    "Expiry date must be a valid date, for example 2026-12-31.": "تاريخ الانتهاء يجب أن يكون تاريخًا صالحًا، مثال: 2026-12-31.",
+    "Availability": "التوفر"
 }
