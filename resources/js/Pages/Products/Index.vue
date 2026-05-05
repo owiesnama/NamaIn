@@ -1,6 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { watch, ref } from "vue";
+    import { watch, ref, reactive, computed, onMounted, onUnmounted, nextTick } from "vue";
     import { router, useForm, Link } from "@inertiajs/vue3";
     import { debounce } from "lodash";
     import EmptySearch from "@/Shared/EmptySearch.vue";
@@ -14,7 +14,7 @@
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import Tooltip from "@/Components/Tooltip.vue";
 
-    defineProps({
+    const props = defineProps({
         products: Object,
         categories: Array,
         storages: Array,
@@ -116,6 +116,146 @@
         });
     };
 
+    // Layout toggle
+    const layout = ref(preferences('products_layout', 'table'));
+
+    const setLayout = (newLayout) => {
+        layout.value = newLayout;
+        router.put(route('user-preferences.update'), { products_layout: newLayout }, { preserveState: true, preserveScroll: true });
+    };
+
+    // Cards mode state
+    const cardProducts = ref([...props.products.data]);
+    const loadingMore = ref(false);
+    const sentinel = ref(null);
+    let observer = null;
+
+    const loadMore = () => {
+        if (loadingMore.value || !props.products.next_page_url) return;
+        loadingMore.value = true;
+        router.get(props.products.next_page_url, filters.value, {
+            only: ['products'],
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: (page) => {
+                cardProducts.value = [...cardProducts.value, ...page.props.products.data];
+                loadingMore.value = false;
+            },
+            onError: () => {
+                loadingMore.value = false;
+            },
+        });
+    };
+
+    const setupObserver = () => {
+        if (observer) observer.disconnect();
+        if (!sentinel.value) return;
+        observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && layout.value === 'cards') {
+                loadMore();
+            }
+        }, { rootMargin: '200px' });
+        observer.observe(sentinel.value);
+    };
+
+    onMounted(() => {
+        nextTick(() => {
+            if (layout.value === 'cards') {
+                setupObserver();
+            }
+        });
+    });
+
+    onUnmounted(() => {
+        if (observer) observer.disconnect();
+    });
+
+    watch(layout, (val) => {
+        if (val === 'cards') {
+            nextTick(() => setupObserver());
+        } else {
+            if (observer) observer.disconnect();
+        }
+    });
+
+    // Reset cardProducts when filters change
+    watch(filters, () => {
+        cardProducts.value = [...props.products.data];
+    }, { deep: true });
+
+    // Sync cardProducts when products prop changes (for table mode nav or filter results)
+    watch(() => props.products.data, (newData) => {
+        if (layout.value === 'cards') {
+            // Only reset if this is a fresh page load (page 1), not an append
+            if (!loadingMore.value) {
+                cardProducts.value = [...newData];
+            }
+        }
+    });
+
+    // Card drafts
+    const drafts = reactive(new Map());
+
+    const getDraft = (productId) => {
+        if (!drafts.has(productId)) return {};
+        return drafts.get(productId);
+    };
+
+    const updateDraft = (productId, field, value) => {
+        const current = drafts.has(productId) ? { ...drafts.get(productId) } : {};
+        current[field] = value;
+        drafts.set(productId, current);
+    };
+
+    const isDirty = (product) => {
+        if (!drafts.has(product.id)) return false;
+        const draft = drafts.get(product.id);
+        for (const key of Object.keys(draft)) {
+            if (String(draft[key]) !== String(product[key])) return true;
+        }
+        return false;
+    };
+
+    const saveCard = (product) => {
+        if (!isDirty(product)) return;
+        const draft = drafts.get(product.id);
+        const dirtyFields = {};
+        for (const key of Object.keys(draft)) {
+            if (String(draft[key]) !== String(product[key])) {
+                dirtyFields[key] = draft[key];
+            }
+        }
+        router.patch(route('products.quick-update', product.id), dirtyFields, {
+            preserveState: true,
+            onSuccess: () => {
+                drafts.delete(product.id);
+            },
+        });
+    };
+
+    // New product card
+    const newProductExpanded = ref(false);
+    const newProductForm = useForm({
+        name: '',
+        cost: '',
+        price: '',
+    });
+
+    const submitNewProduct = () => {
+        newProductForm.post(route('products.index'), {
+            preserveState: true,
+            preserveScroll: true,
+            onSuccess: (page) => {
+                // Prepend new product if in cards mode
+                if (layout.value === 'cards') {
+                    cardProducts.value = [...page.props.products.data.slice(0, 1), ...cardProducts.value];
+                }
+                newProductForm.reset();
+                newProductExpanded.value = false;
+            },
+        });
+    };
+
     watch(
         filters,
         debounce(function() {
@@ -147,6 +287,40 @@
                 <div
                     class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0"
                 >
+                    <!-- Layout toggle buttons -->
+                    <div class="flex items-center gap-x-1">
+                        <button
+                            type="button"
+                            @click="setLayout('table')"
+                            :class="[
+                                'inline-flex items-center justify-center p-2.5 border rounded-lg transition-colors duration-200',
+                                layout === 'table'
+                                    ? 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
+                                    : 'text-gray-700 bg-white border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800'
+                            ]"
+                            :title="__('Table View')"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M10.875 12h-7.5m8.625 0h7.5m-8.625 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25-3.75h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m0-3.75h7.5" />
+                            </svg>
+                        </button>
+                        <button
+                            type="button"
+                            @click="setLayout('cards')"
+                            :class="[
+                                'inline-flex items-center justify-center p-2.5 border rounded-lg transition-colors duration-200',
+                                layout === 'cards'
+                                    ? 'text-emerald-600 bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
+                                    : 'text-gray-700 bg-white border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800'
+                            ]"
+                            :title="__('Grid View')"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                            </svg>
+                        </button>
+                    </div>
+
                     <button
                         @click="showSidebar = !showSidebar"
                         :class="[
@@ -230,7 +404,8 @@
 
                 <!-- Products List -->
                 <div class="flex-1 min-w-0 overflow-hidden">
-                    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                    <!-- Table Mode -->
+                    <div v-if="layout === 'table'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50/50 dark:bg-gray-800/40">
@@ -347,12 +522,220 @@
                             </table>
                         </div>
                     </div>
+
+                    <!-- Cards Mode -->
+                    <div v-if="layout === 'cards'" data-testid="product-cards-grid">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            <!-- New Product Card -->
+                            <div
+                                class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
+                                :class="{ 'border-dashed': !newProductExpanded }"
+                            >
+                                <!-- Collapsed state -->
+                                <div
+                                    v-if="!newProductExpanded"
+                                    @click="newProductExpanded = true"
+                                    class="flex flex-col items-center justify-center h-full min-h-[200px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+                                >
+                                    <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 mb-3">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-emerald-600 dark:text-emerald-400">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                        </svg>
+                                    </div>
+                                    <span class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ __("Add Product") }}</span>
+                                </div>
+
+                                <!-- Expanded state -->
+                                <div v-else class="p-4 space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __("New Product") }}</h4>
+                                        <button
+                                            type="button"
+                                            @click="newProductExpanded = false; newProductForm.reset();"
+                                            class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg transition-colors duration-200"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    <div class="space-y-3" data-testid="new-product-form">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right mb-1">{{ __("Name") }}</label>
+                                            <input
+                                                v-model="newProductForm.name"
+                                                type="text"
+                                                class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600"
+                                                :placeholder="__('Product name')"
+                                            />
+                                            <p v-if="newProductForm.errors.name" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ newProductForm.errors.name }}</p>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right mb-1">{{ __("Cost") }}</label>
+                                            <div class="relative">
+                                                <input
+                                                    v-model="newProductForm.cost"
+                                                    name="new-cost"
+                                                    type="number"
+                                                    step="0.01"
+                                                    class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
+                                                    :placeholder="__('0.00')"
+                                                />
+                                                <span class="absolute inset-y-0 ltr:right-0 rtl:left-0 flex items-center ltr:pr-3 rtl:pl-3 text-xs font-medium text-gray-400 dark:text-gray-500">{{ preferences('currency', 'SDG') }}</span>
+                                            </div>
+                                            <p v-if="newProductForm.errors.cost" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ newProductForm.errors.cost }}</p>
+                                        </div>
+
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right mb-1">{{ __("Price") }}</label>
+                                            <div class="relative">
+                                                <input
+                                                    v-model="newProductForm.price"
+                                                    name="new-price"
+                                                    type="number"
+                                                    step="0.01"
+                                                    class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
+                                                    :placeholder="__('0.00')"
+                                                />
+                                                <span class="absolute inset-y-0 ltr:right-0 rtl:left-0 flex items-center ltr:pr-3 rtl:pl-3 text-xs font-medium text-gray-400 dark:text-gray-500">{{ preferences('currency', 'SDG') }}</span>
+                                            </div>
+                                            <p v-if="newProductForm.errors.price" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ newProductForm.errors.price }}</p>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        @click="submitNewProduct"
+                                        :disabled="newProductForm.processing"
+                                        class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                    >
+                                        {{ __("Save") }}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Product Cards -->
+                            <div
+                                v-for="product in cardProducts"
+                                :key="product.id"
+                                data-testid="product-card"
+                                class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
+                            >
+                                <div class="p-4 space-y-3">
+                                    <!-- Card Header -->
+                                    <div class="flex items-start justify-between">
+                                        <Link
+                                            :href="route('products.show', product.id)"
+                                            class="text-sm font-semibold text-gray-900 dark:text-white hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors duration-200 leading-snug"
+                                        >
+                                            {{ product.name }}
+                                        </Link>
+                                        <div :class="['inline-flex items-center gap-x-1 px-2 py-0.5 text-[10px] font-bold rounded-lg border leading-tight shrink-0', getStockStatus(product).color]">
+                                            <span v-html="getStockStatus(product).icon"></span>
+                                            {{ getStockStatus(product).label }}
+                                        </div>
+                                    </div>
+
+                                    <!-- Categories -->
+                                    <div v-if="product.categories && product.categories.length" class="flex flex-wrap gap-1">
+                                        <span
+                                            v-for="cat in product.categories"
+                                            :key="cat.id"
+                                            class="px-1.5 py-0.5 text-[9px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md leading-tight uppercase tracking-wider"
+                                        >
+                                            {{ cat.name }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Available qty -->
+                                    <div class="flex items-center gap-x-2">
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ __("Available") }}</span>
+                                        <span :class="['text-xs font-bold', product.available_qty <= 0 ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400']">
+                                            {{ product.available_qty }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Editable Fields -->
+                                    <div class="space-y-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                                        <!-- Name -->
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1 rtl:text-right">{{ __("Name") }}</label>
+                                            <input
+                                                type="text"
+                                                name="name"
+                                                :value="getDraft(product.id).name !== undefined ? getDraft(product.id).name : product.name"
+                                                @input="updateDraft(product.id, 'name', $event.target.value)"
+                                                class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600"
+                                            />
+                                        </div>
+
+                                        <!-- Cost -->
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1 rtl:text-right">{{ __("Cost") }}</label>
+                                            <div class="relative">
+                                                <input
+                                                    type="number"
+                                                    name="cost"
+                                                    step="0.01"
+                                                    :value="getDraft(product.id).cost !== undefined ? getDraft(product.id).cost : product.cost"
+                                                    @input="updateDraft(product.id, 'cost', $event.target.value)"
+                                                    class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
+                                                />
+                                                <span class="absolute inset-y-0 ltr:right-0 rtl:left-0 flex items-center ltr:pr-3 rtl:pl-3 text-xs font-medium text-gray-400 dark:text-gray-500">{{ product.currency || preferences('currency', 'SDG') }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Price -->
+                                        <div>
+                                            <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1 rtl:text-right">{{ __("Price") }}</label>
+                                            <div class="relative">
+                                                <input
+                                                    type="number"
+                                                    name="price"
+                                                    step="0.01"
+                                                    :value="getDraft(product.id).price !== undefined ? getDraft(product.id).price : product.price"
+                                                    @input="updateDraft(product.id, 'price', $event.target.value)"
+                                                    class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
+                                                />
+                                                <span class="absolute inset-y-0 ltr:right-0 rtl:left-0 flex items-center ltr:pr-3 rtl:pl-3 text-xs font-medium text-gray-400 dark:text-gray-500">{{ product.currency || preferences('currency', 'SDG') }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Save Button -->
+                                    <div v-if="isDirty(product)" class="pt-2">
+                                        <button
+                                            type="button"
+                                            @click="saveCard(product)"
+                                            class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                        >
+                                            {{ __("Save") }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sentinel for infinite scroll -->
+                        <div ref="sentinel" class="h-4 w-full"></div>
+
+                        <!-- Loading indicator -->
+                        <div v-if="loadingMore" class="flex items-center justify-center py-6">
+                            <svg class="animate-spin h-5 w-5 text-emerald-600 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </div>
+                    </div>
                 </div>
 
                 <EmptySearch :data="products.data"></EmptySearch>
             </div>
 
-            <div class="flex justify-center">
+            <!-- Pagination (table mode only) -->
+            <div v-if="layout === 'table'" class="flex justify-center">
                 <Pagination :links="products.links"></Pagination>
             </div>
         </section>

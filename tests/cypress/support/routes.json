@@ -1308,6 +1308,15 @@
       "HEAD"
     ]
   },
+  "products.quick-update": {
+    "name": "products.quick-update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Catalog\\ProductsController@quickUpdate",
+    "uri": "products/{product}/quick-update",
+    "method": [
+      "PATCH"
+    ]
+  },
   "products.index": {
     "name": "products.index",
     "domain": "{tenant}.namain.test",

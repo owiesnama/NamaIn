@@ -228,7 +228,6 @@
                                                 id="expire_date"
                                                 v-model="product.expire_date"
                                                 class="block w-full mt-1 rtl:text-right"
-                                                required
                                             />
                                             <InputError
                                                 class="mt-2"

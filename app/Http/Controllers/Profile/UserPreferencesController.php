@@ -14,6 +14,7 @@ class UserPreferencesController extends Controller
             'language' => ['nullable', 'string', 'in:en,ar'],
             'timezone' => ['nullable', 'string', 'max:100'],
             'dateFormat' => ['nullable', 'string', 'max:50'],
+            'products_layout' => ['nullable', 'string', 'in:table,cards'],
         ]);
 
         $current = $request->user()->user_preferences ?? [];

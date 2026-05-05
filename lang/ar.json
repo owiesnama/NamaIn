@@ -1276,5 +1276,12 @@
     "Export failed. Unsupported export type.": "فشل التصدير. نوع التصدير غير مدعوم.",
     "Expiry date must be a valid date.": "تاريخ الانتهاء يجب أن يكون تاريخًا صالحًا.",
     "Expiry date must be a valid date, for example 2026-12-31.": "تاريخ الانتهاء يجب أن يكون تاريخًا صالحًا، مثال: 2026-12-31.",
-    "Availability": "التوفر"
+    "Availability": "التوفر",
+    "Table View": "عرض جدول",
+    "Card View": "عرض بطاقات",
+    "Add Product": "إضافة منتج",
+    "Saving...": "جارٍ الحفظ...",
+    "Base Unit": "الوحدة الأساسية",
+    "Product created successfully.": "تم إنشاء المنتج بنجاح.",
+    "Loading more...": "جارٍ تحميل المزيد..."
 }

@@ -6,6 +6,7 @@ use App\Actions\SyncCategoriesAction;
 use App\Filters\ProductFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
+use App\Http\Requests\QuickUpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\Storage;
@@ -25,7 +26,7 @@ class ProductsController extends Controller
                 ->with(['units', 'categories', 'stock'])
                 ->withStockAggregates()
                 ->orderBy(request('sort_by', 'quantity_on_hand'), request('sort_order', 'desc'))
-                ->paginate(parent::ELEMENTS_PER_PAGE)
+                ->paginate(request('layout') === 'cards' ? 24 : parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),
         ]);
     }
@@ -55,11 +56,26 @@ class ProductsController extends Controller
 
         $product = Product::create($request->safe()->except(['units', 'categories']));
 
-        $product->syncUnits($request->get('units'));
+        $units = $request->get('units');
+
+        if (empty($units)) {
+            $product->units()->create(['name' => __('Base Unit'), 'conversion_factor' => 1]);
+        } else {
+            $product->syncUnits($units);
+        }
 
         $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
 
-        return redirect()->route('products.index')->with('success', 'Product has been Created Successfully');
+        return redirect()->route('products.index')->with('success', __('Product created successfully.'));
+    }
+
+    public function quickUpdate(Product $product, QuickUpdateProductRequest $request)
+    {
+        $this->authorize('update', $product);
+
+        $product->update($request->validated());
+
+        return back()->with('success', __('Product updated successfully'));
     }
 
     public function update(Product $product, ProductRequest $request, SyncCategoriesAction $syncCategoriesAction)

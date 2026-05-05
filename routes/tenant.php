@@ -175,6 +175,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/products/export', [ProductExportController::class, 'store'])->name('products.export');
         Route::post('/products/import', [ProductImportController::class, 'store'])->name('products.import');
         Route::get('/products/import/sample', [ProductImportController::class, 'show'])->name('products.import.sample');
+        Route::patch('/products/{product}/quick-update', [ProductsController::class, 'quickUpdate'])->name('products.quick-update');
         Route::resource('/products', ProductsController::class);
 
         /*

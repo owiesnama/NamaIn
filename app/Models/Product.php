@@ -35,6 +35,8 @@ class Product extends BaseModel
 
         static::creating(function (Product $product) {
             $product->currency = $product->currency ?? preference('currency', 'SDG');
+            $product->price = $product->price ?? $product->cost ?? 0;
+            $product->average_cost = $product->average_cost ?? $product->cost ?? 0;
         });
     }
 

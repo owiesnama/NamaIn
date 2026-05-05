@@ -1,6 +1,6 @@
 import { usePage } from "@inertiajs/vue3";
 
-const USER_LEVEL_KEYS = ['language', 'timezone', 'dateFormat'];
+const USER_LEVEL_KEYS = ['language', 'timezone', 'dateFormat', 'products_layout'];
 
 export default {
     install: (app) => {
