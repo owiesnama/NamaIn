@@ -6,7 +6,6 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
     import CustomSelect from "../CustomSelect.vue";
-    import "vue-multiselect/dist/vue-multiselect.css";
 
     const props = defineProps({
         product: {
@@ -26,14 +25,18 @@
         name: props.product?.name,
         cost: props.product?.cost ? String(props.product?.cost) : "",
         price: props.product?.price ? String(props.product?.price) : "",
-        expire_date: props.product?.expire_date,
+        expire_date: props.product?.expire_date || "",
         currency: props.product?.currency || preferences("currency") || "SDG",
         alert_quantity: props.product?.alert_quantity || "",
         categories: props.product?.categories || [],
         units: props.product?.units?.length
             ? props.product?.units
-            : [{ name: "", conversion_factor: null }],
+            : [],
     });
+
+    const addUnit = () => {
+        product.units.push({ name: "", conversion_factor: null });
+    };
 
     const addCategory = (newTag) => {
         const tag = {
@@ -41,9 +44,6 @@
             id: newTag, // Use name as ID for new tags, backend will handle it
         };
         product.categories.push(tag);
-    };
-    const addUnit = () => {
-        product.units.push({ name: "", conversion_factor: null });
     };
 
     const formAttributes = () => {
@@ -183,7 +183,6 @@
                                                     min="0"
                                                     step="0.01"
                                                     class="block w-full mt-1"
-                                                    required
                                                 />
                                                 <div class="block w-20 mt-1 uppercase bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-emerald-500 focus:border-emerald-500 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-emerald-500 dark:focus:border-emerald-500 text-center font-bold">
                                                     {{ product.currency }}
@@ -231,9 +230,7 @@
                                             />
                                             <InputError
                                                 class="mt-2"
-                                                :message="
-                                                    product.errors.expire_date
-                                                "
+                                                :message="product.errors.expire_date"
                                             />
                                         </div>
 
