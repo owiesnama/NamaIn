@@ -105,6 +105,19 @@ return [
     |
     */
 
-    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
+    'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel')).'-cache-'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Cache Serializable Classes
+    |--------------------------------------------------------------------------
+    |
+    | When set to false, only primitive values may be stored in the cache.
+    | If your application intentionally stores PHP objects, list the allowed
+    | classes here to prevent PHP deserialization gadget chain attacks.
+    |
+    */
+
+    'serializable_classes' => false,
 
 ];

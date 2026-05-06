@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Services\DefaultRolesService;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Foundation\Http\Middleware\ValidateCsrfToken;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 use Illuminate\Support\Facades\URL;
 
@@ -20,7 +20,7 @@ abstract class TestCase extends BaseTestCase
     {
         parent::setUp();
         $this->withoutMiddleware([
-            ValidateCsrfToken::class,
+            PreventRequestForgery::class,
         ]);
 
         URL::defaults(['tenant' => 'test-org']);
