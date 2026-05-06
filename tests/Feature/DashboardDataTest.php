@@ -86,7 +86,7 @@ test('dashboard displays enriched data', function () {
     ]);
 
     // Create a low stock product
-    $lowStockProduct = Product::factory()->create(['name' => 'Low Stock Item', 'cost' => 50, 'alert_quantity' => 100]);
+    $lowStockProduct = Product::factory()->create(['name' => 'Low Stock Item', 'cost' => 50, 'average_cost' => 50, 'alert_quantity' => 100]);
     $lowStockProduct->stock()->attach($storage->id, ['quantity' => 10]);
 
     $response = $this->actingAs($user)->get(route('dashboard'));

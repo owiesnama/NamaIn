@@ -15,8 +15,6 @@
     import { useQueryString } from "@/Composables/useQueryString";
     import debounce from "lodash/debounce";
     import axios from "axios";
-    import VueMultiselect from "vue-multiselect";
-
     import CustomSelect from "@/Components/CustomSelect.vue";
 
     defineProps({
@@ -250,7 +248,7 @@
                     :select-label="''"
                     :deselect-label="''"
                     :selected-label="__('Selected')"
-                    @update:model-value="form.storage = selectedStorage?.id || null"
+                    @update:model-value="form.storage = $event"
                 />
             </template>
             <template #footer>

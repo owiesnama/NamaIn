@@ -84,20 +84,12 @@ class DashboardStatsQuery
     {
         return Cache::remember($this->cacheKey('total_inventory_value'), $this->cacheTtl('hour'), function () {
             $result = DB::selectOne('
-                SELECT COALESCE(SUM(qty * avg_cost), 0) as total_value
-                FROM (
-                    SELECT
-                        p.id,
-                        (SELECT COALESCE(SUM(s.quantity), 0) FROM stocks s WHERE s.product_id = p.id AND s.deleted_at IS NULL) as qty,
-                        CASE
-                            WHEN COALESCE((SELECT SUM(t.base_quantity) FROM transactions t INNER JOIN invoices i ON t.invoice_id = i.id WHERE t.product_id = p.id AND t.delivered = true AND i.invocable_type != ?), 0) > 0
-                            THEN (SELECT SUM(t.base_quantity * t.unit_cost) FROM transactions t INNER JOIN invoices i ON t.invoice_id = i.id WHERE t.product_id = p.id AND t.delivered = true AND i.invocable_type != ?) / (SELECT SUM(t.base_quantity) FROM transactions t INNER JOIN invoices i ON t.invoice_id = i.id WHERE t.product_id = p.id AND t.delivered = true AND i.invocable_type != ?)
-                            ELSE COALESCE(p.cost, 0)
-                        END as avg_cost
-                    FROM products p
-                    WHERE p.tenant_id = ?
-                ) inventory
-            ', [Customer::class, Customer::class, Customer::class, app('currentTenant')->id]);
+                SELECT COALESCE(SUM(s.quantity * COALESCE(p.average_cost, p.cost, 0)), 0) as total_value
+                FROM stocks s
+                INNER JOIN products p ON p.id = s.product_id
+                WHERE p.tenant_id = ?
+                AND s.deleted_at IS NULL
+            ', [app('currentTenant')->id]);
 
             return (float) ($result->total_value ?? 0);
         });

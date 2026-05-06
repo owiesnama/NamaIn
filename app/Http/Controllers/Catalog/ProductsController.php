@@ -27,7 +27,8 @@ class ProductsController extends Controller
                 ->withStockAggregates()
                 ->orderBy(request('sort_by', 'quantity_on_hand'), request('sort_order', 'desc'))
                 ->paginate(request('layout') === 'cards' ? 24 : parent::ELEMENTS_PER_PAGE)
-                ->withQueryString(),
+                ->withQueryString()
+                ->through(fn (Product $product) => $product->append(['pending_sales', 'available_qty'])),
         ]);
     }
 

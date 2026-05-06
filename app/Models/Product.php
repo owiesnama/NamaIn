@@ -45,7 +45,7 @@ class Product extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['expired_at', 'pending_sales', 'available_qty'];
+    protected $appends = ['expired_at'];
 
     public function recalculateAverageCost(): void
     {
@@ -106,16 +106,30 @@ class Product extends BaseModel
 
     public function getPendingSalesAttribute(): float|int
     {
+        if (($this->attributes['pending_sales_qty'] ?? null) !== null) {
+            return (int) $this->attributes['pending_sales_qty'];
+        }
+
         return $this->pendingSalesQuantity();
     }
 
     public function getPendingPurchasesAttribute(): float|int
     {
+        if (($this->attributes['pending_purchases_qty'] ?? null) !== null) {
+            return (int) $this->attributes['pending_purchases_qty'];
+        }
+
         return $this->pendingPurchaseQuantity();
     }
 
     public function getAvailableQtyAttribute(): float|int
     {
+        if (($this->attributes['pending_sales_qty'] ?? null) !== null) {
+            $qtyOnHand = (int) ($this->attributes['quantity_on_hand'] ?? 0);
+
+            return $qtyOnHand - (int) $this->attributes['pending_sales_qty'];
+        }
+
         return $this->availableQuantity();
     }
 

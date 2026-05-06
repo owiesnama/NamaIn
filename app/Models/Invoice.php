@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class Invoice extends BaseModel
 {
@@ -206,31 +207,32 @@ class Invoice extends BaseModel
      */
     public function createInverseInvoice(Collection $attributes, string $reason): Invoice
     {
-        $inverseInvoice = $this->replicate();
-        $inverseInvoice->is_inverse = true;
-        $inverseInvoice->parent_invoice_id = $this->id;
-        $inverseInvoice->inverse_reason = $reason;
-        $inverseInvoice->total = $attributes->get('refund_amount', 0);
-        $inverseInvoice->paid_amount = 0;
-        $inverseInvoice->discount = 0;
-        $inverseInvoice->serial_number = null;
-        $inverseInvoice->payment_status = PaymentStatus::Unpaid;
-        $inverseInvoice->status = InvoiceStatus::Pending;
-        $inverseInvoice->save();
+        return DB::transaction(function () use ($attributes, $reason) {
+            $inverseInvoice = $this->replicate();
+            $inverseInvoice->is_inverse = true;
+            $inverseInvoice->parent_invoice_id = $this->id;
+            $inverseInvoice->inverse_reason = $reason;
+            $inverseInvoice->total = $attributes->get('refund_amount', 0);
+            $inverseInvoice->paid_amount = 0;
+            $inverseInvoice->discount = 0;
+            $inverseInvoice->serial_number = null;
+            $inverseInvoice->payment_status = PaymentStatus::Unpaid;
+            $inverseInvoice->status = InvoiceStatus::Pending;
+            $inverseInvoice->save();
 
-        foreach ($attributes->get('products', []) as $productData) {
-            $transaction = Transaction::find($productData['transaction_id']);
-            if ($transaction) {
-                $inverseTransaction = $transaction->replicate();
-                $inverseTransaction->invoice_id = $inverseInvoice->id;
-                $inverseTransaction->quantity = $productData['quantity'];
-                // base_quantity should be handled by logic or replicated with conversion factor
-                $inverseTransaction->base_quantity = $productData['quantity'] * ($transaction->base_quantity / $transaction->quantity);
-                $inverseTransaction->save();
+            foreach ($attributes->get('products', []) as $productData) {
+                $transaction = Transaction::find($productData['transaction_id']);
+                if ($transaction) {
+                    $inverseTransaction = $transaction->replicate();
+                    $inverseTransaction->invoice_id = $inverseInvoice->id;
+                    $inverseTransaction->quantity = $productData['quantity'];
+                    $inverseTransaction->base_quantity = $productData['quantity'] * ($transaction->base_quantity / $transaction->quantity);
+                    $inverseTransaction->save();
+                }
             }
-        }
 
-        return $inverseInvoice;
+            return $inverseInvoice;
+        });
     }
 
     /**
@@ -254,27 +256,32 @@ class Invoice extends BaseModel
         ?string $paidAt = null,
         PaymentDirection $direction = PaymentDirection::In
     ): Payment {
-        $payment = $this->payments()->create([
-            'payable_id' => $this->invocable_id,
-            'payable_type' => $this->invocable_type,
-            'amount' => $amount,
-            'payment_method' => $method,
-            'direction' => $direction,
-            'reference' => $reference,
-            'notes' => $notes,
-            'paid_at' => $paidAt ?? now(),
-            'created_by' => auth()->id(),
-            'metadata' => $metadata,
-            'receipt_path' => $receiptPath,
-        ]);
+        return DB::transaction(function () use ($amount, $method, $reference, $notes, $metadata, $receiptPath, $paidAt, $direction) {
+            self::lockForUpdate()->find($this->id);
 
-        $this->updatePaymentStatus();
+            $payment = $this->payments()->create([
+                'payable_id' => $this->invocable_id,
+                'payable_type' => $this->invocable_type,
+                'amount' => $amount,
+                'payment_method' => $method,
+                'direction' => $direction,
+                'reference' => $reference,
+                'notes' => $notes,
+                'paid_at' => $paidAt ?? now(),
+                'created_by' => auth()->id(),
+                'metadata' => $metadata,
+                'receipt_path' => $receiptPath,
+            ]);
 
-        return $payment;
+            $this->updatePaymentStatus();
+
+            return $payment;
+        });
     }
 
     /**
      * Update the payment status based on paid amount.
+     * Must be called within a transaction with the invoice row locked.
      */
     public function updatePaymentStatus(): void
     {

@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Transaction;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateInverseInvoiceRequest extends FormRequest
 {
@@ -23,13 +24,15 @@ class CreateInverseInvoiceRequest extends FormRequest
      */
     public function rules(): array
     {
+        $tenantId = app('currentTenant')->id;
+
         return [
-            'parent_invoice_id' => 'required|exists:invoices,id',
+            'parent_invoice_id' => ['required', Rule::exists('invoices', 'id')->where('tenant_id', $tenantId)],
             'inverse_reason' => 'required|string|max:1000',
             'products' => 'required|array|min:1',
             'products.*.transaction_id' => [
                 'required',
-                'exists:transactions,id',
+                Rule::exists('transactions', 'id')->where('tenant_id', $tenantId),
                 function ($attribute, $value, $fail) {
                     $index = explode('.', $attribute)[1];
                     $transaction = Transaction::find($value);
@@ -40,9 +43,9 @@ class CreateInverseInvoiceRequest extends FormRequest
                     }
                 },
             ],
-            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.product_id' => ['required', Rule::exists('products', 'id')->where('tenant_id', $tenantId)],
             'products.*.quantity' => 'required|numeric|min:0.01',
-            'products.*.unit_id' => 'nullable|exists:units,id',
+            'products.*.unit_id' => ['nullable', Rule::exists('units', 'id')->where('tenant_id', $tenantId)],
             'products.*.price' => 'required|numeric|min:0',
             'total' => 'required|numeric|min:0',
             'discount' => 'nullable|numeric|min:0',

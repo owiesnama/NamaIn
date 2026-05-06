@@ -17,7 +17,7 @@ class PaymentFormOptionsQuery
             'suppliers' => Supplier::orderBy('name')->get(),
             'banks' => Bank::orderBy('name')->get(),
             'payment_methods' => PaymentMethod::casesWithLabels(),
-            'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $account) => [
+            'treasury_accounts' => TreasuryAccount::active()->withCurrentBalance()->get()->map(fn (TreasuryAccount $account) => [
                 'id' => $account->id,
                 'name' => $account->name,
                 'type' => $account->type->value,

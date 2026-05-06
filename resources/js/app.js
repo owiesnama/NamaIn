@@ -38,7 +38,6 @@ createInertiaApp({
             .component('CustomSelect', CustomSelect)
             .component('DatePicker', DatePicker)
             .component('VueMultiselect', CustomSelect)
-            .component('VueSelect', CustomSelect)
             .mount(el);
     }
 });

@@ -41,7 +41,16 @@ class TreasuryAccount extends BaseModel
 
     public function currentBalance(): int
     {
+        if (array_key_exists('movements_sum_amount', $this->attributes)) {
+            return $this->opening_balance + (int) $this->attributes['movements_sum_amount'];
+        }
+
         return $this->opening_balance + (int) $this->movements()->sum('amount');
+    }
+
+    public function scopeWithCurrentBalance(Builder $query): Builder
+    {
+        return $query->withSum('movements', 'amount');
     }
 
     public function isCashDrawer(): bool

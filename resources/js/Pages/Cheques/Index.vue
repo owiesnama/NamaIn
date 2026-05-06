@@ -7,9 +7,6 @@
     import debounce from "lodash/debounce";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
-    import VueMultiselect from "vue-multiselect";
-    import "vue-multiselect/dist/vue-multiselect.css";
-
     const props = defineProps({
         initialCheques: Object,
         status: Object,

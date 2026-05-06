@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Sales;
 
 use App\Actions\Pos\ClosePosSessionAction;
-use App\Actions\Pos\FindReplenishmentSourceAction;
 use App\Actions\Pos\OpenPosSessionAction;
 use App\Enums\StorageType;
 use App\Http\Controllers\Controller;
-use App\Models\Customer;
 use App\Models\PosSession;
 use App\Models\Product;
 use App\Models\Storage;
@@ -15,7 +13,7 @@ use Illuminate\Http\Request;
 
 class PosSessionController extends Controller
 {
-    public function show(FindReplenishmentSourceAction $replenishmentAction)
+    public function show()
     {
         $this->authorize('viewAny', PosSession::class);
         $storage = currentTenant()->storages()->where('type', StorageType::SALE_POINT)->first();
@@ -34,31 +32,34 @@ class PosSessionController extends Controller
             ]);
         }
 
+        $products = Product::with('units')
+            ->when(request('search'), fn ($q, $search) => $q->where('name', 'ilike', "%{$search}%"))
+            ->leftJoin('stocks', function ($join) use ($storage) {
+                $join->on('stocks.product_id', '=', 'products.id')
+                    ->where('stocks.storage_id', $storage->id)
+                    ->whereNull('stocks.deleted_at');
+            })
+            ->select('products.*', 'stocks.quantity as sale_point_qty')
+            ->orderByDesc('stocks.quantity')
+            ->orderBy('products.name')
+            ->paginate(24)
+            ->withQueryString();
+
+        $productIds = $products->getCollection()->pluck('id');
+        $replenishment = $this->batchReplenishmentInfo($productIds);
+
         return inertia('Pos/Session', [
             'session' => $session->load(['storage', 'openedBy']),
-            'initialProducts' => Product::with('units')
-                ->when(request('search'), fn ($q, $search) => $q->where('name', 'ilike', "%{$search}%"))
-                ->leftJoin('stocks', function ($join) use ($storage) {
-                    $join->on('stocks.product_id', '=', 'products.id')
-                        ->where('stocks.storage_id', $storage->id)
-                        ->whereNull('stocks.deleted_at');
-                })
-                ->select('products.*')
-                ->orderByDesc('stocks.quantity')
-                ->orderBy('products.name')
-                ->paginate(24)
-                ->withQueryString()
-                ->through(function (Product $product) use ($storage, $replenishmentAction) {
-                    return [
-                        'id' => $product->id,
-                        'name' => $product->name,
-                        'price' => $product->price / 100,
-                        'sale_point_qty' => $storage->quantityOf($product),
-                        'replenishment' => $this->buildReplenishmentInfo($product, $replenishmentAction),
-                        'units' => $product->units,
-                    ];
-                }),
-            'customers' => Customer::where('is_system', false)->get(),
+            'initialProducts' => $products->through(function (Product $product) use ($replenishment) {
+                return [
+                    'id' => $product->id,
+                    'name' => $product->name,
+                    'price' => $product->price / 100,
+                    'sale_point_qty' => (int) ($product->sale_point_qty ?? 0),
+                    'replenishment' => $replenishment[$product->id] ?? null,
+                    'units' => $product->units,
+                ];
+            }),
             'session_stats' => [
                 'opening_float' => $session->opening_float / 100,
                 'cash_sales_total' => $session->cashSalesTotal() / 100,
@@ -97,18 +98,39 @@ class PosSessionController extends Controller
         return redirect()->route('pos.index')->with('success', __('POS session closed.'));
     }
 
-    private function buildReplenishmentInfo(Product $product, FindReplenishmentSourceAction $action): ?array
+    /**
+     * Batch-load replenishment sources for multiple products in a single query.
+     *
+     * @return array<int, array{warehouse_id: int, warehouse_name: string, available_qty: int}>
+     */
+    private function batchReplenishmentInfo($productIds): array
     {
-        $source = $action->handle($product, 1);
-
-        if (! $source) {
-            return null;
+        if ($productIds->isEmpty()) {
+            return [];
         }
 
-        return [
-            'warehouse_id' => $source->warehouse->id,
-            'warehouse_name' => $source->warehouse->name,
-            'available_qty' => $source->availableQuantity,
-        ];
+        $rows = Storage::warehouses()
+            ->join('stocks', fn ($join) => $join
+                ->on('storages.id', '=', 'stocks.storage_id')
+                ->whereIn('stocks.product_id', $productIds)
+                ->where('stocks.quantity', '>', 0))
+            ->select('storages.id as warehouse_id', 'storages.name as warehouse_name', 'stocks.product_id', 'stocks.quantity')
+            ->orderByDesc('stocks.quantity')
+            ->get();
+
+        $result = [];
+        foreach ($rows as $row) {
+            if (isset($result[$row->product_id])) {
+                continue;
+            }
+
+            $result[$row->product_id] = [
+                'warehouse_id' => $row->warehouse_id,
+                'warehouse_name' => $row->warehouse_name,
+                'available_qty' => (int) $row->quantity,
+            ];
+        }
+
+        return $result;
     }
 }

@@ -1,29 +1,26 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
     import { Link } from "@inertiajs/vue3";
-    import { computed, ref } from "vue";
+    import { computed, defineAsyncComponent, ref } from "vue";
     import { usePrivacyMode } from "@/Composables/usePrivacyMode";
-    import {
-        Chart as ChartJS,
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Title,
-        Legend,
-        Tooltip as ChartTooltip,
-    } from 'chart.js';
-    import { Line } from 'vue-chartjs';
     import Tooltip from "@/Components/Tooltip.vue";
 
-    ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-        Title,
-        ChartTooltip,
-        Legend
+    const Line = defineAsyncComponent(() =>
+        Promise.all([
+            import('chart.js'),
+            import('vue-chartjs'),
+        ]).then(([chartjs, vuechartjs]) => {
+            chartjs.Chart.register(
+                chartjs.CategoryScale,
+                chartjs.LinearScale,
+                chartjs.PointElement,
+                chartjs.LineElement,
+                chartjs.Title,
+                chartjs.Tooltip,
+                chartjs.Legend
+            );
+            return vuechartjs.Line;
+        })
     );
 
     const props = defineProps([

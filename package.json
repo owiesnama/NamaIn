@@ -15,6 +15,7 @@
         "cypress": "^15.14.1",
         "eslint": "^8.36.0",
         "eslint-config-prettier": "^8.8.0",
+        "eslint-plugin-unused-imports": "^2.0.0",
         "eslint-plugin-vue": "^9.9.0",
         "filepond": "^4.32.12",
         "filepond-plugin-file-validate-type": "^1.2.9",
@@ -35,13 +36,9 @@
         "@formkit/auto-animate": "^0.8.1",
         "@inertiajs/vue3": "^1.0.2",
         "chart.js": "^4.5.1",
-        "date-fns": "^4.1.0",
-        "eslint-plugin-unused-imports": "^2.0.0",
         "flatpickr": "^4.6.13",
         "laravel-echo": "^2.3.4",
-        "puppeteer": "^20.7.3",
         "pusher-js": "^8.5.0",
-        "vue-chartjs": "^5.3.3",
-        "vue-multiselect": "^3.0.0-beta.3"
+        "vue-chartjs": "^5.3.3"
     }
 }

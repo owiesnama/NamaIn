@@ -44,7 +44,7 @@ class PurchasesController extends Controller
         return inertia('Purchases/Create', [
             'payment_methods' => PaymentMethod::casesWithLabels(),
             'banks' => Bank::all(),
-            'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
+            'treasury_accounts' => TreasuryAccount::active()->withCurrentBalance()->get()->map(fn (TreasuryAccount $a) => [
                 'id' => $a->id,
                 'name' => $a->name,
                 'type' => $a->type->value,

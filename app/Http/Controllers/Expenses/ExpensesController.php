@@ -41,7 +41,7 @@ class ExpensesController extends Controller
 
         return inertia('Expenses/Create', [
             'categories' => Category::ofType('expense')->get(),
-            'treasury_accounts' => TreasuryAccount::active()->get()->map(fn (TreasuryAccount $a) => [
+            'treasury_accounts' => TreasuryAccount::active()->withCurrentBalance()->get()->map(fn (TreasuryAccount $a) => [
                 'id' => $a->id,
                 'name' => $a->name,
                 'type_label' => $a->type->label(),

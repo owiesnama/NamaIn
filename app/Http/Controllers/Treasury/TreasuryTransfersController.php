@@ -16,6 +16,7 @@ class TreasuryTransfersController extends Controller
 
         return inertia('Treasury/Transfer/Create', [
             'accounts' => TreasuryAccount::active()
+                ->withCurrentBalance()
                 ->get()
                 ->map(fn (TreasuryAccount $account) => [
                     'id' => $account->id,

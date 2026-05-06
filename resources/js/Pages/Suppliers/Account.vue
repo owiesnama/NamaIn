@@ -3,7 +3,6 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import { Link } from "@inertiajs/vue3";
 import { ref } from "vue";
 import Pagination from "@/Shared/Pagination.vue";
-import { format, parseISO } from "date-fns";
 
 defineProps({
     supplier: Object,
@@ -34,8 +33,7 @@ const formatCurrency = (amount, currency = null) => {
 const formatDate = (dateString) => {
     if (!dateString) return "-";
     try {
-        const date = parseISO(dateString);
-        return format(date, "yyyy-MM-dd");
+        return dateString.slice(0, 10);
     } catch (e) {
         return "-";
     }

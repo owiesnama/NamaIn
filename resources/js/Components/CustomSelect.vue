@@ -300,10 +300,18 @@ watch(searchQuery, (newValue) => {
     highlightedIndex.value = 0;
 });
 
+watch(isOpen, (open) => {
+    if (open) {
+        window.addEventListener('scroll', handleScroll, true);
+        window.addEventListener('resize', handleScroll);
+    } else {
+        window.removeEventListener('scroll', handleScroll, true);
+        window.removeEventListener('resize', handleScroll);
+    }
+});
+
 onMounted(() => {
     document.addEventListener('click', handleClickOutside);
-    window.addEventListener('scroll', handleScroll, true);
-    window.addEventListener('resize', handleScroll);
 });
 
 onBeforeUnmount(() => {

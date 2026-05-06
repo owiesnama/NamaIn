@@ -46,7 +46,7 @@ class Transaction extends BaseModel
     /**
      * @var array<string>
      */
-    protected $appends = ['type', 'created_at_human', 'received_quantity', 'remaining_quantity'];
+    protected $appends = ['type', 'created_at_human'];
 
     public function receipts(): HasMany
     {
@@ -55,6 +55,10 @@ class Transaction extends BaseModel
 
     public function getReceivedQuantityAttribute(): int
     {
+        if (array_key_exists('receipts_sum_quantity', $this->attributes)) {
+            return (int) ($this->attributes['receipts_sum_quantity'] ?? 0);
+        }
+
         return (int) $this->receipts()->sum('quantity');
     }
 

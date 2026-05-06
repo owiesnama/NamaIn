@@ -2,7 +2,6 @@
 import AppLayout from "@/Layouts/AppLayout.vue";
 import { ref, computed } from "vue";
 import { router } from "@inertiajs/vue3";
-import { format, parseISO } from "date-fns";
 import { useDate } from '@/Composables/useDate';
 
 const props = defineProps({
@@ -15,8 +14,8 @@ const props = defineProps({
 });
 
 const filters = ref({
-    start_date: props.start_date ? format(parseISO(props.start_date), "yyyy-MM-dd") : "",
-    end_date: props.end_date ? format(parseISO(props.end_date), "yyyy-MM-dd") : "",
+    start_date: props.start_date ? props.start_date.slice(0, 10) : "",
+    end_date: props.end_date ? props.end_date.slice(0, 10) : "",
 });
 
 const formatCurrency = (amount, currency = null) => {
