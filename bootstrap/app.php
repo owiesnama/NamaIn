@@ -10,6 +10,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Inspector\Laravel\Middleware\WebRequestMonitoring;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -61,10 +62,12 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-        ]);
+            WebRequestMonitoring::class
 
-        $middleware->appendToGroup('web', WebRequestMonitoring::class)
-            ->appendToGroup('api', WebRequestMonitoring::class);
+        ]);
+        $middleware->api(append: [
+            WebRequestMonitoring::class
+        ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
