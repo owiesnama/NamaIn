@@ -62,6 +62,10 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        $middleware->appendToGroup('web', WebRequestMonitoring::class)
+            ->appendToGroup('api', WebRequestMonitoring::class);
+
     })
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->renderable(function (InsufficientStockException $e, $request) {

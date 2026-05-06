@@ -12,6 +12,7 @@
         "barryvdh/laravel-dompdf": "^3.0",
         "doctrine/dbal": "^3.7",
         "inertiajs/inertia-laravel": "^2.0",
+        "inspector-apm/inspector-laravel": "^4.19",
         "laravel-notification-channels/twilio": "^4.0",
         "laravel/boost": "*",
         "laravel/framework": "^12.0",
