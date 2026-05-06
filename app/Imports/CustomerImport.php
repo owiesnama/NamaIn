@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\NormalizesArabicEncoding;
 use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Customer;
 use Illuminate\Database\Eloquent\Model;
@@ -12,6 +13,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 
 class CustomerImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithValidation
 {
+    use NormalizesArabicEncoding;
     use TracksImportProgress;
 
     public function model(array $row): ?Model
@@ -19,8 +21,8 @@ class CustomerImport implements SkipsOnFailure, ToModel, WithHeadingRow, WithVal
         $this->incrementRowCount();
 
         return new Customer([
-            'name' => $row['name'],
-            'address' => $row['address'] ?? '',
+            'name' => $this->normalizeText($row['name']),
+            'address' => $this->normalizeText($row['address'] ?? '') ?? '',
             'phone_number' => $row['phone_number'] ?? '',
             'credit_limit' => $row['credit_limit'] ?? 0,
             'opening_debit' => $row['opening_debit'] ?? 0,

@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\NormalizesArabicEncoding;
 use App\Imports\Concerns\ParsesSpreadsheetDates;
 use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Category;
@@ -14,6 +15,7 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class ProductImport implements OnEachRow, WithHeadingRow
 {
+    use NormalizesArabicEncoding;
     use ParsesSpreadsheetDates;
     use TracksImportProgress;
 
@@ -50,7 +52,7 @@ class ProductImport implements OnEachRow, WithHeadingRow
         $this->incrementRowCount();
 
         $product = Product::create([
-            'name' => $data['name'],
+            'name' => $this->normalizeText($data['name']),
             'cost' => $data['cost'] ?? null,
             'price' => $data['price'] ?? $data['cost'] ?? 0,
             'expire_date' => $expireDate,
@@ -59,7 +61,7 @@ class ProductImport implements OnEachRow, WithHeadingRow
 
         if (! empty($data['unit_name'])) {
             $product->units()->create([
-                'name' => $data['unit_name'],
+                'name' => $this->normalizeText($data['unit_name']),
                 'conversion_factor' => $data['unit_conversion_factor'] ?? 1,
             ]);
         }
@@ -67,7 +69,7 @@ class ProductImport implements OnEachRow, WithHeadingRow
         if (! empty($data['categories'])) {
             $categories = explode(',', $data['categories']);
             $categoryIds = collect($categories)->map(function ($name) {
-                return Category::firstOrCreate(['name' => trim($name)])->id;
+                return Category::firstOrCreate(['name' => $this->normalizeText(trim($name))])->id;
             });
             $product->categories()->sync($categoryIds);
         }

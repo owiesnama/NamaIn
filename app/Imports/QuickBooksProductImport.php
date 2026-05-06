@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\NormalizesArabicEncoding;
 use App\Imports\Concerns\ParsesSpreadsheetDates;
 use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Category;
@@ -16,6 +17,7 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class QuickBooksProductImport implements OnEachRow, WithHeadingRow, WithMultipleSheets
 {
+    use NormalizesArabicEncoding;
     use ParsesSpreadsheetDates;
     use TracksImportProgress;
 
@@ -54,7 +56,7 @@ class QuickBooksProductImport implements OnEachRow, WithHeadingRow, WithMultiple
             return;
         }
 
-        [$name, $categoryName] = $this->parseItemName($itemName);
+        [$name, $categoryName] = $this->parseItemName($this->normalizeText($itemName));
 
         $cost = (int) ($data['cost'] ?? 0);
         $price = (int) ($data['price'] ?? 0);

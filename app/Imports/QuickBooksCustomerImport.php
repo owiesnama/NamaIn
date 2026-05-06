@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\NormalizesArabicEncoding;
 use App\Imports\Concerns\TracksImportProgress;
 use App\Models\Customer;
 use Maatwebsite\Excel\Concerns\OnEachRow;
@@ -13,6 +14,7 @@ use Maatwebsite\Excel\Row;
 
 class QuickBooksCustomerImport implements OnEachRow, SkipsOnFailure, WithHeadingRow, WithMultipleSheets, WithValidation
 {
+    use NormalizesArabicEncoding;
     use TracksImportProgress;
 
     public function sheets(): array
@@ -28,7 +30,7 @@ class QuickBooksCustomerImport implements OnEachRow, SkipsOnFailure, WithHeading
             return;
         }
 
-        $name = trim($data['customer'] ?? '');
+        $name = $this->normalizeText(trim($data['customer'] ?? ''));
 
         if ($name === '' || preg_match('/^[.\s]+$/', $name)) {
             return;
@@ -38,7 +40,7 @@ class QuickBooksCustomerImport implements OnEachRow, SkipsOnFailure, WithHeading
 
         Customer::create([
             'name' => $name,
-            'address' => trim($data['bill_to_1'] ?? ''),
+            'address' => $this->normalizeText(trim($data['bill_to_1'] ?? '')) ?? '',
             'phone_number' => trim($data['phone'] ?? ''),
             'credit_limit' => (float) ($data['credit_limit'] ?? 0),
             'opening_debit' => $balance > 0 ? $balance : 0,
