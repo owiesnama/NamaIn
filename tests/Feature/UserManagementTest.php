@@ -4,6 +4,7 @@ use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Models\UserInvitation;
+use App\Notifications\UserCredentialsNotification;
 use App\Notifications\UserInvitedNotification;
 use Illuminate\Support\Facades\Notification;
 
@@ -25,6 +26,38 @@ it('denies staff from viewing users index', function () {
     actingAsTenantUser(role: 'staff')
         ->get(route('users.index'))
         ->assertForbidden();
+});
+
+it('allows owner to create a user directly and emails credentials', function () {
+    Notification::fake();
+
+    actingAsTenantUser(role: 'owner')
+        ->post(route('users.store'), [
+            'name' => 'Direct User',
+            'email' => 'direct@example.com',
+            'role_id' => $this->managerRole->id,
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $user = User::where('email', 'direct@example.com')->first();
+
+    expect($user)->not->toBeNull()
+        ->and($user->must_change_password)->toBeTrue();
+
+    Notification::assertSentTo($user, UserCredentialsNotification::class);
+});
+
+it('does not expose the generated password in the session', function () {
+    Notification::fake();
+
+    actingAsTenantUser(role: 'owner')
+        ->post(route('users.store'), [
+            'name' => 'Direct User',
+            'email' => 'direct@example.com',
+            'role_id' => $this->managerRole->id,
+        ])
+        ->assertSessionMissing('createdUser');
 });
 
 it('allows owner to invite a user', function () {

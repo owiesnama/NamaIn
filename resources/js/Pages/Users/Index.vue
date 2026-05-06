@@ -95,7 +95,6 @@ const removeUser = () => {
 // ── Create user directly ──────────────────────────────────────────────────────
 const showCreateModal = ref(false);
 const createForm = useForm({ name: '', email: '', role_id: '' });
-const createdUserCredentials = ref(null);
 
 const submitCreate = () => {
     createForm.post(route('users.store'), {
@@ -103,10 +102,6 @@ const submitCreate = () => {
         onSuccess: () => {
             showCreateModal.value = false;
             createForm.reset();
-            const flash = usePage().props.flash;
-            if (flash?.createdUser) {
-                createdUserCredentials.value = flash.createdUser;
-            }
         },
     });
 };
@@ -610,7 +605,7 @@ const roleBadgeClass = (slug) => {
                                 </div>
 
                                 <!-- Notice -->
-                                <WarningAlert :title="__('The user will be required to set a new password on their first login.')" />
+                                <WarningAlert :title="__('Login credentials will be sent to the user\'s email. They will be required to set a new password on their first login.')" />
 
                                 <div class="flex justify-end gap-x-3 pt-2">
                                     <button type="button" class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200" @click="showCreateModal = false">
@@ -627,55 +622,5 @@ const roleBadgeClass = (slug) => {
             </Transition>
         </Teleport>
 
-        <!-- ── Created user credentials modal ────────────────────────────── -->
-        <Teleport to="body">
-            <Transition enter-active-class="ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
-                <div v-if="createdUserCredentials" class="fixed inset-0 z-50 flex items-center justify-center px-4">
-                    <div class="fixed inset-0 bg-gray-500/20 dark:bg-gray-900/60 backdrop-blur-sm" />
-                    <div class="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 w-full max-w-sm">
-                        <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                            <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-base font-semibold text-gray-900 dark:text-white text-center">{{ __('User Created') }}</h3>
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400 text-center mb-5">{{ __('Share these credentials with the user. They will be prompted to change their password on first login.') }}</p>
-
-                        <div class="space-y-3 rounded-lg bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700 p-4">
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{{ __('Name') }}</p>
-                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ createdUserCredentials.name }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{{ __('Email') }}</p>
-                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ createdUserCredentials.email }}</p>
-                            </div>
-                            <div>
-                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1">{{ __('Temporary Password') }}</p>
-                                <div class="flex items-center justify-between gap-x-2">
-                                    <p class="text-sm font-mono font-semibold text-emerald-700 dark:text-emerald-400 tracking-wider">{{ createdUserCredentials.password }}</p>
-                                    <button
-                                        class="inline-flex items-center justify-center p-1.5 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors duration-200"
-                                        @click="navigator.clipboard.writeText(createdUserCredentials.password)"
-                                        :title="__('Copy')"
-                                    >
-                                        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <button
-                            class="mt-5 w-full inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200"
-                            @click="createdUserCredentials = null"
-                        >
-                            {{ __('Done') }}
-                        </button>
-                    </div>
-                </div>
-            </Transition>
-        </Teleport>
     </AppLayout>
 </template>

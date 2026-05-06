@@ -5,13 +5,14 @@ namespace App\Actions\Users;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\UserCredentialsNotification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class CreateDirectUserAction
 {
-    public function handle(Tenant $tenant, string $name, string $email, Role $role): array
+    public function handle(Tenant $tenant, string $name, string $email, Role $role): User
     {
         if ($tenant->users()->where('users.email', $email)->exists()) {
             throw ValidationException::withMessages([
@@ -46,6 +47,8 @@ class CreateDirectUserAction
             'is_active' => true,
         ]);
 
-        return ['user' => $user, 'password' => $temporaryPassword];
+        $user->notify(new UserCredentialsNotification($tenant->name, $temporaryPassword));
+
+        return $user;
     }
 }

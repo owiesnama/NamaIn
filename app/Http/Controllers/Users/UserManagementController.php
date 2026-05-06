@@ -62,16 +62,9 @@ class UserManagementController extends Controller
         $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
         abort_unless($role->tenant_id === $tenant->id, 403);
 
-        $result = $action->handle($tenant, $request->name, $request->email, $role);
+        $action->handle($tenant, $request->name, $request->email, $role);
 
-        return back()->with([
-            'success' => __('User created successfully.'),
-            'createdUser' => [
-                'name' => $result['user']->name,
-                'email' => $result['user']->email,
-                'password' => $result['password'],
-            ],
-        ]);
+        return back()->with('success', __('User created successfully. Login credentials have been sent to their email.'));
     }
 
     public function update(AssignRoleRequest $request, User $user, AssignRoleAction $action): RedirectResponse

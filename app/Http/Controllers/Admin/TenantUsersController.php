@@ -29,16 +29,9 @@ class TenantUsersController extends Controller
             return back()->withErrors(['role_id' => __('This role does not belong to this tenant.')]);
         }
 
-        $result = $action->handle($tenant, $request->name, $request->email, $role);
+        $action->handle($tenant, $request->name, $request->email, $role);
 
-        return back()->with([
-            'success' => __('User added successfully.'),
-            'createdUser' => [
-                'name' => $result['user']->name,
-                'email' => $result['user']->email,
-                'password' => $result['password'],
-            ],
-        ]);
+        return back()->with('success', __('User added successfully. Login credentials have been sent to their email.'));
     }
 
     public function destroy(Tenant $tenant, User $user, RemoveUserAction $action): RedirectResponse
