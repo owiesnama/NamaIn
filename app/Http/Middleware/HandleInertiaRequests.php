@@ -118,7 +118,7 @@ class HandleInertiaRequests extends Middleware
 
     private function resolvePreferences(): array
     {
-        $prefs = collect(TenantCache::rememberForever('preferences', fn () => Preference::asPairs()))->toArray();
+        $prefs = TenantCache::rememberForever('preferences', fn () => Preference::asPairs()->toArray());
 
         if (! empty($prefs['logo']) && ! str_starts_with($prefs['logo'], 'http') && ! str_starts_with($prefs['logo'], '/')) {
             $prefs['logo'] = asset('storage/'.$prefs['logo']);

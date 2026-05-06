@@ -170,7 +170,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return ($this->user_preferences[$key] ?? null)
             ?? (app()->bound('currentTenant')
-                ? TenantCache::rememberForever('preferences', fn () => Preference::asPairs())[$key] ?? null
+                ? TenantCache::rememberForever('preferences', fn () => Preference::asPairs()->toArray())[$key] ?? null
                 : null)
             ?? $default;
     }

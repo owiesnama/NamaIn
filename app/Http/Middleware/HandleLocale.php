@@ -26,7 +26,7 @@ class HandleLocale
         }
 
         if (app()->bound('currentTenant')) {
-            $preferences = TenantCache::rememberForever('preferences', fn () => Preference::asPairs());
+            $preferences = TenantCache::rememberForever('preferences', fn () => Preference::asPairs()->toArray());
             App::setLocale($preferences['language'] ?? config('app.locale'));
         }
 

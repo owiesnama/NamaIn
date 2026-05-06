@@ -30,7 +30,7 @@ class ResolveTenant
         app()->instance('currentTenant', $tenant);
         URL::defaults(['tenant' => $slug]);
 
-        $preferences = TenantCache::rememberForever('preferences', fn () => Preference::asPairs());
+        $preferences = TenantCache::rememberForever('preferences', fn () => Preference::asPairs()->toArray());
         $tenantLocale = $preferences['language'] ?? config('app.locale');
         App::setLocale($tenantLocale);
 
