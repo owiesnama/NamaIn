@@ -43,15 +43,27 @@ class DefaultRolesService
         ];
     }
 
+    /** @return array<string, string> */
+    public static function roleNames(): array
+    {
+        return [
+            'owner'   => 'مالك',
+            'manager' => 'مدير',
+            'cashier' => 'أمين الصندوق',
+            'staff'   => 'موظف',
+        ];
+    }
+
     public function seedForTenant(Tenant $tenant): void
     {
         $permissionMap = Permission::all()->keyBy('slug');
+        $names = self::roleNames();
 
         foreach (self::rolePermissions() as $slug => $permissionSlugs) {
             $role = Role::withoutGlobalScopes()->updateOrCreate(
                 ['tenant_id' => $tenant->id, 'slug' => $slug],
                 [
-                    'name' => ucfirst($slug),
+                    'name' => $names[$slug] ?? ucfirst($slug),
                     'is_system' => true,
                 ]
             );

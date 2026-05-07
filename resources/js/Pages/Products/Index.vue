@@ -378,7 +378,7 @@
                     :categories="categories"
                     :sort-by-options="sortByOptions"
                     :all-label="__('All Products')"
-                    @update:filters="newFilters => filters = newFilters"
+                    @update:filters="newFilters => filters.value = newFilters"
                     @reset="resetFilters"
                 >
                     <template #extra-filters>
