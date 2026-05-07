@@ -106,6 +106,19 @@ const submitCreate = () => {
     });
 };
 
+// ── Resend credentials ────────────────────────────────────────────────────────
+const confirmingResendCredentials = ref(null);
+const resendingCredentials = ref(false);
+
+const resendCredentials = () => {
+    resendingCredentials.value = true;
+    router.post(route('users.credentials.resend', confirmingResendCredentials.value.id), {}, {
+        preserveScroll: true,
+        onSuccess: () => { confirmingResendCredentials.value = null; },
+        onFinish: () => { resendingCredentials.value = false; },
+    });
+};
+
 // ── Cancel invitation ─────────────────────────────────────────────────────────
 const confirmingCancelInvite = ref(null);
 
@@ -287,6 +300,17 @@ const roleBadgeClass = (slug) => {
                                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125" />
                                         </svg>
                                         {{ __('Edit') }}
+                                    </button>
+
+                                    <button
+                                        v-if="member.can_resend_credentials"
+                                        class="inline-flex items-center justify-center gap-x-1.5 px-3 py-1.5 text-xs font-medium text-blue-600 dark:text-blue-400 bg-white dark:bg-gray-900 border border-blue-200 dark:border-blue-800 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200"
+                                        @click="confirmingResendCredentials = member"
+                                    >
+                                        <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                                        </svg>
+                                        {{ __('Resend') }}
                                     </button>
 
                                     <button
@@ -618,6 +642,41 @@ const roleBadgeClass = (slug) => {
                             </form>
                         </div>
                     </Transition>
+                </div>
+            </Transition>
+        </Teleport>
+
+        <!-- ── Resend credentials modal ───────────────────────────────────── -->
+        <Teleport to="body">
+            <Transition enter-active-class="ease-out duration-300" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="ease-in duration-200" leave-from-class="opacity-100" leave-to-class="opacity-0">
+                <div v-if="confirmingResendCredentials" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+                    <div class="fixed inset-0 bg-gray-500/20 dark:bg-gray-900/60 backdrop-blur-sm" @click="confirmingResendCredentials = null" />
+                    <div class="relative bg-white dark:bg-gray-900 rounded-xl shadow-xl p-6 w-full max-w-sm text-center">
+                        <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900/30">
+                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                            </svg>
+                        </div>
+                        <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Resend Login Credentials') }}</h3>
+                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                            {{ __('A new temporary password will be generated and sent to :email.', { email: confirmingResendCredentials?.email }) }}
+                        </p>
+                        <div class="mt-6 flex justify-center gap-x-3">
+                            <button
+                                class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
+                                @click="confirmingResendCredentials = null"
+                            >
+                                {{ __('Cancel') }}
+                            </button>
+                            <button
+                                :disabled="resendingCredentials"
+                                class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                @click="resendCredentials"
+                            >
+                                {{ __('Resend Credentials') }}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </Transition>
         </Teleport>

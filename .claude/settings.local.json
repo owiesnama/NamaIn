@@ -193,7 +193,9 @@
       "Read(//c/Users/Owiesnama/.herd/**)",
       "Read(//c/Users/Owiesnama/Herd/**)",
       "Bash(/usr/local/bin/php vendor/bin/pint --dirty --format agent)",
-      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84:*)"
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84:*)",
+      "Bash(~/.config/herd/bin/php84/php.exe artisan:*)",
+      "Bash(~/.config/herd/bin/php84/php.exe vendor/bin/pint app/Actions/Users/ResendCredentialsAction.php app/Http/Controllers/Users/UserManagementController.php --format agent)"
     ]
   },
   "enableAllProjectMcpServers": true,

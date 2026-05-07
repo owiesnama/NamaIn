@@ -40,4 +40,24 @@ class UserPolicy
     {
         return $user->hasPermission('users.assign-role');
     }
+
+    public function resendCredentials(User $user, User $target): bool
+    {
+        if ($user->id === $target->id) {
+            return false;
+        }
+
+        $tenant = app('currentTenant');
+        $targetRole = $target->tenants()
+            ->where('tenants.id', $tenant->id)
+            ->first()
+            ?->pivot
+            ?->role;
+
+        if ($targetRole === 'owner') {
+            return false;
+        }
+
+        return $user->hasPermission('users.manage');
+    }
 }

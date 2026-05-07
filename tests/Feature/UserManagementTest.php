@@ -201,3 +201,139 @@ it('replaces a pending invitation when re-inviting the same email', function () 
     expect($remaining->first()->id)->not->toBe($firstInvitation->id);
     expect($remaining->first()->role_id)->toBe($this->staffRole->id);
 });
+
+it('allows owner to resend credentials to a direct-created user', function () {
+    Notification::fake();
+
+    $member = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => true,
+    ]);
+    $this->tenant->users()->attach($member, ['role' => 'staff', 'role_id' => $this->staffRole->id, 'is_active' => true]);
+
+    actingAsTenantUser(role: 'owner')
+        ->post(route('users.credentials.resend', $member))
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    Notification::assertSentTo($member, UserCredentialsNotification::class);
+    expect($member->fresh()->must_change_password)->toBeTrue();
+});
+
+it('denies resending credentials when user has already set their own password', function () {
+    Notification::fake();
+
+    $member = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => false,
+    ]);
+    $this->tenant->users()->attach($member, ['role' => 'staff', 'role_id' => $this->staffRole->id, 'is_active' => true]);
+
+    actingAsTenantUser(role: 'owner')
+        ->post(route('users.credentials.resend', $member))
+        ->assertSessionHasErrors('user');
+
+    Notification::assertNothingSent();
+});
+
+it('denies resending credentials to an inactive member', function () {
+    Notification::fake();
+
+    $member = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => true,
+    ]);
+    $this->tenant->users()->attach($member, ['role' => 'staff', 'role_id' => $this->staffRole->id, 'is_active' => false]);
+
+    actingAsTenantUser(role: 'owner')
+        ->post(route('users.credentials.resend', $member))
+        ->assertSessionHasErrors('user');
+
+    Notification::assertNothingSent();
+});
+
+it('denies resending credentials to the owner', function () {
+    Notification::fake();
+
+    $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $this->tenant->id)->where('slug', 'owner')->first();
+    $owner = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => true,
+    ]);
+    $this->tenant->users()->attach($owner, ['role' => 'owner', 'role_id' => $ownerRole->id, 'is_active' => true]);
+
+    actingAsTenantUser(role: 'owner')
+        ->post(route('users.credentials.resend', $owner))
+        ->assertSessionHasErrors('user');
+
+    Notification::assertNothingSent();
+});
+
+it('denies resending credentials to yourself', function () {
+    Notification::fake();
+
+    $ownerUser = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => false,
+    ]);
+    $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $this->tenant->id)->where('slug', 'owner')->first();
+    $this->tenant->users()->attach($ownerUser, ['role' => 'owner', 'role_id' => $ownerRole->id, 'is_active' => true]);
+
+    test()->actingAs($ownerUser)
+        ->post(route('users.credentials.resend', $ownerUser))
+        ->assertSessionHasErrors('user');
+
+    Notification::assertNothingSent();
+});
+
+it('denies staff from resending credentials', function () {
+    Notification::fake();
+
+    $member = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => true,
+    ]);
+    $this->tenant->users()->attach($member, ['role' => 'staff', 'role_id' => $this->staffRole->id, 'is_active' => true]);
+
+    actingAsTenantUser(role: 'staff')
+        ->post(route('users.credentials.resend', $member))
+        ->assertForbidden();
+
+    Notification::assertNothingSent();
+});
+
+it('exposes can_resend_credentials on members with must_change_password', function () {
+    $member = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => true,
+    ]);
+    $this->tenant->users()->attach($member, ['role' => 'staff', 'role_id' => $this->staffRole->id, 'is_active' => true]);
+
+    actingAsTenantUser(role: 'owner')
+        ->get(route('users.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Users/Index')
+            ->where('members', fn ($members) => collect($members)
+                ->firstWhere('id', $member->id)['can_resend_credentials'] === true
+            )
+        );
+});
+
+it('does not expose can_resend_credentials when must_change_password is false', function () {
+    $member = User::factory()->create([
+        'current_tenant_id' => $this->tenant->id,
+        'must_change_password' => false,
+    ]);
+    $this->tenant->users()->attach($member, ['role' => 'staff', 'role_id' => $this->staffRole->id, 'is_active' => true]);
+
+    actingAsTenantUser(role: 'owner')
+        ->get(route('users.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Users/Index')
+            ->where('members', fn ($members) => collect($members)
+                ->firstWhere('id', $member->id)['can_resend_credentials'] === false
+            )
+        );
+});

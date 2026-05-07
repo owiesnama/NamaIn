@@ -303,6 +303,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
         Route::put('/users/{user}/role', [UserRoleController::class, 'update'])->name('users.assign-role');
         Route::put('/users/{user}/toggle-status', [UserStatusController::class, 'update'])->name('users.toggle-status');
+        Route::post('/users/{user}/resend-credentials', [UserManagementController::class, 'resendCredentials'])->name('users.credentials.resend');
         Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
 
         /*

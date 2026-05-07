@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Users;
 use App\Actions\Users\AssignRoleAction;
 use App\Actions\Users\CreateDirectUserAction;
 use App\Actions\Users\RemoveUserAction;
+use App\Actions\Users\ResendCredentialsAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AssignRoleRequest;
 use App\Http\Requests\CreateDirectUserRequest;
@@ -22,6 +23,8 @@ class UserManagementController extends Controller
 
         $tenant = app('currentTenant');
 
+        $authUser = request()->user();
+
         $members = $tenant->users()
             ->get()
             ->map(fn (User $user) => [
@@ -33,6 +36,11 @@ class UserManagementController extends Controller
                 'role_id' => $user->pivot->role_id,
                 'is_active' => (bool) $user->pivot->is_active,
                 'joined_at' => $user->pivot->created_at,
+                'can_resend_credentials' => $user->must_change_password
+                    && (bool) $user->pivot->is_active
+                    && $user->pivot->role !== 'owner'
+                    && $authUser->id !== $user->id
+                    && $authUser->can('resendCredentials', $user),
             ]);
 
         $invitations = UserInvitation::with('inviter', 'role')
@@ -95,5 +103,14 @@ class UserManagementController extends Controller
         $action->handle(app('currentTenant'), $user, request()->user());
 
         return redirect()->route('users.index')->with('success', __('User removed from organization.'));
+    }
+
+    public function resendCredentials(User $user, ResendCredentialsAction $action): RedirectResponse
+    {
+        $this->authorize('resendCredentials', $user);
+
+        $action->handle(app('currentTenant'), request()->user(), $user);
+
+        return back()->with('success', __('Login credentials have been resent to :email.', ['email' => $user->email]));
     }
 }
