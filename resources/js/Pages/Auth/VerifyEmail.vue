@@ -44,12 +44,6 @@ const verificationLinkSent = computed(() => props.status === 'verification-link-
 
                 <div>
                     <Link
-                        :href="route('profile.show')"
-                        class="text-sm text-gray-600 underline hover:text-gray-900"
-                    >
-                        {{ __('Edit Profile') }}</Link>
-
-                    <Link
                         :href="route('logout')"
                         method="post"
                         as="button"
