@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class TenantLoginController extends Controller
 {
@@ -25,11 +26,17 @@ class TenantLoginController extends Controller
         ]);
     }
 
-    public function store(TenantLoginRequest $request, AuthenticateTenantUser $action): RedirectResponse
+    public function store(TenantLoginRequest $request, AuthenticateTenantUser $action): RedirectResponse|SymfonyResponse
     {
         $tenant = app('currentTenant');
 
-        $action->authenticate($request, $tenant);
+        $user = $action->authenticate($request, $tenant);
+
+        if (! $user->hasVerifiedEmail()) {
+            $request->session()->put('verification_tenant', $tenant->slug);
+
+            return Inertia::location(route('verification.notice'));
+        }
 
         return redirect()->intended(
             tenant_route('dashboard', $tenant->slug),

@@ -12,7 +12,7 @@ class ResetPassword extends BaseResetPassword implements ShouldQueue
 {
     use Queueable;
 
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable): MailMessage
     {
         $url = url(route('password.reset', [
             'token' => $this->token,

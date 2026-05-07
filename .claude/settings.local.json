@@ -195,7 +195,20 @@
       "Bash(/usr/local/bin/php vendor/bin/pint --dirty --format agent)",
       "Bash(/c/Users/Owiesnama/.config/herd/bin/php84:*)",
       "Bash(~/.config/herd/bin/php84/php.exe artisan:*)",
-      "Bash(~/.config/herd/bin/php84/php.exe vendor/bin/pint app/Actions/Users/ResendCredentialsAction.php app/Http/Controllers/Users/UserManagementController.php --format agent)"
+      "Bash(~/.config/herd/bin/php84/php.exe vendor/bin/pint app/Actions/Users/ResendCredentialsAction.php app/Http/Controllers/Users/UserManagementController.php --format agent)",
+      "Bash(~/.config/herd/bin/php84/php.exe vendor/bin/pint app/Http/Controllers/Auth/TenantLoginController.php app/Http/Responses/VerifyEmailResponse.php app/Providers/FortifyServiceProvider.php --format agent)",
+      "Bash(~/.config/herd/bin/php84/php.exe vendor/bin/pint tests/Feature/Jetstream/EmailVerificationTest.php --format agent)",
+      "Bash(~/.config/herd/bin/php --version)",
+      "Read(//Applications/Herd/**)",
+      "Read(//tmp/**)",
+      "Bash(git stash:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(mkdir -p /c/Users/Owiesnama/bin)",
+      "Bash(cat)",
+      "Bash(chmod +x /c/Users/Owiesnama/bin/php)",
+      "Bash(echo \"STDERR_EXIT:$?\")",
+      "Bash(APP_ENV=testing php vendor/bin/phpunit --configuration phpunit.xml tests/Feature/Jetstream/ProfileInformationTest.php)",
+      "Bash(APP_ENV=testing php vendor/bin/phpunit --configuration phpunit.xml tests/Feature/Jetstream/PasswordResetTest.php)"
     ]
   },
   "enableAllProjectMcpServers": true,
