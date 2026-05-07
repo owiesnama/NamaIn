@@ -8,7 +8,7 @@ class PosSessionPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasPermission('pos.view');
+        return $user->hasPermission('pos.view') || $user->hasPermission('pos.operate');
     }
 
     public function view(User $user): bool

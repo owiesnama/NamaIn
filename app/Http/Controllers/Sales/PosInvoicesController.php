@@ -12,6 +12,7 @@ class PosInvoicesController extends Controller
 {
     public function index(PosInvoiceFilter $filter)
     {
+        abort_unless(auth()->user()->hasPermission('pos.view'), 403);
         $this->authorize('viewAny', Invoice::class);
         $invoicesQuery = Invoice::query()
             ->forCustomer()

@@ -56,10 +56,10 @@ test('policies enforce roles correctly', function () {
     $staff = User::factory()->create(['current_tenant_id' => $tenant->id]);
     $tenant->users()->attach($staff, ['role' => 'staff', 'role_id' => $staffRole->id, 'is_active' => true]);
 
-    // StoragePolicy
+    // StoragePolicy — cashier no longer has inventory.view
     expect($owner->can('create', Storage::class))->toBeTrue();
     expect($cashier->can('create', Storage::class))->toBeFalse();
-    expect($cashier->can('viewAny', Storage::class))->toBeTrue();
+    expect($cashier->can('viewAny', Storage::class))->toBeFalse();
 
     // StockTransferPolicy
     expect($owner->can('create', StockTransfer::class))->toBeTrue();
@@ -69,9 +69,11 @@ test('policies enforce roles correctly', function () {
     expect($owner->can('create', Adjustment::class))->toBeTrue();
     expect($cashier->can('create', Adjustment::class))->toBeFalse();
 
-    // PosSessionPolicy
+    // PosSessionPolicy — cashier can reach terminal via pos.operate (viewAny), not history (view)
     expect($owner->can('create', PosSession::class))->toBeTrue();
     expect($cashier->can('create', PosSession::class))->toBeTrue();
+    expect($cashier->can('viewAny', PosSession::class))->toBeTrue();
+    expect($cashier->can('view', PosSession::class))->toBeFalse();
     expect($staff->can('create', PosSession::class))->toBeFalse();
 
     // InvoicePolicy

@@ -21,17 +21,13 @@ class DefaultRolesService
                 'roles.manage',
             ]))),
             'cashier' => [
-                'products.view',
                 'customers.view',
-                'suppliers.view',
                 'sales.view',
                 'sales.create',
-                'pos.view',
                 'pos.operate',
                 'pos.manage-sessions',
                 'payments.view',
                 'payments.create',
-                'inventory.view',
             ],
             'staff' => [
                 'products.view',
