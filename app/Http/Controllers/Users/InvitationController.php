@@ -7,7 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AcceptInvitationRequest;
 use App\Models\UserInvitation;
 use Illuminate\Http\RedirectResponse;
+use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class InvitationController extends Controller
 {
@@ -35,7 +37,7 @@ class InvitationController extends Controller
         ]);
     }
 
-    public function accept(AcceptInvitationRequest $request, string $token, AcceptInvitationAction $action): RedirectResponse
+    public function accept(AcceptInvitationRequest $request, string $token, AcceptInvitationAction $action): SymfonyResponse
     {
         $invitation = UserInvitation::withoutGlobalScopes()
             ->with('tenant', 'role')
@@ -45,8 +47,8 @@ class InvitationController extends Controller
         $user = $action->handle($invitation, $request->name, $request->password);
 
         auth()->login($user);
+        $user->switchTenant($invitation->tenant);
 
-        return redirect()->route('dashboard', ['tenant' => $invitation->tenant->slug])
-            ->with('success', __('Welcome to :tenant!', ['tenant' => $invitation->tenant->name]));
+        return Inertia::location(tenant_route('dashboard', $invitation->tenant->slug));
     }
 }

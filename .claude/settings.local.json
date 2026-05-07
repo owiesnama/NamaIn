@@ -192,7 +192,8 @@
       "Bash(C:/Users/Owiesnama/Herd/bin/php84 vendor/bin/pint --dirty --format agent)",
       "Read(//c/Users/Owiesnama/.herd/**)",
       "Read(//c/Users/Owiesnama/Herd/**)",
-      "Bash(git push:*)"
+      "Bash(/usr/local/bin/php vendor/bin/pint --dirty --format agent)",
+      "Bash(/c/Users/Owiesnama/.config/herd/bin/php84:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

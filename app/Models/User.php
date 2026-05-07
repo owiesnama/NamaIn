@@ -158,12 +158,12 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function sendEmailVerificationNotification(): void
     {
-        $this->notify(new VerifyEmailNotification);
+        $this->notify((new VerifyEmailNotification)->locale(app()->getLocale()));
     }
 
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new ResetPasswordNotification($token));
+        $this->notify((new ResetPasswordNotification($token))->locale(app()->getLocale()));
     }
 
     public function preference(string $key, mixed $default = null): mixed

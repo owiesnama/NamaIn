@@ -37,12 +37,14 @@ class InviteUserAction
         ]);
 
         Notification::route('mail', $invitation->email)
-            ->notify(new UserInvitedNotification(
-                tenantName: $tenant->name,
-                inviterName: $invitedBy->name,
-                roleName: $role->name,
-                acceptUrl: route('invitations.accept', $invitation->token),
-            ));
+            ->notify(
+                (new UserInvitedNotification(
+                    tenantName: $tenant->name,
+                    inviterName: $invitedBy->name,
+                    roleName: $role->name,
+                    acceptUrl: route('invitations.accept', $invitation->token),
+                ))->locale(app()->getLocale())
+            );
 
         return $invitation;
     }

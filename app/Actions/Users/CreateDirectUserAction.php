@@ -47,7 +47,9 @@ class CreateDirectUserAction
             'is_active' => true,
         ]);
 
-        $user->notify(new UserCredentialsNotification($tenant->name, $temporaryPassword));
+        $user->notify(
+            (new UserCredentialsNotification($tenant->name, $temporaryPassword))->locale(app()->getLocale())
+        );
 
         return $user;
     }
