@@ -2,7 +2,6 @@
 
 namespace App\Notifications;
 
-use App\Models\UserInvitation;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -12,7 +11,12 @@ class UserInvitedNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(public readonly UserInvitation $invitation) {}
+    public function __construct(
+        private readonly string $tenantName,
+        private readonly string $inviterName,
+        private readonly string $roleName,
+        private readonly string $acceptUrl,
+    ) {}
 
     /** @return array<int, string> */
     public function via(object $notifiable): array
@@ -22,20 +26,15 @@ class UserInvitedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $tenantName = $this->invitation->tenant->name;
-        $inviterName = $this->invitation->inviter->name;
-        $roleName = $this->invitation->role->name;
-        $acceptUrl = route('invitations.accept', $this->invitation->token);
-
         return (new MailMessage)
-            ->subject(__(':inviter invited you to join :tenant', ['inviter' => $inviterName, 'tenant' => $tenantName]))
+            ->subject(__(':inviter invited you to join :tenant', ['inviter' => $this->inviterName, 'tenant' => $this->tenantName]))
             ->greeting(__('You have been invited!'))
             ->line(__(':inviter has invited you to join :tenant as :role.', [
-                'inviter' => $inviterName,
-                'tenant' => $tenantName,
-                'role' => $roleName,
+                'inviter' => $this->inviterName,
+                'tenant' => $this->tenantName,
+                'role' => $this->roleName,
             ]))
-            ->action(__('Accept Invitation'), $acceptUrl)
+            ->action(__('Accept Invitation'), $this->acceptUrl)
             ->line(__('This invitation expires in 7 days.'))
             ->line(__('If you did not expect this invitation, you may ignore this email.'));
     }

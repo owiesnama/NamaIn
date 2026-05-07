@@ -37,7 +37,12 @@ class InviteUserAction
         ]);
 
         Notification::route('mail', $invitation->email)
-            ->notify(new UserInvitedNotification($invitation));
+            ->notify(new UserInvitedNotification(
+                tenantName: $tenant->name,
+                inviterName: $invitedBy->name,
+                roleName: $role->name,
+                acceptUrl: route('invitations.accept', $invitation->token),
+            ));
 
         return $invitation;
     }
