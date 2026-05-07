@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'mailgun'),
+    'default' => env('MAIL_MAILER', 'cloudflare'),
 
     /*
     |--------------------------------------------------------------------------
@@ -77,6 +77,9 @@ return [
                 'smtp',
                 'log',
             ],
+        ],
+        'cloudflare' => [
+            'transport' => 'cloudflare',
         ],
     ],
 

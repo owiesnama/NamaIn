@@ -180,7 +180,19 @@
       "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" -r \"echo implode\\('\\\\n', mb_list_encodings\\(\\)\\);\")",
       "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" -r \"echo iconv\\('Windows-1256', 'UTF-8', '\\\\xC7\\\\xE1\\\\xE4\\\\xC7\\\\xE3'\\);\")",
       "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" -r \"echo iconv\\('CP1256', 'UTF-8', '\\\\xC7\\\\xE1\\\\xE4\\\\xC7\\\\xE3'\\);\")",
-      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" -r \"var_dump\\(function_exists\\('iconv'\\)\\);\")"
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" -r \"var_dump\\(function_exists\\('iconv'\\)\\);\")",
+      "WebSearch",
+      "Bash(composer update:*)",
+      "Bash(C:/ProgramData/ComposerSetup/bin/composer.bat update:*)",
+      "Bash(where composer.bat)",
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/php.bat\" -r \"echo shell_exec\\('where composer'\\);\")",
+      "Bash(C:/Users/Owiesnama/.config/herd/bin/composer.bat update:*)",
+      "Bash(\"C:/Users/Owiesnama/.config/herd/bin/composer.bat\" show:*)",
+      "Bash(C:/Users/Owiesnama/.config/herd/bin/composer.bat require:*)",
+      "Bash(C:/Users/Owiesnama/Herd/bin/php84 vendor/bin/pint --dirty --format agent)",
+      "Read(//c/Users/Owiesnama/.herd/**)",
+      "Read(//c/Users/Owiesnama/Herd/**)",
+      "Bash(git push:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

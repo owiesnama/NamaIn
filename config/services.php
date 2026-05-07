@@ -36,4 +36,9 @@ return [
         'sender_id' => env('MAZIN_HOST_SENDER_ID'),
     ],
 
+    'cloudflare' => [
+        'account_id' => env('CLOUDFLARE_ACCOUNT_ID'),
+        'key' => env('CLOUDFLARE_KEY'),
+    ],
+
 ];
