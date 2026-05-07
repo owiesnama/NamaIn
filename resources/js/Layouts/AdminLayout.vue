@@ -4,6 +4,7 @@
     import ApplicationLogo from "@/Components/ApplicationLogo.vue";
     import Banner from "@/Components/Banner.vue";
     import Flash from "@/Shared/Flash.vue";
+    import ErrorToast from "@/Shared/ErrorToast.vue";
 
     defineProps({
         title: String,
@@ -202,6 +203,7 @@
                 <main class="xl:flex-1 xl:overflow-y-auto">
                     <div class="px-4 py-10 sm:px-6 lg:px-8 2xl:container 2xl:mx-auto">
                         <Flash />
+                        <ErrorToast />
                         <slot />
                     </div>
                 </main>

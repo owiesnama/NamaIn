@@ -1332,5 +1332,20 @@
     "Your account on :tenant is ready. Here are your login credentials.": "حسابك على :tenant جاهز. إليك بيانات تسجيل الدخول.",
     "Your Account is Ready": "حسابك جاهز",
     "Role": "الدور",
-    "Organization": "المؤسسة"
+    "Organization": "المؤسسة",
+
+    "Page not found": "الصفحة غير موجودة",
+    "The page you are looking for does not exist or has been moved.": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+    "Access denied": "غير مصرح",
+    "You do not have permission to access this page.": "ليس لديك صلاحية للوصول إلى هذه الصفحة.",
+    "Session expired": "انتهت الجلسة",
+    "Your session has expired. Please refresh the page and try again.": "انتهت صلاحية جلستك. يرجى تحديث الصفحة والمحاولة مجدداً.",
+    "Something went wrong": "خطأ في الخادم",
+    "An unexpected error occurred on the server. Please try again later.": "حدث خطأ غير متوقع في الخادم. يرجى المحاولة لاحقاً.",
+    "Service unavailable": "الخدمة غير متاحة",
+    "The service is temporarily unavailable. Please check back shortly.": "الخدمة غير متاحة مؤقتاً. يرجى المحاولة بعد قليل.",
+    "Go home": "الصفحة الرئيسية",
+    "Go back": "رجوع",
+    "An error occurred": "حدث خطأ",
+    "Please correct the following errors.": "يرجى تصحيح الأخطاء التالية."
 }

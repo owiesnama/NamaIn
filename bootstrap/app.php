@@ -9,8 +9,11 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 use Inspector\Laravel\Middleware\WebRequestMonitoring;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -63,11 +66,11 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            WebRequestMonitoring::class
+            WebRequestMonitoring::class,
 
         ]);
         $middleware->api(append: [
-            WebRequestMonitoring::class
+            WebRequestMonitoring::class,
         ]);
 
     })
@@ -78,5 +81,29 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             return back()->with('error', $e->getMessage());
+        });
+
+        $exceptions->respond(function (Response $response, Throwable $e, Request $request) {
+            $status = $response->getStatusCode();
+
+            if (
+                $request->expectsJson()
+                || $request->is('api/*')
+                || $response->isRedirection()
+                || ! in_array($status, [403, 404, 419, 500, 503])
+            ) {
+                return $response;
+            }
+
+            $homeUrl = match (true) {
+                Auth::guard('admin')->check() => '/__admin',
+                Auth::check() && app()->bound('currentTenant') => '/dashboard',
+                default => '/',
+            };
+
+            return Inertia::render('Error', [
+                'status' => $status,
+                'homeUrl' => $homeUrl,
+            ])->toResponse($request)->setStatusCode($status);
         });
     })->create();
