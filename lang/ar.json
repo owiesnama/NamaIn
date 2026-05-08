@@ -53,7 +53,7 @@
     "Available:": "المتاح:",
     "To Account": "إلى حساب",
     "Select destination account...": "اختر الحساب المستهدف...",
-    "Amount (in cents)": "المبلغ (بالهللات)",
+    "Amount (in cents)": "المبلغ (بالقروش)",
     "Reason for transfer...": "سبب التحويل...",
     "Processing...": "جارٍ المعالجة...",
     "Cash": "نقدي",
@@ -1347,5 +1347,10 @@
     "Go home": "الصفحة الرئيسية",
     "Go back": "رجوع",
     "An error occurred": "حدث خطأ",
-    "Please correct the following errors.": "يرجى تصحيح الأخطاء التالية."
+    "Please correct the following errors.": "يرجى تصحيح الأخطاء التالية.",
+    "Opening Credit": "الرصيد الافتتاحي (لنا)",
+    "Opening Debit": "الرصيد الافتتاحي (علينا)",
+    "Amount owed to you": "المبلغ المستحق لك",
+    "Advance or credit given": "المبلغ المستحق له",
+    "Select or Add Category": "اختر أو أضف فئة"
 }

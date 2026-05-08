@@ -6,6 +6,7 @@ import debounce from "lodash/debounce";
 import Pagination from "@/Shared/Pagination.vue";
 import EmptySearch from "@/Shared/EmptySearch.vue";
 import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import CustomSelect from "@/Components/CustomSelect.vue";
 import { useQueryString } from "@/Composables/useQueryString";
 
 defineProps({
@@ -168,19 +169,14 @@ const getBudgetColor = (budget) => {
                     <template #extra-filters>
                         <div class="space-y-2">
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Status") }}</label>
-                            <VueMultiselect
-                                :model-value="[{ id: 'pending', label: __('Pending') }, { id: 'approved', label: __('Approved') }, { id: 'rejected', label: __('Rejected') }].find(o => o.id === filters.status)"
+                            <CustomSelect
+                                :model-value="filters.status"
                                 :options="[{ id: 'pending', label: __('Pending') }, { id: 'approved', label: __('Approved') }, { id: 'rejected', label: __('Rejected') }]"
-                                :multiple="false"
-                                :close-on-select="true"
                                 :placeholder="__('All Statuses')"
                                 label="label"
                                 track-by="id"
                                 class="w-full"
-                                :select-label="''"
-                                :deselect-label="''"
-                                :selected-label="__('Selected')"
-                                @update:model-value="option => filters.status = option?.id || null"
+                                @update:model-value="val => filters.status = val || null"
                             />
                         </div>
 
@@ -207,19 +203,14 @@ const getBudgetColor = (budget) => {
 
                         <div class="space-y-2">
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Created By") }}</label>
-                            <VueMultiselect
-                                :model-value="users.find(u => u.id == filters.created_by)"
+                            <CustomSelect
+                                :model-value="filters.created_by"
                                 :options="users"
-                                :multiple="false"
-                                :close-on-select="true"
                                 :placeholder="__('All Users')"
                                 label="name"
                                 track-by="id"
                                 class="w-full"
-                                :select-label="''"
-                                :deselect-label="''"
-                                :selected-label="__('Selected')"
-                                @update:model-value="option => filters.created_by = option?.id || null"
+                                @update:model-value="val => filters.created_by = val || null"
                             />
                         </div>
                     </template>

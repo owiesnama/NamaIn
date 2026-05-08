@@ -44,12 +44,12 @@ class PurchasesController extends Controller
         return inertia('Purchases/Create', [
             'payment_methods' => PaymentMethod::casesWithLabels(),
             'banks' => Bank::all(),
-            'treasury_accounts' => TreasuryAccount::active()->withCurrentBalance()->get()->map(fn (TreasuryAccount $a) => [
-                'id' => $a->id,
-                'name' => $a->name,
-                'type' => $a->type->value,
-                'type_label' => $a->type->label(),
-                'current_balance' => $a->currentBalance(),
+            'treasury_accounts' => TreasuryAccount::active()->withCurrentBalance()->get()->map(fn (TreasuryAccount $account) => [
+                'id' => $account->id,
+                'name' => $account->name,
+                'type' => $account->type->value,
+                'type_label' => $account->type->label(),
+                'current_balance' => $account->currentBalance(),
             ]),
         ]);
     }

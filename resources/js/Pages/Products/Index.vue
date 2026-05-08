@@ -374,11 +374,10 @@
                 <!-- Sidebar -->
                 <FilterSidebar
                     v-if="showSidebar"
-                    :filters="filters"
+                    v-model:filters="filters"
                     :categories="categories"
                     :sort-by-options="sortByOptions"
                     :all-label="__('All Products')"
-                    @update:filters="newFilters => filters.value = newFilters"
                     @reset="resetFilters"
                 >
                     <template #extra-filters>

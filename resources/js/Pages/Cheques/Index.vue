@@ -7,6 +7,7 @@
     import debounce from "lodash/debounce";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+    import CustomSelect from "@/Components/CustomSelect.vue";
     const props = defineProps({
         initialCheques: Object,
         status: Object,
@@ -266,21 +267,13 @@
                     <!-- Status Filter -->
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Status") }}</label>
-                        <VueMultiselect
+                        <CustomSelect
                             v-model="filters.status"
                             :options="Object.values(status)"
                             :multiple="true"
-                            :close-on-select="false"
                             :placeholder="__('Filter by status')"
-                            :select-label="''"
-                            :deselect-label="''"
-                            :selected-label="__('Selected')"
-                            class="text-xs custom-multiselect"
-                        >
-                            <template #noResult>
-                                <span class="text-xs text-gray-500">{{ __("No status found") }}</span>
-                            </template>
-                        </VueMultiselect>
+                            class="w-full"
+                        />
                     </div>
                 </template>
             </FilterSidebar>

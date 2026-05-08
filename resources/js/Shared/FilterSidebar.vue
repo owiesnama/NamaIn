@@ -1,5 +1,6 @@
 <script setup>
 import TrashFilter from "@/Shared/TrashFilter.vue";
+import CustomSelect from "@/Components/CustomSelect.vue";
 
 defineProps({
     filters: Object,
@@ -56,33 +57,23 @@ const resetFilters = () => {
                 <div class="space-y-2" v-if="sortByOptions && sortByOptions.length">
                     <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Sort By") }}</label>
                     <div class="space-y-2">
-                        <VueMultiselect
-                            :model-value="sortByOptions.find(o => o.value === filters.sort_by)"
+                        <CustomSelect
+                            :model-value="filters.sort_by"
                             :options="sortByOptions"
-                            :multiple="false"
-                            :close-on-select="true"
+                            label="label"
+                            track-by="value"
                             :placeholder="__('Sort By')"
-                            label="label"
-                            track-by="value"
                             class="w-full"
-                            :select-label="''"
-                            :deselect-label="''"
-                            :selected-label="__('Selected')"
-                            @update:model-value="option => $emit('update:filters', { ...filters, sort_by: option?.value })"
+                            @update:model-value="sortBy => $emit('update:filters', { ...filters, sort_by: sortBy })"
                         />
-                        <VueMultiselect
-                            :model-value="[{ value: 'asc', label: __('Ascending') }, { value: 'desc', label: __('Descending') }].find(o => o.value === filters.sort_order)"
+                        <CustomSelect
+                            :model-value="filters.sort_order"
                             :options="[{ value: 'asc', label: __('Ascending') }, { value: 'desc', label: __('Descending') }]"
-                            :multiple="false"
-                            :close-on-select="true"
-                            :placeholder="__('Sort Order')"
                             label="label"
                             track-by="value"
+                            :placeholder="__('Sort Order')"
                             class="w-full"
-                            :select-label="''"
-                            :deselect-label="''"
-                            :selected-label="__('Selected')"
-                            @update:model-value="option => $emit('update:filters', { ...filters, sort_order: option?.value })"
+                            @update:model-value="sortOrder => $emit('update:filters', { ...filters, sort_order: sortOrder })"
                         />
                     </div>
                 </div>

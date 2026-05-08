@@ -46,7 +46,7 @@ class SalesController extends Controller
                 'name' => $a->name,
                 'type' => $a->type->value,
                 'type_label' => $a->type->label(),
-                'current_balance' => $a->currentBalance(),
+                'current_balance' => $a->current_balance,
             ]),
         ]);
     }
