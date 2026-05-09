@@ -5,7 +5,7 @@ namespace App\Traits;
 use App\Models\TreasuryAccount;
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;
-use App\Services\StatementService;
+use App\Services\Utils\StatementService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 

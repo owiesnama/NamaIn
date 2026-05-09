@@ -2,7 +2,7 @@
 
 namespace App\Imports\Concerns;
 
-use App\Services\ArabicEncodingNormalizer;
+use App\Services\Utils\ArabicEncodingNormalizer;
 
 trait NormalizesArabicEncoding
 {

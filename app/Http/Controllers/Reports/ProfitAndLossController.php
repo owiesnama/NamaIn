@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
 use App\Queries\Reports\ProfitAndLossQuery;
-use App\Services\DatePreset;
+use App\Services\Utils\DatePreset;
 use Illuminate\Http\Request;
 
 class ProfitAndLossController extends Controller

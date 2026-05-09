@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Utils;
 
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Renderer\ImageRenderer;

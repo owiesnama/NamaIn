@@ -11,7 +11,7 @@ use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\TreasuryAccount;
 use App\Models\Unit;
-use App\Services\ArabicEncodingNormalizer;
+use App\Services\Utils\ArabicEncodingNormalizer;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;

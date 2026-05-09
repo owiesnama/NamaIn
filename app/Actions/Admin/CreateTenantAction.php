@@ -5,8 +5,8 @@ namespace App\Actions\Admin;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Services\DefaultRolesService;
-use App\Services\SeedTenantDefaultsService;
+use App\Services\OnBoarding\DefaultRolesService;
+use App\Services\OnBoarding\SeedTenantDefaultsService;
 
 class CreateTenantAction
 {

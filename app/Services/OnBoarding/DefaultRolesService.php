@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\OnBoarding;
 
 use App\Models\Permission;
 use App\Models\Role;

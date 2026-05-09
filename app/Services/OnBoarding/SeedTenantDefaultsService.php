@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\OnBoarding;
 
 use App\Enums\StorageType;
 use App\Enums\TreasuryAccountType;

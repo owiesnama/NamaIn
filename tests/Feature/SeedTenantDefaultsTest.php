@@ -6,7 +6,7 @@ use App\Models\Customer;
 use App\Models\Storage;
 use App\Models\Tenant;
 use App\Models\TreasuryAccount;
-use App\Services\SeedTenantDefaultsService;
+use App\Services\OnBoarding\SeedTenantDefaultsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Contacts;
 use App\Http\Controllers\Controller;
 use App\Models\Supplier;
 use App\Queries\StatementQuery;
-use App\Services\StatementService;
+use App\Services\Utils\StatementService;
 use App\Traits\HandlesPartyAccount;
 
 class SupplierStatementController extends Controller

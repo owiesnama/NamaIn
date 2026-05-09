@@ -3,7 +3,7 @@
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Supplier;
-use App\Services\StatementService;
+use App\Services\Utils\StatementService;
 use BaconQrCode\Writer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Browsershot\Browsershot;

@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Reports;
 
 use App\Http\Controllers\Controller;
-use App\Services\DatePreset;
+use App\Services\Utils\DatePreset;
 
 class ReportsIndexController extends Controller
 {

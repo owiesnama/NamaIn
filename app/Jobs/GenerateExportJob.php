@@ -6,7 +6,7 @@ use App\Events\ExportStatusUpdated;
 use App\Models\ExportLog;
 use App\Models\Preference;
 use App\Models\Tenant;
-use App\Services\ExportRegistry;
+use App\Services\Utils\ExportRegistry;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;

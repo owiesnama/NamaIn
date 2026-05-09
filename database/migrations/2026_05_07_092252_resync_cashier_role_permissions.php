@@ -2,7 +2,7 @@
 
 use App\Models\Permission;
 use App\Models\Role;
-use App\Services\DefaultRolesService;
+use App\Services\OnBoarding\DefaultRolesService;
 use Illuminate\Database\Migrations\Migration;
 
 return new class extends Migration

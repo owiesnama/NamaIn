@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Reports;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Queries\Reports\ExpenseSummaryQuery;
-use App\Services\DatePreset;
+use App\Services\Utils\DatePreset;
 use Illuminate\Http\Request;
 
 class ExpenseSummaryController extends Controller

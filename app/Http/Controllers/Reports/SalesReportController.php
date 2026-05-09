@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Reports;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Queries\Reports\SalesReportQuery;
-use App\Services\DatePreset;
+use App\Services\Utils\DatePreset;
 use Illuminate\Http\Request;
 
 class SalesReportController extends Controller

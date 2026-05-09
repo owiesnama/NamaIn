@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Utils;
 
 use App\Models\Invoice;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;

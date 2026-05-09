@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Concerns;
 
 use App\Jobs\ProcessImportJob;
 use App\Models\ImportLog;
-use App\Services\CsvSampleGenerator;
+use App\Services\Utils\CsvSampleGenerator;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 trait HandlesImport

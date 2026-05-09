@@ -4,7 +4,7 @@ namespace App\Models;
 
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 use App\Notifications\VerifyEmail as VerifyEmailNotification;
-use App\Services\TenantCache;
+use App\Facades\Cache;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -170,7 +170,7 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return ($this->user_preferences[$key] ?? null)
             ?? (app()->bound('currentTenant')
-                ? TenantCache::rememberForever('preferences', fn () => Preference::asPairs()->toArray())[$key] ?? null
+                ? Cache::rememberForever('preferences', fn () => Preference::asPairs()->toArray())[$key] ?? null
                 : null)
             ?? $default;
     }

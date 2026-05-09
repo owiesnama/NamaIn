@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Tenant;
-use App\Services\DefaultRolesService;
+use App\Services\OnBoarding\DefaultRolesService;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Console\Command;
 

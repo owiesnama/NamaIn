@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Invoicing;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
-use App\Services\InvoicePrintService;
+use App\Services\Utils\InvoicePrintService;
 
 class InvoicePrintController extends Controller
 {

@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\Preference;
-use App\Services\TenantCache;
+use App\Facades\Cache;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
@@ -26,7 +26,7 @@ class HandleLocale
         }
 
         if (app()->bound('currentTenant')) {
-            $preferences = TenantCache::rememberForever('preferences', fn () => Preference::asPairs()->toArray());
+            $preferences = Cache::rememberForever('preferences', fn () => Preference::asPairs()->toArray());
             App::setLocale($preferences['language'] ?? config('app.locale'));
         }
 

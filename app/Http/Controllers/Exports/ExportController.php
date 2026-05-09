@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Exports;
 use App\Actions\RequestExportAction;
 use App\Http\Controllers\Controller;
 use App\Models\ExportLog;
-use App\Services\ExportRegistry;
+use App\Services\Utils\ExportRegistry;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 

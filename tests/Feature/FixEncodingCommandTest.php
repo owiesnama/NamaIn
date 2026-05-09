@@ -7,7 +7,7 @@ use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Services\ArabicEncodingNormalizer;
+use App\Services\Utils\ArabicEncodingNormalizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 

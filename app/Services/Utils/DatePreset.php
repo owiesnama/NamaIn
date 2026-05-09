@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Utils;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -60,7 +60,7 @@ class DatePreset
                 'from' => now()->subDays(30)->startOfDay(),
                 'to' => now()->endOfDay(),
             ],
-            default => [ // this_month
+            default => [
                 'from' => now()->startOfMonth(),
                 'to' => now()->endOfMonth(),
             ],

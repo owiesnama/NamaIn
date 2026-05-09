@@ -1,6 +1,6 @@
 <?php
 
-use App\Services\DefaultRolesService;
+use App\Services\OnBoarding\DefaultRolesService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 

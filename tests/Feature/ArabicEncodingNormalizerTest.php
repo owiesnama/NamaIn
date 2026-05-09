@@ -2,14 +2,12 @@
 
 use App\Imports\CustomerImport;
 use App\Imports\ProductImport;
-use App\Imports\QuickBooksCustomerImport;
-use App\Imports\QuickBooksProductImport;
 use App\Imports\SupplierImport;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Supplier;
 use App\Models\Tenant;
-use App\Services\ArabicEncodingNormalizer;
+use App\Services\Utils\ArabicEncodingNormalizer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Maatwebsite\Excel\Facades\Excel;
 

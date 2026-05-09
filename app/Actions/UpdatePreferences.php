@@ -4,7 +4,7 @@ namespace App\Actions;
 
 use App\Http\Requests\PreferenceRequest;
 use App\Models\Preference;
-use App\Services\TenantCache;
+use App\Facades\Cache;
 
 class UpdatePreferences
 {
@@ -23,7 +23,7 @@ class UpdatePreferences
             );
         }
 
-        TenantCache::forget('preferences');
+        Cache::forget('preferences');
     }
 
     private function resolveValue(string $key, mixed $value, PreferenceRequest $request): mixed

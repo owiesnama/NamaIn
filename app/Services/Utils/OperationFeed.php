@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Utils;
 
 use App\Enums\ExportStatus;
 use App\Models\ExportLog;

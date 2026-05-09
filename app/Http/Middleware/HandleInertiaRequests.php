@@ -4,8 +4,8 @@ namespace App\Http\Middleware;
 
 use App\Models\Preference;
 use App\Models\Tenant;
-use App\Services\OperationFeed;
-use App\Services\TenantCache;
+use App\Facades\Cache;
+use App\Services\Utils\OperationFeed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
@@ -118,7 +118,7 @@ class HandleInertiaRequests extends Middleware
 
     private function resolvePreferences(): array
     {
-        $prefs = TenantCache::rememberForever('preferences', fn () => Preference::asPairs()->toArray());
+        $prefs = Cache::rememberForever('preferences', fn () => Preference::asPairs()->toArray());
 
         if (! empty($prefs['logo']) && ! str_starts_with($prefs['logo'], 'http') && ! str_starts_with($prefs['logo'], '/')) {
             $prefs['logo'] = asset('storage/'.$prefs['logo']);

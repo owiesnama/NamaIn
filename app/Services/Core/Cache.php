@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Core;
 
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Cache as CacheFacade;
 
-class TenantCache
+class Cache
 {
     public static function key(string $key): string
     {
@@ -19,11 +19,11 @@ class TenantCache
 
     public static function rememberForever(string $key, \Closure $callback): mixed
     {
-        return Cache::rememberForever(self::key($key), $callback);
+        return CacheFacade::rememberForever(self::key($key), $callback);
     }
 
     public static function forget(string $key): bool
     {
-        return Cache::forget(self::key($key));
+        return CacheFacade::forget(self::key($key));
     }
 }

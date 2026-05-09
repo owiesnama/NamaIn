@@ -5,7 +5,7 @@ namespace Tests;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
-use App\Services\DefaultRolesService;
+use App\Services\OnBoarding\DefaultRolesService;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;

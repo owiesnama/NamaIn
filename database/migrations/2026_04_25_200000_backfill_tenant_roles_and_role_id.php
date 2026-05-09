@@ -1,7 +1,7 @@
 <?php
 
 use App\Models\Tenant;
-use App\Services\DefaultRolesService;
+use App\Services\OnBoarding\DefaultRolesService;
 use Database\Seeders\PermissionSeeder;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
