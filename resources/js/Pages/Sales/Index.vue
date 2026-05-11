@@ -187,7 +187,22 @@
             </div>
         </div>
 
-        <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
+        <!-- Tabs -->
+        <div class="mt-6 border-b border-gray-200 dark:border-gray-700">
+            <nav class="flex gap-x-6">
+                <span class="pb-3 text-sm font-medium text-emerald-600 dark:text-emerald-400 border-b-2 border-emerald-600 dark:border-emerald-400">
+                    {{ __("Invoices") }}
+                </span>
+                <Link
+                    :href="route('quotes.index')"
+                    class="pb-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 border-b-2 border-transparent hover:border-gray-300 transition-colors duration-200"
+                >
+                    {{ __("Quotes") }}
+                </Link>
+            </nav>
+        </div>
+
+        <div class="flex flex-col mt-6 lg:flex-row lg:gap-x-6">
             <!-- Sidebar -->
             <FilterSidebar
                 v-if="showSidebar"
