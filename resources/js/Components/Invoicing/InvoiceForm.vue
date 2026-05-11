@@ -18,6 +18,10 @@
         paymentMethods: Object,
         banks: Array,
         treasuryAccounts: Array,
+        prefill: {
+            type: Object,
+            default: null,
+        },
     });
 
     const isSale = computed(() => props.type === 'sale');
@@ -42,7 +46,16 @@
         onSearch: searchProduct,
     } = useAsyncOptions(route('api.products.index'));
 
-    const lineItems = ref([new PurchaseProduct()]);
+    const lineItems = ref(
+        props.prefill?.items?.length
+            ? props.prefill.items.map((item) => new PurchaseProduct({
+                product: item.product?.id ?? item.product_id,
+                unit: item.unit_id,
+                quantity: item.quantity,
+                price: parseFloat(item.unit_price),
+            }))
+            : [new PurchaseProduct()]
+    );
 
     const newRow = () => {
         lineItems.value.push(new PurchaseProduct());
@@ -60,13 +73,17 @@
         return product.units;
     };
 
+    const prefillCustomer = props.prefill?.customer ?? null;
+
     const form = useForm({
         total: 0,
         products: lineItems.value,
-        invocable: null,
+        invocable: prefillCustomer
+            ? { id: prefillCustomer.id, name: prefillCustomer.name, type: 'App\\Models\\Customer' }
+            : null,
         payment_method: 'cash',
         treasury_account_id: null,
-        discount: 0,
+        discount: props.prefill?.discount ?? 0,
         initial_payment_amount: 0,
         payment_reference: '',
         payment_notes: '',
@@ -75,6 +92,7 @@
         cheque_bank_id: null,
         cheque_due_date: '',
         cheque_number: '',
+        from_quote_id: props.prefill?.from_quote_id ?? null,
     });
 
     const methodToAccountType = { cash: 'cash', bank_transfer: 'bank', cheque: 'cheque_clearing' };

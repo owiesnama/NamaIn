@@ -4,8 +4,11 @@ namespace App\Providers;
 
 use App\Listeners\InvalidateAllUserSessions;
 use App\Models\Invoice;
+use App\Models\Quote;
 use App\Models\User;
 use App\Observers\InvoiceObserver;
+use App\Observers\QuoteObserver;
+use App\Services\Core\Cache as TenantCacheService;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -17,14 +20,13 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
-use App\Services\Core\Cache as TenantCacheService;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->app->singleton('tenant-cache', fn () => new TenantCacheService());
+        $this->app->singleton('tenant-cache', fn () => new TenantCacheService);
     }
 
     public function boot(): void
@@ -67,6 +69,7 @@ class AppServiceProvider extends ServiceProvider
         );
 
         Invoice::observe(InvoiceObserver::class);
+        Quote::observe(QuoteObserver::class);
 
         Gate::before(function (User $user, string $ability) {
             if ($user->hasRole('owner')) {

@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateInvoiceRequest;
 use App\Models\Bank;
 use App\Models\Invoice;
+use App\Models\Quote;
 use App\Models\Storage;
 use App\Models\TreasuryAccount;
 
@@ -48,14 +49,45 @@ class SalesController extends Controller
                 'type_label' => $a->type->label(),
                 'current_balance' => $a->current_balance,
             ]),
+            'prefill' => $this->prefillFromQuote(),
         ]);
+    }
+
+    private function prefillFromQuote(): ?array
+    {
+        $quoteId = request()->integer('from_quote');
+
+        if (! $quoteId) {
+            return null;
+        }
+
+        $quote = Quote::with(['customer', 'items.product', 'items.unit'])->findOrFail($quoteId);
+
+        return [
+            'from_quote_id' => $quote->id,
+            'customer' => $quote->customer,
+            'discount' => $quote->discount,
+            'items' => $quote->items->map(fn ($item) => [
+                'product_id' => $item->product_id,
+                'product' => $item->product,
+                'unit_id' => $item->unit_id,
+                'unit' => $item->unit,
+                'quantity' => $item->quantity,
+                'unit_price' => $item->unit_price,
+            ]),
+        ];
     }
 
     public function store(CreateInvoiceRequest $request, StoreInvoiceAction $storeInvoice)
     {
         $this->authorize('create', Invoice::class);
 
-        $storeInvoice->handle(collect($request->validated()));
+        $invoice = $storeInvoice->handle(collect($request->validated()));
+
+        if ($fromQuoteId = $request->integer('from_quote_id')) {
+            $quote = Quote::find($fromQuoteId);
+            $quote?->markAsConverted($invoice);
+        }
 
         return redirect()->route('sales.index')->with('success', __('Sale created successfully'));
     }

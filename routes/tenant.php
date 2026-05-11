@@ -53,6 +53,9 @@ use App\Http\Controllers\Sales\PosCheckoutController;
 use App\Http\Controllers\Sales\PosInvoicesController;
 use App\Http\Controllers\Sales\PosPreflightController;
 use App\Http\Controllers\Sales\PosSessionController;
+use App\Http\Controllers\Sales\QuoteConvertController;
+use App\Http\Controllers\Sales\QuotePrintController;
+use App\Http\Controllers\Sales\QuotesController;
 use App\Http\Controllers\Sales\SalesController;
 use App\Http\Controllers\Treasury\TreasuryAccountsController;
 use App\Http\Controllers\Treasury\TreasuryAdjustmentsController;
@@ -233,6 +236,22 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::post('/pos/close', [PosSessionController::class, 'destroy'])->name('pos.close');
         Route::get('/sales/{invoice}/return', [SaleReturnController::class, 'create'])->name('sales.return.create');
         Route::post('/sales/{invoice}/return', [SaleReturnController::class, 'store'])->name('sales.return.store');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Quotes (Price Quotations)
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('quotes')->name('quotes.')->group(function () {
+            Route::get('/', [QuotesController::class, 'index'])->name('index');
+            Route::get('/create', [QuotesController::class, 'create'])->name('create');
+            Route::post('/', [QuotesController::class, 'store'])->name('store');
+            Route::get('/{quote}/edit', [QuotesController::class, 'edit'])->name('edit');
+            Route::put('/{quote}', [QuotesController::class, 'update'])->name('update');
+            Route::delete('/{quote}', [QuotesController::class, 'destroy'])->name('destroy');
+            Route::get('/{quote}/convert', [QuoteConvertController::class, 'show'])->name('convert');
+            Route::get('/{quote}/print', [QuotePrintController::class, 'show'])->name('print');
+        });
 
         /*
         |--------------------------------------------------------------------------
