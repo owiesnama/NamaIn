@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 class RecordAdjustmentAction
 {
-    public function execute(Storage $storage, Product $product, int $newQuantity, string $type, User $actor, ?string $notes = null): Adjustment
+    public function handle(Storage $storage, Product $product, int $newQuantity, string $type, User $actor, ?string $notes = null): Adjustment
     {
         return DB::transaction(function () use ($storage, $product, $newQuantity, $type, $actor, $notes) {
             $quantityBefore = $storage->quantityOf($product);

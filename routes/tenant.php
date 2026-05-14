@@ -9,6 +9,7 @@ use App\Http\Controllers\Catalog\ProductExportController;
 use App\Http\Controllers\Catalog\ProductImportController;
 use App\Http\Controllers\Catalog\ProductsController;
 use App\Http\Controllers\Contacts\CustomerAccountController;
+use App\Http\Controllers\Contacts\CustomerAdvancesController;
 use App\Http\Controllers\Contacts\CustomerExportController;
 use App\Http\Controllers\Contacts\CustomerImportController;
 use App\Http\Controllers\Contacts\CustomersController;
@@ -22,7 +23,6 @@ use App\Http\Controllers\Core\DashboardController;
 use App\Http\Controllers\Core\GlobalSearchController;
 use App\Http\Controllers\Core\PreferenceController;
 use App\Http\Controllers\Core\TenantSelectionController;
-use App\Http\Controllers\CustomerAdvancesController;
 use App\Http\Controllers\Expenses\ExpenseApprovalController;
 use App\Http\Controllers\Expenses\ExpenseExportController;
 use App\Http\Controllers\Expenses\ExpenseReceiptController;
@@ -36,6 +36,7 @@ use App\Http\Controllers\Inventory\StockDeductionController;
 use App\Http\Controllers\Inventory\StockTransfersController;
 use App\Http\Controllers\Inventory\StoragesController;
 use App\Http\Controllers\Invoicing\InvoicePrintController;
+use App\Http\Controllers\Invoicing\InvoiceReceiptController;
 use App\Http\Controllers\Invoicing\InvoicesController;
 use App\Http\Controllers\Invoicing\InvoiceSearchController;
 use App\Http\Controllers\Invoicing\PurchaseReturnController;
@@ -261,6 +262,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | invoices eligible for return.
         */
         Route::get('/invoice/print/{invoice}', [InvoicePrintController::class, 'show'])->name('invoices.print');
+        Route::get('/invoice/receipt/{invoice}', [InvoiceReceiptController::class, 'show'])->name('invoices.receipt');
         Route::get('/invoice/show/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
         Route::post('/transactions/{transaction}/deliver', [TransactionDeliveryController::class, 'store'])->name('transactions.deliver');
         Route::get('/invoices/search-for-return', [InvoiceSearchController::class, 'index'])->name('invoices.search-for-return');

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Actions\Stock\AddStockFromInvoice;
 use App\Actions\Stock\DeductStockFromInvoice;
-use App\Enums\InvoiceStatus;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StockRequest;
@@ -13,7 +12,6 @@ use App\Models\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class StockController extends Controller
 {
@@ -30,8 +28,6 @@ class StockController extends Controller
 
         $invoice = Invoice::with('transactions.product')->findOrFail($request->validated('invoice'));
 
-        $this->validateInvoiceNotDelivered($invoice);
-
         DB::transaction(function () use ($invoice, $storage) {
             $this->addStock->execute($invoice, $storage);
         });
@@ -47,8 +43,6 @@ class StockController extends Controller
 
         $invoice = Invoice::with('transactions.product')->findOrFail($request->validated('invoice'));
 
-        $this->validateInvoiceNotDelivered($invoice);
-
         try {
             DB::transaction(function () use ($invoice, $storage) {
                 $this->deductStock->execute($invoice, $storage);
@@ -60,15 +54,6 @@ class StockController extends Controller
         $this->clearStockCache();
 
         return back()->with('success', "Invoice items have been deducted from storage: {$storage->name}");
-    }
-
-    private function validateInvoiceNotDelivered(Invoice $invoice): void
-    {
-        if ($invoice->status === InvoiceStatus::Delivered) {
-            throw ValidationException::withMessages([
-                'invoice' => __('This invoice has already been fully delivered.'),
-            ]);
-        }
     }
 
     private function clearStockCache(): void

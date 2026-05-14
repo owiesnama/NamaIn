@@ -18,6 +18,8 @@ class CsvSampleGenerator
         fputcsv($handle, $sampleData);
         fclose($handle);
 
-        return response()->download($filePath)->deleteFileAfterSend();
+        return response()->download($filePath, $filename, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ])->deleteFileAfterSend();
     }
 }

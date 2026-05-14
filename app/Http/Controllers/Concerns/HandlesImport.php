@@ -28,7 +28,7 @@ trait HandlesImport
     public function store()
     {
         request()->validate([
-            'file' => 'required|file|mimes:csv,xlsx,xls',
+            'file' => 'required|file|extensions:csv,xlsx,xls',
             'template' => ['sometimes', 'string', 'in:'.implode(',', $this->allowedTemplates())],
         ]);
 

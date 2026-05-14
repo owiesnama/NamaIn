@@ -215,7 +215,7 @@ const variancePrefix = (variance) => {
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <div class="flex items-center gap-x-3">
                                             <Link :href="route('invoices.show', invoice.id)" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300">{{ __('View') }}</Link>
-                                            <a :href="route('invoices.print', invoice.id)" target="_blank" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300">{{ __('Print Receipt') }}</a>
+                                            <a :href="route('invoices.receipt', invoice.id)" target="_blank" class="text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300">{{ __('Print Receipt') }}</a>
                                         </div>
                                     </td>
                                 </tr>

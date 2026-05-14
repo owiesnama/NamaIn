@@ -6,17 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use Inertia\Response;
 
-class InvoicePrintController extends Controller
+class InvoiceReceiptController extends Controller
 {
     public function show(Invoice $invoice): Response
     {
         $this->authorize('view', $invoice);
 
-        $invoice->load(['invocable', 'transactions.product', 'transactions.unit', 'payments']);
+        $invoice->load(['invocable', 'transactions.product']);
 
-        return inertia('Invoices/Print', [
+        return inertia('Invoices/Receipt', [
             'invoice' => $invoice,
-            'qr_url' => route('invoices.show', $invoice),
             'logo' => preference('logo', '/images/logo.svg'),
             'headline' => preference('invoicesHeadline'),
             'currency' => $invoice->currency ?: preference('currency', 'SDG'),

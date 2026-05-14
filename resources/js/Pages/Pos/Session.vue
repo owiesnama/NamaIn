@@ -182,7 +182,7 @@ const startNewSale = () => {
 
 const printLastReceipt = () => {
     if (completedSale.value.invoiceId) {
-        window.open(route('invoices.print', completedSale.value.invoiceId), '_blank');
+        window.open(route('invoices.receipt', completedSale.value.invoiceId), '_blank');
     }
 };
 

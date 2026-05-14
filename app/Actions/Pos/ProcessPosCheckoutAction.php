@@ -4,7 +4,7 @@ namespace App\Actions\Pos;
 
 use App\Actions\RecordPaymentAction;
 use App\Actions\Stock\DeliverTransactionAction;
-use App\Actions\Stock\ExecuteStockTransferAction;
+use App\Actions\Stock\TransferStockAction;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
@@ -31,7 +31,7 @@ class ProcessPosCheckoutAction
         private RecordPaymentAction $recordPayment,
         private DeliverTransactionAction $deliverAction,
         private FindReplenishmentSourceAction $findReplenishmentSource,
-        private ExecuteStockTransferAction $executeStockTransfer,
+        private TransferStockAction $executeStockTransfer,
     ) {}
 
     public function execute(

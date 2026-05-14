@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Inventory;
 
-use App\Actions\Stock\ExecuteStockTransferAction;
+use App\Actions\Stock\TransferStockAction;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStockTransferRequest;
@@ -35,7 +35,7 @@ class StockTransfersController extends Controller
         ]);
     }
 
-    public function store(StoreStockTransferRequest $request, ExecuteStockTransferAction $action)
+    public function store(StoreStockTransferRequest $request, TransferStockAction $transferStock)
     {
         $this->authorize('create', StockTransfer::class);
 
@@ -50,19 +50,20 @@ class StockTransfersController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            foreach ($validated['items'] as $item) {
-                $transfer->lines()->create([
-                    'tenant_id' => $transfer->tenant_id,
-                    'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
-                ]);
-            }
+            $transfer->lines()->insert(array_map(fn ($item) => [
+                'tenant_id' => $transfer->tenant_id,
+                'stock_transfer_id' => $transfer->id,
+                'product_id' => $item['product_id'],
+                'quantity' => $item['quantity'],
+                'created_at' => $now = now(),
+                'updated_at' => $now,
+            ], $validated['items']));
 
             return $transfer;
         });
 
         try {
-            $action->execute($transfer, auth()->user());
+            $transferStock->execute($transfer, auth()->user());
         } catch (InsufficientStockException $e) {
             return redirect()->route('stock-transfers.show', $transfer)
                 ->with('error', $e->getMessage());
@@ -80,7 +81,7 @@ class StockTransfersController extends Controller
             'fromStorage',
             'toStorage',
             'creator',
-            'lines.product' => fn ($q) => $q->select('products.id', 'products.name',),
+            'lines.product' => fn ($q) => $q->select('products.id', 'products.name'),
         ]);
 
         return inertia('StockTransfers/Show', [

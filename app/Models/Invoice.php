@@ -43,6 +43,11 @@ class Invoice extends BaseModel
         });
     }
 
+    public function isDelivered(): bool
+    {
+        return $this->status === InvoiceStatus::Delivered;
+    }
+
     /**
      * @return array<string, string>
      */

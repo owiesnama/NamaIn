@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
-class ExecuteStockTransferAction
+class TransferStockAction
 {
     public function execute(StockTransfer $transfer, User $actor): void
     {

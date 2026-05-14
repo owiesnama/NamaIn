@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Inventory;
 
 use App\Actions\Stock\DeductStockFromInvoice;
-use App\Enums\InvoiceStatus;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StockRequest;
@@ -12,7 +11,6 @@ use App\Models\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class StockDeductionController extends Controller
 {
@@ -21,12 +19,6 @@ class StockDeductionController extends Controller
         $this->authorize('manageStock', $storage);
 
         $invoice = Invoice::with('transactions.product')->findOrFail($request->validated('invoice'));
-
-        if ($invoice->status === InvoiceStatus::Delivered) {
-            throw ValidationException::withMessages([
-                'invoice' => __('This invoice has already been fully delivered.'),
-            ]);
-        }
 
         try {
             DB::transaction(function () use ($invoice, $storage, $deductStock) {

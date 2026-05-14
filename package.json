@@ -39,6 +39,7 @@
         "flatpickr": "^4.6.13",
         "laravel-echo": "^2.3.4",
         "pusher-js": "^8.5.0",
+        "qrcode": "^1.5.4",
         "vue-chartjs": "^5.3.3"
     }
 }

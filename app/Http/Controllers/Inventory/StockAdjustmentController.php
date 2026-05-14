@@ -5,30 +5,24 @@ namespace App\Http\Controllers\Inventory;
 use App\Actions\Stock\RecordAdjustmentAction;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StockAdjustmentRequest;
 use App\Models\Product;
 use App\Models\Storage;
-use Illuminate\Http\Request;
 
 class StockAdjustmentController extends Controller
 {
-    public function store(Storage $storage, Product $product, Request $request, RecordAdjustmentAction $action)
+    public function store(Storage $storage, Product $product, StockAdjustmentRequest $request, RecordAdjustmentAction $recordAdjustment)
     {
         $this->authorize('manageStock', $storage);
 
-        $request->validate([
-            'new_quantity' => 'required|integer|min:0',
-            'type' => 'required|string',
-            'notes' => 'nullable|string',
-        ]);
-
         try {
-            $action->execute(
+            $recordAdjustment->handle(
                 $storage,
                 $product,
-                $request->new_quantity,
-                $request->type,
+                $request->validated('new_quantity'),
+                $request->validated('type'),
                 auth()->user(),
-                $request->notes
+                $request->validated('notes')
             );
         } catch (InsufficientStockException $e) {
             return back()->with('error', $e->getMessage());

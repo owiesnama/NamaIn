@@ -27,7 +27,7 @@ beforeEach(function () {
 });
 
 test('it can record a stock adjustment', function () {
-    $adjustment = app(RecordAdjustmentAction::class)->execute(
+    $adjustment = app(RecordAdjustmentAction::class)->handle(
         $this->storage,
         $this->product,
         120,
@@ -52,7 +52,7 @@ test('it can record a stock adjustment', function () {
 });
 
 test('it can record a negative adjustment', function () {
-    app(RecordAdjustmentAction::class)->execute(
+    app(RecordAdjustmentAction::class)->handle(
         $this->storage,
         $this->product,
         80,

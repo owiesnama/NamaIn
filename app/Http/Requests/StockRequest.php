@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\InvoiceStatus;
+use App\Models\Invoice;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StockRequest extends FormRequest
@@ -17,7 +20,17 @@ class StockRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'invoice' => 'required|exists:invoices,id',
+            'invoice' => [
+                'required',
+                'exists:invoices,id',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    $invoice = Invoice::find($value);
+
+                    if ($invoice && $invoice->status === InvoiceStatus::Delivered) {
+                        $fail(__('This invoice has already been fully delivered.'));
+                    }
+                },
+            ],
         ];
     }
 }

@@ -5,7 +5,6 @@ namespace App\Traits;
 use App\Models\TreasuryAccount;
 use App\Queries\PartyAccountQuery;
 use App\Queries\StatementQuery;
-use App\Services\Utils\StatementService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -46,20 +45,22 @@ trait HandlesPartyAccount
         ], $data));
     }
 
-    protected function handlePrintStatement(Model $party, StatementService $statementService)
+    protected function handlePrintStatement(Model $party, string $routeName)
     {
-        $startDate = request('start_date', now()->subMonth()->toDateTimeString());
-        $endDate = request('end_date', now()->toDateTimeString());
+        $startDate = request('start_date', now()->subMonth()->toDateString());
+        $endDate = request('end_date', now()->toDateString());
 
         $data = (new StatementQuery)->forParty($party, $startDate, $endDate);
 
-        $pdf = $statementService->generatePdf($party, $data, $startDate, $endDate);
+        $resourceName = Str::camel(Str::singular($this->inertiaFolder));
 
-        $headers = [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "inline; filename='statement-{$party->name}.pdf'",
-        ];
-
-        return response(content: $pdf, headers: $headers);
+        return inertia("{$this->inertiaFolder}/PrintStatement", array_merge([
+            $resourceName => $party,
+            'start_date' => $startDate,
+            'end_date' => $endDate,
+            'qr_url' => route($routeName, [$party, 'start_date' => $startDate, 'end_date' => $endDate]),
+            'logo' => preference('logo', '/images/logo.svg'),
+            'currency' => preference('currency', 'SDG'),
+        ], $data));
     }
 }

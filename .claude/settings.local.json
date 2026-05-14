@@ -208,7 +208,21 @@
       "Bash(chmod +x /c/Users/Owiesnama/bin/php)",
       "Bash(echo \"STDERR_EXIT:$?\")",
       "Bash(APP_ENV=testing php vendor/bin/phpunit --configuration phpunit.xml tests/Feature/Jetstream/ProfileInformationTest.php)",
-      "Bash(APP_ENV=testing php vendor/bin/phpunit --configuration phpunit.xml tests/Feature/Jetstream/PasswordResetTest.php)"
+      "Bash(APP_ENV=testing php vendor/bin/phpunit --configuration phpunit.xml tests/Feature/Jetstream/PasswordResetTest.php)",
+      "Bash(herd list *)",
+      "Bash(herd parked *)",
+      "Bash(herd links *)",
+      "Bash(herd paths *)",
+      "Bash(herd site-information *)",
+      "Bash(herd log *)",
+      "Bash(herd php:list)",
+      "Read(//Users/owiesnama/Library/Application Support/Herd/config/nginx/**)",
+      "Bash(herd isolated *)",
+      "Bash(herd isolate *)",
+      "Bash(composer why *)",
+      "Bash(:)",
+      "Bash(composer show *)",
+      "Bash(composer remove *)"
     ]
   },
   "enableAllProjectMcpServers": true,

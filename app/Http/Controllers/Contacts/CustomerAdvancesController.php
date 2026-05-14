@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Contacts;
 
 use App\Actions\RecordCustomerAdvanceAction;
 use App\Actions\SettleCustomerAdvanceAction;
 use App\Exceptions\OverSettlementException;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\RecordCustomerAdvanceRequest;
 use App\Http\Requests\SettleCustomerAdvanceRequest;
 use App\Models\Customer;
@@ -44,7 +45,7 @@ class CustomerAdvancesController extends Controller
     public function destroy(
         CustomerAdvance $customerAdvance,
         SettleCustomerAdvanceRequest $request,
-        SettleCustomerAdvanceAction $action,
+        SettleCustomerAdvanceAction $settleCustomerAdvanceAction,
     ): RedirectResponse {
         $this->authorize('update', $customerAdvance->customer);
         $treasury = TreasuryAccount::findOrFail($request->validated('treasury_account_id'));
@@ -53,7 +54,7 @@ class CustomerAdvancesController extends Controller
             : null;
 
         try {
-            $action->handle(
+            $settleCustomerAdvanceAction->handle(
                 advance: $customerAdvance,
                 amount: (float) $request->validated('amount'),
                 treasury: $treasury,

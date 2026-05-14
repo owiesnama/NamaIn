@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Contacts;
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
 use App\Queries\StatementQuery;
-use App\Services\Utils\StatementService;
 use App\Traits\HandlesPartyAccount;
 
 class CustomerStatementController extends Controller
@@ -21,10 +20,10 @@ class CustomerStatementController extends Controller
         return $this->handleStatement($customer, $query);
     }
 
-    public function store(Customer $customer, StatementService $statementService)
+    public function store(Customer $customer)
     {
         $this->authorize('view', $customer);
 
-        return $this->handlePrintStatement($customer, $statementService);
+        return $this->handlePrintStatement($customer, 'customers.statement');
     }
 }
