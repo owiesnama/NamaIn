@@ -153,7 +153,7 @@
                             <Tooltip :text="__('Net result: Sales minus purchases and expenses over the last 30 days.')" position="top">
                                 <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Gross Profit") }}</p>
                             </Tooltip>
-                            <p class="text-2xl font-bold mt-1 tracking-tight" :class="[gross_profit >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600', sensitiveClass]">
+                            <p class="text-1xl font-bold mt-1 tracking-tight" :class="[gross_profit >= 0 ? 'text-gray-900 dark:text-white' : 'text-red-600', sensitiveClass]">
                                 {{ formatCurrency(gross_profit) }}
                             </p>
                             <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">
@@ -174,7 +174,7 @@
                         <Tooltip :text="__('Total revenue from sales and inventory value.')" position="top">
                             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Total Revenue") }}</p>
                         </Tooltip>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(parseFloat(total_sales) + parseFloat(total_inventory_value)) }}</p>
+                        <p class="text-1xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(parseFloat(total_sales) + parseFloat(total_inventory_value)) }}</p>
                         <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">
                             {{ __("Sales") }}: {{ formatCurrency(total_sales) }} &middot; {{ __("Inventory") }}: {{ formatCurrency(total_inventory_value) }}
                         </p>
@@ -192,7 +192,7 @@
                         <Tooltip :text="__('Total money owed by customers.')" position="top">
                             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Receivables") }}</p>
                         </Tooltip>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(outstanding_receivables) }}</p>
+                        <p class="text-1xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(outstanding_receivables) }}</p>
                         <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">{{ __("Open invoices") }}</p>
                     </div>
                 </Link>
@@ -208,7 +208,7 @@
                         <Tooltip :text="__('Total money owed to suppliers.')" position="top">
                             <p class="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest truncate border-b border-dashed border-gray-300 dark:border-gray-600 cursor-help inline-block">{{ __("Payables") }}</p>
                         </Tooltip>
-                        <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(outstanding_payables) }}</p>
+                        <p class="text-1xl font-bold text-gray-900 dark:text-white mt-1 tracking-tight" :class="sensitiveClass">{{ formatCurrency(outstanding_payables) }}</p>
                         <p class="text-[10px] text-gray-400 mt-1 font-medium" :class="sensitiveClass">{{ __("Open invoices") }}</p>
                     </div>
                 </Link>
