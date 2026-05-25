@@ -26,6 +26,10 @@ class InvoicePolicy
 
     public function update(User $user, Invoice $invoice): bool
     {
+        if (! $invoice->isEditable()) {
+            return false;
+        }
+
         return $invoice->isSale()
             ? $user->hasPermission('sales.create')
             : $user->hasPermission('purchases.create');

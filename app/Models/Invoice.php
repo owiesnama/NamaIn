@@ -49,6 +49,28 @@ class Invoice extends BaseModel
     }
 
     /**
+     * Whether the invoice can still be edited.
+     *
+     * Editing is allowed only when no payments have been recorded and stock has
+     * not been moved. Any partial or full delivery, or a return, locks the invoice.
+     */
+    public function isEditable(): bool
+    {
+        $stockTouched = in_array($this->status, [
+            InvoiceStatus::Delivered,
+            InvoiceStatus::PartiallyDelivered,
+            InvoiceStatus::Returned,
+        ], true);
+
+        return ! $stockTouched && (float) $this->paid_amount <= 0;
+    }
+
+    public function getIsEditableAttribute(): bool
+    {
+        return $this->isEditable();
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -68,7 +90,7 @@ class Invoice extends BaseModel
      *
      * @var array<string>
      */
-    protected $appends = ['locked', 'remaining_balance', 'is_fully_paid'];
+    protected $appends = ['locked', 'remaining_balance', 'is_fully_paid', 'is_editable'];
 
     /**
      * Transactions belong to this invoice

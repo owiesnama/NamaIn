@@ -53,6 +53,8 @@ class Product extends BaseModel
             ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
             ->where('transactions.product_id', $this->id)
             ->where('transactions.delivered', true)
+            ->whereNull('transactions.deleted_at')
+            ->whereNull('invoices.deleted_at')
             ->where('invoices.invocable_type', Supplier::class)
             ->selectRaw('SUM(transactions.base_quantity) as total_qty, SUM(transactions.base_quantity * transactions.unit_cost) as total_cost')
             ->first();

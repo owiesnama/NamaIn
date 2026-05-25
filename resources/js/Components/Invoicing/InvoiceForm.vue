@@ -15,6 +15,15 @@
             required: true,
             validator: (v) => ['sale', 'purchase'].includes(v),
         },
+        mode: {
+            type: String,
+            default: 'create',
+            validator: (v) => ['create', 'edit'].includes(v),
+        },
+        invoice: {
+            type: Object,
+            default: null,
+        },
         paymentMethods: Object,
         banks: Array,
         treasuryAccounts: Array,
@@ -25,11 +34,18 @@
     });
 
     const isSale = computed(() => props.type === 'sale');
+    const isEdit = computed(() => props.mode === 'edit');
 
     const partyType = computed(() => isSale.value ? 'customer' : 'supplier');
     const partyModelClass = computed(() => isSale.value ? 'App\\Models\\Customer' : 'App\\Models\\Supplier');
     const partyApiRoute = computed(() => isSale.value ? route('api.customers.index') : route('api.suppliers.index'));
     const storeRoute = computed(() => isSale.value ? route('sales.store') : route('purchases.store'));
+    const updateRoute = computed(() => {
+        if (!isEdit.value || !props.invoice) return null;
+        return isSale.value
+            ? route('sales.update', props.invoice.id)
+            : route('purchases.update', props.invoice.id);
+    });
     const indexRoute = computed(() => isSale.value ? route('sales.index') : route('purchases.index'));
 
     const {
@@ -53,6 +69,7 @@
                 unit: item.unit_id,
                 quantity: item.quantity,
                 price: parseFloat(item.unit_price),
+                description: item.description ?? '',
             }))
             : [new PurchaseProduct()]
     );
@@ -73,15 +90,15 @@
         return product.units;
     };
 
-    const prefillCustomer = props.prefill?.customer ?? null;
+    const prefillParty = props.prefill?.customer ?? props.prefill?.supplier ?? null;
 
     const form = useForm({
         total: 0,
         products: lineItems.value,
-        invocable: prefillCustomer
-            ? { id: prefillCustomer.id, name: prefillCustomer.name, type: 'App\\Models\\Customer' }
+        invocable: prefillParty
+            ? { id: prefillParty.id, name: prefillParty.name, type: partyModelClass.value }
             : null,
-        payment_method: 'cash',
+        payment_method: props.prefill?.payment_method ?? 'cash',
         treasury_account_id: null,
         discount: props.prefill?.discount ?? 0,
         initial_payment_amount: 0,
@@ -128,7 +145,11 @@
     const submit = () => {
         form.total = totalCost.value;
         form.products = lineItems.value;
-        form.post(storeRoute.value);
+        if (isEdit.value) {
+            form.put(updateRoute.value);
+        } else {
+            form.post(storeRoute.value);
+        }
     };
 </script>
 
@@ -145,8 +166,19 @@
                 </svg>
             </Link>
             <div>
-                <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ isSale ? __("New Sales Invoice") : __("New Purchase Invoice") }}</h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">{{ isSale ? __("Create a new sales invoice for a customer") : __("Create a new purchase invoice for a supplier") }}</p>
+                <h1 class="text-xl font-bold text-gray-900 dark:text-white">
+                    <template v-if="isEdit">
+                        {{ isSale ? __("Edit Sales Invoice") : __("Edit Purchase Invoice") }}
+                        <span v-if="invoice?.serial_number" class="ml-2 text-gray-500 dark:text-gray-400 font-normal">#{{ invoice.serial_number }}</span>
+                    </template>
+                    <template v-else>
+                        {{ isSale ? __("New Sales Invoice") : __("New Purchase Invoice") }}
+                    </template>
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <template v-if="isEdit">{{ __("Update line items and totals. Payments cannot be edited.") }}</template>
+                    <template v-else>{{ isSale ? __("Create a new sales invoice for a customer") : __("Create a new purchase invoice for a supplier") }}</template>
+                </p>
             </div>
         </div>
 
@@ -336,7 +368,7 @@
                             <span class="text-red-500">{{ __("Discount") }}</span>
                             <span class="font-semibold text-red-500 tabular-nums">-{{ form.discount }}</span>
                         </div>
-                        <div v-if="form.initial_payment_amount > 0" class="flex items-center justify-between text-sm">
+                        <div v-if="!isEdit && form.initial_payment_amount > 0" class="flex items-center justify-between text-sm">
                             <span class="text-gray-500 dark:text-gray-400">{{ __("Paid") }}</span>
                             <span class="font-semibold text-emerald-600 dark:text-emerald-400 tabular-nums">{{ form.initial_payment_amount }}</span>
                         </div>
@@ -347,7 +379,10 @@
                             :disabled="form.processing"
                             class="w-full py-3 text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            <span v-if="!form.processing">{{ isSale ? __("Complete Sale") : __("Complete Purchase") }}</span>
+                            <span v-if="!form.processing">
+                                <template v-if="isEdit">{{ __("Save Changes") }}</template>
+                                <template v-else>{{ isSale ? __("Complete Sale") : __("Complete Purchase") }}</template>
+                            </span>
                             <span v-else class="inline-flex items-center justify-center gap-2">
                                 <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -391,7 +426,7 @@
                             <InputError :message="form.errors.payment_method" class="mt-1" />
                         </div>
 
-                        <div v-if="filteredTreasuryAccounts.length">
+                        <div v-if="!isEdit && filteredTreasuryAccounts.length">
                             <InputLabel :value="isSale ? __('Received Into') : __('Paid From')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                             <CustomSelect
                                 v-model="selectedTreasuryAccount"
@@ -410,27 +445,27 @@
                             </CustomSelect>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-3">
+                        <div :class="isEdit ? '' : 'grid grid-cols-2 gap-3'">
                             <div>
                                 <InputLabel for="discount" :value="__('Discount')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                                 <TextInput id="discount" v-model="form.discount" type="number" min="0" step="0.01" class="block w-full" />
                                 <InputError :message="form.errors.discount" class="mt-1" />
                             </div>
-                            <div>
+                            <div v-if="!isEdit">
                                 <InputLabel for="initial_payment" :value="__('Payment')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                                 <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" min="0" step="0.01" class="block w-full" />
                                 <InputError :message="form.errors.initial_payment_amount" class="mt-1" />
                             </div>
                         </div>
 
-                        <div>
+                        <div v-if="!isEdit">
                             <InputLabel for="payment_reference" :value="__('Reference #')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                             <TextInput id="payment_reference" v-model="form.payment_reference" type="text" class="block w-full" :placeholder="__('Ref / Cheque #')" />
                             <InputError :message="form.errors.payment_reference" class="mt-1" />
                         </div>
 
                         <!-- Bank Transfer Details -->
-                        <div v-if="form.payment_method === 'bank_transfer'" class="col-span-full space-y-4 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
+                        <div v-if="!isEdit && form.payment_method === 'bank_transfer'" class="col-span-full space-y-4 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-lg border border-emerald-200 dark:border-emerald-800">
                             <div>
                                 <InputLabel for="bank_name" :value="__('Bank Name')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                                 <TextInput id="bank_name" v-model="form.bank_name" type="text" class="block w-full" required />
@@ -444,7 +479,7 @@
                         </div>
 
                         <!-- Cheque Details -->
-                        <div v-if="form.payment_method === 'cheque'" class="col-span-full space-y-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <div v-if="!isEdit && form.payment_method === 'cheque'" class="col-span-full space-y-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-lg border border-blue-200 dark:border-blue-800">
                             <div>
                                 <InputLabel for="cheque_bank" :value="__('Select Bank')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                                 <CustomSelect
@@ -474,7 +509,7 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div v-if="!isEdit">
                             <InputLabel for="payment_notes" :value="__('Notes')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                             <textarea
                                 id="payment_notes"
