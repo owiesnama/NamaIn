@@ -34,17 +34,17 @@
             class="px-6 py-4"
             :dir="preferences('language') == 'ar' ? 'rtl' : 'ltr'"
         >
-            <div class="text-lg">
+            <div class="text-lg text-gray-900 dark:text-white">
                 <slot name="title" />
             </div>
 
-            <div class="mt-4 rtl:text-right">
+            <div class="mt-4 rtl:text-right text-gray-600 dark:text-gray-400">
                 <slot name="content" />
             </div>
         </div>
 
         <div
-            class="flex rtl:flex-row-reverse flex-row ltr:justify-end px-6 py-4 bg-gray-100 text-right rtl:justify-start"
+            class="flex rtl:flex-row-reverse flex-row ltr:justify-end px-6 py-4 bg-gray-100 dark:bg-gray-900/40 text-right rtl:justify-start"
             :dir="preferences('language') == 'ar' ? 'rtl' : 'ltr'"
         >
             <slot name="footer" />

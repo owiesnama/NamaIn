@@ -241,7 +241,13 @@
       "Bash(composer install *)",
       "Bash(yarn install *)",
       "Bash(npm ci *)",
-      "Read(//home/owies/.config/JetBrains/**)"
+      "Read(//home/owies/.config/JetBrains/**)",
+      "Bash(echo \"exit code: $?\")",
+      "Bash(awk '/<template>/,0' Components/CustomSelect.vue)",
+      "Bash(awk '/<style/,/<\\\\/style>/' Components/CustomSelect.vue)",
+      "Bash(sed -n '/public function index/,/^    }/p' app/Http/Controllers/Sales/SalesController.php)",
+      "Bash(sed -n '/public function index/,/^    }/p' app/Http/Controllers/Purchases/PurchasesController.php)",
+      "Bash(echo \"tests exit: $?\")"
     ]
   },
   "enableAllProjectMcpServers": true,

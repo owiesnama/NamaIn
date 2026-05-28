@@ -139,7 +139,7 @@
                         class="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0"
                     >
                         <div
-                            class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-xl sm:p-6"
+                            class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white dark:bg-gray-800 rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-xl sm:p-6"
                         >
                             <h1 class="font-semibold text-gray-800 rtl:text-right">
                                 {{ __("Add New Product") }}

@@ -68,6 +68,7 @@ test('it can store a purchase with cash payment', function () {
             ],
         ],
         'payment_method' => 'cash',
+        'initial_payment_amount' => 1800,
         'payment_reference' => 'CASH-PUR-001',
     ];
 

@@ -5,6 +5,13 @@
 @import "tailwindcss/utilities";
 
 
+/* Let native form controls (select option lists, number spinners, date inputs,
+   scrollbars) follow the OS theme — which is how this app's dark mode is driven. */
+:root {
+    color-scheme: light dark;
+}
+
+
 /* Vue Multiselect Global Styling - Flat & Simple with RTL/LTR Support */
 .multiselect {
     @apply text-sm text-gray-900 dark:text-gray-100;
@@ -93,12 +100,14 @@
     border-color: transparent transparent #9ca3af transparent !important;
 }
 
-.dark .multiselect__select:before {
-    border-color: #6b7280 transparent transparent transparent !important;
-}
+@media (prefers-color-scheme: dark) {
+    .multiselect__select:before {
+        border-color: #6b7280 transparent transparent transparent !important;
+    }
 
-.dark .multiselect--active .multiselect__select:before {
-    border-color: transparent transparent #6b7280 transparent !important;
+    .multiselect--active .multiselect__select:before {
+        border-color: transparent transparent #6b7280 transparent !important;
+    }
 }
 
 .multiselect--active .multiselect__tags {
@@ -177,4 +186,93 @@
 [dir="rtl"] .multiselect__spinner {
     left: 0 !important;
     right: auto !important;
+}
+
+/* Flatpickr calendar - dark theme (matches OS preference, like the rest of the app) */
+@media (prefers-color-scheme: dark) {
+    .flatpickr-calendar {
+        background: #111827; /* gray-900 */
+        border: 1px solid #374151; /* gray-700 */
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+        color: #f3f4f6; /* gray-100 */
+    }
+
+    .flatpickr-calendar.arrowTop:before { border-bottom-color: #374151; }
+    .flatpickr-calendar.arrowTop:after { border-bottom-color: #111827; }
+    .flatpickr-calendar.arrowBottom:before { border-top-color: #374151; }
+    .flatpickr-calendar.arrowBottom:after { border-top-color: #111827; }
+
+    .flatpickr-months,
+    .flatpickr-month,
+    .flatpickr-current-month .flatpickr-monthDropdown-months {
+        background: #111827;
+        color: #f3f4f6;
+        fill: #f3f4f6;
+    }
+
+    .flatpickr-monthDropdown-months .flatpickr-monthDropdown-month {
+        background: #111827;
+        color: #f3f4f6;
+    }
+
+    .flatpickr-current-month input.cur-year,
+    .numInputWrapper span {
+        color: #f3f4f6;
+    }
+
+    .flatpickr-months .flatpickr-prev-month svg,
+    .flatpickr-months .flatpickr-next-month svg {
+        fill: #9ca3af; /* gray-400 */
+    }
+
+    .flatpickr-months .flatpickr-prev-month:hover svg,
+    .flatpickr-months .flatpickr-next-month:hover svg {
+        fill: #34d399; /* emerald-400 */
+    }
+
+    .flatpickr-weekdays,
+    span.flatpickr-weekday {
+        background: #111827;
+        color: #9ca3af;
+    }
+
+    .flatpickr-day {
+        color: #e5e7eb; /* gray-200 */
+    }
+
+    .flatpickr-day:hover,
+    .flatpickr-day:focus {
+        background: #1f2937; /* gray-800 */
+        border-color: #1f2937;
+    }
+
+    .flatpickr-day.today {
+        border-color: #34d399;
+    }
+
+    .flatpickr-day.selected,
+    .flatpickr-day.selected:hover {
+        background: #059669; /* emerald-600 */
+        border-color: #059669;
+        color: #fff;
+    }
+
+    .flatpickr-day.flatpickr-disabled,
+    .flatpickr-day.prevMonthDay,
+    .flatpickr-day.nextMonthDay {
+        color: #4b5563; /* gray-600 */
+    }
+
+    .flatpickr-time input,
+    .flatpickr-time .flatpickr-time-separator,
+    .flatpickr-time .flatpickr-am-pm {
+        color: #f3f4f6;
+    }
+
+    .flatpickr-time input:hover,
+    .flatpickr-time .flatpickr-am-pm:hover,
+    .flatpickr-time input:focus,
+    .flatpickr-time .flatpickr-am-pm:focus {
+        background: #1f2937;
+    }
 }

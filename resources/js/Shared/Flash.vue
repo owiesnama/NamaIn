@@ -21,7 +21,7 @@
         >
             <div v-show="$page.props.flash.success && show" class="fixed inset-0 z-50 overflow-y-auto">
                 <div class="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0">
-                    <div class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+                    <div class="relative px-4 pt-5 pb-4 overflow-hidden text-left transition-all transform bg-white dark:bg-gray-800 rounded-lg shadow-xl sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
                         <div>
                             <div class="flex items-center justify-center w-12 h-12 mx-auto rounded-full bg-emerald-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-emerald-500">

@@ -1,11 +1,11 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\TreasuryAccount;
 use App\Models\TreasuryMovement;
-use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -54,6 +54,7 @@ test('sale creation with cash payment should record treasury movement', function
             ],
         ],
         'payment_method' => 'cash',
+        'initial_payment_amount' => 500,
         'treasury_account_id' => $this->cashAccount->id,
         'discount' => 0,
     ]);
@@ -61,7 +62,7 @@ test('sale creation with cash payment should record treasury movement', function
     $response->assertRedirect();
 
     // Payment should exist
-    $payment = \App\Models\Payment::latest()->first();
+    $payment = Payment::latest()->first();
     expect($payment)->not->toBeNull();
     expect((float) $payment->amount)->toBe(500.0);
 

@@ -94,9 +94,7 @@ class StoreInvoiceAction
 
         $method = PaymentMethod::from($methodValue);
 
-        $amount = $method === PaymentMethod::Cash
-            ? $invoice->total - $invoice->discount
-            : (float) $data->get('initial_payment_amount', 0);
+        $amount = (float) $data->get('initial_payment_amount', 0);
 
         if ($amount <= 0) {
             return;

@@ -1,4 +1,5 @@
 <script setup>
+    import { computed } from "vue";
     import { Link } from "@inertiajs/vue3";
     import Transactions from "@/Shared/Transactions.vue";
 
@@ -16,6 +17,8 @@
     });
 
     const emit = defineEmits(["moveToStorage", "printInvoice"]);
+
+    const resourcePrefix = computed(() => props.invoice.invocable_type === 'App\\Models\\Customer' ? 'sales' : 'purchases');
 
     let moveToStorage = (moveToStorage) => {
         emit("moveToStorage", moveToStorage);
@@ -76,7 +79,7 @@
 
                     <Link
                         v-if="invoice.is_editable"
-                        :href="route(invoice.invocable_type === 'App\\Models\\Customer' ? 'sales.edit' : 'purchases.edit', invoice)"
+                        :href="route(`${resourcePrefix}.edit`, invoice)"
                         class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
                         :title="__('Edit Invoice')"
                     >
@@ -87,7 +90,7 @@
 
                     <Link
                         v-if="invoice.can_be_inversed"
-                        :href="route(invoice.invocable_type === 'App\\Models\\Customer' ? 'sales.return.create' : 'purchases.return.create', invoice)"
+                        :href="route(`${resourcePrefix}.return.create`, invoice)"
                         class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
                         :title="__('Return Items')"
                     >
