@@ -6,6 +6,15 @@
                 "C:\\Users\\Owiesnama\\Projects\\NamaIn\\artisan",
                 "boost:mcp"
             ]
+        },
+        "lerd": {
+            "command": "lerd",
+            "args": [
+                "mcp"
+            ],
+            "env": {
+                "LERD_SITE_PATH": "/home/owies/Code/NamaIn"
+            }
         }
     }
 }

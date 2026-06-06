@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Sales;
 
 use App\Actions\StoreInvoiceAction;
+use App\Actions\UpdateInvoiceAction;
 use App\Enums\PaymentMethod;
 use App\Filters\InvoiceFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateInvoiceRequest;
+use App\Http\Requests\UpdateInvoiceRequest;
 use App\Models\Bank;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Quote;
 use App\Models\Storage;
@@ -90,5 +93,53 @@ class SalesController extends Controller
         }
 
         return redirect()->route('sales.index')->with('success', __('Sale created successfully'));
+    }
+
+    public function edit(Invoice $invoice)
+    {
+        abort_unless($invoice->isSale(), 404);
+        abort_unless($invoice->isEditable(), 403);
+        $this->authorize('update', $invoice);
+
+        $invoice->load(['transactions.product', 'transactions.unit', 'invocable']);
+
+        return inertia('Sales/Edit', [
+            'invoice' => $invoice,
+            'payment_methods' => PaymentMethod::casesWithLabels(),
+            'banks' => Bank::all(),
+            'treasury_accounts' => TreasuryAccount::active()->withCurrentBalance()->get()->map(fn (TreasuryAccount $a) => [
+                'id' => $a->id,
+                'name' => $a->name,
+                'type' => $a->type->value,
+                'type_label' => $a->type->label(),
+                'current_balance' => $a->current_balance,
+            ]),
+            'prefill' => [
+                'customer' => $invoice->invocable,
+                'discount' => $invoice->discount,
+                'payment_method' => $invoice->payment_method?->value,
+                'items' => $invoice->transactions->map(fn ($transaction) => [
+                    'product' => $transaction->product,
+                    'product_id' => $transaction->product_id,
+                    'unit' => $transaction->unit,
+                    'unit_id' => $transaction->unit_id,
+                    'quantity' => $transaction->quantity,
+                    'unit_price' => $transaction->price,
+                    'description' => $transaction->description,
+                ]),
+            ],
+        ]);
+    }
+
+    public function update(UpdateInvoiceRequest $request, Invoice $invoice, UpdateInvoiceAction $updateInvoice)
+    {
+        abort_unless($invoice->isSale(), 404);
+        abort_unless($invoice->isEditable(), 403);
+        $this->authorize('update', $invoice);
+        abort_unless($request->input('invocable.type') === Customer::class, 422);
+
+        $updateInvoice->handle($invoice, collect($request->validated()));
+
+        return redirect()->route('invoices.show', $invoice)->with('success', __('Sale updated successfully'));
     }
 }

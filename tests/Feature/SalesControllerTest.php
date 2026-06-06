@@ -66,6 +66,7 @@ test('it can store a sale with cash payment', function () {
             ],
         ],
         'payment_method' => 'cash',
+        'initial_payment_amount' => 900,
         'payment_reference' => 'CASH-001',
     ];
 
@@ -86,6 +87,41 @@ test('it can store a sale with cash payment', function () {
         'payment_method' => PaymentMethod::Cash,
         'reference' => 'CASH-001',
     ]);
+});
+
+test('it records no payment when the amount is left empty, leaving the invoice editable', function () {
+    $customer = Customer::factory()->create();
+    $product = Product::factory()->create();
+    $unit = Unit::factory()->create(['product_id' => $product->id]);
+    $storage = Storage::factory()->create();
+
+    $data = [
+        'total' => 1000,
+        'discount' => 0,
+        'invocable' => [
+            'id' => $customer->id,
+            'name' => $customer->name,
+            'type' => Customer::class,
+        ],
+        'products' => [
+            [
+                'product' => $product->id,
+                'quantity' => 2,
+                'unit' => $unit->id,
+                'price' => 500,
+                'storage' => $storage->id,
+            ],
+        ],
+        'payment_method' => 'cash',
+    ];
+
+    $this->post(route('sales.store'), $data)->assertRedirect(route('sales.index'));
+
+    $invoice = Invoice::where('invocable_id', $customer->id)->first();
+
+    expect($invoice->payments()->count())->toBe(0);
+    expect((float) $invoice->paid_amount)->toBe(0.0);
+    expect($invoice->isEditable())->toBeTrue();
 });
 
 test('it can store a sale with initial payment', function () {

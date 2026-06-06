@@ -470,8 +470,8 @@
                 </div>
 
                 <!-- Main content -->
-                <main class="xl:flex-1 xl:overflow-y-auto">
-                    <div class="px-4 py-10 sm:px-6 lg:px-8 2xl:container 2xl:mx-auto">
+                <main class="xl:flex-1 dark:bg-gray-900 xl:overflow-y-auto">
+                    <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-[1800px] 2xl:mx-auto min-h-screen xl:min-h-full">
                         <Flash />
                         <ErrorToast />
                         <OperationsCenter />

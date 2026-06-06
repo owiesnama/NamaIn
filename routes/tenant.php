@@ -216,7 +216,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Purchase invoices, goods receiving, and purchase return (credit notes).
         */
-        Route::resource('/purchases', PurchasesController::class);
+        Route::resource('/purchases', PurchasesController::class)->parameters(['purchases' => 'invoice']);
         Route::post('/purchases/receive/{transaction}', [PurchaseReceiptController::class, 'store'])->name('purchases.receive');
         Route::get('/purchases/{invoice}/return', [PurchaseReturnController::class, 'create'])->name('purchases.return.create');
         Route::post('/purchases/{invoice}/return', [PurchaseReturnController::class, 'store'])->name('purchases.return.store');
@@ -228,7 +228,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Sales invoices, POS session management (open/checkout/close),
         | and sale return (credit notes).
         */
-        Route::resource('/sales', SalesController::class);
+        Route::resource('/sales', SalesController::class)->parameters(['sales' => 'invoice']);
         Route::get('/pos', [PosSessionController::class, 'show'])->name('pos.index');
         Route::get('/pos/invoices', [PosInvoicesController::class, 'index'])->name('pos.invoices');
         Route::post('/pos/open', [PosSessionController::class, 'store'])->name('pos.open');

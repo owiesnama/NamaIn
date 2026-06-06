@@ -3,6 +3,7 @@ import AppLayout from "@/Layouts/AppLayout.vue";
 import InvoiceForm from "@/Components/Invoicing/InvoiceForm.vue";
 
 defineProps({
+    invoice: Object,
     payment_methods: Object,
     banks: Array,
     treasury_accounts: Array,
@@ -14,9 +15,11 @@ defineProps({
 </script>
 
 <template>
-    <AppLayout :title="__('New Purchase')">
+    <AppLayout :title="__('Edit Purchase')">
         <InvoiceForm
             type="purchase"
+            mode="edit"
+            :invoice="invoice"
             :payment-methods="payment_methods"
             :banks="banks"
             :treasury-accounts="treasury_accounts"
