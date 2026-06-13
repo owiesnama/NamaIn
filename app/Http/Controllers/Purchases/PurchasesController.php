@@ -111,6 +111,6 @@ class PurchasesController extends Controller
 
         $updateInvoice->handle($invoice, collect($request->validated()));
 
-        return redirect()->route('invoices.show', $invoice)->with('success', __('Purchase updated successfully'));
+        return redirect()->route('purchases.index')->with('success', __('Purchase updated successfully'));
     }
 }
