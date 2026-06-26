@@ -211,9 +211,9 @@ return [
             'nice' => 0,
         ],
         'supervisor-backups' => [
-            'connection' => 'redis',
+            'connection' => 'redis-backups',
             'queue' => ['backups'],
-            'balance' => 'false',
+            'balance' => 'off',
             'maxProcesses' => 1,
             'maxTime' => 0,
             'maxJobs' => 0,

@@ -66,7 +66,21 @@ return [
             'driver' => 'redis',
             'connection' => 'default',
             'queue' => env('REDIS_QUEUE', 'default'),
-            'retry_after' => 90,
+            // Must stay greater than the longest worker timeout in config/horizon.php
+            // (supervisor-default timeout = 300). Otherwise long jobs are released
+            // back to the queue while still running, duplicating work and starving workers.
+            'retry_after' => 360,
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+
+        'redis-backups' => [
+            'driver' => 'redis',
+            'connection' => 'default',
+            'queue' => env('REDIS_BACKUPS_QUEUE', 'backups'),
+            // Backups are long-running (supervisor-backups timeout = 900), so this
+            // connection needs a retry_after comfortably above that.
+            'retry_after' => 960,
             'block_for' => null,
             'after_commit' => false,
         ],
