@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Inspector\Laravel\Middleware\WebRequestMonitoring;
 use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -66,11 +65,6 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-            WebRequestMonitoring::class,
-
-        ]);
-        $middleware->api(append: [
-            WebRequestMonitoring::class,
         ]);
 
     })
