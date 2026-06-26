@@ -248,7 +248,8 @@
       "Bash(sed -n '/public function index/,/^    }/p' app/Http/Controllers/Sales/SalesController.php)",
       "Bash(sed -n '/public function index/,/^    }/p' app/Http/Controllers/Purchases/PurchasesController.php)",
       "Bash(echo \"tests exit: $?\")",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(echo \"exit=$?  \\(inspector should be absent; horizon line present\\)\")"
     ]
   },
   "enableAllProjectMcpServers": true,
