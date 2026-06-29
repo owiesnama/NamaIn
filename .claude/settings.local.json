@@ -249,7 +249,10 @@
       "Bash(sed -n '/public function index/,/^    }/p' app/Http/Controllers/Purchases/PurchasesController.php)",
       "Bash(echo \"tests exit: $?\")",
       "Bash(echo \"exit: $?\")",
-      "Bash(echo \"exit=$?  \\(inspector should be absent; horizon line present\\)\")"
+      "Bash(echo \"exit=$?  \\(inspector should be absent; horizon line present\\)\")",
+      "Bash(php -d memory_limit=-1 vendor/bin/pest tests/Feature/ActiveTenantMiddlewareTest.php)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(npx eslint *)"
     ]
   },
   "enableAllProjectMcpServers": true,

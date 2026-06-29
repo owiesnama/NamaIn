@@ -117,9 +117,8 @@ describe('Sidebar visibility', () => {
     });
 
     // ── Cashier ──────────────────────────────────────────────
-    // products.view, customers.view, suppliers.view, sales.view,
-    // sales.create, pos.view, pos.operate, pos.manage-sessions,
-    // payments.view, payments.create, inventory.view
+    // customers.view, sales.view, sales.create, pos.operate,
+    // pos.manage-sessions, payments.view, payments.create
     describe('as cashier', () => {
         beforeEach(() => cy.tenantLoginAs('cashier'));
 
@@ -127,14 +126,10 @@ describe('Sidebar visibility', () => {
             cy.visit('/dashboard');
 
             cy.get('aside').within(() => {
-                cy.contains('POS').should('exist');
-                cy.contains('POS History').should('exist');
-                cy.contains('Products').should('exist');
-                cy.contains('Storages').should('exist');
-                cy.contains('Customers').should('exist');
-                cy.contains('Suppliers').should('exist');
-                cy.contains('Sales').should('exist');
-                cy.contains('Payments').should('exist');
+                cy.contains('POS').should('exist');       // pos.operate
+                cy.contains('Customers').should('exist'); // customers.view
+                cy.contains('Sales').should('exist');     // sales.view
+                cy.contains('Payments').should('exist');  // payments.view
             });
         });
 
@@ -142,8 +137,20 @@ describe('Sidebar visibility', () => {
             cy.visit('/dashboard');
 
             cy.get('aside').within(() => {
+                // No pos.view
+                cy.contains('POS History').should('not.exist');
+
                 // No inventory.transfer
                 cy.contains('Stock Transfers').should('not.exist');
+
+                // No products.view
+                cy.contains('Products').should('not.exist');
+
+                // No inventory.view
+                cy.contains('Storages').should('not.exist');
+
+                // No suppliers.view
+                cy.contains('Suppliers').should('not.exist');
 
                 // No purchases.view
                 cy.contains('Purchases').should('not.exist');

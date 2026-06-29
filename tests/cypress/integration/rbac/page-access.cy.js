@@ -104,9 +104,8 @@ describe('as staff', () => {
 |--------------------------------------------------------------------------
 | Cashier
 |--------------------------------------------------------------------------
-| products.view, customers.view, suppliers.view, sales.view,
-| sales.create, pos.view, pos.operate, pos.manage-sessions,
-| payments.view, payments.create, inventory.view
+| customers.view, sales.view, sales.create, pos.operate,
+| pos.manage-sessions, payments.view, payments.create
 */
 describe('as cashier', () => {
     beforeEach(() => cy.tenantLoginAs('cashier'));
@@ -116,11 +115,6 @@ describe('as cashier', () => {
     it('can access /dashboard', () => {
         cy.visit('/dashboard');
         cy.url().should('include', '/dashboard');
-    });
-
-    it('can access /products', () => {
-        cy.visit('/products');
-        cy.url().should('include', '/products');
     });
 
     it('can access /customers', () => {
@@ -142,6 +136,16 @@ describe('as cashier', () => {
     });
 
     // ── Blocked pages (backend-protected) ──
+
+    it('cannot access /products (no products.view)', () => {
+        cy.visit('/products', { failOnStatusCode: false });
+        cy.get('body').should('contain', '403');
+    });
+
+    it('cannot access /suppliers (no suppliers.view)', () => {
+        cy.visit('/suppliers', { failOnStatusCode: false });
+        cy.get('body').should('contain', '403');
+    });
 
     it('cannot access /users (no users.view)', () => {
         cy.visit('/users', { failOnStatusCode: false });
