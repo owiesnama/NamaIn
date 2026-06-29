@@ -24,12 +24,15 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->domain(config('app.domain'))
                 ->group(base_path('routes/web.php'));
 
-            $excluded = implode('|', Tenant::RESERVED_SLUGS);
+            $tenantRoutes = Route::middleware('web')
+                ->domain('{tenant}.'.config('app.domain'));
 
-            Route::middleware('web')
-                ->domain('{tenant}.'.config('app.domain'))
-                ->where(['tenant' => "^(?!(?:{$excluded})$).+$"])
-                ->group(base_path('routes/tenant.php'));
+            if ($reserved = Tenant::reservedSlugs()) {
+                $excluded = implode('|', $reserved);
+                $tenantRoutes->where(['tenant' => "^(?!(?:{$excluded})$).+$"]);
+            }
+
+            $tenantRoutes->group(base_path('routes/tenant.php'));
         },
     )
     ->withBroadcasting(

@@ -43,3 +43,15 @@ test('tenant has users relationship', function () {
     expect($tenant->users)->toHaveCount(1);
     expect($tenant->owner()->id)->toBe($user->id);
 });
+
+test('reserved slugs are enforced outside the local environment', function () {
+    app()->detectEnvironment(fn () => 'production');
+
+    expect(Tenant::reservedSlugs())->toBe(Tenant::RESERVED_SLUGS);
+});
+
+test('no slugs are reserved on local so any subdomain is allowed', function () {
+    app()->detectEnvironment(fn () => 'local');
+
+    expect(Tenant::reservedSlugs())->toBe([]);
+});

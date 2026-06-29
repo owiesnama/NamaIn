@@ -21,7 +21,7 @@ class UpdateTenantRequest extends FormRequest
             'slug' => [
                 'required', 'string', 'max:63', 'alpha_dash:ascii',
                 Rule::unique('tenants', 'slug')->ignore($this->route('tenant')),
-                Rule::notIn(Tenant::RESERVED_SLUGS),
+                Rule::notIn(Tenant::reservedSlugs()),
             ],
         ];
     }
