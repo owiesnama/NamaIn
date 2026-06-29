@@ -1,5 +1,5 @@
 <script setup>
-    import { computed, ref } from "vue";
+    import { computed, ref, onMounted, onUnmounted } from "vue";
     import { router, Head, Link, usePage } from "@inertiajs/vue3";
     import ApplicationLogo from "@/Components/ApplicationLogo.vue";
     import Banner from "@/Components/Banner.vue";
@@ -23,8 +23,6 @@
         return usePage().props.locale === "ar" ? "rtl" : "ltr";
     });
 
-    const page = usePage();
-
     const logout = () => {
         router.post(route("tenant.logout"));
     };
@@ -40,6 +38,19 @@
             onFinish: () => { switchingToTenant.value = null; },
         });
     };
+
+    // Auto-close the navigation drawer after navigating (tablet/mobile).
+    let stopNavigationListener = null;
+    onMounted(() => {
+        stopNavigationListener = router.on("navigate", () => {
+            showingSidebar.value = false;
+        });
+    });
+    onUnmounted(() => {
+        if (stopNavigationListener) {
+            stopNavigationListener();
+        }
+    });
 </script>
 
 <template>
@@ -50,46 +61,56 @@
         <Banner />
 
         <!-- App shell -->
-        <div class="xl:flex xl:h-screen xl:overflow-hidden">
+        <div class="lg:flex lg:h-screen lg:overflow-hidden">
 
             <!-- ─────────────────────────────────────────
                  SIDEBAR
-                 DOM order: first → top on mobile, end-side on desktop via xl:order-last
+                 Slide-over drawer below lg (1024px); static side pane at lg+.
+                 Anchored to the inline-start edge, direction-aware via :dir.
             ───────────────────────────────────────── -->
-            <aside class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 xl:flex xl:w-72 xl:shrink-0 xl:flex-col xl:border-b-0 xl:border-s xl:border-s-gray-200 dark:xl:border-s-gray-700 text-right ltr:text-left">
+            <!-- Drawer backdrop (below lg) -->
+            <Transition
+                enter-active-class="transition-opacity ease-out duration-300"
+                enter-from-class="opacity-0"
+                enter-to-class="opacity-100"
+                leave-active-class="transition-opacity ease-in duration-200"
+                leave-from-class="opacity-100"
+                leave-to-class="opacity-0"
+            >
+                <div
+                    v-if="showingSidebar"
+                    class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden"
+                    @click="showingSidebar = false"
+                />
+            </Transition>
 
-                <!-- Mobile header: logo + hamburger toggle -->
-                <div class="flex h-14 shrink-0 items-center justify-between px-4 xl:hidden">
-                    <Link :href="route('dashboard')" class="inline-flex items-center gap-x-2">
-                        <ApplicationLogo class="h-8 w-auto" />
-                        <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">NamaIn</span>
+            <!-- SIDEBAR: slide-over drawer below lg, static pane at lg+ -->
+            <aside
+                class="fixed inset-y-0 start-0 z-50 flex w-72 max-w-[85vw] flex-col bg-white dark:bg-gray-900 shadow-xl transition-transform duration-300 ease-in-out lg:static lg:z-auto lg:w-60 xl:w-72 lg:max-w-none lg:shrink-0 lg:border-e lg:border-gray-200 lg:shadow-none dark:lg:border-gray-700 text-right ltr:text-left"
+                :class="showingSidebar
+                    ? 'translate-x-0'
+                    : (direction === 'rtl' ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0')"
+            >
+                <!-- Logo header + drawer close (close shown below lg) -->
+                <div class="flex h-14 lg:h-16 shrink-0 items-center justify-between border-b border-gray-100 px-4 lg:px-5 dark:border-gray-800">
+                    <Link :href="route('dashboard')" class="group inline-flex items-center gap-x-2.5">
+                        <ApplicationLogo class="h-8 w-auto transition-transform duration-200 group-hover:scale-105" />
+                        <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">NamaIn</span>
                     </Link>
                     <button
-                        class="inline-flex items-center justify-center rounded-lg p-2 text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none dark:hover:bg-gray-800 dark:hover:text-gray-300"
-                        @click="showingSidebar = !showingSidebar"
+                        type="button"
+                        class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
+                        @click="showingSidebar = false"
                     >
-                        <svg v-if="!showingSidebar" class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                        </svg>
-                        <svg v-else class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <span class="sr-only">{{ __('Close navigation') }}</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
 
-                <!-- Desktop logo header (h-16 aligns with desktop search bar) -->
-                <div class="hidden h-16 shrink-0 items-center justify-center border-b border-gray-100 px-5 dark:border-gray-800 xl:flex ">
-                    <Link :href="route('dashboard')" class="group inline-flex items-center gap-x-2.5">
-                        <ApplicationLogo class="h-8 w-auto transition-transform duration-200 group-hover:scale-105" />
-                        <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">NamaIn</span>
-                    </Link>
-                </div>
-
-                <!-- Nav body: always visible on xl, toggled on mobile -->
-                <div
-                    :class="showingSidebar ? 'block' : 'hidden'"
-                    class="xl:flex xl:flex-1 xl:flex-col xl:overflow-y-auto px-4 py-5 border-l ltr:border-l border-gray-100 dark:border-gray-800"
-                >
+                <!-- Nav body: scrollable, always mounted (drawer slides via transform) -->
+                <div class="flex flex-1 flex-col overflow-y-auto px-4 py-5">
                     <div class="mb-4">
                         <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
                             <svg class="h-5 w-5 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -284,11 +305,8 @@
                     </nav>
                 </div>
 
-                <!-- User footer: toggled on mobile, always visible on desktop -->
-                <div
-                    :class="showingSidebar ? 'block' : 'hidden'"
-                    class="xl:block shrink-0 border-t border-gray-100 dark:border-gray-800"
-                >
+                <!-- User footer -->
+                <div class="shrink-0 border-t border-gray-100 dark:border-gray-800">
                     <!-- Click-outside overlay -->
                     <div v-if="showingUserMenu" class="fixed inset-0 z-40" @click="showingUserMenu = false" />
 
@@ -457,21 +475,28 @@
             <!-- ─────────────────────────────────────────
                  CONTENT AREA
             ───────────────────────────────────────── -->
-            <div class="flex min-h-0 flex-1 flex-col xl:overflow-hidden">
+            <div class="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
 
-                <!-- Desktop top bar: search only, h-16 aligns with sidebar logo header -->
-                <div class="hidden h-16 shrink-0 items-center border-b border-gray-100 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6 lg:px-8 xl:flex">
-                    <GlobalSearch />
-                </div>
-
-                <!-- Mobile search bar (shown below the aside on mobile) -->
-                <div class=" border-b border-gray-100 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900 xl:hidden">
-                    <GlobalSearch />
+                <!-- Top bar: hamburger (below lg) + global search -->
+                <div class="flex h-14 lg:h-16 shrink-0 items-center gap-x-3 border-b border-gray-100 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6 lg:px-8">
+                    <button
+                        type="button"
+                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
+                        @click="showingSidebar = true"
+                    >
+                        <span class="sr-only">{{ __('Open navigation') }}</span>
+                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    </button>
+                    <div class="min-w-0 flex-1">
+                        <GlobalSearch />
+                    </div>
                 </div>
 
                 <!-- Main content -->
-                <main class="xl:flex-1 dark:bg-gray-900 xl:overflow-y-auto">
-                    <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-[1800px] 2xl:mx-auto min-h-screen xl:min-h-full">
+                <main class="lg:flex-1 dark:bg-gray-900 lg:overflow-y-auto">
+                    <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-[1800px] 2xl:mx-auto min-h-screen lg:min-h-full">
                         <Flash />
                         <ErrorToast />
                         <OperationsCenter />
