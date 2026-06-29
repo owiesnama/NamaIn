@@ -113,6 +113,44 @@ describe('Queued Export', () => {
 
 /*
 |--------------------------------------------------------------------------
+| Operations Center
+|--------------------------------------------------------------------------
+*/
+describe('Operations Center', () => {
+    beforeEach(() => cy.tenantLoginAs('owner'));
+
+    it('does not auto-open the panel when navigating between pages', () => {
+        // Queue an export so there is a pending operation in the shared snapshot.
+        cy.visit('/reports/sales');
+        cy.contains('button', 'Export').click();
+        cy.url().should('include', '/reports/sales');
+
+        // Navigate to another page — the panel must NOT re-open on navigation.
+        cy.visit('/customers');
+        cy.get('[data-testid="operations-panel"]').should('not.exist');
+        cy.get('[data-testid="operations-pill"]').should('be.visible');
+
+        // Navigating again keeps it closed.
+        cy.visit('/exports');
+        cy.get('[data-testid="operations-panel"]').should('not.exist');
+        cy.get('[data-testid="operations-pill"]').should('be.visible');
+    });
+
+    it('opens the panel only when the user clicks the pill', () => {
+        cy.visit('/reports/sales');
+        cy.contains('button', 'Export').click();
+
+        cy.visit('/customers');
+        cy.get('[data-testid="operations-panel"]').should('not.exist');
+
+        cy.get('[data-testid="operations-pill"]').click();
+        cy.get('[data-testid="operations-panel"]').should('be.visible');
+        cy.get('[data-testid="operations-panel"]').contains('Operations').should('exist');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
 | Legacy Export Retrofit
 |--------------------------------------------------------------------------
 */

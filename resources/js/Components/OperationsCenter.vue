@@ -45,11 +45,10 @@ function hydrateOperations(items) {
 
     if (!Array.isArray(items) || items.length === 0) return;
 
+    // Re-seed the operations snapshot on each fresh mount so the pill reflects
+    // pending work, but never force the panel open — auto-opening on every
+    // navigation is disruptive (especially on tablets). The user opens it.
     [...items].reverse().forEach(addOrUpdate);
-
-    if (!panelOpen.value) {
-        panelOpen.value = true;
-    }
 }
 
 function dismiss(id) {
@@ -160,7 +159,8 @@ const ringCircumference = 2 * Math.PI * 13;
         >
             <div
                 v-if="panelOpen"
-                class="fixed bottom-16 z-50 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
+                data-testid="operations-panel"
+                class="fixed bottom-16 z-50 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
                 :class="[isRtl ? 'left-4' : 'right-4']"
             >
                 <!-- Header -->
@@ -172,7 +172,7 @@ const ringCircumference = 2 * Math.PI * 13;
                         </div>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button v-if="done.length" @click="clearDone" class="text-[11px] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 font-medium px-1.5 py-1 transition-colors">
+                        <button v-if="done.length" @click="clearDone" class="text-[11px] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium px-2 py-1.5 rounded-md transition-colors">
                             {{ __('Clear') }}
                         </button>
                         <button @click="panelOpen = false" class="w-7 h-7 inline-flex items-center justify-center text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 rounded-md transition-colors">
@@ -260,7 +260,7 @@ const ringCircumference = 2 * Math.PI * 13;
                                     </template>
                                 </div>
                             </div>
-                            <button @click="dismiss(op.id)" class="text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 transition-colors mt-1">
+                            <button @click="dismiss(op.id)" class="w-8 h-8 flex-shrink-0 inline-flex items-center justify-center rounded-md text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
                                 <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
@@ -283,6 +283,7 @@ const ringCircumference = 2 * Math.PI * 13;
             <button
                 v-if="!panelOpen"
                 @click="panelOpen = true"
+                data-testid="operations-pill"
                 class="fixed bottom-4 z-50 inline-flex items-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
                 :class="[isRtl ? 'left-4' : 'right-4']"
             >
