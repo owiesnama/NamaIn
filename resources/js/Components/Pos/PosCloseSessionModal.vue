@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useForm } from "@inertiajs/vue3";
 import Modal from "@/Components/Modal.vue";
 import InputLabel from "@/Components/InputLabel.vue";
+import InputError from "@/Components/InputError.vue";
 import TextInput from "@/Components/TextInput.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 
@@ -19,7 +20,9 @@ const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDig
 
 const form = useForm({
     session_id: props.sessionId,
-    closing_float: '',
+    // Pre-fill with the expected float so closing works on a single click; the
+    // cashier can overwrite it with the actual counted cash.
+    closing_float: props.sessionStats?.expected_closing_float ?? '',
 });
 
 const liveVariance = computed(() => {
@@ -70,6 +73,7 @@ const closeSession = () => form.post(route('pos.close'));
                 <div>
                     <InputLabel for="closing_float" :value="__('Actual Cash in Hand')" />
                     <TextInput v-model="form.closing_float" id="closing_float" type="number" step="0.01" min="0" class="mt-1 block w-full rounded-xl" :placeholder="sessionStats ? String(sessionStats.expected_closing_float) : '0.00'" />
+                    <InputError :message="form.errors.closing_float" class="mt-1" />
                 </div>
                 <div v-if="liveVariance !== null" class="flex items-center justify-between rounded-xl px-4 py-3 transition-colors" :class="liveVariance < 0 ? 'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800' : 'bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800'">
                     <span class="text-sm font-medium" :class="liveVariance < 0 ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'">{{ __('Variance') }}</span>
