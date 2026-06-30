@@ -1,4 +1,220 @@
 {
+  "horizon.stats.index": {
+    "name": "horizon.stats.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\DashboardStatsController@index",
+    "uri": "api/stats",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.workload.index": {
+    "name": "horizon.workload.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\WorkloadController@index",
+    "uri": "api/workload",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.masters.index": {
+    "name": "horizon.masters.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MasterSupervisorController@index",
+    "uri": "api/masters",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.monitoring.index": {
+    "name": "horizon.monitoring.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@index",
+    "uri": "api/monitoring",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.monitoring.store": {
+    "name": "horizon.monitoring.store",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@store",
+    "uri": "api/monitoring",
+    "method": [
+      "POST"
+    ]
+  },
+  "horizon.monitoring-tag.paginate": {
+    "name": "horizon.monitoring-tag.paginate",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@paginate",
+    "uri": "api/monitoring/{tag}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.monitoring-tag.destroy": {
+    "name": "horizon.monitoring-tag.destroy",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@destroy",
+    "uri": "api/monitoring/{tag}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "horizon.jobs-metrics.index": {
+    "name": "horizon.jobs-metrics.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\JobMetricsController@index",
+    "uri": "api/metrics/jobs",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-metrics.show": {
+    "name": "horizon.jobs-metrics.show",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\JobMetricsController@show",
+    "uri": "api/metrics/jobs/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.queues-metrics.index": {
+    "name": "horizon.queues-metrics.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\QueueMetricsController@index",
+    "uri": "api/metrics/queues",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.queues-metrics.show": {
+    "name": "horizon.queues-metrics.show",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\QueueMetricsController@show",
+    "uri": "api/metrics/queues/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-batches.index": {
+    "name": "horizon.jobs-batches.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@index",
+    "uri": "api/batches",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-batches.show": {
+    "name": "horizon.jobs-batches.show",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@show",
+    "uri": "api/batches/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.jobs-batches.retry": {
+    "name": "horizon.jobs-batches.retry",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@retry",
+    "uri": "api/batches/retry/{id}",
+    "method": [
+      "POST"
+    ]
+  },
+  "horizon.pending-jobs.index": {
+    "name": "horizon.pending-jobs.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\PendingJobsController@index",
+    "uri": "api/jobs/pending",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.completed-jobs.index": {
+    "name": "horizon.completed-jobs.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\CompletedJobsController@index",
+    "uri": "api/jobs/completed",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.silenced-jobs.index": {
+    "name": "horizon.silenced-jobs.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\SilencedJobsController@index",
+    "uri": "api/jobs/silenced",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.failed-jobs.index": {
+    "name": "horizon.failed-jobs.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\FailedJobsController@index",
+    "uri": "api/jobs/failed",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.failed-jobs.show": {
+    "name": "horizon.failed-jobs.show",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\FailedJobsController@show",
+    "uri": "api/jobs/failed/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.retry-jobs.show": {
+    "name": "horizon.retry-jobs.show",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\RetryController@store",
+    "uri": "api/jobs/retry/{id}",
+    "method": [
+      "POST"
+    ]
+  },
+  "horizon.jobs.show": {
+    "name": "horizon.jobs.show",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\JobsController@show",
+    "uri": "api/jobs/{id}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "horizon.index": {
+    "name": "horizon.index",
+    "domain": "queue.",
+    "action": "Laravel\\Horizon\\Http\\Controllers\\HomeController@index",
+    "uri": "{view?}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
   "": {
     "name": null,
     "domain": null,
@@ -10,622 +226,11 @@
       "HEAD"
     ]
   },
-  "cypress.factory": {
-    "name": "cypress.factory",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@factory",
-    "uri": "__cypress__/factory",
-    "method": [
-      "POST"
-    ]
-  },
-  "cypress.login": {
-    "name": "cypress.login",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@login",
-    "uri": "__cypress__/login",
-    "method": [
-      "POST"
-    ]
-  },
-  "cypress.logout": {
-    "name": "cypress.logout",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@logout",
-    "uri": "__cypress__/logout",
-    "method": [
-      "POST"
-    ]
-  },
-  "cypress.artisan": {
-    "name": "cypress.artisan",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@artisan",
-    "uri": "__cypress__/artisan",
-    "method": [
-      "POST"
-    ]
-  },
-  "cypress.run-php": {
-    "name": "cypress.run-php",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@runPhp",
-    "uri": "__cypress__/run-php",
-    "method": [
-      "POST"
-    ]
-  },
-  "cypress.csrf-token": {
-    "name": "cypress.csrf-token",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@csrfToken",
-    "uri": "__cypress__/csrf_token",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "cypress.routes": {
-    "name": "cypress.routes",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@routes",
-    "uri": "__cypress__/routes",
-    "method": [
-      "POST"
-    ]
-  },
-  "cypress.current-user": {
-    "name": "cypress.current-user",
-    "domain": null,
-    "action": "Laracasts\\Cypress\\Controllers\\CypressController@currentUser",
-    "uri": "__cypress__/current-user",
-    "method": [
-      "POST"
-    ]
-  },
-  "dusk.login": {
-    "name": "dusk.login",
-    "domain": null,
-    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@login",
-    "uri": "_dusk/login/{userId}/{guard?}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "dusk.logout": {
-    "name": "dusk.logout",
-    "domain": null,
-    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@logout",
-    "uri": "_dusk/logout/{guard?}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "dusk.user": {
-    "name": "dusk.user",
-    "domain": null,
-    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@user",
-    "uri": "_dusk/user/{guard?}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "login": {
-    "name": "login",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@create",
-    "uri": "login",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "login.store": {
-    "name": "login.store",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@store",
-    "uri": "login",
-    "method": [
-      "POST"
-    ]
-  },
-  "logout": {
-    "name": "logout",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@destroy",
-    "uri": "logout",
-    "method": [
-      "POST"
-    ]
-  },
-  "password.request": {
-    "name": "password.request",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@create",
-    "uri": "forgot-password",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "password.reset": {
-    "name": "password.reset",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@create",
-    "uri": "reset-password/{token}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "password.email": {
-    "name": "password.email",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@store",
-    "uri": "forgot-password",
-    "method": [
-      "POST"
-    ]
-  },
-  "password.update": {
-    "name": "password.update",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@store",
-    "uri": "reset-password",
-    "method": [
-      "POST"
-    ]
-  },
-  "register": {
-    "name": "register",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@create",
-    "uri": "register",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "register.store": {
-    "name": "register.store",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@store",
-    "uri": "register",
-    "method": [
-      "POST"
-    ]
-  },
-  "user-profile-information.update": {
-    "name": "user-profile-information.update",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\ProfileInformationController@update",
-    "uri": "user/profile-information",
-    "method": [
-      "PUT"
-    ]
-  },
-  "user-password.update": {
-    "name": "user-password.update",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordController@update",
-    "uri": "user/password",
-    "method": [
-      "PUT"
-    ]
-  },
-  "password.confirm": {
-    "name": "password.confirm",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@show",
-    "uri": "user/confirm-password",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "password.confirmation": {
-    "name": "password.confirmation",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedPasswordStatusController@show",
-    "uri": "user/confirmed-password-status",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "password.confirm.store": {
-    "name": "password.confirm.store",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@store",
-    "uri": "user/confirm-password",
-    "method": [
-      "POST"
-    ]
-  },
-  "two-factor.login": {
-    "name": "two-factor.login",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@create",
-    "uri": "two-factor-challenge",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "two-factor.login.store": {
-    "name": "two-factor.login.store",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@store",
-    "uri": "two-factor-challenge",
-    "method": [
-      "POST"
-    ]
-  },
-  "two-factor.enable": {
-    "name": "two-factor.enable",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@store",
-    "uri": "user/two-factor-authentication",
-    "method": [
-      "POST"
-    ]
-  },
-  "two-factor.confirm": {
-    "name": "two-factor.confirm",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedTwoFactorAuthenticationController@store",
-    "uri": "user/confirmed-two-factor-authentication",
-    "method": [
-      "POST"
-    ]
-  },
-  "two-factor.disable": {
-    "name": "two-factor.disable",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@destroy",
-    "uri": "user/two-factor-authentication",
-    "method": [
-      "DELETE"
-    ]
-  },
-  "two-factor.qr-code": {
-    "name": "two-factor.qr-code",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorQrCodeController@show",
-    "uri": "user/two-factor-qr-code",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "two-factor.secret-key": {
-    "name": "two-factor.secret-key",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorSecretKeyController@show",
-    "uri": "user/two-factor-secret-key",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "two-factor.recovery-codes": {
-    "name": "two-factor.recovery-codes",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@index",
-    "uri": "user/two-factor-recovery-codes",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "two-factor.regenerate-recovery-codes": {
-    "name": "two-factor.regenerate-recovery-codes",
-    "domain": "namain.test",
-    "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@store",
-    "uri": "user/two-factor-recovery-codes",
-    "method": [
-      "POST"
-    ]
-  },
-  "horizon.stats.index": {
-    "name": "horizon.stats.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\DashboardStatsController@index",
-    "uri": "api/stats",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.workload.index": {
-    "name": "horizon.workload.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\WorkloadController@index",
-    "uri": "api/workload",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.masters.index": {
-    "name": "horizon.masters.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\MasterSupervisorController@index",
-    "uri": "api/masters",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.monitoring.index": {
-    "name": "horizon.monitoring.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@index",
-    "uri": "api/monitoring",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.monitoring.store": {
-    "name": "horizon.monitoring.store",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@store",
-    "uri": "api/monitoring",
-    "method": [
-      "POST"
-    ]
-  },
-  "horizon.monitoring-tag.paginate": {
-    "name": "horizon.monitoring-tag.paginate",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@paginate",
-    "uri": "api/monitoring/{tag}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.monitoring-tag.destroy": {
-    "name": "horizon.monitoring-tag.destroy",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\MonitoringController@destroy",
-    "uri": "api/monitoring/{tag}",
-    "method": [
-      "DELETE"
-    ]
-  },
-  "horizon.jobs-metrics.index": {
-    "name": "horizon.jobs-metrics.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\JobMetricsController@index",
-    "uri": "api/metrics/jobs",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.jobs-metrics.show": {
-    "name": "horizon.jobs-metrics.show",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\JobMetricsController@show",
-    "uri": "api/metrics/jobs/{id}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.queues-metrics.index": {
-    "name": "horizon.queues-metrics.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\QueueMetricsController@index",
-    "uri": "api/metrics/queues",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.queues-metrics.show": {
-    "name": "horizon.queues-metrics.show",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\QueueMetricsController@show",
-    "uri": "api/metrics/queues/{id}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.jobs-batches.index": {
-    "name": "horizon.jobs-batches.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@index",
-    "uri": "api/batches",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.jobs-batches.show": {
-    "name": "horizon.jobs-batches.show",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@show",
-    "uri": "api/batches/{id}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.jobs-batches.retry": {
-    "name": "horizon.jobs-batches.retry",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\BatchesController@retry",
-    "uri": "api/batches/retry/{id}",
-    "method": [
-      "POST"
-    ]
-  },
-  "horizon.pending-jobs.index": {
-    "name": "horizon.pending-jobs.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\PendingJobsController@index",
-    "uri": "api/jobs/pending",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.completed-jobs.index": {
-    "name": "horizon.completed-jobs.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\CompletedJobsController@index",
-    "uri": "api/jobs/completed",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.silenced-jobs.index": {
-    "name": "horizon.silenced-jobs.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\SilencedJobsController@index",
-    "uri": "api/jobs/silenced",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.failed-jobs.index": {
-    "name": "horizon.failed-jobs.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\FailedJobsController@index",
-    "uri": "api/jobs/failed",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.failed-jobs.show": {
-    "name": "horizon.failed-jobs.show",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\FailedJobsController@show",
-    "uri": "api/jobs/failed/{id}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.retry-jobs.show": {
-    "name": "horizon.retry-jobs.show",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\RetryController@store",
-    "uri": "api/jobs/retry/{id}",
-    "method": [
-      "POST"
-    ]
-  },
-  "horizon.jobs.show": {
-    "name": "horizon.jobs.show",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\JobsController@show",
-    "uri": "api/jobs/{id}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "horizon.index": {
-    "name": "horizon.index",
-    "domain": "queue.namain.test",
-    "action": "Laravel\\Horizon\\Http\\Controllers\\HomeController@index",
+  "telescope": {
+    "name": "telescope",
+    "domain": "monitor.",
+    "action": "Laravel\\Telescope\\Http\\Controllers\\HomeController@index",
     "uri": "{view?}",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "profile.show": {
-    "name": "profile.show",
-    "domain": null,
-    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\UserProfileController@show",
-    "uri": "user/profile",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "other-browser-sessions.destroy": {
-    "name": "other-browser-sessions.destroy",
-    "domain": null,
-    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\OtherBrowserSessionsController@destroy",
-    "uri": "user/other-browser-sessions",
-    "method": [
-      "DELETE"
-    ]
-  },
-  "current-user-photo.destroy": {
-    "name": "current-user-photo.destroy",
-    "domain": null,
-    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\ProfilePhotoController@destroy",
-    "uri": "user/profile-photo",
-    "method": [
-      "DELETE"
-    ]
-  },
-  "current-user.destroy": {
-    "name": "current-user.destroy",
-    "domain": null,
-    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\CurrentUserController@destroy",
-    "uri": "user",
-    "method": [
-      "DELETE"
-    ]
-  },
-  "sanctum.csrf-cookie": {
-    "name": "sanctum.csrf-cookie",
-    "domain": null,
-    "action": "Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController@show",
-    "uri": "sanctum/csrf-cookie",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "ignition.healthCheck": {
-    "name": "ignition.healthCheck",
-    "domain": null,
-    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\HealthCheckController",
-    "uri": "_ignition/health-check",
-    "method": [
-      "GET",
-      "HEAD"
-    ]
-  },
-  "ignition.executeSolution": {
-    "name": "ignition.executeSolution",
-    "domain": null,
-    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\ExecuteSolutionController",
-    "uri": "_ignition/execute-solution",
-    "method": [
-      "POST"
-    ]
-  },
-  "ignition.updateConfig": {
-    "name": "ignition.updateConfig",
-    "domain": null,
-    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\UpdateConfigController",
-    "uri": "_ignition/update-config",
-    "method": [
-      "POST"
-    ]
-  },
-  "api.customers.index": {
-    "name": "api.customers.index",
-    "domain": null,
-    "action": "App\\Http\\Controllers\\Api\\CustomersController",
-    "uri": "api/customers",
     "method": [
       "GET",
       "HEAD"
@@ -1007,6 +612,36 @@
       "PUT"
     ]
   },
+  "api.customers.index": {
+    "name": "api.customers.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Api\\CustomersController",
+    "uri": "api/customers",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "api.products.index": {
+    "name": "api.products.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Api\\ProductsController",
+    "uri": "api/products",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "api.suppliers.index": {
+    "name": "api.suppliers.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Api\\SuppliersController",
+    "uri": "api/suppliers",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
   "customers.export": {
     "name": "customers.export",
     "domain": "{tenant}.namain.test",
@@ -1137,7 +772,7 @@
   "customer-advances.store": {
     "name": "customer-advances.store",
     "domain": "{tenant}.namain.test",
-    "action": "App\\Http\\Controllers\\CustomerAdvancesController@store",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerAdvancesController@store",
     "uri": "customers/{customer}/advances",
     "method": [
       "POST"
@@ -1146,7 +781,7 @@
   "customer-advances.settle": {
     "name": "customer-advances.settle",
     "domain": "{tenant}.namain.test",
-    "action": "App\\Http\\Controllers\\CustomerAdvancesController@destroy",
+    "action": "App\\Http\\Controllers\\Contacts\\CustomerAdvancesController@destroy",
     "uri": "customer-advances/{customerAdvance}/settle",
     "method": [
       "POST"
@@ -1552,7 +1187,7 @@
     "name": "purchases.show",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@show",
-    "uri": "purchases/{purchase}",
+    "uri": "purchases/{invoice}",
     "method": [
       "GET",
       "HEAD"
@@ -1562,7 +1197,7 @@
     "name": "purchases.edit",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@edit",
-    "uri": "purchases/{purchase}/edit",
+    "uri": "purchases/{invoice}/edit",
     "method": [
       "GET",
       "HEAD"
@@ -1572,7 +1207,7 @@
     "name": "purchases.update",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@update",
-    "uri": "purchases/{purchase}",
+    "uri": "purchases/{invoice}",
     "method": [
       "PUT",
       "PATCH"
@@ -1582,7 +1217,7 @@
     "name": "purchases.destroy",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Purchases\\PurchasesController@destroy",
-    "uri": "purchases/{purchase}",
+    "uri": "purchases/{invoice}",
     "method": [
       "DELETE"
     ]
@@ -1648,7 +1283,7 @@
     "name": "sales.show",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Sales\\SalesController@show",
-    "uri": "sales/{sale}",
+    "uri": "sales/{invoice}",
     "method": [
       "GET",
       "HEAD"
@@ -1658,7 +1293,7 @@
     "name": "sales.edit",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Sales\\SalesController@edit",
-    "uri": "sales/{sale}/edit",
+    "uri": "sales/{invoice}/edit",
     "method": [
       "GET",
       "HEAD"
@@ -1668,7 +1303,7 @@
     "name": "sales.update",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Sales\\SalesController@update",
-    "uri": "sales/{sale}",
+    "uri": "sales/{invoice}",
     "method": [
       "PUT",
       "PATCH"
@@ -1678,7 +1313,7 @@
     "name": "sales.destroy",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Sales\\SalesController@destroy",
-    "uri": "sales/{sale}",
+    "uri": "sales/{invoice}",
     "method": [
       "DELETE"
     ]
@@ -1758,11 +1393,98 @@
       "POST"
     ]
   },
+  "quotes.index": {
+    "name": "quotes.index",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuotesController@index",
+    "uri": "quotes",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "quotes.create": {
+    "name": "quotes.create",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuotesController@create",
+    "uri": "quotes/create",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "quotes.store": {
+    "name": "quotes.store",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuotesController@store",
+    "uri": "quotes",
+    "method": [
+      "POST"
+    ]
+  },
+  "quotes.edit": {
+    "name": "quotes.edit",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuotesController@edit",
+    "uri": "quotes/{quote}/edit",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "quotes.update": {
+    "name": "quotes.update",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuotesController@update",
+    "uri": "quotes/{quote}",
+    "method": [
+      "PUT"
+    ]
+  },
+  "quotes.destroy": {
+    "name": "quotes.destroy",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuotesController@destroy",
+    "uri": "quotes/{quote}",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "quotes.convert": {
+    "name": "quotes.convert",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuoteConvertController@show",
+    "uri": "quotes/{quote}/convert",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "quotes.print": {
+    "name": "quotes.print",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Sales\\QuotePrintController@show",
+    "uri": "quotes/{quote}/print",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
   "invoices.print": {
     "name": "invoices.print",
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Invoicing\\InvoicePrintController@show",
     "uri": "invoice/print/{invoice}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "invoices.receipt": {
+    "name": "invoices.receipt",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Invoicing\\InvoiceReceiptController@show",
+    "uri": "invoice/receipt/{invoice}",
     "method": [
       "GET",
       "HEAD"
@@ -2286,6 +2008,15 @@
       "PUT"
     ]
   },
+  "users.credentials.resend": {
+    "name": "users.credentials.resend",
+    "domain": "{tenant}.namain.test",
+    "action": "App\\Http\\Controllers\\Users\\UserManagementController@resendCredentials",
+    "uri": "users/{user}/resend-credentials",
+    "method": [
+      "POST"
+    ]
+  },
   "users.destroy": {
     "name": "users.destroy",
     "domain": "{tenant}.namain.test",
@@ -2484,6 +2215,439 @@
     "domain": "{tenant}.namain.test",
     "action": "App\\Http\\Controllers\\Core\\TenantSelectionController@switchFrom",
     "uri": "switch-tenant/{target}",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.factory": {
+    "name": "cypress.factory",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@factory",
+    "uri": "__cypress__/factory",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.login": {
+    "name": "cypress.login",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@login",
+    "uri": "__cypress__/login",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.logout": {
+    "name": "cypress.logout",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@logout",
+    "uri": "__cypress__/logout",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.artisan": {
+    "name": "cypress.artisan",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@artisan",
+    "uri": "__cypress__/artisan",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.run-php": {
+    "name": "cypress.run-php",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@runPhp",
+    "uri": "__cypress__/run-php",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.csrf-token": {
+    "name": "cypress.csrf-token",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@csrfToken",
+    "uri": "__cypress__/csrf_token",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "cypress.routes": {
+    "name": "cypress.routes",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@routes",
+    "uri": "__cypress__/routes",
+    "method": [
+      "POST"
+    ]
+  },
+  "cypress.current-user": {
+    "name": "cypress.current-user",
+    "domain": null,
+    "action": "Laracasts\\Cypress\\Controllers\\CypressController@currentUser",
+    "uri": "__cypress__/current-user",
+    "method": [
+      "POST"
+    ]
+  },
+  "boost.browser-logs": {
+    "name": "boost.browser-logs",
+    "domain": null,
+    "action": "Closure",
+    "uri": "_boost/browser-logs",
+    "method": [
+      "POST"
+    ]
+  },
+  "dusk.login": {
+    "name": "dusk.login",
+    "domain": null,
+    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@login",
+    "uri": "_dusk/login/{userId}/{guard?}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "dusk.logout": {
+    "name": "dusk.logout",
+    "domain": null,
+    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@logout",
+    "uri": "_dusk/logout/{guard?}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "dusk.user": {
+    "name": "dusk.user",
+    "domain": null,
+    "action": "Laravel\\Dusk\\Http\\Controllers\\UserController@user",
+    "uri": "_dusk/user/{guard?}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "login": {
+    "name": "login",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@create",
+    "uri": "login",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "login.store": {
+    "name": "login.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@store",
+    "uri": "login",
+    "method": [
+      "POST"
+    ]
+  },
+  "logout": {
+    "name": "logout",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\AuthenticatedSessionController@destroy",
+    "uri": "logout",
+    "method": [
+      "POST"
+    ]
+  },
+  "password.request": {
+    "name": "password.request",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@create",
+    "uri": "forgot-password",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.reset": {
+    "name": "password.reset",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@create",
+    "uri": "reset-password/{token}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.email": {
+    "name": "password.email",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordResetLinkController@store",
+    "uri": "forgot-password",
+    "method": [
+      "POST"
+    ]
+  },
+  "password.update": {
+    "name": "password.update",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\NewPasswordController@store",
+    "uri": "reset-password",
+    "method": [
+      "POST"
+    ]
+  },
+  "register": {
+    "name": "register",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@create",
+    "uri": "register",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "register.store": {
+    "name": "register.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RegisteredUserController@store",
+    "uri": "register",
+    "method": [
+      "POST"
+    ]
+  },
+  "verification.notice": {
+    "name": "verification.notice",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\EmailVerificationPromptController@__invoke",
+    "uri": "email/verify",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "verification.verify": {
+    "name": "verification.verify",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\VerifyEmailController@__invoke",
+    "uri": "email/verify/{id}/{hash}",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "verification.send": {
+    "name": "verification.send",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\EmailVerificationNotificationController@store",
+    "uri": "email/verification-notification",
+    "method": [
+      "POST"
+    ]
+  },
+  "user-profile-information.update": {
+    "name": "user-profile-information.update",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ProfileInformationController@update",
+    "uri": "user/profile-information",
+    "method": [
+      "PUT"
+    ]
+  },
+  "user-password.update": {
+    "name": "user-password.update",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\PasswordController@update",
+    "uri": "user/password",
+    "method": [
+      "PUT"
+    ]
+  },
+  "password.confirm": {
+    "name": "password.confirm",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@show",
+    "uri": "user/confirm-password",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.confirmation": {
+    "name": "password.confirmation",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedPasswordStatusController@show",
+    "uri": "user/confirmed-password-status",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "password.confirm.store": {
+    "name": "password.confirm.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmablePasswordController@store",
+    "uri": "user/confirm-password",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.login": {
+    "name": "two-factor.login",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@create",
+    "uri": "two-factor-challenge",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.login.store": {
+    "name": "two-factor.login.store",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticatedSessionController@store",
+    "uri": "two-factor-challenge",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.enable": {
+    "name": "two-factor.enable",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@store",
+    "uri": "user/two-factor-authentication",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.confirm": {
+    "name": "two-factor.confirm",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\ConfirmedTwoFactorAuthenticationController@store",
+    "uri": "user/confirmed-two-factor-authentication",
+    "method": [
+      "POST"
+    ]
+  },
+  "two-factor.disable": {
+    "name": "two-factor.disable",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorAuthenticationController@destroy",
+    "uri": "user/two-factor-authentication",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "two-factor.qr-code": {
+    "name": "two-factor.qr-code",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorQrCodeController@show",
+    "uri": "user/two-factor-qr-code",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.secret-key": {
+    "name": "two-factor.secret-key",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\TwoFactorSecretKeyController@show",
+    "uri": "user/two-factor-secret-key",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.recovery-codes": {
+    "name": "two-factor.recovery-codes",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@index",
+    "uri": "user/two-factor-recovery-codes",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "two-factor.regenerate-recovery-codes": {
+    "name": "two-factor.regenerate-recovery-codes",
+    "domain": null,
+    "action": "Laravel\\Fortify\\Http\\Controllers\\RecoveryCodeController@store",
+    "uri": "user/two-factor-recovery-codes",
+    "method": [
+      "POST"
+    ]
+  },
+  "profile.show": {
+    "name": "profile.show",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\UserProfileController@show",
+    "uri": "user/profile",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "other-browser-sessions.destroy": {
+    "name": "other-browser-sessions.destroy",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\OtherBrowserSessionsController@destroy",
+    "uri": "user/other-browser-sessions",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "current-user-photo.destroy": {
+    "name": "current-user-photo.destroy",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\ProfilePhotoController@destroy",
+    "uri": "user/profile-photo",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "current-user.destroy": {
+    "name": "current-user.destroy",
+    "domain": null,
+    "action": "Laravel\\Jetstream\\Http\\Controllers\\Inertia\\CurrentUserController@destroy",
+    "uri": "user",
+    "method": [
+      "DELETE"
+    ]
+  },
+  "sanctum.csrf-cookie": {
+    "name": "sanctum.csrf-cookie",
+    "domain": null,
+    "action": "Laravel\\Sanctum\\Http\\Controllers\\CsrfCookieController@show",
+    "uri": "sanctum/csrf-cookie",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "ignition.healthCheck": {
+    "name": "ignition.healthCheck",
+    "domain": null,
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\HealthCheckController",
+    "uri": "_ignition/health-check",
+    "method": [
+      "GET",
+      "HEAD"
+    ]
+  },
+  "ignition.executeSolution": {
+    "name": "ignition.executeSolution",
+    "domain": null,
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\ExecuteSolutionController",
+    "uri": "_ignition/execute-solution",
+    "method": [
+      "POST"
+    ]
+  },
+  "ignition.updateConfig": {
+    "name": "ignition.updateConfig",
+    "domain": null,
+    "action": "Spatie\\LaravelIgnition\\Http\\Controllers\\UpdateConfigController",
+    "uri": "_ignition/update-config",
     "method": [
       "POST"
     ]

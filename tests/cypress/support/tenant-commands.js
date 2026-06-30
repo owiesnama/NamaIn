@@ -54,8 +54,9 @@ Cypress.Commands.add('tenantLogin', (slug = 'cypress') => {
             app()->instance('currentTenant', $tenant);
 
             if (!App\\Models\\Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->exists()) {
-                (new Database\\Seeders\\PermissionSeeder)->run();
-                (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+                // Permissions are seeded by migration; DefaultRolesService reads
+                // Permission::all() and syncs them to the default roles.
+                (new App\\Services\\OnBoarding\\DefaultRolesService)->seedForTenant($tenant);
             }
 
             $user = App\\Models\\User::factory()->create([
@@ -79,7 +80,7 @@ Cypress.Commands.add('tenantLogin', (slug = 'cypress') => {
                 ['key' => 'language', 'tenant_id' => $tenant->id],
                 ['value' => 'en']
             );
-            App\\Services\\TenantCache::forget('preferences');
+            App\\Facades\\Cache::forget('preferences');
 
             return ['slug' => $tenant->slug, 'email' => $user->email]
         `).then((result) => {
@@ -112,8 +113,9 @@ Cypress.Commands.add('tenantLoginAs', (roleSlug, slug = 'cypress') => {
             app()->instance('currentTenant', $tenant);
 
             if (!App\\Models\\Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->exists()) {
-                (new Database\\Seeders\\PermissionSeeder)->run();
-                (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+                // Permissions are seeded by migration; DefaultRolesService reads
+                // Permission::all() and syncs them to the default roles.
+                (new App\\Services\\OnBoarding\\DefaultRolesService)->seedForTenant($tenant);
             }
 
             $user = App\\Models\\User::factory()->create([
@@ -136,7 +138,7 @@ Cypress.Commands.add('tenantLoginAs', (roleSlug, slug = 'cypress') => {
                 ['key' => 'language', 'tenant_id' => $tenant->id],
                 ['value' => 'en']
             );
-            App\\Services\\TenantCache::forget('preferences');
+            App\\Facades\\Cache::forget('preferences');
 
             return ['slug' => $tenant->slug, 'email' => $user->email]
         `).then((result) => {

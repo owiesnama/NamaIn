@@ -31,7 +31,7 @@ class BankFactory extends Factory
         ];
 
         return [
-            'name' => $this->faker->randomElement($banks),
+            'name' => $this->faker->unique()->randomElement($banks),
             'code' => $this->faker->unique()->numerify('###'),
         ];
     }

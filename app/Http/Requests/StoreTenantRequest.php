@@ -21,7 +21,7 @@ class StoreTenantRequest extends FormRequest
             'slug' => [
                 'required', 'string', 'max:63', 'alpha_dash:ascii',
                 Rule::unique('tenants', 'slug'),
-                Rule::notIn(Tenant::RESERVED_SLUGS),
+                Rule::notIn(Tenant::reservedSlugs()),
             ],
             'owner_email' => ['required', 'email', 'exists:users,email'],
         ];

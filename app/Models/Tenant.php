@@ -24,6 +24,18 @@ class Tenant extends Model
         'dashboard', 'auth', 'sso', 'oauth', 'cloud',
     ];
 
+    /**
+     * Slugs that may not be used as a tenant subdomain.
+     *
+     * The reservation is lifted on local so any subdomain works while developing.
+     *
+     * @return string[]
+     */
+    public static function reservedSlugs(): array
+    {
+        return app()->isLocal() ? [] : self::RESERVED_SLUGS;
+    }
+
     protected static function booted(): void
     {
         static::unguard();

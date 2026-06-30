@@ -216,14 +216,8 @@ describe('Storages page', () => {
         });
     });
 
-    describe('as cashier (inventory.view only)', () => {
-        beforeEach(() => cy.tenantLoginAs('cashier'));
-
-        it('hides create storage button (no inventory.manage)', () => {
-            cy.visit('/storages');
-            cy.contains('button', 'Add New').should('not.exist');
-        });
-    });
+    // Cashier has no inventory.view, so /storages is backend-blocked (403)
+    // and is covered by the page-access spec instead.
 });
 
 /*
