@@ -224,7 +224,9 @@ class DashboardStatsQuery
 
     private function cacheTtl(string $duration): DateTimeInterface|int
     {
-        if (app()->environment('testing')) {
+        // Only cache in production; outside it (incl. the 'local'-based Cypress
+        // env) stats must stay fresh right after data is seeded.
+        if (! app()->environment('production')) {
             return 0;
         }
 

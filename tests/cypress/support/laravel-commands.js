@@ -206,13 +206,47 @@ Cypress.Commands.add('create', (model, count = 1, attributes = {}, load = [], st
 /**
  * Refresh the database state.
  *
- * @param {Object} options
+ * Fast reset: TRUNCATE every table instead of running `migrate:fresh` (which
+ * drops and replays every migration on each spec). The database itself is kept,
+ * so Herd's persistent php-fpm connections stay valid. The schema is migrated
+ * once on first use, then each reset just truncates + re-seeds the permission
+ * catalog (the seeding migration only runs once, so it must be re-applied).
  *
  * @example cy.refreshDatabase();
- *          cy.refreshDatabase({ '--drop-views': true });
  */
-Cypress.Commands.add('refreshDatabase', (options = {}) => {
-    return cy.artisan('migrate:fresh', options);
+Cypress.Commands.add('refreshDatabase', () => {
+    // Fast reset: TRUNCATE every table instead of migrate:fresh (which drops and
+    // replays every migration). The schema persists across specs — TRUNCATE keeps
+    // the tables — so we only need to migrate on a fresh database. Every other
+    // reset is a single round-trip that truncates and re-seeds the permission
+    // catalog (its seeding migration only runs once, so it must be re-applied).
+    const reset = `
+        if (! Illuminate\\Support\\Facades\\Schema::hasTable('permissions')) {
+            return 'needs-migrate';
+        }
+
+        $tables = collect(Illuminate\\Support\\Facades\\DB::select(
+            "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
+        ))->pluck('tablename')
+          ->reject(fn ($t) => $t === 'migrations')
+          ->map(fn ($t) => '"' . $t . '"')
+          ->implode(', ');
+
+        Illuminate\\Support\\Facades\\DB::statement(
+            "TRUNCATE TABLE {$tables} RESTART IDENTITY CASCADE"
+        );
+
+        (new Database\\Seeders\\PermissionSeeder)->run();
+
+        return 'reset';
+    `;
+
+    return cy.php(reset).then((result) => {
+        if (result === 'needs-migrate') {
+            cy.artisan('migrate', { '--force': true });
+            cy.php(reset);
+        }
+    });
 });
 
 /**

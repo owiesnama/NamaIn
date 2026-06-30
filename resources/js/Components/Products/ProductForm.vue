@@ -354,6 +354,15 @@
                                                 {{ __("Add Unit") }}
                                             </button>
                                         </div>
+
+                                        <button
+                                            v-if="product.units.length === 0"
+                                            type="button"
+                                            class="px-4 py-2.5 bg-gray-100 rounded-lg w-full text-sm font-semibold"
+                                            @click="addUnit"
+                                        >
+                                            {{ __("Add Unit") }}
+                                        </button>
                                     </div>
                                 </div>
 

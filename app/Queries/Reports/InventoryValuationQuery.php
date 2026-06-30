@@ -91,7 +91,9 @@ class InventoryValuationQuery
 
     private function longCacheTtl(): \DateTimeInterface|int
     {
-        if (app()->environment('testing')) {
+        // Only cache in production; outside it (incl. the 'local'-based Cypress
+        // env) results must stay fresh right after data is seeded.
+        if (! app()->environment('production')) {
             return 0;
         }
 
