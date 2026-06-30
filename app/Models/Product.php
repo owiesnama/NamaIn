@@ -49,23 +49,64 @@ class Product extends BaseModel
 
     public function recalculateAverageCost(): void
     {
-        $result = DB::table('transactions')
+        $movingAverage = $this->replayMovingAverageCost();
+
+        $newCost = $movingAverage !== null
+            ? (int) round($movingAverage)
+            : (int) ($this->cost ?? 0);
+
+        DB::table('products')->where('id', $this->id)->update(['average_cost' => $newCost]);
+
+        $this->average_cost = $newCost;
+    }
+
+    /**
+     * Replay the product's delivered movements in chronological order to derive
+     * the moving weighted average cost of the stock currently on hand.
+     *
+     * Purchases raise the pool (weighted by their base quantity); sales draw the
+     * pool down without changing the average. The whole replay runs in floating
+     * point so precision is only lost once, when the caller rounds to store it.
+     * Returns null when no purchase has been delivered, so the caller can fall
+     * back to the product's configured cost.
+     */
+    private function replayMovingAverageCost(): ?float
+    {
+        $movements = DB::table('transactions')
             ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
             ->where('transactions.product_id', $this->id)
             ->where('transactions.delivered', true)
             ->whereNull('transactions.deleted_at')
             ->whereNull('invoices.deleted_at')
-            ->where('invoices.invocable_type', Supplier::class)
-            ->selectRaw('SUM(transactions.base_quantity) as total_qty, SUM(transactions.base_quantity * transactions.unit_cost) as total_cost')
-            ->first();
+            ->orderBy('transactions.created_at')
+            ->orderBy('transactions.id')
+            ->get(['transactions.base_quantity', 'transactions.unit_cost', 'invoices.invocable_type']);
 
-        $newCost = ($result && $result->total_qty > 0)
-            ? (int) round($result->total_cost / $result->total_qty)
-            : ($this->cost ?? 0);
+        $quantityOnHand = 0.0;
+        $averageCost = 0.0;
+        $hasPurchase = false;
 
-        DB::table('products')->where('id', $this->id)->update(['average_cost' => $newCost]);
+        foreach ($movements as $movement) {
+            $baseQuantity = (float) $movement->base_quantity;
 
-        $this->average_cost = $newCost;
+            if ($movement->invocable_type !== Supplier::class) {
+                $quantityOnHand -= $baseQuantity;
+
+                continue;
+            }
+
+            $existingQuantity = max($quantityOnHand, 0.0);
+            $combinedQuantity = $existingQuantity + $baseQuantity;
+
+            if ($combinedQuantity > 0) {
+                $averageCost = (($existingQuantity * $averageCost) + ($baseQuantity * (float) ($movement->unit_cost ?? 0))) / $combinedQuantity;
+            }
+
+            $quantityOnHand += $baseQuantity;
+            $hasPurchase = true;
+        }
+
+        return $hasPurchase ? $averageCost : null;
     }
 
     /**

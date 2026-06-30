@@ -2,9 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Facades\Cache;
 use App\Models\Preference;
 use App\Models\Tenant;
-use App\Facades\Cache;
 use App\Services\Utils\OperationFeed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -52,6 +52,8 @@ class HandleInertiaRequests extends Middleware
                 'id' => $request->user()->id,
                 'name' => $request->user()->name,
                 'email' => $request->user()->email,
+                'email_verified_at' => $request->user()->email_verified_at,
+                'verified' => $request->user()->hasVerifiedEmail(),
                 'profile_photo_url' => $request->user()->profile_photo_url,
                 'role' => fn () => $request->user()->roleInCurrentTenant()?->only('id', 'name', 'slug'),
                 'permissions' => fn () => $request->user()->roleInCurrentTenant()?->permissions->pluck('slug') ?? [],
