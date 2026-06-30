@@ -13,10 +13,20 @@ import PosProductGrid from "@/Components/Pos/PosProductGrid.vue";
 import PosCheckoutModal from "@/Components/Pos/PosCheckoutModal.vue";
 import PosSaleCompleteModal from "@/Components/Pos/PosSaleCompleteModal.vue";
 import PosCloseSessionModal from "@/Components/Pos/PosCloseSessionModal.vue";
+import SalePointPicker from "@/Components/Pos/SalePointPicker.vue";
 
 const props = defineProps({
     session: Object,
     initialProducts: Object,
+    hotProducts: {
+        type: Array,
+        default: () => [],
+    },
+    salePoints: {
+        type: Array,
+        default: () => [],
+    },
+    selectedStorageId: [Number, String],
     session_stats: Object,
     flash: Object,
 });
@@ -197,8 +207,18 @@ const paymentMethodLabels = [
     <AppLayout :title="__('POS Session')">
         <div class="flex flex-col lg:flex-row h-[calc(100vh-120px)] gap-4">
 
-            <!-- Products Grid -->
-            <PosProductGrid :initial-products="initialProducts" :currency="currency" @add-to-cart="addToCart" />
+            <!-- Products column -->
+            <div class="flex-grow flex flex-col min-w-0 gap-3">
+                <SalePointPicker
+                    v-if="salePoints.length > 1"
+                    :sale-points="salePoints"
+                    :selected-id="selectedStorageId"
+                    class="shrink-0"
+                />
+
+                <!-- Products Grid -->
+                <PosProductGrid :initial-products="initialProducts" :hot-products="hotProducts" :currency="currency" @add-to-cart="addToCart" />
+            </div>
 
             <!-- Cart Sidebar -->
             <div class="w-full lg:w-96 flex flex-col bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">

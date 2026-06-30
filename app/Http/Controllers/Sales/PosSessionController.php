@@ -4,23 +4,28 @@ namespace App\Http\Controllers\Sales;
 
 use App\Actions\Pos\ClosePosSessionAction;
 use App\Actions\Pos\OpenPosSessionAction;
-use App\Enums\StorageType;
 use App\Http\Controllers\Controller;
 use App\Models\PosSession;
 use App\Models\Product;
 use App\Models\Storage;
+use App\Queries\DashboardStatsQuery;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
 class PosSessionController extends Controller
 {
-    public function show()
+    public function show(DashboardStatsQuery $stats)
     {
         $this->authorize('viewAny', PosSession::class);
-        $storage = currentTenant()->storages()->where('type', StorageType::SALE_POINT)->first();
 
-        if (! $storage) {
+        $salePoints = currentTenant()->storages()->salePoints()->get();
+
+        if ($salePoints->isEmpty()) {
             return redirect()->route('storages.index')->with('error', __('No sale point storage found.'));
         }
+
+        $storage = $this->resolveSalePoint($salePoints, request('storage_id'));
+        $salePointOptions = $this->presentSalePoints($salePoints);
 
         $session = PosSession::where('storage_id', $storage->id)
             ->whereNull('closed_at')
@@ -29,6 +34,7 @@ class PosSessionController extends Controller
         if (! $session) {
             return inertia('Pos/Open', [
                 'storage' => $storage,
+                'salePoints' => $salePointOptions,
             ]);
         }
 
@@ -50,22 +56,95 @@ class PosSessionController extends Controller
 
         return inertia('Pos/Session', [
             'session' => $session->load(['storage', 'openedBy']),
-            'initialProducts' => $products->through(function (Product $product) use ($replenishment) {
-                return [
-                    'id' => $product->id,
-                    'name' => $product->name,
-                    'price' => $product->price / 100,
-                    'sale_point_qty' => (int) ($product->sale_point_qty ?? 0),
-                    'replenishment' => $replenishment[$product->id] ?? null,
-                    'units' => $product->units,
-                ];
-            }),
+            'salePoints' => $salePointOptions,
+            'selectedStorageId' => $storage->id,
+            'hotProducts' => $this->hotProducts($storage, $stats),
+            'initialProducts' => $products->through(fn (Product $product) => $this->presentProduct($product, $replenishment)),
             'session_stats' => [
                 'opening_float' => $session->opening_float / 100,
                 'cash_sales_total' => $session->cashSalesTotal() / 100,
                 'expected_closing_float' => $session->expectedClosingFloat() / 100,
             ],
         ]);
+    }
+
+    /**
+     * Resolve the sale point to drive the session, falling back to the first
+     * sale point when the requested one is missing or not a valid sale point.
+     */
+    private function resolveSalePoint(Collection $salePoints, mixed $requestedId): Storage
+    {
+        if ($requestedId) {
+            $selected = $salePoints->firstWhere('id', (int) $requestedId);
+
+            if ($selected) {
+                return $selected;
+            }
+        }
+
+        return $salePoints->first();
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, array{id: int, name: string}>
+     */
+    private function presentSalePoints(Collection $salePoints): \Illuminate\Support\Collection
+    {
+        return $salePoints->map(fn (Storage $salePoint) => [
+            'id' => $salePoint->id,
+            'name' => $salePoint->name,
+        ])->values();
+    }
+
+    /**
+     * Most-sold products for the given sale point, shaped like the product grid rows.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function hotProducts(Storage $storage, DashboardStatsQuery $stats): array
+    {
+        $orderedProductIds = $stats->topSellingProducts($storage->id, 8)
+            ->pluck('product_id')
+            ->filter()
+            ->values();
+
+        if ($orderedProductIds->isEmpty()) {
+            return [];
+        }
+
+        $products = Product::with('units')
+            ->whereIn('products.id', $orderedProductIds)
+            ->leftJoin('stocks', function ($join) use ($storage) {
+                $join->on('stocks.product_id', '=', 'products.id')
+                    ->where('stocks.storage_id', $storage->id)
+                    ->whereNull('stocks.deleted_at');
+            })
+            ->select('products.*', 'stocks.quantity as sale_point_qty')
+            ->get()
+            ->sortBy(fn (Product $product) => $orderedProductIds->search($product->id))
+            ->values();
+
+        $replenishment = $this->batchReplenishmentInfo($products->pluck('id'));
+
+        return $products->map(fn (Product $product) => $this->presentProduct($product, $replenishment))->all();
+    }
+
+    /**
+     * Shape a product row for the POS product grid.
+     *
+     * @param  array<int, array{warehouse_id: int, warehouse_name: string, available_qty: int}>  $replenishment
+     * @return array<string, mixed>
+     */
+    private function presentProduct(Product $product, array $replenishment): array
+    {
+        return [
+            'id' => $product->id,
+            'name' => $product->name,
+            'price' => $product->price / 100,
+            'sale_point_qty' => (int) ($product->sale_point_qty ?? 0),
+            'replenishment' => $replenishment[$product->id] ?? null,
+            'units' => $product->units,
+        ];
     }
 
     public function store(Request $request, OpenPosSessionAction $action)

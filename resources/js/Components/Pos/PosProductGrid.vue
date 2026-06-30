@@ -6,6 +6,10 @@ import TextInput from "@/Components/TextInput.vue";
 
 const props = defineProps({
     initialProducts: Object,
+    hotProducts: {
+        type: Array,
+        default: () => [],
+    },
     currency: String,
 });
 
@@ -79,6 +83,36 @@ onUnmounted(() => {
 
 <template>
     <div class="flex-grow flex flex-col min-w-0">
+        <!-- Hot items strip -->
+        <div v-if="hotProducts.length > 0" class="mb-4">
+            <div class="flex items-center gap-x-2 mb-2">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4 text-amber-500">
+                    <path fill-rule="evenodd" d="M12.963 2.286a.75.75 0 0 0-1.071-.136 9.742 9.742 0 0 0-3.539 6.176 7.547 7.547 0 0 1-1.705-1.715.75.75 0 0 0-1.152-.082A9 9 0 1 0 15.68 4.534a7.46 7.46 0 0 1-2.717-2.248ZM15.75 14.25a3.75 3.75 0 1 1-7.313-1.172c.628.465 1.35.81 2.133 1.002A5.99 5.99 0 0 1 12 12.75c0-1.18-.34-2.281-.926-3.214a3.75 3.75 0 0 1 4.676 4.714Z" clip-rule="evenodd" />
+                </svg>
+                <h3 class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ __('Hot Items') }}</h3>
+            </div>
+            <div class="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1">
+                <button
+                    v-for="product in hotProducts"
+                    :key="`hot-${product.id}`"
+                    type="button"
+                    :disabled="product.sale_point_qty === 0 && !product.replenishment"
+                    class="shrink-0 w-36 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-700 text-start shadow-sm group flex flex-col transition-all duration-150 active:scale-95"
+                    :class="product.sale_point_qty === 0 && !product.replenishment
+                        ? 'opacity-40 cursor-not-allowed grayscale'
+                        : 'hover:border-emerald-400 hover:shadow-md cursor-pointer'"
+                    @click="emit('add-to-cart', product)"
+                >
+                    <h4 class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 truncate leading-snug">{{ product.name }}</h4>
+                    <div class="flex items-center justify-between mt-2">
+                        <span class="text-sm font-bold text-emerald-600">{{ fmt(product.price || 0) }}</span>
+                        <span v-if="product.sale_point_qty > 0" class="text-[10px] font-medium text-gray-400">{{ product.sale_point_qty }}</span>
+                        <span v-else-if="product.replenishment" class="text-[10px] font-medium text-amber-500">{{ __('via warehouse') }}</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+
         <div class="mb-4">
             <div class="relative flex items-center">
                 <span class="absolute ltr:left-3 rtl:right-3 text-gray-400">
