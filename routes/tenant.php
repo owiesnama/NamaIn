@@ -33,6 +33,7 @@ use App\Http\Controllers\Exports;
 use App\Http\Controllers\Inventory\StockAdditionController;
 use App\Http\Controllers\Inventory\StockAdjustmentController;
 use App\Http\Controllers\Inventory\StockDeductionController;
+use App\Http\Controllers\Inventory\StockTransferPrintController;
 use App\Http\Controllers\Inventory\StockTransfersController;
 use App\Http\Controllers\Inventory\StoragesController;
 use App\Http\Controllers\Invoicing\InvoicePrintController;
@@ -209,6 +210,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/stock-transfers/create', [StockTransfersController::class, 'create'])->name('stock-transfers.create');
         Route::post('/stock-transfers', [StockTransfersController::class, 'store'])->name('stock-transfers.store');
         Route::get('/stock-transfers/{transfer}', [StockTransfersController::class, 'show'])->name('stock-transfers.show');
+        Route::get('/stock-transfers/{transfer}/print', [StockTransferPrintController::class, 'show'])->name('stock-transfers.print');
 
         /*
         |--------------------------------------------------------------------------
