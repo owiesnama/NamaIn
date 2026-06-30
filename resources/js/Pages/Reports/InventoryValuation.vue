@@ -122,11 +122,11 @@ function requestExport() {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                    <tr v-for="row in data" :key="row.product + '-' + row.storage" class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ row.product }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ row.storage }}</td>
+                                    <tr v-for="row in data" :key="row.product_name + '-' + row.storage_name" class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ row.product_name }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ row.storage_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ row.quantity }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ formatCurrency(row.avg_cost) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ formatCurrency(row.average_cost) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-emerald-600 dark:text-emerald-400">{{ formatCurrency(row.total_value) }}</td>
                                     </tr>
                                 </tbody>
