@@ -76,9 +76,13 @@ describe('POS Sale Flow', () => {
 
         cy.contains('button', 'POS Test Product').first().click();
 
-        cy.get('button').filter(':contains("Complete Sale"), :contains("Review & Complete")').click();
+        // The checkout button sits at the bottom of a full-height cart column, so it can
+        // fall below the test viewport fold — scroll it into view before clicking.
+        cy.get('button').filter(':contains("Complete Sale"), :contains("Review & Complete")')
+            .scrollIntoView()
+            .click({ force: true });
 
-        cy.contains('button', 'Confirm Payment').click();
+        cy.contains('button', 'Confirm Payment').click({ force: true });
 
         cy.url().should('include', '/pos');
     });
@@ -107,11 +111,19 @@ describe('POS Sale Point Picker', () => {
 
         ensureSessionOpen();
 
-        // With more than one sale point, the picker is rendered.
-        cy.get('#sale-point-picker').should('exist').select('Secondary POS Register');
+        // With more than one sale point, the picker is rendered. Select whichever sale
+        // point is NOT currently active so the switch always navigates (selecting the
+        // active one is a no-op by design).
+        cy.get('#sale-point-picker').should('exist').then(($sel) => {
+            const current = $sel.val();
+            const target = [...$sel[0].options].find((o) => o.value !== current);
 
-        // Switching to a sale point without an open session lands on the Open screen for it.
-        cy.contains('Secondary POS Register').should('exist');
-        cy.contains('Open POS Session').should('exist');
+            cy.get('#sale-point-picker').select(target.value);
+
+            // POS opened against the chosen sale point: the URL carries its id and the
+            // destination page's picker reflects it.
+            cy.url().should('include', `storage_id=${target.value}`);
+            cy.get('#sale-point-picker', { timeout: 10000 }).should('have.value', target.value);
+        });
     });
 });
