@@ -127,3 +127,24 @@ describe('POS Sale Point Picker', () => {
         });
     });
 });
+
+describe('POS Close Session', () => {
+    it('closes the open session from the modal in one click', () => {
+        cy.visit('/pos');
+
+        ensureSessionOpen();
+
+        // Open the close modal and confirm. The closing-float field is pre-filled with
+        // the expected amount, so a single click must actually close the session.
+        // (force: a success-flash overlay can sit above the cart header in headless.)
+        cy.contains('button', 'Close Session').click({ force: true });
+        cy.contains('button', 'Confirm & Close').click({ force: true });
+
+        // Session closed → the sale point returns to its Open screen.
+        cy.get('#opening_float', { timeout: 10000 }).should('exist');
+
+        // And it stays closed on reload (it was not silently left open).
+        cy.visit('/pos');
+        cy.get('#opening_float', { timeout: 10000 }).should('exist');
+    });
+});
