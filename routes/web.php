@@ -43,7 +43,6 @@ Route::get('/', function () {
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
-    'verified',
 ])->group(function () {
     Route::get('/tenants/select', [TenantSelectionController::class, 'index'])->name('tenants.select');
     Route::post('/tenants/{tenant}/select', [TenantSelectionController::class, 'select'])->name('tenants.switch');
