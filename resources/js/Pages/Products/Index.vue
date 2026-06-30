@@ -64,6 +64,7 @@
         { label: __("Availability"), value: "quantity_on_hand" },
         { label: __("Name"), value: "name" },
         { label: __("Added Time"), value: "created_at" },
+        { label: __("Cost"), value: "cost" },
         { label: __("Avg Cost"), value: "average_cost" },
         { label: __("Expire Date"), value: "expire_date" },
     ];
@@ -421,6 +422,7 @@
                                             </Tooltip>
                                         </div>
                                     </th>
+                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Cost") }}</th>
                                     <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Avg Cost") }}</th>
                                     <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Price") }}</th>
                                     <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Total Value") }}</th>
@@ -484,6 +486,9 @@
                                                 <span class="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider leading-tight">{{ __("Available") }}</span>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        {{ formatCurrency(product.cost, product.currency) }}
                                     </td>
                                     <td class="px-6 py-4 text-sm font-bold">
                                         <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-400/5 px-2 py-1 rounded-md w-fit leading-tight">

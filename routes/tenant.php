@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Auth\MustChangePasswordController;
+use App\Http\Controllers\Auth\ResendVerificationController;
 use App\Http\Controllers\Auth\TenantLoginController;
 use App\Http\Controllers\Catalog\ProductExportController;
 use App\Http\Controllers\Catalog\ProductImportController;
@@ -33,6 +34,7 @@ use App\Http\Controllers\Exports;
 use App\Http\Controllers\Inventory\StockAdditionController;
 use App\Http\Controllers\Inventory\StockAdjustmentController;
 use App\Http\Controllers\Inventory\StockDeductionController;
+use App\Http\Controllers\Inventory\StockTransferPrintController;
 use App\Http\Controllers\Inventory\StockTransfersController;
 use App\Http\Controllers\Inventory\StoragesController;
 use App\Http\Controllers\Invoicing\InvoicePrintController;
@@ -91,6 +93,12 @@ Route::middleware([ResolveTenant::class])->group(function () {
         ->name('tenant.logout')
         ->middleware('auth');
 
+    // Same-origin email verification resend for the (non-blocking) dashboard banner.
+    // Reachable by authenticated but unverified users.
+    Route::post('/email/resend-verification', [ResendVerificationController::class, 'store'])
+        ->name('verification.resend')
+        ->middleware(['auth:sanctum', config('jetstream.auth_session'), 'throttle:6,1']);
+
     Route::post('/stop-impersonating', [ImpersonationController::class, 'stop'])
         ->name('impersonate.stop')
         ->middleware(['auth:sanctum', config('jetstream.auth_session')]);
@@ -98,7 +106,6 @@ Route::middleware([ResolveTenant::class])->group(function () {
     Route::middleware([
         'auth:sanctum',
         config('jetstream.auth_session'),
-        'verified',
         EnsureTenantIsActive::class,
         EnsureUserIsActiveInTenant::class,
     ])->group(function () {
@@ -118,7 +125,6 @@ Route::middleware([ResolveTenant::class])->group(function () {
     Route::middleware([
         'auth:sanctum',
         config('jetstream.auth_session'),
-        'verified',
         EnsureTenantIsActive::class,
         EnsureUserIsActiveInTenant::class,
         EnsurePasswordIsChanged::class,
@@ -209,6 +215,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/stock-transfers/create', [StockTransfersController::class, 'create'])->name('stock-transfers.create');
         Route::post('/stock-transfers', [StockTransfersController::class, 'store'])->name('stock-transfers.store');
         Route::get('/stock-transfers/{transfer}', [StockTransfersController::class, 'show'])->name('stock-transfers.show');
+        Route::get('/stock-transfers/{transfer}/print', [StockTransferPrintController::class, 'show'])->name('stock-transfers.print');
 
         /*
         |--------------------------------------------------------------------------

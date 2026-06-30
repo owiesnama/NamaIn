@@ -15,7 +15,7 @@ before(() => {
         $tenant = App\\Models\\Tenant::where('slug', 'cypress')->first();
         app()->instance('currentTenant', $tenant);
 
-        $storage = App\\Models\\Storage::factory()->create();
+        $storage = App\\Models\\Storage::factory()->create(['name' => 'Cypress Storage']);
         $customer = App\\Models\\Customer::factory()->create(['name' => 'Cypress Customer']);
         $supplier = App\\Models\\Supplier::factory()->create(['name' => 'Cypress Supplier']);
         $product = App\\Models\\Product::factory()->create(['name' => 'Cypress Product', 'cost' => 50]);
@@ -151,6 +151,24 @@ describe('Inventory Valuation with data', () => {
         cy.visit('/reports/inventory-valuation');
         // Verify table rows exist (product data is rendered in the table)
         cy.get('table tbody tr', { timeout: 10000 }).should('have.length.at.least', 1);
+    });
+
+    it('renders the product and storage names in the table', () => {
+        cy.visit('/reports/inventory-valuation');
+        // Product and Warehouse columns must render real names (not blank).
+        cy.get('table tbody').contains('td', 'Cypress Product').should('be.visible');
+        cy.get('table tbody').contains('td', 'Cypress Storage').should('be.visible');
+    });
+
+    it('renders a non-zero average cost cell', () => {
+        cy.visit('/reports/inventory-valuation');
+        // The Avg Cost column (4th cell) must not be zero.
+        cy.get('table tbody tr')
+            .first()
+            .find('td')
+            .eq(3)
+            .invoke('text')
+            .should('not.match', /SDG\s*0\.00/);
     });
 
     it('shows non-zero total value', () => {

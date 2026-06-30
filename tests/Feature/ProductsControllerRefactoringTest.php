@@ -90,6 +90,62 @@ test('product insights return correct warnings', function () {
     expect($messages->first(fn ($m) => str_contains($m, 'Product overcommitted') || str_contains($m, 'التزام زائد للمنتج')))->not->toBeNull();
 });
 
+test('products index payload includes cost for each product', function () {
+    $user = User::factory()->create();
+    Product::factory()->create(['name' => 'Costed Product', 'cost' => 750]);
+
+    $response = $this->actingAs($user)->get(route('products.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Products/Index')
+        ->has('products.data', 1)
+        ->where('products.data.0.cost', 750)
+    );
+});
+
+test('can sort products by cost', function () {
+    $user = User::factory()->create();
+    Product::factory()->create(['name' => 'Cheap Product', 'cost' => 100]);
+    Product::factory()->create(['name' => 'Expensive Product', 'cost' => 900]);
+
+    $response = $this->actingAs($user)->get(route('products.index', ['sort_by' => 'cost', 'sort_order' => 'desc']));
+
+    $products = $response->viewData('page')['props']['products']['data'];
+    expect($products[0]['name'])->toBe('Expensive Product');
+});
+
+test('currency round-trips when creating a product', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('products.index'), [
+        'name' => 'Currency Create Product',
+        'cost' => 100,
+        'price' => 120,
+        'currency' => 'USD',
+        'units' => [['name' => 'Box', 'conversion_factor' => 1]],
+        'categories' => [],
+    ])->assertRedirect(route('products.index'));
+
+    expect(Product::where('name', 'Currency Create Product')->first()->currency)->toBe('USD');
+});
+
+test('currency round-trips when updating a product', function () {
+    $user = User::factory()->create();
+    $product = Product::factory()->create(['currency' => 'SDG']);
+
+    $this->actingAs($user)->put(route('products.update', $product), [
+        'name' => $product->name,
+        'cost' => $product->cost,
+        'price' => $product->price,
+        'currency' => 'EUR',
+        'units' => [['name' => 'Box', 'conversion_factor' => 1]],
+        'categories' => [],
+    ])->assertSessionHasNoErrors();
+
+    expect($product->fresh()->currency)->toBe('EUR');
+});
+
 test('can download product import sample', function () {
     $user = User::factory()->create();
 

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Product;
+use App\Models\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -110,4 +112,30 @@ test('reports accept custom date range filter', function () {
     ]));
 
     $response->assertOk();
+});
+
+test('inventory valuation report exposes product, storage, and average cost keys', function () {
+    actingAsTenantUser(role: 'owner');
+
+    $storage = Storage::factory()->create(['name' => 'Main Warehouse']);
+    $product = Product::factory()->create([
+        'name' => 'Valuation Widget',
+        'cost' => 50,
+        'average_cost' => 50,
+    ]);
+    $storage->stock()->attach($product->id, ['quantity' => 10]);
+
+    $response = $this->get(route('reports.inventory-valuation'));
+
+    $response->assertOk();
+    $response->assertInertia(fn ($page) => $page
+        ->component('Reports/InventoryValuation')
+        ->has('data', 1)
+        ->has('data.0', fn ($row) => $row
+            ->where('product_name', 'Valuation Widget')
+            ->where('storage_name', 'Main Warehouse')
+            ->where('average_cost', 50)
+            ->etc()
+        )
+    );
 });

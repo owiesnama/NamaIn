@@ -1,6 +1,6 @@
 <script setup>
     import AppLayout from "@/Layouts/AppLayout.vue";
-    import { Link } from "@inertiajs/vue3";
+    import { Link, router, usePage } from "@inertiajs/vue3";
     import { computed, defineAsyncComponent, ref } from "vue";
     import { usePrivacyMode } from "@/Composables/usePrivacyMode";
     import Tooltip from "@/Components/Tooltip.vue";
@@ -109,11 +109,81 @@
     const attentionCount = computed(() =>
         (alertsEnabled ? (props.low_stock_products?.length || 0) : 0) + (props.upcoming_cheques?.length || 0)
     );
+
+    // Non-blocking email verification reminder.
+    const page = usePage();
+    const isEmailUnverified = computed(() => {
+        const user = page.props.user;
+        return !!user && user.verified === false;
+    });
+
+    const verificationBannerDismissed = ref(false);
+    const resendingVerification = ref(false);
+    const verificationEmailSent = ref(false);
+
+    const resendVerificationEmail = () => {
+        resendingVerification.value = true;
+        router.post(route('verification.resend'), {}, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => { verificationEmailSent.value = true; },
+            onFinish: () => { resendingVerification.value = false; },
+        });
+    };
 </script>
 
 <template>
     <AppLayout :title="__('Dashboard')">
         <div class="space-y-6">
+
+            <!-- Email verification reminder (non-blocking) -->
+            <div
+                v-if="isEmailUnverified && !verificationBannerDismissed"
+                data-cy="verify-email-banner"
+                class="flex items-start gap-x-3 rounded-xl border border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20 px-5 py-4"
+            >
+                <svg class="h-5 w-5 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-amber-800 dark:text-amber-300">{{ __('Please verify your email address') }}</p>
+                    <p class="mt-0.5 text-sm text-amber-700 dark:text-amber-400">
+                        {{ __('Your account is active. Verifying your email keeps it secure and makes sure you receive important notifications.') }}
+                    </p>
+                    <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                        <button
+                            type="button"
+                            data-cy="resend-verification"
+                            @click="resendVerificationEmail"
+                            :disabled="resendingVerification || verificationEmailSent"
+                            class="inline-flex items-center justify-center gap-x-2 px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                        >
+                            <svg v-if="resendingVerification" class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                            </svg>
+                            <span>{{ verificationEmailSent ? __('Email sent') : __('Resend email') }}</span>
+                        </button>
+                        <span v-if="verificationEmailSent" data-cy="verification-sent" class="inline-flex items-center gap-x-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ __('Verification email sent. Check your inbox.') }}
+                        </span>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    data-cy="dismiss-verify-banner"
+                    @click="verificationBannerDismissed = true"
+                    :aria-label="__('Dismiss')"
+                    class="shrink-0 inline-flex items-center justify-center p-1.5 rounded-lg text-amber-600 dark:text-amber-400 hover:bg-amber-100 dark:hover:bg-amber-900/40 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-colors duration-200"
+                >
+                    <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
 
             <!-- Page Header -->
             <div class="w-full flex items-center justify-between">
