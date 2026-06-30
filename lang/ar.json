@@ -1,4 +1,10 @@
 {
+    "Please verify your email address": "يرجى تأكيد عنوان بريدك الإلكتروني",
+    "Your account is active. Verifying your email keeps it secure and makes sure you receive important notifications.": "حسابك مفعّل. تأكيد بريدك الإلكتروني يحافظ على أمان حسابك ويضمن وصول الإشعارات المهمة إليك.",
+    "Resend email": "إعادة إرسال البريد",
+    "Email sent": "تم إرسال البريد",
+    "Verification email sent. Check your inbox.": "تم إرسال بريد التأكيد. يرجى التحقق من صندوق الوارد.",
+    "Dismiss": "إغلاق",
     "Treasury": "الخزينة",
     "Accounts": "الحسابات",
     "Track your cash, bank, and mobile money balances in one place.": "تتبع أرصدة النقد والبنوك والمحافظ الإلكترونية في مكان واحد.",
