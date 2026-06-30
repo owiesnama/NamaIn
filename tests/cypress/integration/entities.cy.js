@@ -32,7 +32,8 @@ describe('Products', () => {
             cy.get('.flatpickr-day:not(.prevMonthDay):not(.nextMonthDay)').contains('15').click();
         });
 
-        // Fill unit fields inside the modal
+        // Add a unit row, then fill its fields inside the modal
+        cy.contains('button', 'Add Unit').click();
         cy.get('input[placeholder="Unit eg: box"]').clear().type('Box');
         cy.get('input[placeholder="Unit Conversion Factor"]').clear().type('1');
 

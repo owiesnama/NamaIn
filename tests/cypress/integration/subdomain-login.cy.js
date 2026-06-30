@@ -44,8 +44,7 @@ describe('Subdomain Login', () => {
             app()->instance('currentTenant', $tenant);
 
             if (!App\\Models\\Role::withoutGlobalScopes()->where('tenant_id', $tenant->id)->exists()) {
-                (new Database\\Seeders\\PermissionSeeder)->run();
-                (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+                (new App\\Services\\OnBoarding\\DefaultRolesService)->seedForTenant($tenant);
             }
 
             $user = App\\Models\\User::factory()->create([
@@ -69,7 +68,7 @@ describe('Subdomain Login', () => {
                 ['key' => 'language', 'tenant_id' => $tenant->id],
                 ['value' => 'en']
             );
-            App\\Services\\TenantCache::forget('preferences');
+            App\\Facades\\Cache::forget('preferences');
 
             return $user->email;
         `).then((email) => {

@@ -16,7 +16,10 @@ trait ResolvesReportDates
 
     private function cacheTtl(): DateTimeInterface|int
     {
-        if (app()->environment('testing')) {
+        // Only cache report results in production. Outside it (local, testing,
+        // and the Cypress E2E env which runs as 'local') results must stay fresh
+        // so a query right after seeding data isn't served a stale empty result.
+        if (! app()->environment('production')) {
             return 0;
         }
 
