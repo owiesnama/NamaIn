@@ -97,6 +97,7 @@ describe('Sale Invoice impacts treasury', () => {
                 'total' => 50,
                 'discount' => 0,
                 'payment_method' => 'cash',
+                'initial_payment_amount' => 50,
                 'treasury_account_id' => ${cashAccountId},
             ]));
 
@@ -138,6 +139,7 @@ describe('Purchase Invoice impacts treasury', () => {
                 'total' => 15,
                 'discount' => 0,
                 'payment_method' => 'cash',
+                'initial_payment_amount' => 15,
                 'treasury_account_id' => ${cashAccountId},
             ]));
 

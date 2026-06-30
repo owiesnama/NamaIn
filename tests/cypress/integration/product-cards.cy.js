@@ -251,7 +251,8 @@ describe('Optional Expire Date and Units', () => {
         cy.get('#name').clear().type('No Expiry Product');
         cy.get('#cost').clear().type('100');
 
-        // Fill unit fields
+        // Add a unit row, then fill its fields
+        cy.contains('button', 'Add Unit').click();
         cy.get('input[placeholder="Unit eg: box"]').clear().type('Pack');
         cy.get('input[placeholder="Unit Conversion Factor"]').clear().type('1');
 

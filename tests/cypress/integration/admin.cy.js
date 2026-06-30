@@ -152,8 +152,7 @@ describe('Tenant Detail & User Management', () => {
         // Create a tenant with an owner
         cy.php(`
             $tenant = App\\Models\\Tenant::factory()->create();
-            (new Database\\Seeders\\PermissionSeeder)->run();
-            (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+            (new App\\Services\\OnBoarding\\DefaultRolesService)->seedForTenant($tenant);
 
             $owner = App\\Models\\User::factory()->create(['current_tenant_id' => $tenant->id]);
             $role = App\\Models\\Role::withoutGlobalScopes()
@@ -181,8 +180,7 @@ describe('Tenant Detail & User Management', () => {
     it('opens the add user modal', () => {
         cy.php(`
             $tenant = App\\Models\\Tenant::factory()->create();
-            (new Database\\Seeders\\PermissionSeeder)->run();
-            (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+            (new App\\Services\\OnBoarding\\DefaultRolesService)->seedForTenant($tenant);
 
             $owner = App\\Models\\User::factory()->create(['current_tenant_id' => $tenant->id]);
             $role = App\\Models\\Role::withoutGlobalScopes()
@@ -207,8 +205,7 @@ describe('Impersonation', () => {
 
         cy.php(`
             $tenant = App\\Models\\Tenant::factory()->create(['name' => 'Impersonate Me']);
-            (new Database\\Seeders\\PermissionSeeder)->run();
-            (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+            (new App\\Services\\OnBoarding\\DefaultRolesService)->seedForTenant($tenant);
 
             $owner = App\\Models\\User::factory()->create(['current_tenant_id' => $tenant->id]);
             $role = App\\Models\\Role::withoutGlobalScopes()
@@ -233,8 +230,7 @@ describe('Impersonation', () => {
 
         cy.php(`
             $tenant = App\\Models\\Tenant::factory()->create(['name' => 'Impersonate Target', 'slug' => 'imp-target']);
-            (new Database\\Seeders\\PermissionSeeder)->run();
-            (new App\\Services\\DefaultRolesService)->seedForTenant($tenant);
+            (new App\\Services\\OnBoarding\\DefaultRolesService)->seedForTenant($tenant);
 
             $owner = App\\Models\\User::factory()->create(['current_tenant_id' => $tenant->id]);
             $role = App\\Models\\Role::withoutGlobalScopes()
