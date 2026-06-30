@@ -168,15 +168,18 @@ class DashboardStatsQuery
         );
     }
 
-    public function topSellingProducts(): Collection
+    public function topSellingProducts(?int $storageId = null, int $limit = 5): Collection
     {
-        return Cache::remember($this->cacheKey('top_products'), $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
+        $cacheKey = $this->cacheKey("top_products_{$storageId}_{$limit}");
+
+        return Cache::remember($cacheKey, $this->cacheTtl('day'), fn () => Transaction::delivered(now()->subDays(30))
             ->forCustomer()
+            ->forStorage($storageId)
             ->with('product')
             ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(price * quantity) as total_revenue'))
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
-            ->limit(5)
+            ->limit($limit)
             ->get()
         );
     }

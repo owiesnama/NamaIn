@@ -5,9 +5,14 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
+import SalePointPicker from "@/Components/Pos/SalePointPicker.vue";
 
 const props = defineProps({
     storage: Object,
+    salePoints: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const form = useForm({
@@ -35,6 +40,13 @@ const submit = () => {
                 <p class="text-sm text-gray-500 dark:text-gray-400 mb-8">
                     {{ __('Register') }}: <span class="font-semibold text-gray-900 dark:text-white">{{ storage.name }}</span>
                 </p>
+
+                <SalePointPicker
+                    v-if="salePoints.length > 1"
+                    :sale-points="salePoints"
+                    :selected-id="storage.id"
+                    class="mb-6"
+                />
 
                 <form @submit.prevent="submit" class="space-y-6">
                     <div>
