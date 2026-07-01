@@ -205,7 +205,7 @@ class Transaction extends BaseModel
 
     public function scopeTotalValue(Builder $query): float|int|string
     {
-        return $query->sum(DB::raw('price * base_quantity'));
+        return $query->sum(DB::raw('price * quantity'));
     }
 
     public function scopeOfType(Builder $builder, string $type): Builder
