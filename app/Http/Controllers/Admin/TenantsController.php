@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Actions\Admin\CreateTenantAction;
 use App\Actions\Admin\DeleteTenantAction;
 use App\Actions\Admin\LogAdminAction;
 use App\Actions\Admin\UpdateTenantAction;
+use App\Actions\ProvisionTenantAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTenantRequest;
 use App\Http\Requests\UpdateTenantRequest;
@@ -37,7 +37,7 @@ class TenantsController extends Controller
         ]);
     }
 
-    public function store(StoreTenantRequest $request, CreateTenantAction $action): RedirectResponse
+    public function store(StoreTenantRequest $request, ProvisionTenantAction $action): RedirectResponse
     {
         $this->authorize('create', Tenant::class);
 

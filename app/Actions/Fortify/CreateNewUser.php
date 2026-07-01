@@ -2,21 +2,19 @@
 
 namespace App\Actions\Fortify;
 
-use App\Models\Role;
-use App\Models\Tenant;
+use App\Actions\ProvisionTenantAction;
 use App\Models\User;
-use App\Services\OnBoarding\DefaultRolesService;
-use App\Services\OnBoarding\SeedTenantDefaultsService;
-use Database\Seeders\PermissionSeeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
 use Laravel\Fortify\Contracts\CreatesNewUsers;
 
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules;
+
+    public function __construct(private ProvisionTenantAction $provisionTenant) {}
 
     /**
      * Validate and create a newly registered user.
@@ -33,35 +31,21 @@ class CreateNewUser implements CreatesNewUsers
             'tenant_slug' => ['required', 'string', 'max:255', 'unique:tenants,slug', 'alpha_dash:ascii'],
         ])->validate();
 
-        $tenant = Tenant::create([
-            'name' => $input['tenant_name'],
-            'slug' => Str::lower($input['tenant_slug']),
-        ]);
+        [$user, $tenant] = DB::transaction(function () use ($input) {
+            $user = User::create([
+                'name' => $input['name'],
+                'email' => $input['email'],
+                'password' => Hash::make($input['password']),
+            ]);
+
+            $tenant = $this->provisionTenant->handle($input['tenant_name'], $input['tenant_slug'], $user);
+
+            return [$user, $tenant];
+        });
 
         if (app()->isLocal()) {
             Process::run('herd link '.$tenant->slug.'.namain.test');
         }
-
-        $user = User::create([
-            'name' => $input['name'],
-            'email' => $input['email'],
-            'password' => Hash::make($input['password']),
-            'current_tenant_id' => $tenant->id,
-        ]);
-
-        (new PermissionSeeder)->run();
-        (new DefaultRolesService)->seedForTenant($tenant);
-        (new SeedTenantDefaultsService)->seedForTenant($tenant);
-
-        $ownerRole = Role::withoutGlobalScopes()
-            ->where('tenant_id', $tenant->id)
-            ->where('slug', 'owner')
-            ->firstOrFail();
-
-        $tenant->users()->attach($user->id, [
-            'role' => 'owner',
-            'role_id' => $ownerRole?->id,
-        ]);
 
         return $user;
     }
