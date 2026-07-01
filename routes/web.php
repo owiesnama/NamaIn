@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\BackupsController as AdminBackupsController;
 use App\Http\Controllers\Admin\BackupSettingsController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
+use App\Http\Controllers\Admin\MessagesController as AdminMessagesController;
 use App\Http\Controllers\Admin\TenantInvitationsController;
 use App\Http\Controllers\Admin\TenantOwnershipController;
 use App\Http\Controllers\Admin\TenantsController as AdminTenantsController;
@@ -88,6 +89,9 @@ Route::prefix('__admin')->name('admin.')->group(function () {
 
         Route::post('tenants/{tenant}/invitations', [TenantInvitationsController::class, 'store'])->name('tenants.invitations.store');
         Route::delete('tenants/{tenant}/invitations/{invitation}', [TenantInvitationsController::class, 'destroy'])->name('tenants.invitations.destroy');
+
+        Route::get('messages', [AdminMessagesController::class, 'index'])->name('messages.index');
+        Route::post('messages', [AdminMessagesController::class, 'store'])->name('messages.store');
 
         Route::resource('backups', AdminBackupsController::class)->only(['index', 'store', 'show', 'destroy']);
         Route::put('backups/settings', [BackupSettingsController::class, 'update'])->name('backups.settings');

@@ -105,6 +105,20 @@
                             <span class="text-sm">{{ __('Tenants') }}</span>
                         </Link>
 
+                        <!-- Messaging -->
+                        <Link
+                            :href="route('admin.messages.index')"
+                            class="flex items-center gap-x-3 px-3 py-2 rounded-lg transition-all duration-200"
+                            :class="route().current('admin.messages.*')
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'"
+                        >
+                            <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                            </svg>
+                            <span class="text-sm">{{ __('Messaging') }}</span>
+                        </Link>
+
                         <!-- Activity Log -->
                         <Link
                             :href="route('admin.activity')"
