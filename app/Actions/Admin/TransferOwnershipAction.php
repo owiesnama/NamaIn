@@ -5,6 +5,7 @@ namespace App\Actions\Admin;
 use App\Models\Role;
 use App\Models\Tenant;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class TransferOwnershipAction
@@ -28,16 +29,18 @@ class TransferOwnershipAction
             ->where('slug', 'manager')
             ->firstOrFail();
 
-        if ($currentOwner) {
-            $tenant->users()->updateExistingPivot($currentOwner->id, [
-                'role' => 'manager',
-                'role_id' => $managerRole->id,
-            ]);
-        }
+        DB::transaction(function () use ($tenant, $currentOwner, $newOwner, $ownerRole, $managerRole) {
+            if ($currentOwner) {
+                $tenant->users()->updateExistingPivot($currentOwner->id, [
+                    'role' => 'manager',
+                    'role_id' => $managerRole->id,
+                ]);
+            }
 
-        $tenant->users()->updateExistingPivot($newOwner->id, [
-            'role' => 'owner',
-            'role_id' => $ownerRole->id,
-        ]);
+            $tenant->users()->updateExistingPivot($newOwner->id, [
+                'role' => 'owner',
+                'role_id' => $ownerRole->id,
+            ]);
+        });
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\Storage;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class DeductStockFromInvoice
 {
@@ -16,24 +17,26 @@ class DeductStockFromInvoice
 
         abort_unless($actor instanceof User, 403, 'An authenticated user is required.');
 
-        $invoiceStatus = InvoiceStatus::Delivered;
+        DB::transaction(function () use ($invoice, $storage, $actor) {
+            $invoiceStatus = InvoiceStatus::Delivered;
 
-        $invoice->transactions->each(function (Transaction $transaction) use ($storage, &$invoiceStatus, $actor) {
-            $baseQuantity = (float) $transaction->base_quantity;
-            $availableQuantity = (float) $storage->quantityOf($transaction->product_id);
+            $invoice->transactions->each(function (Transaction $transaction) use ($storage, &$invoiceStatus, $actor) {
+                $baseQuantity = (float) $transaction->base_quantity;
+                $availableQuantity = (float) $storage->quantityOf($transaction->product_id);
 
-            if ($availableQuantity < $baseQuantity) {
-                $remaining = $baseQuantity - $availableQuantity;
-                $transaction->split($remaining);
-                $invoiceStatus = InvoiceStatus::PartiallyDelivered;
-            }
+                if ($availableQuantity < $baseQuantity) {
+                    $remaining = $baseQuantity - $availableQuantity;
+                    $transaction->split($remaining);
+                    $invoiceStatus = InvoiceStatus::PartiallyDelivered;
+                }
 
-            $transaction->for($storage)
-                ->deduct($storage);
+                $transaction->for($storage)
+                    ->deduct($storage);
 
-            $transaction->deliver($actor, $storage);
+                $transaction->deliver($actor, $storage);
+            });
+
+            $invoice->markAs($invoiceStatus);
         });
-
-        $invoice->markAs($invoiceStatus);
     }
 }
