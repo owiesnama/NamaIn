@@ -11,8 +11,6 @@ class SupplierAgingController extends Controller
 {
     public function index(Request $request, SupplierAgingQuery $query)
     {
-        abort_unless(auth()->user()->hasPermission('reports.view'), 403);
-
         $supplierId = $request->input('supplier') ? (int) $request->input('supplier') : null;
 
         return inertia('Reports/SupplierAging', [

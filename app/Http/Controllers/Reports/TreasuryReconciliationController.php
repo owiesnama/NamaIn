@@ -12,8 +12,6 @@ class TreasuryReconciliationController extends Controller
 {
     public function index(Request $request, TreasuryReconciliationQuery $query, DatePreset $datePreset)
     {
-        abort_unless(auth()->user()->hasPermission('reports.view'), 403);
-
         $dates = $datePreset->fromRequest($request);
 
         $accountId = $request->input('treasury_account') ? (int) $request->input('treasury_account') : null;

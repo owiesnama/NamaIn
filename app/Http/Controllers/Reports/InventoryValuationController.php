@@ -12,8 +12,6 @@ class InventoryValuationController extends Controller
 {
     public function index(Request $request, InventoryValuationQuery $query)
     {
-        abort_unless(auth()->user()->hasPermission('reports.view'), 403);
-
         $storageId = $request->input('storage') ? (int) $request->input('storage') : null;
         $categoryId = $request->input('category') ? (int) $request->input('category') : null;
 

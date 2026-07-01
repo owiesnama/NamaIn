@@ -11,8 +11,6 @@ class CustomerAgingController extends Controller
 {
     public function index(Request $request, CustomerAgingQuery $query)
     {
-        abort_unless(auth()->user()->hasPermission('reports.view'), 403);
-
         $customerId = $request->input('customer') ? (int) $request->input('customer') : null;
 
         return inertia('Reports/CustomerAging', [

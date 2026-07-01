@@ -16,9 +16,9 @@ class UserInvitationController extends Controller
     {
         $this->authorize('invite', User::class);
 
+        // InviteUserRequest already validates the role belongs to the current tenant.
         $tenant = app('currentTenant');
         $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
-        abort_unless($role->tenant_id === $tenant->id, 403);
 
         $action->handle($tenant, $request->email, $role, $request->user());
 

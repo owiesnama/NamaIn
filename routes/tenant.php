@@ -361,7 +361,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Filterable report pages with export and print support.
         */
-        Route::prefix('reports')->group(function () {
+        Route::prefix('reports')->middleware('can:reports.view')->group(function () {
             Route::get('/', [Reports\ReportsIndexController::class, 'index'])->name('reports.index');
             Route::get('/sales', [Reports\SalesReportController::class, 'index'])->name('reports.sales');
             Route::get('/purchases', [Reports\PurchaseReportController::class, 'index'])->name('reports.purchases');

@@ -23,6 +23,13 @@ test('unauthorized user receives 403 on reports index', function () {
     $response->assertForbidden();
 });
 
+test('a non-owner role holding the reports permission can view reports', function () {
+    actingAsTenantUser(role: 'manager');
+
+    $this->get(route('reports.index'))->assertOk();
+    $this->get(route('reports.sales'))->assertOk();
+});
+
 test('authorized user can view each report page', function () {
     actingAsTenantUser(role: 'owner');
 

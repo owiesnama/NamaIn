@@ -12,8 +12,6 @@ class SalesReportController extends Controller
 {
     public function index(Request $request, SalesReportQuery $query, DatePreset $datePreset)
     {
-        abort_unless(auth()->user()->hasPermission('reports.view'), 403);
-
         $dates = $datePreset->fromRequest($request);
 
         $groupBy = $request->input('group_by', 'day');
