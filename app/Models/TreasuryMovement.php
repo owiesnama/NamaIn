@@ -3,20 +3,11 @@
 namespace App\Models;
 
 use App\Enums\TreasuryMovementReason;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class TreasuryMovement extends Model
+class TreasuryMovement extends BaseModel
 {
-    use HasFactory;
-
-    protected static function booted(): void
-    {
-        static::unguard();
-    }
-
     protected function casts(): array
     {
         return [

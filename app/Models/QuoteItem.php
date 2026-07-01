@@ -2,19 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class QuoteItem extends Model
+class QuoteItem extends BaseModel
 {
-    use HasFactory;
-
-    protected static function booted(): void
-    {
-        static::unguard();
-    }
-
     protected $appends = ['line_total'];
 
     protected function casts(): array

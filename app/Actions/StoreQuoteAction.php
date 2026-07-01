@@ -21,6 +21,7 @@ class StoreQuoteAction
 
         $quote->items()->insert(
             array_map(fn ($item) => [
+                'tenant_id' => $quote->tenant_id,
                 'quote_id' => $quote->id,
                 'product_id' => $item['product_id'],
                 'unit_id' => $item['unit_id'] ?? null,

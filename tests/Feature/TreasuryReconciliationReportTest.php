@@ -22,6 +22,7 @@ test('the reconciliation report only lists movements of the current tenant', fun
     $otherTenant = Tenant::factory()->create();
     $foreignAccount = TreasuryAccount::factory()->create(['tenant_id' => $otherTenant->id]);
     TreasuryMovement::factory()->create([
+        'tenant_id' => $otherTenant->id,
         'treasury_account_id' => $foreignAccount->id,
         'movable_type' => TreasuryAccount::class,
         'movable_id' => $foreignAccount->id,
@@ -34,4 +35,8 @@ test('the reconciliation report only lists movements of the current tenant', fun
 
     expect($rows)->toHaveCount(1)
         ->and($rows[0]['account_name'])->toBe($ownAccount->name);
+
+    // The tenant scope now applies to treasury movements directly.
+    expect(TreasuryMovement::count())->toBe(1)
+        ->and(TreasuryMovement::withoutGlobalScopes()->count())->toBe(2);
 });
