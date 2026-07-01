@@ -169,11 +169,13 @@ class ProcessPosCheckoutAction
 
     private function replenish(Storage $salePoint, int $productId, int $quantityNeeded, User $actor): void
     {
+        $product = Product::findOrFail($productId);
+
         $source = $this->findReplenishmentSource
-            ->handle(Product::findOrFail($productId), $quantityNeeded);
+            ->handle($product, $quantityNeeded);
 
         if (! $source) {
-            throw new InsufficientStockException($productId, $salePoint);
+            throw new InsufficientStockException($product, $salePoint);
         }
 
         $transfer = StockTransfer::create([

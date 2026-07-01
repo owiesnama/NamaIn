@@ -2,7 +2,9 @@
 
 use App\Actions\Pos\FindReplenishmentSourceAction;
 use App\Actions\Pos\OpenPosSessionAction;
+use App\Actions\Pos\ProcessPosCheckoutAction;
 use App\Enums\StorageType;
+use App\Exceptions\InsufficientStockException;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Storage;
@@ -134,4 +136,20 @@ test('it only transfers the shortfall', function () {
     expect($this->warehouse->fresh()->quantityOf($this->product))->toBe(48);
     // Sale point should be 0
     expect($this->salePoint->fresh()->quantityOf($this->product))->toBe(0);
+});
+
+test('checkout throws a typed insufficient stock exception when no replenishment source exists', function () {
+    $unstocked = Product::factory()->create(['tenant_id' => $this->tenant->id]);
+
+    expect(fn () => app(ProcessPosCheckoutAction::class)->execute(
+        $this->session,
+        collect([
+            'items' => [['product_id' => $unstocked->id, 'quantity' => 5, 'price' => 100]],
+            'total' => 500,
+            'payment_method' => 'cash',
+        ]),
+        $this->cashier,
+        null,
+        true,
+    ))->toThrow(InsufficientStockException::class);
 });
