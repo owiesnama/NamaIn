@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\ChequeStatus;
 use App\Models\BackupSetting;
 use App\Models\Cheque;
 use App\Models\User;
@@ -14,12 +15,18 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Artisan::command('cheques:notify-for-due', function () {
-    $admins = User::whereIn('email', config('app.admins'));
-    $cheques = Cheque::where('due', '<', now()->subDay(config('cheques_notify_before_days', 3)));
+    $admins = User::whereIn('email', config('app.admins', []))->get();
+
+    // Runs without a tenant bound, so the tenant scope must be lifted explicitly.
+    $cheques = Cheque::withoutGlobalScopes()
+        ->whereIn('status', [ChequeStatus::Issued, ChequeStatus::Deposited])
+        ->where('due', '<=', now()->addDays(config('app.cheques_notify_before_days', 3)))
+        ->get();
+
     $admins->each(function ($admin) use ($cheques) {
         $cheques->each(fn ($cheque) => $admin->notify(new ChequeDueNotification($cheque)));
     });
-});
+})->purpose('Notify platform admins of cheques due within the configured window');
 
 Schedule::command('cheques:notify-for-due')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
