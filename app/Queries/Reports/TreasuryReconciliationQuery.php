@@ -32,8 +32,10 @@ class TreasuryReconciliationQuery
 
     private function buildData(Carbon $from, Carbon $to, ?int $accountId): array
     {
+        // TreasuryMovement carries no tenant_id; scope through the joined account.
         $query = TreasuryMovement::query()
             ->join('treasury_accounts', 'treasury_movements.treasury_account_id', '=', 'treasury_accounts.id')
+            ->where('treasury_accounts.tenant_id', app('currentTenant')->id)
             ->whereBetween('treasury_movements.occurred_at', [$from, $to])
             ->select(
                 'treasury_movements.*',

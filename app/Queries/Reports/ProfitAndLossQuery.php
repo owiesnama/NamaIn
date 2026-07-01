@@ -40,7 +40,7 @@ class ProfitAndLossQuery
             ->whereBetween('transactions.created_at', [$from, $to])
             ->select(
                 DB::raw("$dateFormat as period"),
-                DB::raw('SUM(transactions.price * transactions.quantity) as amount'),
+                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') as amount'),
             )
             ->groupBy('period')
             ->pluck('amount', 'period');
@@ -94,7 +94,7 @@ class ProfitAndLossQuery
         $revenue = (float) Transaction::delivered()
             ->forCustomer()
             ->whereBetween('transactions.created_at', [$from, $to])
-            ->sum(DB::raw('transactions.price * transactions.quantity'));
+            ->sum(DB::raw(Transaction::lineRevenueSql('transactions')));
 
         $cogs = (float) Transaction::delivered()
             ->forCustomer()

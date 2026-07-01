@@ -203,9 +203,20 @@ class Transaction extends BaseModel
         return $query->whereHas('invoice', fn ($q) => $q->where('invocable_type', Supplier::class));
     }
 
+    /**
+     * SQL expression for a line's revenue. Price is per sold unit, so it
+     * pairs with quantity, never base_quantity.
+     */
+    public static function lineRevenueSql(?string $table = null): string
+    {
+        $prefix = $table ? "{$table}." : '';
+
+        return "{$prefix}price * {$prefix}quantity";
+    }
+
     public function scopeTotalValue(Builder $query): float|int|string
     {
-        return $query->sum(DB::raw('price * quantity'));
+        return $query->sum(DB::raw(self::lineRevenueSql()));
     }
 
     public function scopeOfType(Builder $builder, string $type): Builder

@@ -32,6 +32,7 @@ class CustomerAgingQuery
     private function buildData(?int $customerId): array
     {
         $dateDiff = $this->dateDiff();
+        $outstanding = Invoice::outstandingBalanceSql('invoices');
 
         $query = Invoice::forCustomer()
             ->outstanding()
@@ -42,11 +43,11 @@ class CustomerAgingQuery
             ->select(
                 'customers.id as customer_id',
                 'customers.name as customer_name',
-                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 0 AND 30 THEN (invoices.total - invoices.discount) - invoices.paid_amount ELSE 0 END) as bucket_0_30"),
-                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 31 AND 60 THEN (invoices.total - invoices.discount) - invoices.paid_amount ELSE 0 END) as bucket_31_60"),
-                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 61 AND 90 THEN (invoices.total - invoices.discount) - invoices.paid_amount ELSE 0 END) as bucket_61_90"),
-                DB::raw("SUM(CASE WHEN $dateDiff > 90 THEN (invoices.total - invoices.discount) - invoices.paid_amount ELSE 0 END) as bucket_90_plus"),
-                DB::raw('SUM((invoices.total - invoices.discount) - invoices.paid_amount) as total'),
+                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 0 AND 30 THEN $outstanding ELSE 0 END) as bucket_0_30"),
+                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 31 AND 60 THEN $outstanding ELSE 0 END) as bucket_31_60"),
+                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 61 AND 90 THEN $outstanding ELSE 0 END) as bucket_61_90"),
+                DB::raw("SUM(CASE WHEN $dateDiff > 90 THEN $outstanding ELSE 0 END) as bucket_90_plus"),
+                DB::raw("SUM($outstanding) as total"),
             )
             ->groupBy('customers.id', 'customers.name')
             ->orderByDesc('total');

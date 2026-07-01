@@ -171,6 +171,16 @@ class Invoice extends BaseModel
     }
 
     /**
+     * SQL expression for an invoice's outstanding balance.
+     */
+    public static function outstandingBalanceSql(?string $table = null): string
+    {
+        $prefix = $table ? "{$table}." : '';
+
+        return "({$prefix}total - {$prefix}discount) - {$prefix}paid_amount";
+    }
+
+    /**
      * Filter invoices to delivered.
      */
     public function scopeDelivered(Builder $builder, ?Carbon $datetime = null): Builder

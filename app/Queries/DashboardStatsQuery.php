@@ -48,13 +48,13 @@ class DashboardStatsQuery
 
         $sales = Transaction::delivered(now()->subMonths(6))
             ->forCustomer()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM('.Transaction::lineRevenueSql().') as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
         $purchases = Transaction::delivered(now()->subMonths(6))
             ->forSupplier()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM('.Transaction::lineRevenueSql().') as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
@@ -107,7 +107,7 @@ class DashboardStatsQuery
     {
         return Cache::remember($this->cacheKey('outstanding_receivables'), $this->cacheTtl('hour'), fn () => Invoice::forCustomer()
             ->outstanding()
-            ->sum(DB::raw('(total - discount) - paid_amount'))
+            ->sum(DB::raw(Invoice::outstandingBalanceSql()))
         );
     }
 
@@ -134,7 +134,7 @@ class DashboardStatsQuery
     {
         return Cache::remember($this->cacheKey('outstanding_payables'), $this->cacheTtl('hour'), fn () => Invoice::forSupplier()
             ->outstanding()
-            ->sum(DB::raw('(total - discount) - paid_amount'))
+            ->sum(DB::raw(Invoice::outstandingBalanceSql()))
         );
     }
 
@@ -176,7 +176,7 @@ class DashboardStatsQuery
             ->forCustomer()
             ->forStorage($storageId)
             ->with('product')
-            ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(price * quantity) as total_revenue'))
+            ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM('.Transaction::lineRevenueSql().') as total_revenue'))
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
             ->limit($limit)
@@ -191,7 +191,7 @@ class DashboardStatsQuery
             ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
             ->join('customers', 'invoices.invocable_id', '=', 'customers.id')
             ->where('invoices.invocable_type', Customer::class)
-            ->select('customers.name', DB::raw('SUM(transactions.price * transactions.quantity) as total_revenue'))
+            ->select('customers.name', DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') as total_revenue'))
             ->groupBy('customers.id', 'customers.name')
             ->orderByDesc('total_revenue')
             ->limit(5)

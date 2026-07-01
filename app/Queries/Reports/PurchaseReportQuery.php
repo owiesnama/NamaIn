@@ -41,7 +41,7 @@ class PurchaseReportQuery
                 DB::raw("$dateFormat as period"),
                 DB::raw('COUNT(DISTINCT invoices.id) as invoice_count'),
                 DB::raw('SUM(transactions.quantity) as items_purchased'),
-                DB::raw('SUM(transactions.price * transactions.quantity) as total_cost'),
+                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') as total_cost'),
             )
             ->groupBy('period')
             ->orderBy('period')
@@ -64,7 +64,7 @@ class PurchaseReportQuery
             ->select(
                 DB::raw('COUNT(DISTINCT invoices.id) as invoice_count'),
                 DB::raw('SUM(transactions.quantity) as items_purchased'),
-                DB::raw('SUM(transactions.price * transactions.quantity) as total_cost'),
+                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') as total_cost'),
             )
             ->first();
 

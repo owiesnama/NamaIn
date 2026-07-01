@@ -14,15 +14,10 @@ class StatementQuery
             ->with('payments')
             ->get();
 
-        $payments = Payment::where(function ($query) use ($party) {
-            $query->whereHas('invoice', function ($query) use ($party) {
-                $query->where('invocable_id', $party->id)
-                    ->where('invocable_type', get_class($party));
-            })->orWhere(function ($query) use ($party) {
-                $query->where('payable_id', $party->id)
-                    ->where('payable_type', get_class($party));
-            });
-        })->whereBetween('paid_at', [$startDate, $endDate])->latest()->get();
+        $payments = Payment::forParty($party)
+            ->whereBetween('paid_at', [$startDate, $endDate])
+            ->latest()
+            ->get();
 
         $openingBalance = $party->calculateAccountBalance($startDate);
 
