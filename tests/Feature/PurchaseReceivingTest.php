@@ -39,7 +39,7 @@ test('it can receive goods for a purchase transaction', function () {
         'delivered' => false,
     ]);
 
-    app(ReceiveGoodsAction::class)->execute($transaction, $this->storage, 40, $this->owner);
+    app(ReceiveGoodsAction::class)->handle($transaction, $this->storage, 40, $this->owner);
 
     expect($transaction->fresh()->received_quantity)->toBe(40);
     expect($transaction->fresh()->remaining_quantity)->toBe(60);
@@ -58,7 +58,7 @@ test('it can fully receive a purchase transaction', function () {
         'delivered' => false,
     ]);
 
-    app(ReceiveGoodsAction::class)->execute($transaction, $this->storage, 100, $this->owner);
+    app(ReceiveGoodsAction::class)->handle($transaction, $this->storage, 100, $this->owner);
 
     expect($transaction->fresh()->received_quantity)->toBe(100);
     expect($transaction->fresh()->isFullyReceived())->toBeTrue();
@@ -75,6 +75,6 @@ test('it rejects over-receiving', function () {
         'base_quantity' => 100,
     ]);
 
-    expect(fn () => app(ReceiveGoodsAction::class)->execute($transaction, $this->storage, 110, $this->owner))
+    expect(fn () => app(ReceiveGoodsAction::class)->handle($transaction, $this->storage, 110, $this->owner))
         ->toThrow(DomainException::class);
 });

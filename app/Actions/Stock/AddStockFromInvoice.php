@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class AddStockFromInvoice
 {
-    public function execute(Invoice $invoice, Storage $storage, ?User $actor = null): void
+    public function handle(Invoice $invoice, Storage $storage, ?User $actor = null): void
     {
         $actor ??= auth()->user();
 

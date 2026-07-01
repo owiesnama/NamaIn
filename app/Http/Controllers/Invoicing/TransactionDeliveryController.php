@@ -21,7 +21,7 @@ class TransactionDeliveryController extends Controller
         $storage = Storage::findOrFail($request->storage_id);
 
         try {
-            $action->execute($transaction, auth()->user(), $storage);
+            $action->handle($transaction, auth()->user(), $storage);
         } catch (InsufficientStockException $e) {
             return back()->with('error', $e->getMessage());
         }

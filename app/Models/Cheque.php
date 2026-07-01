@@ -22,7 +22,7 @@ class Cheque extends BaseModel
      *
      * @var array<string>
      */
-    public $appends = ['is_credit', 'amount_formated', 'due_formatted'];
+    public $appends = ['is_credit', 'amount_formatted', 'due_formatted'];
 
     /**
      * @return array<string, string>
@@ -58,7 +58,7 @@ class Cheque extends BaseModel
     /**
      * The amount of this cheque formatted.
      */
-    public function getAmountFormatedAttribute(): string
+    public function getAmountFormattedAttribute(): string
     {
         return number_format($this->amount, 2).' '.(preference('currency', 'SDG'));
     }

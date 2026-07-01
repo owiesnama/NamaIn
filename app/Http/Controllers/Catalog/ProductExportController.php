@@ -9,7 +9,7 @@ class ProductExportController extends Controller
 {
     public function store(RequestExportAction $action)
     {
-        $action->execute('products', 'xlsx');
+        $action->handle('products', 'xlsx');
 
         return back()->with('flash', [
             'type' => 'export_queued',

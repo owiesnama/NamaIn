@@ -18,7 +18,7 @@ class StockAdditionController extends Controller
 
         $invoice = Invoice::with('transactions.product')->findOrFail($request->validated('invoice'));
 
-        $addStock->execute($invoice, $storage);
+        $addStock->handle($invoice, $storage);
 
         Cache::forget('low_stock_products');
 

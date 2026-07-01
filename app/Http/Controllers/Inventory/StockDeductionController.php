@@ -20,7 +20,7 @@ class StockDeductionController extends Controller
         $invoice = Invoice::with('transactions.product')->findOrFail($request->validated('invoice'));
 
         try {
-            $deductStock->execute($invoice, $storage);
+            $deductStock->handle($invoice, $storage);
         } catch (InsufficientStockException $e) {
             return back()->with('error', $e->getMessage());
         }

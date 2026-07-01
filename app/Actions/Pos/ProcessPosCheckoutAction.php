@@ -34,7 +34,7 @@ class ProcessPosCheckoutAction
         private TransferStockAction $executeStockTransfer,
     ) {}
 
-    public function execute(
+    public function handle(
         PosSession $session,
         Collection $data,
         User $actor,
@@ -127,7 +127,7 @@ class ProcessPosCheckoutAction
                     'delivered' => false,
                 ]);
 
-                $this->deliverAction->execute($transaction, $actor, $session->storage);
+                $this->deliverAction->handle($transaction, $actor, $session->storage);
             }
 
             $invoice->markAs(InvoiceStatus::Delivered);
@@ -194,6 +194,6 @@ class ProcessPosCheckoutAction
             'quantity' => $quantityNeeded,
         ]);
 
-        $this->executeStockTransfer->execute($transfer, $actor);
+        $this->executeStockTransfer->handle($transfer, $actor);
     }
 }

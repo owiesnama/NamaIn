@@ -44,7 +44,7 @@ beforeEach(function () {
     // Put stock in warehouse only
     $this->warehouse->addStock($this->product, 50, 'initial_stock', actor: $this->owner);
 
-    $this->session = app(OpenPosSessionAction::class)->execute($this->salePoint, 5000, $this->cashier);
+    $this->session = app(OpenPosSessionAction::class)->handle($this->salePoint, 5000, $this->cashier);
 });
 
 test('it finds replenishment source correctly', function () {
@@ -141,7 +141,7 @@ test('it only transfers the shortfall', function () {
 test('checkout throws a typed insufficient stock exception when no replenishment source exists', function () {
     $unstocked = Product::factory()->create(['tenant_id' => $this->tenant->id]);
 
-    expect(fn () => app(ProcessPosCheckoutAction::class)->execute(
+    expect(fn () => app(ProcessPosCheckoutAction::class)->handle(
         $this->session,
         collect([
             'items' => [['product_id' => $unstocked->id, 'quantity' => 5, 'price' => 100]],

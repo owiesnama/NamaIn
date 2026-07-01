@@ -10,7 +10,7 @@ use InvalidArgumentException;
 
 class TransferStockAction
 {
-    public function execute(StockTransfer $transfer, User $actor): void
+    public function handle(StockTransfer $transfer, User $actor): void
     {
         if ($transfer->from_storage_id === $transfer->to_storage_id) {
             throw new InvalidArgumentException('Source and destination storage cannot be the same.');

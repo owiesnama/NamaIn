@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\DB;
 class UpdateChequeStatusAction
 {
     public function __construct(
-        private ClearCheque $clearCheque,
+        private ClearChequeAction $clearCheque,
         private RecordTreasuryMovementAction $recordMovement,
     ) {}
 

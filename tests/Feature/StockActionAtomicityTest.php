@@ -55,7 +55,7 @@ test('deducting an invoice rolls back every line when one line has no stock at a
     $this->storage->addStock($this->stockedProduct, 10, 'initial_stock', actor: $this->owner);
     // otherProduct has no stock row anywhere, so its line throws mid-loop.
 
-    expect(fn () => app(DeductStockFromInvoice::class)->execute($this->invoice, $this->storage, $this->owner))
+    expect(fn () => app(DeductStockFromInvoice::class)->handle($this->invoice, $this->storage, $this->owner))
         ->toThrow(InsufficientStockException::class);
 
     expect($this->storage->fresh()->quantityOf($this->stockedProduct))->toBe(10)
@@ -67,7 +67,7 @@ test('deducting an invoice rolls back every line when one line has no stock at a
 test('adding an invoice rolls back every line when a later line fails', function () {
     $this->otherProduct->delete(); // deleted between invoicing and receiving
 
-    expect(fn () => app(AddStockFromInvoice::class)->execute($this->invoice->fresh(), $this->storage, $this->owner))
+    expect(fn () => app(AddStockFromInvoice::class)->handle($this->invoice->fresh(), $this->storage, $this->owner))
         ->toThrow(ModelNotFoundException::class);
 
     expect($this->storage->fresh()->quantityOf($this->stockedProduct))->toBe(0)

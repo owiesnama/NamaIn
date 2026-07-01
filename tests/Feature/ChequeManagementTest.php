@@ -69,7 +69,7 @@ test('can update status to Issued, Deposited, Returned, Cancelled', function ($s
         'status' => ChequeStatus::Drafted,
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => $status->value,
     ]);
 
@@ -94,7 +94,7 @@ test('updating status with null cleared_amount passes validation', function ($st
     ]);
 
     // Simulate exactly what the Inertia form sends — explicit nulls for optional fields
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => $status->value,
         'cleared_amount' => null,
         'treasury_account_id' => null,

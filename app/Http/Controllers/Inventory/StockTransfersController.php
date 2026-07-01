@@ -63,7 +63,7 @@ class StockTransfersController extends Controller
         });
 
         try {
-            $transferStock->execute($transfer, auth()->user());
+            $transferStock->handle($transfer, auth()->user());
         } catch (InsufficientStockException $e) {
             return redirect()->route('stock-transfers.show', $transfer)
                 ->with('error', $e->getMessage());

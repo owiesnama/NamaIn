@@ -39,7 +39,7 @@ class ExportController extends Controller
             'filters' => ['sometimes', 'array'],
         ]);
 
-        $exportLog = $action->execute(
+        $exportLog = $action->handle(
             $request->input('export_key'),
             $request->input('format', 'xlsx'),
             $request->input('filters', []),

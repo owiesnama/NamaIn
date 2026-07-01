@@ -35,7 +35,7 @@ test('it can deliver a transaction and track it', function () {
         'delivered' => false,
     ]);
 
-    app(DeliverTransactionAction::class)->execute($transaction, $this->owner);
+    app(DeliverTransactionAction::class)->handle($transaction, $this->owner);
 
     $transaction->refresh();
     expect($transaction->delivered)->toBeTrue();
@@ -67,7 +67,7 @@ test('it can deliver from a different storage than assigned', function () {
         'delivered' => false,
     ]);
 
-    app(DeliverTransactionAction::class)->execute($transaction, $this->owner, $altStorage);
+    app(DeliverTransactionAction::class)->handle($transaction, $this->owner, $altStorage);
 
     $transaction->refresh();
     expect($transaction->fulfilled_from_storage_id)->toBe($altStorage->id);

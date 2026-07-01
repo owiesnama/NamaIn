@@ -16,7 +16,7 @@ class PosCheckoutController extends Controller
         $session = PosSession::findOrFail($request->session_id);
 
         try {
-            $invoice = $action->execute($session,
+            $invoice = $action->handle($session,
                 collect($request->validated()),
 
                 $request->user(),

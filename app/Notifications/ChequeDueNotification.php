@@ -35,7 +35,7 @@ class ChequeDueNotification extends Notification implements ShouldQueue
             ->line("Reference Number: #{$this->cheque->reference_number}")
             ->line("Direction: {$direction}")
             ->line("Payee: {$this->cheque->payee->name}")
-            ->line("Amount: {$this->cheque->amount_formated}")
+            ->line("Amount: {$this->cheque->amount_formatted}")
             ->line("Due Date: {$this->cheque->due->format('d-m-Y')}")
             ->line('Current Status: '.__(str($this->cheque->status->value)->title()->replace('_', ' ')))
             ->action('View Cheque', route('cheques.index', ['search' => $this->cheque->reference_number]))

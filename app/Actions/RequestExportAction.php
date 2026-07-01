@@ -7,7 +7,7 @@ use App\Models\ExportLog;
 
 class RequestExportAction
 {
-    public function execute(string $exportKey, string $format, array $filters = []): ExportLog
+    public function handle(string $exportKey, string $format, array $filters = []): ExportLog
     {
         $exportLog = ExportLog::create([
             'user_id' => auth()->id(),

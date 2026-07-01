@@ -12,7 +12,7 @@ use App\Models\Cheque;
 use App\Models\TreasuryAccount;
 use Illuminate\Support\Facades\DB;
 
-class ClearCheque
+class ClearChequeAction
 {
     public function __construct(
         private RecordPaymentAction $recordPayment,

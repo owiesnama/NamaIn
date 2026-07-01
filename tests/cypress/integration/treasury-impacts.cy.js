@@ -314,7 +314,7 @@ describe('Cheque clearing impacts treasury', () => {
             // Now clear the cheque — debits clearing, credits bank
             cy.php(`
                 $cheque = App\\Models\\Cheque::find(${result.chequeId});
-                app(App\\Actions\\ClearCheque::class)->handle($cheque);
+                app(App\\Actions\\ClearChequeAction::class)->handle($cheque);
 
                 $clearingAccount = App\\Models\\TreasuryAccount::find(${result.clearingAccountId});
                 $bankAccount = App\\Models\\TreasuryAccount::find(${bankAccountId});
@@ -363,7 +363,7 @@ describe('Cheque clearing impacts treasury', () => {
         `).then((result) => {
             cy.php(`
                 $cheque = App\\Models\\Cheque::find(${result.chequeId});
-                app(App\\Actions\\ClearCheque::class)->handle($cheque);
+                app(App\\Actions\\ClearChequeAction::class)->handle($cheque);
 
                 $bankAccount = App\\Models\\TreasuryAccount::find(${bankAccountId});
 

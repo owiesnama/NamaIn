@@ -45,7 +45,7 @@ test('clearing a credit cheque with invoice records payment on that invoice', fu
         'reference_number' => 'CHQ-1',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -80,7 +80,7 @@ test('clearing a debit cheque with invoice records payment on that invoice', fun
         'reference_number' => 'CHQ-2',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -102,7 +102,7 @@ test('clearing a credit cheque without invoice creates a direct customer payment
         'reference_number' => 'CHQ-3',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -135,7 +135,7 @@ test('clearing a debit cheque without invoice creates a direct supplier payment'
         'reference_number' => 'CHQ-4',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -166,7 +166,7 @@ test('partially clearing a cheque records cleared_amount, not full amount', func
         'reference_number' => 'CHQ-5',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::PartiallyCleared->value,
         'cleared_amount' => 400,
     ]);
@@ -198,7 +198,7 @@ test('clearing a partially cleared cheque again records the remaining amount', f
         'reference_number' => 'CHQ-6',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 

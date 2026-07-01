@@ -284,7 +284,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::resource('/payments', PaymentsController::class);
         Route::resource('/cheques', ChequesController::class);
         Route::get('/payee-invoices', [ChequePayeeInvoiceController::class, 'index'])->name('cheques.payee-invoices');
-        Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.updateStatus');
+        Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.update-status');
 
         /*
         |--------------------------------------------------------------------------

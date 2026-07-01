@@ -14,7 +14,7 @@ class PosPreflightController extends Controller
         $this->authorize('create', PosSession::class);
         $session = PosSession::findOrFail($request->session_id);
 
-        $result = $preflight->execute($session, $request->items);
+        $result = $preflight->handle($session, $request->items);
 
         return response()->json($result);
     }

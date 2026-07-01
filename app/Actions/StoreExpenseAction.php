@@ -10,7 +10,7 @@ use App\Models\TreasuryAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class StoreExpense
+class StoreExpenseAction
 {
     public function __construct(
         private SyncCategoriesAction $syncCategories,
