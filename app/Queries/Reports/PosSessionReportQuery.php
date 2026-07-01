@@ -37,21 +37,29 @@ class PosSessionReportQuery
             ->withCount('invoices')
             ->latest('pos_sessions.created_at')
             ->get()
-            ->map(fn (PosSession $session) => [
-                'id' => $session->id,
-                'operator' => $session->openedBy?->name,
-                'storage' => $session->storage?->name,
-                'opened_at' => $session->created_at->toDateTimeString(),
-                'closed_at' => $session->closed_at?->toDateTimeString(),
-                'opening_float' => $session->opening_float,
-                'cash_sales' => (int) ($session->invoices_sum_total ?? 0),
-                'expected_close' => $session->opening_float + (int) ($session->invoices_sum_total ?? 0),
-                'closing_float' => $session->closing_float,
-                'variance' => $session->closing_float
-                    ? $session->closing_float - ($session->opening_float + (int) ($session->invoices_sum_total ?? 0))
-                    : null,
-                'invoice_count' => $session->invoices_count,
-            ])
+            ->map(function (PosSession $session) {
+                // Session floats are stored in cents; the report is in major units like invoice totals.
+                $openingFloat = $session->opening_float / 100;
+                $closingFloat = $session->closing_float !== null ? $session->closing_float / 100 : null;
+                $cashSales = round((float) ($session->invoices_sum_total ?? 0), 2);
+                $expectedClose = round($openingFloat + $cashSales, 2);
+
+                return [
+                    'id' => $session->id,
+                    'operator' => $session->openedBy?->name,
+                    'storage' => $session->storage?->name,
+                    'opened_at' => $session->created_at->toDateTimeString(),
+                    'closed_at' => $session->closed_at?->toDateTimeString(),
+                    'opening_float' => $openingFloat,
+                    'cash_sales' => $cashSales,
+                    'expected_close' => $expectedClose,
+                    'closing_float' => $closingFloat,
+                    'variance' => $closingFloat !== null
+                        ? round($closingFloat - $expectedClose, 2)
+                        : null,
+                    'invoice_count' => $session->invoices_count,
+                ];
+            })
             ->all();
     }
 
@@ -65,18 +73,21 @@ class PosSessionReportQuery
             )
             ->first();
 
-        $cashSales = PosSession::whereBetween('pos_sessions.created_at', [$from, $to])
+        // Session floats are stored in cents; the report is in major units like invoice totals.
+        $cashSales = round((float) PosSession::whereBetween('pos_sessions.created_at', [$from, $to])
             ->withSum(['invoices' => fn ($q) => $q->where('payment_method', 'cash')], 'total')
             ->get()
-            ->sum('invoices_sum_total');
+            ->sum('invoices_sum_total'), 2);
+
+        $totalOpening = ($result->total_opening ?? 0) / 100;
+        $totalClosing = ($result->total_closing ?? 0) / 100;
 
         return [
             'session_count' => (int) ($result->session_count ?? 0),
-            'total_opening' => (int) ($result->total_opening ?? 0),
-            'total_cash_sales' => (int) $cashSales,
-            'total_closing' => (int) ($result->total_closing ?? 0),
-            'total_variance' => (int) ($result->total_closing ?? 0)
-                - ((int) ($result->total_opening ?? 0) + (int) $cashSales),
+            'total_opening' => $totalOpening,
+            'total_cash_sales' => $cashSales,
+            'total_closing' => $totalClosing,
+            'total_variance' => round($totalClosing - ($totalOpening + $cashSales), 2),
         ];
     }
 }
