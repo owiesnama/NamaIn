@@ -6,27 +6,22 @@ use App\Models\TreasuryAccount;
 use App\Models\TreasuryMovement;
 use App\ValueObjects\Money;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class TreasuryReconciliationQuery
+class TreasuryReconciliationQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(Carbon $from, Carbon $to, ?int $accountId = null): array
     {
-        return Cache::remember(
-            $this->cacheKey("treasury_data_{$from->toDateString()}_{$to->toDateString()}_{$accountId}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "treasury_data_{$from->toDateString()}_{$to->toDateString()}_{$accountId}",
             fn () => $this->buildData($from, $to, $accountId),
         );
     }
 
     public function summary(Carbon $from, Carbon $to, ?int $accountId = null): array
     {
-        return Cache::remember(
-            $this->cacheKey("treasury_summary_{$from->toDateString()}_{$to->toDateString()}_{$accountId}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "treasury_summary_{$from->toDateString()}_{$to->toDateString()}_{$accountId}",
             fn () => $this->buildSummary($from, $to, $accountId),
         );
     }

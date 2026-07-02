@@ -4,27 +4,22 @@ namespace App\Queries\Reports;
 
 use App\Models\PosSession;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class PosSessionReportQuery
+class PosSessionReportQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pos_sessions_data_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pos_sessions_data_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildData($from, $to),
         );
     }
 
     public function summary(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pos_sessions_summary_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pos_sessions_summary_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildSummary($from, $to),
         );
     }

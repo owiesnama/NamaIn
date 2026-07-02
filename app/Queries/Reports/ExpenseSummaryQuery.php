@@ -5,27 +5,22 @@ namespace App\Queries\Reports;
 use App\Enums\ExpenseStatus;
 use App\Models\Expense;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class ExpenseSummaryQuery
+class ExpenseSummaryQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("expense_summary_data_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "expense_summary_data_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildData($from, $to),
         );
     }
 
     public function summary(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("expense_summary_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "expense_summary_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildSummary($from, $to),
         );
     }
@@ -40,7 +35,7 @@ class ExpenseSummaryQuery
             ->leftJoin('categories', 'categorizables.category_id', '=', 'categories.id')
             ->where('expenses.status', ExpenseStatus::Approved)
             ->whereBetween('expenses.expensed_at', [$from, $to])
-            ->where('expenses.tenant_id', app()->has('currentTenant') ? app('currentTenant')->id : 0)
+            ->where('expenses.tenant_id', $this->tenantId())
             ->whereNull('expenses.deleted_at')
             ->select(
                 'categories.id as category_id',

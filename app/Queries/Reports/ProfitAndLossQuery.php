@@ -6,27 +6,22 @@ use App\Enums\ExpenseStatus;
 use App\Models\Expense;
 use App\Models\Transaction;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class ProfitAndLossQuery
+class ProfitAndLossQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pnl_data_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pnl_data_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildData($from, $to),
         );
     }
 
     public function summary(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pnl_summary_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pnl_summary_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildSummary($from, $to),
         );
     }
