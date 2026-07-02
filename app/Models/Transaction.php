@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,6 +41,8 @@ class Transaction extends BaseModel
             'delivered' => 'boolean',
             'created_at' => 'datetime',
             'delivered_at' => 'datetime',
+            'price' => MoneyCast::class,
+            'unit_cost' => MoneyCast::class,
         ];
     }
 
@@ -216,7 +219,7 @@ class Transaction extends BaseModel
 
     public function scopeTotalValue(Builder $query): float|int|string
     {
-        return $query->sum(DB::raw(self::lineRevenueSql()));
+        return $query->sum(DB::raw(self::lineRevenueSql())) / 100;
     }
 
     public function scopeOfType(Builder $builder, string $type): Builder

@@ -140,7 +140,7 @@ class PosSessionController extends Controller
         return [
             'id' => $product->id,
             'name' => $product->name,
-            'price' => $product->price / 100,
+            'price' => $product->price,
             'sale_point_qty' => (int) ($product->sale_point_qty ?? 0),
             'replenishment' => $replenishment[$product->id] ?? null,
             'units' => $product->units,

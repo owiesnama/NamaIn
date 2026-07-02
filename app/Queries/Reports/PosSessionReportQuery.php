@@ -38,10 +38,10 @@ class PosSessionReportQuery
             ->latest('pos_sessions.created_at')
             ->get()
             ->map(function (PosSession $session) {
-                // Session floats are stored in cents; the report is in major units like invoice totals.
+                // Floats and invoice totals are stored in minor units; the report is in major units.
                 $openingFloat = $session->opening_float / 100;
                 $closingFloat = $session->closing_float !== null ? $session->closing_float / 100 : null;
-                $cashSales = round((float) ($session->invoices_sum_total ?? 0), 2);
+                $cashSales = ((int) ($session->invoices_sum_total ?? 0)) / 100;
                 $expectedClose = round($openingFloat + $cashSales, 2);
 
                 return [
@@ -73,11 +73,11 @@ class PosSessionReportQuery
             )
             ->first();
 
-        // Session floats are stored in cents; the report is in major units like invoice totals.
-        $cashSales = round((float) PosSession::whereBetween('pos_sessions.created_at', [$from, $to])
+        // Floats and invoice totals are stored in minor units; the report is in major units.
+        $cashSales = ((int) PosSession::whereBetween('pos_sessions.created_at', [$from, $to])
             ->withSum(['invoices' => fn ($q) => $q->where('payment_method', 'cash')], 'total')
             ->get()
-            ->sum('invoices_sum_total'), 2);
+            ->sum('invoices_sum_total')) / 100;
 
         $totalOpening = ($result->total_opening ?? 0) / 100;
         $totalClosing = ($result->total_closing ?? 0) / 100;

@@ -40,7 +40,7 @@ class ProfitAndLossQuery
             ->whereBetween('transactions.created_at', [$from, $to])
             ->select(
                 DB::raw("$dateFormat as period"),
-                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') as amount'),
+                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') / 100.0 as amount'),
             )
             ->groupBy('period')
             ->pluck('amount', 'period');
@@ -50,7 +50,7 @@ class ProfitAndLossQuery
             ->whereBetween('transactions.created_at', [$from, $to])
             ->select(
                 DB::raw("$dateFormat as period"),
-                DB::raw('SUM(transactions.base_quantity * COALESCE(transactions.unit_cost, 0)) as amount'),
+                DB::raw('SUM(transactions.base_quantity * COALESCE(transactions.unit_cost, 0)) / 100.0 as amount'),
             )
             ->groupBy('period')
             ->pluck('amount', 'period');
@@ -94,16 +94,16 @@ class ProfitAndLossQuery
         $revenue = (float) Transaction::delivered()
             ->forCustomer()
             ->whereBetween('transactions.created_at', [$from, $to])
-            ->sum(DB::raw(Transaction::lineRevenueSql('transactions')));
+            ->sum(DB::raw(Transaction::lineRevenueSql('transactions'))) / 100;
 
         $cogs = (float) Transaction::delivered()
             ->forCustomer()
             ->whereBetween('transactions.created_at', [$from, $to])
-            ->sum(DB::raw('transactions.base_quantity * COALESCE(transactions.unit_cost, 0)'));
+            ->sum(DB::raw('transactions.base_quantity * COALESCE(transactions.unit_cost, 0)')) / 100;
 
         $expenses = (float) Expense::where('status', ExpenseStatus::Approved)
             ->whereBetween('expensed_at', [$from, $to])
-            ->sum('amount');
+            ->sum('amount') / 100;
 
         $grossProfit = $revenue - $cogs;
         $netProfit = $grossProfit - $expenses;

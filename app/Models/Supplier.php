@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\HasAccountBalance;
 use App\Traits\HasPaymentHistory;
 use App\Traits\WithTrashScope;
@@ -31,8 +32,8 @@ class Supplier extends BaseModel
     protected function casts(): array
     {
         return [
-            'opening_debit' => 'decimal:2',
-            'opening_credit' => 'decimal:2',
+            'opening_debit' => MoneyCast::class,
+            'opening_credit' => MoneyCast::class,
         ];
     }
 

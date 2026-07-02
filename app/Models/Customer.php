@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\PaymentStatus;
 use App\Traits\HasAccountBalance;
 use App\Traits\HasPaymentHistory;
@@ -35,9 +36,9 @@ class Customer extends BaseModel
     protected function casts(): array
     {
         return [
-            'credit_limit' => 'decimal:2',
-            'opening_debit' => 'decimal:2',
-            'opening_credit' => 'decimal:2',
+            'credit_limit' => MoneyCast::class,
+            'opening_debit' => MoneyCast::class,
+            'opening_credit' => MoneyCast::class,
             'is_system' => 'boolean',
         ];
     }

@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Supplier;
 use App\Models\TreasuryAccount;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -57,7 +58,7 @@ class RecordPaymentAction
 
             if (isset($options['treasury_account_id'])) {
                 $account = TreasuryAccount::findOrFail($options['treasury_account_id']);
-                $amountInCents = (int) round($amount * 100);
+                $amountInCents = Money::fromMajor($amount)->minor();
 
                 $reason = $options['movement_reason']
                     ?? ($direction === PaymentDirection::In

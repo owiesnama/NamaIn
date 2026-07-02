@@ -22,7 +22,7 @@ test('can create customer with opening debit and credit', function () {
     $response->assertRedirect();
     $this->assertDatabaseHas('customers', [
         'name' => 'John Doe',
-        'opening_debit' => 500.50,
+        'opening_debit' => 50050,
         'opening_credit' => 0,
     ]);
 
@@ -77,7 +77,7 @@ test('can create supplier with opening debit and credit', function () {
     $response->assertRedirect();
     $this->assertDatabaseHas('suppliers', [
         'name' => 'Jane Supplier',
-        'opening_credit' => 750.25,
+        'opening_credit' => 75025,
     ]);
 
     $supplier = Supplier::where('name', 'Jane Supplier')->first();

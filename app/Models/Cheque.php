@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\ChequeStatus;
 use App\Enums\ChequeType;
 use App\Filters\Filters;
@@ -33,6 +34,8 @@ class Cheque extends BaseModel
             'due' => 'datetime',
             'status' => ChequeStatus::class,
             'type' => ChequeType::class,
+            'amount' => MoneyCast::class,
+            'cleared_amount' => MoneyCast::class,
         ];
     }
 

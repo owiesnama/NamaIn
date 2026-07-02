@@ -59,7 +59,7 @@ class StorageShowQuery
             ->where('stocks.storage_id', $this->storage->id)
             ->where('stocks.quantity', '>', 0)
             ->join('products', 'stocks.product_id', '=', 'products.id')
-            ->selectRaw('SUM(stocks.quantity * COALESCE(products.cost, 0)) as total')
+            ->selectRaw('SUM(stocks.quantity * COALESCE(products.cost, 0)) / 100.0 as total')
             ->value('total') ?? 0;
     }
 

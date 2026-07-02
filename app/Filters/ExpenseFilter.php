@@ -2,6 +2,8 @@
 
 namespace App\Filters;
 
+use App\ValueObjects\Money;
+
 class ExpenseFilter extends Filters
 {
     protected $filters = [
@@ -42,12 +44,12 @@ class ExpenseFilter extends Filters
 
     public function min_amount($amount)
     {
-        return $this->builder->where('amount', '>=', $amount);
+        return $this->builder->where('amount', '>=', Money::fromMajor($amount)->minor());
     }
 
     public function max_amount($amount)
     {
-        return $this->builder->where('amount', '<=', $amount);
+        return $this->builder->where('amount', '<=', Money::fromMajor($amount)->minor());
     }
 
     public function created_by($userId)

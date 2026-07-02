@@ -216,16 +216,18 @@ test('preserves precision and rounds once, instead of truncating mid-calculation
     $storage = Storage::factory()->create();
     $product = Product::factory()->create(['cost' => 0]);
 
-    // 1@10, 1@11, 1@11 → true average = 32 / 3 = 10.6667 → rounds to 11.
-    // An implementation that truncated the 10.5 intermediate to 10 would land on
-    // (2*10 + 11) / 3 = 10.33 → 10, so asserting 11 proves precision is preserved.
+    // 1@10, 1@11, 1@11 → true average = 32 / 3 = 10.6667 → rounds once, at the
+    // end, to the nearest cent: 1066.67 cents → 1067 (10.67). An implementation
+    // that truncated intermediates mid-calculation would land on 1066 → 10.66,
+    // so asserting the exact cent value proves precision is preserved.
     deliverPurchase($product, $storage, baseQuantity: 1, unitCost: 10);
     deliverPurchase($product, $storage, baseQuantity: 1, unitCost: 11);
     deliverPurchase($product, $storage, baseQuantity: 1, unitCost: 11);
 
     $product->recalculateAverageCost();
 
-    expect((int) $product->average_cost)->toBe(11);
+    expect($product->average_cost)->toBe(10.67);
+    $this->assertDatabaseHas('products', ['id' => $product->id, 'average_cost' => 1067]);
 });
 
 test('keeps the average and COGS on the same base-unit basis under unit conversion', function () {

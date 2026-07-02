@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Traits\WithTrashScope;
@@ -60,7 +61,7 @@ class Payment extends BaseModel
             'payment_method' => PaymentMethod::class,
             'direction' => PaymentDirection::class,
             'paid_at' => 'datetime',
-            'amount' => 'decimal:2',
+            'amount' => MoneyCast::class,
             'metadata' => 'json',
         ];
     }

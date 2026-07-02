@@ -324,7 +324,7 @@ test('can record a customer advance via POST', function () {
     $response->assertRedirect();
     $this->assertDatabaseHas(CustomerAdvance::class, [
         'customer_id' => $customer->id,
-        'amount' => 500,
+        'amount' => 50000,
     ]);
 });
 

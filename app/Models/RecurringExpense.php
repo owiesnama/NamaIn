@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -19,7 +20,7 @@ class RecurringExpense extends BaseModel
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
+            'amount' => MoneyCast::class,
             'starts_at' => 'date',
             'ends_at' => 'date',
             'last_generated_at' => 'datetime',

@@ -43,11 +43,11 @@ class CustomerAgingQuery
             ->select(
                 'customers.id as customer_id',
                 'customers.name as customer_name',
-                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 0 AND 30 THEN $outstanding ELSE 0 END) as bucket_0_30"),
-                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 31 AND 60 THEN $outstanding ELSE 0 END) as bucket_31_60"),
-                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 61 AND 90 THEN $outstanding ELSE 0 END) as bucket_61_90"),
-                DB::raw("SUM(CASE WHEN $dateDiff > 90 THEN $outstanding ELSE 0 END) as bucket_90_plus"),
-                DB::raw("SUM($outstanding) as total"),
+                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 0 AND 30 THEN $outstanding ELSE 0 END) / 100.0 as bucket_0_30"),
+                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 31 AND 60 THEN $outstanding ELSE 0 END) / 100.0 as bucket_31_60"),
+                DB::raw("SUM(CASE WHEN $dateDiff BETWEEN 61 AND 90 THEN $outstanding ELSE 0 END) / 100.0 as bucket_61_90"),
+                DB::raw("SUM(CASE WHEN $dateDiff > 90 THEN $outstanding ELSE 0 END) / 100.0 as bucket_90_plus"),
+                DB::raw("SUM($outstanding) / 100.0 as total"),
             )
             ->groupBy('customers.id', 'customers.name')
             ->orderByDesc('total');

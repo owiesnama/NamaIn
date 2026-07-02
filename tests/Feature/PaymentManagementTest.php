@@ -97,7 +97,7 @@ test('can record cash payment without extra fields', function () {
 
     $response->assertRedirect(route('payments.index'));
     $this->assertDatabaseHas('payments', [
-        'amount' => 100,
+        'amount' => 10000,
         'payment_method' => 'cash',
         'payable_id' => $customer->id,
     ]);
@@ -125,7 +125,7 @@ test('can record bank transfer with bank name and receipt', function () {
 
     $response->assertRedirect(route('payments.index'));
 
-    $payment = Payment::where('amount', 250)->first();
+    $payment = Payment::where('amount', 25000)->first();
     expect($payment->metadata)->toHaveKey('bank_name', 'Palestinian Bank');
     expect($payment->receipt_path)->not->toBeNull();
 
@@ -150,12 +150,12 @@ test('can record cheque payment and automated cheque creation', function () {
     $response->assertRedirect(route('payments.index'));
 
     $this->assertDatabaseHas('payments', [
-        'amount' => 500,
+        'amount' => 50000,
         'payment_method' => 'cheque',
     ]);
 
     $this->assertDatabaseHas('cheques', [
-        'amount' => 500,
+        'amount' => 50000,
         'bank_id' => $this->bank->id,
         'reference_number' => 'CHQ-123',
         'chequeable_id' => $customer->id,
@@ -183,7 +183,7 @@ test('can record cheque payment with a new bank name', function () {
 
     $bank = Bank::where('name', 'New National Bank')->first();
     $this->assertDatabaseHas('cheques', [
-        'amount' => 750,
+        'amount' => 75000,
         'bank_id' => $bank->id,
         'reference_number' => 'CHQ-NEW-001',
     ]);
@@ -238,7 +238,7 @@ test('can record direct payment for customer', function () {
     $this->assertDatabaseHas('payments', [
         'payable_id' => $customer->id,
         'payable_type' => Customer::class,
-        'amount' => 500,
+        'amount' => 50000,
         'invoice_id' => null,
     ]);
 
@@ -263,7 +263,7 @@ test('can record direct payment for supplier', function () {
     $this->assertDatabaseHas('payments', [
         'payable_id' => $supplier->id,
         'payable_type' => Supplier::class,
-        'amount' => 1000,
+        'amount' => 100000,
         'invoice_id' => null,
     ]);
 

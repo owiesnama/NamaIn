@@ -41,7 +41,7 @@ class SalesReportQuery
                 DB::raw("$dateFormat as period"),
                 DB::raw('COUNT(DISTINCT invoices.id) as invoice_count'),
                 DB::raw('SUM(transactions.quantity) as items_sold'),
-                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') as revenue'),
+                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') / 100.0 as revenue'),
             )
             ->groupBy('period')
             ->orderBy('period')
@@ -67,7 +67,7 @@ class SalesReportQuery
             ->select(
                 DB::raw('COUNT(DISTINCT invoices.id) as invoice_count'),
                 DB::raw('SUM(transactions.quantity) as items_sold'),
-                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') as revenue'),
+                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') / 100.0 as revenue'),
             )
             ->first();
 

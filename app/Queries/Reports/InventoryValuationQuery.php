@@ -47,8 +47,8 @@ class InventoryValuationQuery
                 'products.name as product_name',
                 'storages.name as storage_name',
                 'stocks.quantity',
-                DB::raw('COALESCE(products.average_cost, products.cost, 0) as average_cost'),
-                DB::raw('stocks.quantity * COALESCE(products.average_cost, products.cost, 0) as total_value'),
+                DB::raw('COALESCE(products.average_cost, products.cost, 0) / 100.0 as average_cost'),
+                DB::raw('stocks.quantity * COALESCE(products.average_cost, products.cost, 0) / 100.0 as total_value'),
             );
 
         if ($storageId) {

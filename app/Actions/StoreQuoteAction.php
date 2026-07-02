@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\Quote;
+use App\ValueObjects\Money;
 
 class StoreQuoteAction
 {
@@ -26,7 +27,7 @@ class StoreQuoteAction
                 'product_id' => $item['product_id'],
                 'unit_id' => $item['unit_id'] ?? null,
                 'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
+                'unit_price' => Money::fromMajor($item['unit_price'])->minor(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ], $data['items'])

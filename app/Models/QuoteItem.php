@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class QuoteItem extends BaseModel
@@ -11,7 +12,7 @@ class QuoteItem extends BaseModel
     protected function casts(): array
     {
         return [
-            'unit_price' => 'decimal:2',
+            'unit_price' => MoneyCast::class,
         ];
     }
 

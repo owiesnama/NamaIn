@@ -76,14 +76,14 @@ test('it can store a sale with cash payment', function () {
     $this->assertDatabaseHas('invoices', [
         'invocable_id' => $customer->id,
         'invocable_type' => Customer::class,
-        'total' => 1000,
-        'discount' => 100,
+        'total' => 100000,
+        'discount' => 10000,
     ]);
 
     $invoice = Invoice::where('invocable_id', $customer->id)->first();
     $this->assertDatabaseHas('payments', [
         'invoice_id' => $invoice->id,
-        'amount' => 900,
+        'amount' => 90000,
         'payment_method' => PaymentMethod::Cash,
         'reference' => 'CASH-001',
     ]);
@@ -160,7 +160,7 @@ test('it can store a sale with initial payment', function () {
     $invoice = Invoice::where('invocable_id', $customer->id)->first();
     $this->assertDatabaseHas('payments', [
         'invoice_id' => $invoice->id,
-        'amount' => 300,
+        'amount' => 30000,
         'payment_method' => PaymentMethod::BankTransfer,
         'reference' => 'TRANS-001',
         'notes' => 'Some notes',

@@ -33,8 +33,8 @@ class PaymentIndexQuery
         $baseQuery = $this->baseQuery($filter);
 
         return [
-            'total_in' => (clone $baseQuery)->where('direction', PaymentDirection::In->value)->sum('amount'),
-            'total_out' => (clone $baseQuery)->where('direction', PaymentDirection::Out->value)->sum('amount'),
+            'total_in' => (clone $baseQuery)->where('direction', PaymentDirection::In->value)->sum('amount') / 100,
+            'total_out' => (clone $baseQuery)->where('direction', PaymentDirection::Out->value)->sum('amount') / 100,
         ];
     }
 

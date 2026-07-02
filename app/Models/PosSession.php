@@ -41,10 +41,10 @@ class PosSession extends BaseModel
 
     public function cashSalesTotal(): int
     {
-        // Invoice totals are stored in major units; session floats are stored in cents.
-        return (int) round($this->invoices()
+        // Invoice totals and session floats are both stored in minor units.
+        return (int) $this->invoices()
             ->where('payment_method', 'cash')
-            ->sum('total') * 100);
+            ->sum('total');
     }
 
     public function expectedClosingFloat(): int

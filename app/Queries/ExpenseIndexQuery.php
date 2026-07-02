@@ -28,7 +28,7 @@ class ExpenseIndexQuery
                     ->where('status', ExpenseStatus::Approved)
                     ->whereMonth('expensed_at', now()->month)
                     ->whereYear('expensed_at', now()->year)
-                    ->sum('amount'),
+                    ->sum('amount') / 100,
             ]);
     }
 
@@ -46,7 +46,7 @@ class ExpenseIndexQuery
             })
             ->join('categories', 'categorizables.category_id', '=', 'categories.id')
             ->groupBy('categories.id', 'categories.name')
-            ->select('categories.name', DB::raw('SUM(amount) as total'))
+            ->select('categories.name', DB::raw('SUM(amount) / 100.0 as total'))
             ->get();
     }
 }

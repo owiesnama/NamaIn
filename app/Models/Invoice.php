@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
@@ -79,9 +80,9 @@ class Invoice extends BaseModel
             'status' => InvoiceStatus::class,
             'payment_method' => PaymentMethod::class,
             'payment_status' => PaymentStatus::class,
-            'total' => 'decimal:2',
-            'paid_amount' => 'decimal:2',
-            'discount' => 'decimal:2',
+            'total' => MoneyCast::class,
+            'paid_amount' => MoneyCast::class,
+            'discount' => MoneyCast::class,
         ];
     }
 
@@ -212,7 +213,7 @@ class Invoice extends BaseModel
      */
     public function getSubtotalAttribute(): float
     {
-        return $this->transactions()->sum(\DB::raw('price * quantity'));
+        return $this->transactions()->sum(\DB::raw('price * quantity')) / 100;
     }
 
     /**
@@ -322,7 +323,7 @@ class Invoice extends BaseModel
      */
     public function updatePaymentStatus(): void
     {
-        $this->paid_amount = $this->payments()->sum('amount');
+        $this->paid_amount = $this->payments()->sum('amount') / 100;
 
         $netTotal = $this->total - $this->discount;
 

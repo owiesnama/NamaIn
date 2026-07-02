@@ -45,8 +45,8 @@ class ExpenseSummaryQuery
             ->select(
                 'categories.id as category_id',
                 DB::raw("COALESCE(categories.name, 'Uncategorized') as category_name"),
-                DB::raw('COALESCE(categories.budget_limit, 0) as budget_limit'),
-                DB::raw('SUM(expenses.amount) as total_spent'),
+                DB::raw('COALESCE(categories.budget_limit, 0) / 100.0 as budget_limit'),
+                DB::raw('SUM(expenses.amount) / 100.0 as total_spent'),
                 DB::raw('COUNT(expenses.id) as expense_count'),
             )
             ->groupBy('categories.id', 'categories.name', 'categories.budget_limit')
