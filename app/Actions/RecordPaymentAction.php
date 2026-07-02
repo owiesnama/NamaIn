@@ -56,8 +56,9 @@ class RecordPaymentAction
                 ]);
             }
 
-            if (isset($options['treasury_account_id'])) {
-                $account = TreasuryAccount::findOrFail($options['treasury_account_id']);
+            $account = $this->resolveTreasuryAccount($method, $options);
+
+            if ($account) {
                 $amountInCents = Money::fromMajor($amount)->minor();
 
                 $reason = $options['movement_reason']
@@ -78,6 +79,23 @@ class RecordPaymentAction
 
             return $payment;
         });
+    }
+
+    /**
+     * The explicitly chosen account, or the default cash account when cash
+     * changes hands with no account named — cash must always hit the ledger.
+     */
+    private function resolveTreasuryAccount(PaymentMethod $method, array $options): ?TreasuryAccount
+    {
+        if (isset($options['treasury_account_id'])) {
+            return TreasuryAccount::findOrFail($options['treasury_account_id']);
+        }
+
+        if ($method === PaymentMethod::Cash) {
+            return TreasuryAccount::defaultCash();
+        }
+
+        return null;
     }
 
     private function recordForInvoice(Invoice $invoice, float $amount, PaymentMethod $method, PaymentDirection $direction, array $options): Payment

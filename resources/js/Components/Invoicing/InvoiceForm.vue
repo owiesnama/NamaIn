@@ -415,7 +415,6 @@
                             :is-sale="isSale"
                             :banks="banks"
                             :treasury-accounts="treasuryAccounts ?? []"
-                            :net-total="netTotal"
                         />
                     </div>
                 </div>
