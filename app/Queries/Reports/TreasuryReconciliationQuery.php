@@ -4,6 +4,7 @@ namespace App\Queries\Reports;
 
 use App\Models\TreasuryAccount;
 use App\Models\TreasuryMovement;
+use App\ValueObjects\Money;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -53,8 +54,8 @@ class TreasuryReconciliationQuery
                 'account_name' => $m->account_name,
                 'occurred_at' => $m->occurred_at->toDateTimeString(),
                 'reason' => $m->reason?->value,
-                'amount' => $m->amount,
-                'balance_after' => $m->balance_after,
+                'amount' => Money::fromMinor($m->amount)->major(),
+                'balance_after' => Money::fromMinor($m->balance_after)->major(),
             ])
             ->all();
     }
@@ -87,10 +88,10 @@ class TreasuryReconciliationQuery
 
             return [
                 'account_name' => $account->name,
-                'opening_balance' => $openingBalance,
-                'total_credits' => (int) ($periodMovements->total_credits ?? 0),
-                'total_debits' => (int) ($periodMovements->total_debits ?? 0),
-                'closing_balance' => $closingBalance,
+                'opening_balance' => Money::fromMinor($openingBalance)->major(),
+                'total_credits' => Money::fromMinor((int) ($periodMovements->total_credits ?? 0))->major(),
+                'total_debits' => Money::fromMinor((int) ($periodMovements->total_debits ?? 0))->major(),
+                'closing_balance' => Money::fromMinor($closingBalance)->major(),
             ];
         })->all();
 

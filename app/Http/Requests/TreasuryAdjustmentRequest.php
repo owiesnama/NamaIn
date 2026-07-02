@@ -14,7 +14,7 @@ class TreasuryAdjustmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'new_balance' => 'required|integer|min:0',
+            'new_balance' => 'required|numeric|min:0',
             'notes' => 'required|string|max:1000',
         ];
     }

@@ -16,7 +16,7 @@ class TreasuryTransferRequest extends FormRequest
         return [
             'from_account_id' => 'required|exists:treasury_accounts,id',
             'to_account_id' => 'required|exists:treasury_accounts,id|different:from_account_id',
-            'amount' => 'required|integer|min:1',
+            'amount' => 'required|numeric|min:0.01',
             'notes' => 'nullable|string|max:1000',
         ];
     }

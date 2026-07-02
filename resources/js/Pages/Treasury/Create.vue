@@ -163,17 +163,18 @@ watch(() => form.bank_id, (bankId) => {
 
                         <!-- Opening Balance -->
                         <div>
-                            <InputLabel for="opening_balance" :value="__('Opening Balance (in cents)')" />
+                            <InputLabel for="opening_balance" :value="__('Opening Balance')" />
                             <TextInput
                                 id="opening_balance"
                                 v-model="form.opening_balance"
                                 type="number"
                                 min="0"
+                                step="0.01"
                                 class="mt-1 block w-full"
                                 placeholder="0"
                             />
                             <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                {{ __("Enter the current balance in the smallest currency unit (e.g. 10000 = 100.00)") }}
+                                {{ __("Enter the account's current balance") }}
                             </p>
                             <InputError :message="form.errors.opening_balance" class="mt-2" />
                         </div>

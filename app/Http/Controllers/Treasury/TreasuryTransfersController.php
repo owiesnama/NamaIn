@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\TreasuryTransferRequest;
 use App\Models\TreasuryAccount;
 use App\Models\TreasuryTransfer;
+use App\ValueObjects\Money;
 
 class TreasuryTransfersController extends Controller
 {
@@ -23,7 +24,7 @@ class TreasuryTransfersController extends Controller
                     'name' => $account->name,
                     'type_label' => $account->type->label(),
                     'currency' => $account->currency,
-                    'current_balance' => $account->currentBalance(),
+                    'current_balance' => Money::fromMinor($account->currentBalance())->major(),
                 ]),
         ]);
     }
@@ -38,7 +39,7 @@ class TreasuryTransfersController extends Controller
         $transfer = $action->handle(
             from: $from,
             to: $to,
-            amount: $request->amount,
+            amount: Money::fromMajor($request->amount)->minor(),
             actor: auth()->user(),
             notes: $request->notes,
         );
@@ -57,8 +58,13 @@ class TreasuryTransfersController extends Controller
                 ->orWhereIn('to_account_id', $tenantAccountIds);
         })->findOrFail($transfer);
 
+        $transfer->load(['fromAccount', 'toAccount', 'createdBy']);
+
         return inertia('Treasury/Transfer/Show', [
-            'transfer' => $transfer->load(['fromAccount', 'toAccount', 'createdBy']),
+            'transfer' => [
+                ...$transfer->toArray(),
+                'amount' => Money::fromMinor($transfer->amount)->major(),
+            ],
         ]);
     }
 }
