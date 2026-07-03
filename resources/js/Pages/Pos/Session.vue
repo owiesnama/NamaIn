@@ -102,6 +102,7 @@ const transfersRequired = ref([]);
 const unavailableProducts = ref([]);
 const completedSale = ref({ invoiceId: null, total: 0, paymentMethod: 'cash', change: null });
 const showingCloseModal = ref(false);
+const showingCart = ref(false);
 
 const checkoutForm = useForm({
     session_id: props.session.id,
@@ -171,6 +172,7 @@ const proceedToCheckout = (paymentMethod, change) => {
             discountValue.value = '';
             checkoutForm.reset();
             showingCheckoutModal.value = false;
+            showingCart.value = false;
             showingSaleCompleteModal.value = true;
         },
         onError: (errors) => {
@@ -208,7 +210,7 @@ const paymentMethodLabels = [
         <div class="flex flex-col md:flex-row h-[calc(100dvh-120px)] min-h-0 gap-4">
 
             <!-- Products column -->
-            <div class="flex-grow flex flex-col min-w-0 gap-3">
+            <div class="flex-grow flex flex-col min-w-0 min-h-0 gap-3">
                 <SalePointPicker
                     v-if="salePoints.length > 1"
                     :sale-points="salePoints"
@@ -220,8 +222,14 @@ const paymentMethodLabels = [
                 <PosProductGrid :initial-products="initialProducts" :hot-products="hotProducts" :currency="currency" @add-to-cart="addToCart" />
             </div>
 
-            <!-- Cart Sidebar -->
-            <div class="w-full md:w-80 lg:w-96 shrink-0 flex flex-col min-h-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <!-- Backdrop for the cart bottom sheet (stacked layout only) -->
+            <div v-if="showingCart" class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm md:hidden" @click="showingCart = false"></div>
+
+            <!-- Cart: bottom sheet below md, sidebar at md+ -->
+            <div
+                class="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] rounded-t-2xl md:static md:z-auto md:max-h-none md:rounded-2xl w-full md:w-80 lg:w-96 shrink-0 flex-col min-h-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden"
+                :class="showingCart ? 'flex' : 'hidden md:flex'"
+            >
 
                 <!-- Cart header -->
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
@@ -232,7 +240,14 @@ const paymentMethodLabels = [
                         <h2 class="text-base font-bold text-gray-900 dark:text-white">{{ __('Cart') }}</h2>
                         <span v-if="cart.length > 0" class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{{ cart.length }}</span>
                     </div>
-                    <button @click="showingCloseModal = true" class="inline-flex items-center min-h-[44px] px-3 py-2 -me-2 text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-red-500">{{ __('Close Session') }}</button>
+                    <div class="flex items-center gap-x-1 -me-2">
+                        <button class="inline-flex items-center min-h-[44px] px-3 py-2 text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-red-500" @click="showingCloseModal = true">{{ __('Close Session') }}</button>
+                        <button :aria-label="__('Hide cart')" class="md:hidden inline-flex items-center justify-center min-w-[44px] min-h-[44px] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500" @click="showingCart = false">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="h-5 w-5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Cart items -->
@@ -247,27 +262,27 @@ const paymentMethodLabels = [
                     <div v-for="(item, index) in cart" :key="index" class="flex flex-col p-3 rounded-xl border transition-colors" :class="item.sale_point_qty < item.quantity ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800' : 'bg-gray-50 dark:bg-gray-800/50 border-transparent'">
                         <div class="flex items-start justify-between gap-x-2 mb-2">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{{ item.name }}</p>
-                            <button @click="removeFromCart(index)" class="flex items-center justify-center min-w-[44px] min-h-[44px] -m-2.5 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors shrink-0">
+                            <button class="flex items-center justify-center min-w-[44px] min-h-[44px] -m-2.5 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors shrink-0" @click="removeFromCart(index)">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
                         <div class="flex items-center gap-x-2 mb-2">
-                            <select v-if="item.units && item.units.length > 0" :value="item.unit_id" @change="updateItemUnit(item, $event.target.value)" class="text-[10px] py-1 px-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500">
+                            <select v-if="item.units && item.units.length > 0" :value="item.unit_id" class="text-[10px] py-1 px-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" @change="updateItemUnit(item, $event.target.value)">
                                 <option :value="null">{{ __('Base') }}</option>
                                 <option v-for="unit in item.units" :key="unit.id" :value="unit.id">{{ unit.name }}</option>
                             </select>
                             <div class="flex items-center gap-x-1 flex-1">
                                 <span class="text-[10px] text-gray-400 shrink-0">{{ currency }}</span>
-                                <input type="number" inputmode="decimal" :value="item.price" @input="updateItemPrice(item, $event.target.value)" class="w-full text-xs py-1 px-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
+                                <input type="number" inputmode="decimal" :value="item.price" class="w-full text-xs py-1 px-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" @input="updateItemPrice(item, $event.target.value)" />
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-x-1">
-                                <button @click="updateItemQuantity(item, -1)" class="w-11 h-11 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors">
+                                <button class="w-11 h-11 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors" @click="updateItemQuantity(item, -1)">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" /></svg>
                                 </button>
-                                <input type="number" inputmode="numeric" v-model.number="item.quantity" class="h-11 w-12 text-center text-base font-bold py-1 px-0 bg-transparent border-0 focus:ring-0" min="1" />
-                                <button @click="updateItemQuantity(item, 1)" class="w-11 h-11 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors">
+                                <input v-model.number="item.quantity" type="number" inputmode="numeric" class="h-11 w-12 text-center text-base font-bold py-1 px-0 bg-transparent border-0 focus:ring-0" min="1" />
+                                <button class="w-11 h-11 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors" @click="updateItemQuantity(item, 1)">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
                                 </button>
                             </div>
@@ -289,9 +304,9 @@ const paymentMethodLabels = [
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">{{ __('Customer') }}</label>
-                            <button @click="showingAddCustomerModal = true" class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 hover:text-emerald-700 transition-colors">+ {{ __('Add New') }}</button>
+                            <button class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 hover:text-emerald-700 transition-colors" @click="showingAddCustomerModal = true">+ {{ __('Add New') }}</button>
                         </div>
-                        <CustomSelect v-model="checkoutForm.customer_id" :options="customerOptions" label="name" track-by="id" :remote="true" :loading="customersLoading" @search-change="searchCustomer" @scroll-end="loadMoreCustomers" :placeholder="__('Walk-in Customer')" class="w-full" />
+                        <CustomSelect v-model="checkoutForm.customer_id" :options="customerOptions" label="name" track-by="id" :remote="true" :loading="customersLoading" :placeholder="__('Walk-in Customer')" class="w-full" @search-change="searchCustomer" @scroll-end="loadMoreCustomers" />
                     </div>
                     <div v-if="cart.length > 0">
                         <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">{{ __('Discount') }}</label>
@@ -318,6 +333,23 @@ const paymentMethodLabels = [
                     <div v-if="cartErrorMessage" class="p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 text-sm">{{ cartErrorMessage }}</div>
                 </div>
             </div>
+
+            <!-- Floating cart bar (stacked layout only) -->
+            <button
+                v-if="!showingCart"
+                type="button"
+                class="md:hidden fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-30 flex items-center justify-between gap-x-3 px-5 min-h-[56px] text-white bg-emerald-600 hover:bg-emerald-700 rounded-2xl shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 transition-colors duration-200"
+                @click="showingCart = true"
+            >
+                <span class="flex items-center gap-x-2 text-sm font-semibold">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                    </svg>
+                    {{ __('Cart') }}
+                    <span v-if="cart.length > 0" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full bg-white/20">{{ cart.length }}</span>
+                </span>
+                <span class="text-base font-bold">{{ fmt(total) }}</span>
+            </button>
         </div>
 
         <!-- Modals -->
@@ -344,8 +376,8 @@ const paymentMethodLabels = [
                     </li>
                 </ul>
                 <div class="flex justify-end gap-x-3">
-                    <button @click="showingTransferModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">{{ __('Cancel') }}</button>
-                    <PrimaryButton @click="confirmTransferAndCheckout" :disabled="checkoutForm.processing">{{ __('Transfer & Complete Sale') }}</PrimaryButton>
+                    <button class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" @click="showingTransferModal = false">{{ __('Cancel') }}</button>
+                    <PrimaryButton :disabled="checkoutForm.processing" @click="confirmTransferAndCheckout">{{ __('Transfer & Complete Sale') }}</PrimaryButton>
                 </div>
             </div>
         </Modal>
@@ -367,7 +399,7 @@ const paymentMethodLabels = [
                     </li>
                 </ul>
                 <div class="flex justify-end">
-                    <button @click="showingUnavailableModal = false" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">{{ __('Close') }}</button>
+                    <button class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" @click="showingUnavailableModal = false">{{ __('Close') }}</button>
                 </div>
             </div>
         </Modal>
