@@ -7,6 +7,7 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Services\Sync\SerialNumberGenerator;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -41,7 +42,47 @@ class Invoice extends BaseModel
 
         static::creating(function (Invoice $invoice) {
             $invoice->currency = $invoice->currency ?? preference('currency', 'SDG');
+            $invoice->assignSerialNumber();
         });
+    }
+
+    /**
+     * Assign the register-scoped serial during creation so it is written in the
+     * same insert (atomic, never null). Cloud-web invoices number on the tenant's
+     * reserved register R0; an explicitly-set register (offline/device) or a
+     * pre-set serial (legacy imports, seeders) is respected as-is.
+     */
+    public function assignSerialNumber(): void
+    {
+        if (! empty($this->serial_number) || ! $this->tenant_id) {
+            return;
+        }
+
+        $register = $this->register_id
+            ? Register::withoutGlobalScopes()->find($this->register_id)
+            : Register::cloudRegisterFor($this->tenant_id);
+
+        if (! $register) {
+            return;
+        }
+
+        $this->register_id = $register->id;
+        $this->serial_number = app(SerialNumberGenerator::class)->generate(
+            $register,
+            $this->serialSeries(),
+            (int) now()->format('Y')
+        );
+    }
+
+    /**
+     * The 'INV-SA'|'INV-SU'|'RET-SA'|'RET-SU' series this invoice belongs to.
+     */
+    private function serialSeries(): string
+    {
+        $direction = $this->is_inverse ? 'RET' : 'INV';
+        $party = $this->invocable_type === Supplier::class ? 'SU' : 'SA';
+
+        return "{$direction}-{$party}";
     }
 
     public function isDelivered(): bool
