@@ -2,7 +2,9 @@
 
 namespace App\Actions;
 
+use App\Models\ChangeLog;
 use App\Models\Expense;
+use Illuminate\Support\Facades\DB;
 
 class UpdateExpenseAction
 {
@@ -13,16 +15,20 @@ class UpdateExpenseAction
      */
     public function handle(Expense $expense, array $data): Expense
     {
-        $expense->update([
-            'title' => $data['title'],
-            'amount' => $data['amount'],
-            'expensed_at' => $data['expensed_at'],
-            'notes' => $data['notes'] ?? null,
-            'receipt_path' => $data['receipt_path'] ?? $expense->receipt_path,
-        ]);
+        return DB::transaction(function () use ($expense, $data) {
+            ChangeLog::lockTenant($expense->tenant_id);
 
-        $this->syncCategories->handle($expense, $data['category_objects'] ?? [], 'expense');
+            $expense->update([
+                'title' => $data['title'],
+                'amount' => $data['amount'],
+                'expensed_at' => $data['expensed_at'],
+                'notes' => $data['notes'] ?? null,
+                'receipt_path' => $data['receipt_path'] ?? $expense->receipt_path,
+            ]);
 
-        return $expense;
+            $this->syncCategories->handle($expense, $data['category_objects'] ?? [], 'expense');
+
+            return $expense;
+        });
     }
 }

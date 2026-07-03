@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Actions\Stock\ReverseTransactionAction;
 use App\Enums\InvoiceStatus;
 use App\Enums\PaymentMethod;
+use App\Models\ChangeLog;
 use App\Models\Invoice;
 use App\Models\Transaction;
 use Illuminate\Support\Collection;
@@ -19,6 +20,8 @@ class CreateInverseInvoiceAction
     public function handle(Invoice $invoice, Collection $data, string $reason): Invoice
     {
         return DB::transaction(function () use ($invoice, $data, $reason) {
+            ChangeLog::lockTenant($invoice->tenant_id);
+
             $inverseInvoice = $invoice->createInverseInvoice($data, $reason);
 
             $this->reverseTransactions($inverseInvoice, $data);

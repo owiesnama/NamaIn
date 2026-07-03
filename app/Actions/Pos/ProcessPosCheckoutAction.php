@@ -11,6 +11,7 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\TreasuryAccountType;
 use App\Exceptions\InsufficientStockException;
+use App\Models\ChangeLog;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\PosSession;
@@ -53,6 +54,8 @@ class ProcessPosCheckoutAction
         }
 
         return DB::transaction(function () use ($session, $data, $actor, $idempotencyKey, $acknowledgeTransfers, $paymentMethod) {
+            ChangeLog::lockTenant($session->tenant_id);
+
             if ($idempotencyKey) {
                 $existing = Invoice::where('tenant_id', $session->tenant_id)
                     ->where('idempotency_key', $idempotencyKey)

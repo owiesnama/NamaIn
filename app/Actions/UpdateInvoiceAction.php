@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Models\ChangeLog;
 use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Unit;
@@ -14,6 +15,8 @@ class UpdateInvoiceAction
     public function handle(Invoice $invoice, Collection $data): Invoice
     {
         return DB::transaction(function () use ($invoice, $data) {
+            ChangeLog::lockTenant($invoice->tenant_id);
+
             $invoice = Invoice::lockForUpdate()->findOrFail($invoice->id);
 
             if (! $invoice->isEditable()) {
@@ -42,7 +45,8 @@ class UpdateInvoiceAction
 
     private function replaceTransactions(Invoice $invoice, Collection $data): void
     {
-        $invoice->transactions()->delete();
+        // Per-model delete so each removed transaction emits a change-log tombstone.
+        $invoice->transactions->each->delete();
 
         $products = collect($data->get('products'));
         $units = Unit::whereIn('id', $products->pluck('unit')->filter()->unique())

@@ -6,11 +6,11 @@ use App\Actions\Stock\TransferStockAction;
 use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStockTransferRequest;
+use App\Models\ChangeLog;
 use App\Models\Product;
 use App\Models\StockTransfer;
 use App\Models\Storage;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class StockTransfersController extends Controller
 {
@@ -43,6 +43,8 @@ class StockTransfersController extends Controller
         $validated = $request->validated();
 
         $transfer = DB::transaction(function () use ($validated) {
+            ChangeLog::lockTenant(currentTenant()?->id);
+
             $transfer = StockTransfer::create([
                 'tenant_id' => currentTenant()->id,
                 'from_storage_id' => $validated['from_storage_id'],
@@ -51,14 +53,10 @@ class StockTransfersController extends Controller
                 'notes' => $validated['notes'] ?? null,
             ]);
 
-            $transfer->lines()->insert(array_map(fn ($item) => [
-                'public_id' => strtolower((string) Str::ulid()),
+            $transfer->lines()->createMany(array_map(fn ($item) => [
                 'tenant_id' => $transfer->tenant_id,
-                'stock_transfer_id' => $transfer->id,
                 'product_id' => $item['product_id'],
                 'quantity' => $item['quantity'],
-                'created_at' => $now = now(),
-                'updated_at' => $now,
             ], $validated['items']));
 
             return $transfer;
