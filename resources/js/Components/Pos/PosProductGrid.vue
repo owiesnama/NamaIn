@@ -82,7 +82,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-    <div class="flex-grow flex flex-col min-w-0">
+    <div class="flex-grow flex flex-col min-w-0 min-h-0">
         <!-- Hot items strip -->
         <div v-if="hotProducts.length > 0" class="mb-4">
             <div class="flex items-center gap-x-2 mb-2">
@@ -124,7 +124,7 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <div class="flex-grow overflow-y-auto overscroll-contain grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-1 auto-rows-max">
+        <div class="flex-grow overflow-y-auto overscroll-contain grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-1 pb-24 md:pb-1 auto-rows-max">
             <button
                 v-for="product in products"
                 :key="product.id"
