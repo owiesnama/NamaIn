@@ -26,7 +26,7 @@ test('user can record an expense', function () {
     $response->assertRedirect(route('expenses.index'));
     $this->assertDatabaseHas('expenses', [
         'title' => 'Monthly Rent',
-        'amount' => 1200.50,
+        'amount' => 120050,
     ]);
 
     $expense = Expense::first();
@@ -96,7 +96,7 @@ test('index response contains budget limit data', function () {
     $response->assertInertia(fn ($page) => $page
         ->has('category_budgets', 1)
         ->where('category_budgets.0.name', 'Marketing')
-        ->where('category_budgets.0.limit', '1000.00')
+        ->where('category_budgets.0.limit', 1000)
         ->where('category_budgets.0.spent', 200)
     );
 });

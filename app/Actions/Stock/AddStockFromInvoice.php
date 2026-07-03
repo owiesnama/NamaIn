@@ -7,22 +7,25 @@ use App\Models\Invoice;
 use App\Models\Storage;
 use App\Models\Transaction;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 class AddStockFromInvoice
 {
-    public function execute(Invoice $invoice, Storage $storage, ?User $actor = null): void
+    public function handle(Invoice $invoice, Storage $storage, ?User $actor = null): void
     {
         $actor ??= auth()->user();
 
         abort_unless($actor instanceof User, 403, 'An authenticated user is required.');
 
-        $invoice->transactions->each(
-            function (Transaction $transaction) use ($storage, $actor) {
-                $transaction->for($storage)->add($storage);
-                $transaction->deliver($actor, $storage);
-            }
-        );
+        DB::transaction(function () use ($invoice, $storage, $actor) {
+            $invoice->transactions->each(
+                function (Transaction $transaction) use ($storage, $actor) {
+                    $transaction->for($storage)->add($storage);
+                    $transaction->deliver($actor, $storage);
+                }
+            );
 
-        $invoice->markAs(InvoiceStatus::Delivered);
+            $invoice->markAs(InvoiceStatus::Delivered);
+        });
     }
 }

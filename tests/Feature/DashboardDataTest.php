@@ -127,3 +127,35 @@ test('dashboard displays enriched data', function () {
     $this->assertNotEmpty($data['transactions']);
     $this->assertIsString($data['transactions'][0]['created_at']);
 });
+
+test('dashboard revenue is priced by the sold quantity, not the base quantity', function () {
+    $user = User::factory()->create();
+    $storage = Storage::factory()->create();
+    $product = Product::factory()->create();
+    $customer = Customer::factory()->create(['name' => 'Bulk Buyer']);
+
+    $invoice = Invoice::create([
+        'invocable_id' => $customer->id,
+        'invocable_type' => Customer::class,
+        'total' => 20,
+        'serial_number' => 'INV-BOX-1',
+        'status' => 'delivered',
+    ]);
+
+    // 2 boxes at 10 each; a box converts to 12 base units.
+    Transaction::create([
+        'product_id' => $product->id,
+        'storage_id' => $storage->id,
+        'invoice_id' => $invoice->id,
+        'quantity' => 2,
+        'base_quantity' => 24,
+        'price' => 10,
+        'delivered' => 1,
+        'created_at' => now(),
+    ]);
+
+    $data = $this->actingAs($user)->get(route('dashboard'))->viewData('page')['props'];
+
+    $this->assertEquals(20, $data['total_sales']);
+    $this->assertEquals(20, $data['top_customers'][0]['revenue']);
+});

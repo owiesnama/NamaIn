@@ -41,7 +41,7 @@ class CreateInverseInvoiceAction
                 $transaction->save();
             }
 
-            $this->reverseTransaction->execute($transaction);
+            $this->reverseTransaction->handle($transaction);
         }
     }
 

@@ -15,9 +15,9 @@ class UserRoleController extends Controller
     {
         $this->authorize('assignRole', User::class);
 
+        // AssignRoleRequest already validates the role belongs to the current tenant.
         $tenant = app('currentTenant');
         $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
-        abort_unless($role->tenant_id === $tenant->id, 403);
 
         $action->handle($tenant, $user, $role);
 

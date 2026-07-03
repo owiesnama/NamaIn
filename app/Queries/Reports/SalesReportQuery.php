@@ -2,82 +2,40 @@
 
 namespace App\Queries\Reports;
 
-use App\Models\Transaction;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 
-class SalesReportQuery
+class SalesReportQuery extends TradeReportQuery
 {
-    use ResolvesReportDates;
-
-    public function get(Carbon $from, Carbon $to, string $groupBy = 'day'): array
+    protected function reportKey(): string
     {
-        return Cache::remember(
-            $this->cacheKey("sales_data_{$groupBy}_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
-            fn () => $this->buildData($from, $to, $groupBy),
-        );
+        return 'sales';
     }
 
-    public function summary(Carbon $from, Carbon $to): array
+    protected function scopeParty(Builder $query): Builder
     {
-        return Cache::remember(
-            $this->cacheKey("sales_summary_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
-            fn () => $this->buildSummary($from, $to),
-        );
+        return $query->forCustomer();
     }
 
-    private function buildData(Carbon $from, Carbon $to, string $groupBy): array
+    protected function moneyKey(): string
     {
-        $dateFormat = $this->dateFormat($groupBy);
-
-        return Transaction::delivered()
-            ->forCustomer()
-            ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
-            ->whereBetween('transactions.created_at', [$from, $to])
-            ->select(
-                DB::raw("$dateFormat as period"),
-                DB::raw('COUNT(DISTINCT invoices.id) as invoice_count'),
-                DB::raw('SUM(transactions.quantity) as items_sold'),
-                DB::raw('SUM(transactions.price * transactions.quantity) as revenue'),
-            )
-            ->groupBy('period')
-            ->orderBy('period')
-            ->get()
-            ->map(fn ($row) => [
-                'period' => $row->period,
-                'invoice_count' => (int) $row->invoice_count,
-                'items_sold' => (int) $row->items_sold,
-                'revenue' => (float) $row->revenue,
-                'average_order_value' => $row->invoice_count > 0
-                    ? round((float) $row->revenue / (int) $row->invoice_count, 2)
-                    : 0,
-            ])
-            ->all();
+        return 'revenue';
     }
 
-    private function buildSummary(Carbon $from, Carbon $to): array
+    protected function itemsKey(): string
     {
-        $result = Transaction::delivered()
-            ->forCustomer()
-            ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
-            ->whereBetween('transactions.created_at', [$from, $to])
-            ->select(
-                DB::raw('COUNT(DISTINCT invoices.id) as invoice_count'),
-                DB::raw('SUM(transactions.quantity) as items_sold'),
-                DB::raw('SUM(transactions.price * transactions.quantity) as revenue'),
-            )
-            ->first();
+        return 'items_sold';
+    }
 
-        return [
-            'invoice_count' => (int) ($result->invoice_count ?? 0),
-            'items_sold' => (int) ($result->items_sold ?? 0),
-            'revenue' => (float) ($result->revenue ?? 0),
-            'average_order_value' => ($result->invoice_count ?? 0) > 0
-                ? round((float) $result->revenue / (int) $result->invoice_count, 2)
-                : 0,
-        ];
+    /**
+     * @param  array<string, mixed>  $row
+     * @return array<string, mixed>
+     */
+    protected function decorate(array $row): array
+    {
+        $row['average_order_value'] = $row['invoice_count'] > 0
+            ? round($row['revenue'] / $row['invoice_count'], 2)
+            : 0;
+
+        return $row;
     }
 }

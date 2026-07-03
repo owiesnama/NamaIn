@@ -32,7 +32,7 @@ beforeEach(function () {
     $this->storage->addStock($this->product, 100, 'initial_stock', actor: $this->owner);
 
     $this->customer = Customer::factory()->create(['tenant_id' => $this->tenant->id]);
-    $this->session = app(OpenPosSessionAction::class)->execute($this->storage, 5000, $this->cashier);
+    $this->session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
 });
 
 test('it can checkout a pos order', function () {
@@ -49,7 +49,7 @@ test('it can checkout a pos order', function () {
         ],
     ]);
 
-    $invoice = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier);
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
 
     expect($invoice->pos_session_id)->toBe($this->session->id);
     expect((int) $invoice->total)->toBe(2000);
@@ -65,8 +65,8 @@ test('it respects idempotency key', function () {
 
     $key = 'test-idempotency-key';
 
-    $invoice1 = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier, $key);
-    $invoice2 = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier, $key);
+    $invoice1 = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier, $key);
+    $invoice2 = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier, $key);
 
     expect($invoice1->id)->toBe($invoice2->id);
     expect($this->storage->fresh()->quantityOf($this->product))->toBe(99); // Only deducted once
@@ -79,7 +79,7 @@ test('it rolls back if stock is insufficient', function () {
         'items' => [['product_id' => $this->product->id, 'quantity' => 200, 'price' => 10]],
     ]);
 
-    expect(fn () => app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier, null, false))
+    expect(fn () => app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier, null, false))
         ->toThrow(InsufficientStockException::class);
 
     expect($this->storage->fresh()->quantityOf($this->product))->toBe(100);
@@ -111,7 +111,7 @@ test('it can checkout as a walk-in customer (null customer_id)', function () {
         ],
     ]);
 
-    $invoice = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier);
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
 
     expect($invoice->invocable_id)->not->toBeNull();
     expect($invoice->invocable->name)->toBe('Walk-in Customer');
@@ -133,7 +133,7 @@ test('credit checkout creates invoice without payment or treasury movement', fun
         ],
     ]);
 
-    $invoice = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier);
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
 
     expect($invoice)->toBeInstanceOf(Invoice::class)
         ->and((int) $invoice->total)->toBe(3000)
@@ -157,7 +157,7 @@ test('credit checkout requires a named customer', function () {
         ],
     ]);
 
-    expect(fn () => app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier))
+    expect(fn () => app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier))
         ->toThrow(DomainException::class, 'Credit sales require a named customer.');
 });
 
@@ -189,7 +189,7 @@ test('cash checkout still records payment and treasury movement', function () {
         ],
     ]);
 
-    $invoice = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier);
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
 
     expect($invoice->payment_status->value)->toBe('paid')
         ->and((int) $invoice->paid_amount)->toBe(2000)

@@ -45,7 +45,7 @@ test('clearing a credit cheque with invoice records payment on that invoice', fu
         'reference_number' => 'CHQ-1',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -53,7 +53,7 @@ test('clearing a credit cheque with invoice records payment on that invoice', fu
     $this->assertEquals(500, $invoice->fresh()->paid_amount);
     $this->assertDatabaseHas('payments', [
         'invoice_id' => $invoice->id,
-        'amount' => 500,
+        'amount' => 50000,
         'payment_method' => PaymentMethod::Cheque->value,
     ]);
 });
@@ -80,7 +80,7 @@ test('clearing a debit cheque with invoice records payment on that invoice', fun
         'reference_number' => 'CHQ-2',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -102,7 +102,7 @@ test('clearing a credit cheque without invoice creates a direct customer payment
         'reference_number' => 'CHQ-3',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -110,7 +110,7 @@ test('clearing a credit cheque without invoice creates a direct customer payment
     $this->assertDatabaseHas('payments', [
         'payable_id' => $customer->id,
         'payable_type' => get_class($customer),
-        'amount' => 500,
+        'amount' => 50000,
     ]);
     // Balance should decrease (more negative if we use the same calculation)
     // Actually, calculateAccountBalance subtracts direct payments from invoice balance.
@@ -135,7 +135,7 @@ test('clearing a debit cheque without invoice creates a direct supplier payment'
         'reference_number' => 'CHQ-4',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -143,7 +143,7 @@ test('clearing a debit cheque without invoice creates a direct supplier payment'
     $this->assertDatabaseHas('payments', [
         'payable_id' => $supplier->id,
         'payable_type' => get_class($supplier),
-        'amount' => 500,
+        'amount' => 50000,
     ]);
     $this->assertEquals(-500, $supplier->fresh()->account_balance);
 
@@ -166,7 +166,7 @@ test('partially clearing a cheque records cleared_amount, not full amount', func
         'reference_number' => 'CHQ-5',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::PartiallyCleared->value,
         'cleared_amount' => 400,
     ]);
@@ -175,11 +175,11 @@ test('partially clearing a cheque records cleared_amount, not full amount', func
     $this->assertDatabaseHas('cheques', [
         'id' => $cheque->id,
         'status' => ChequeStatus::PartiallyCleared->value,
-        'cleared_amount' => 400,
+        'cleared_amount' => 40000,
     ]);
     $this->assertDatabaseHas('payments', [
         'payable_id' => $customer->id,
-        'amount' => 400,
+        'amount' => 40000,
     ]);
 });
 
@@ -198,7 +198,7 @@ test('clearing a partially cleared cheque again records the remaining amount', f
         'reference_number' => 'CHQ-6',
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ]);
 
@@ -206,12 +206,12 @@ test('clearing a partially cleared cheque again records the remaining amount', f
     $this->assertDatabaseHas('cheques', [
         'id' => $cheque->id,
         'status' => ChequeStatus::Cleared->value,
-        'cleared_amount' => 1000,
+        'cleared_amount' => 100000,
     ]);
     // Should have a new payment for the remaining 600
     $this->assertDatabaseHas('payments', [
         'payable_id' => $customer->id,
-        'amount' => 600,
+        'amount' => 60000,
     ]);
 });
 

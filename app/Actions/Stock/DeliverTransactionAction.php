@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\DB;
 
 class DeliverTransactionAction
 {
-    public function execute(Transaction $transaction, User $actor, ?Storage $fromStorage = null): void
+    public function handle(Transaction $transaction, User $actor, ?Storage $fromStorage = null): void
     {
         DB::transaction(function () use ($transaction, $actor, $fromStorage) {
             $storage = $fromStorage ?? $transaction->storage;

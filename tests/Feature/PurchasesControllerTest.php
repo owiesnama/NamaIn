@@ -78,14 +78,14 @@ test('it can store a purchase with cash payment', function () {
     $this->assertDatabaseHas('invoices', [
         'invocable_id' => $supplier->id,
         'invocable_type' => Supplier::class,
-        'total' => 2000,
-        'discount' => 200,
+        'total' => 200000,
+        'discount' => 20000,
     ]);
 
     $invoice = Invoice::where('invocable_id', $supplier->id)->first();
     $this->assertDatabaseHas('payments', [
         'invoice_id' => $invoice->id,
-        'amount' => 1800,
+        'amount' => 180000,
         'payment_method' => PaymentMethod::Cash,
         'reference' => 'CASH-PUR-001',
     ]);
@@ -133,7 +133,7 @@ test('it can store a purchase with bank transfer payment', function () {
     $invoice = Invoice::latest()->first();
     $this->assertDatabaseHas('payments', [
         'invoice_id' => $invoice->id,
-        'amount' => 500,
+        'amount' => 50000,
         'payment_method' => PaymentMethod::BankTransfer,
     ]);
 
@@ -179,7 +179,7 @@ test('it can store a purchase with cheque payment', function () {
     $invoice = Invoice::latest()->first();
     $this->assertDatabaseHas('cheques', [
         'invoice_id' => $invoice->id,
-        'amount' => 1500,
+        'amount' => 150000,
         'reference_number' => 'CHQ-001',
         'type' => 0,
     ]);

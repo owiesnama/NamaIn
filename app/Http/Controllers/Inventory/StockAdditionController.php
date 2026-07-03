@@ -9,7 +9,6 @@ use App\Models\Invoice;
 use App\Models\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class StockAdditionController extends Controller
 {
@@ -19,9 +18,7 @@ class StockAdditionController extends Controller
 
         $invoice = Invoice::with('transactions.product')->findOrFail($request->validated('invoice'));
 
-        DB::transaction(function () use ($invoice, $storage, $addStock) {
-            $addStock->execute($invoice, $storage);
-        });
+        $addStock->handle($invoice, $storage);
 
         Cache::forget('low_stock_products');
 

@@ -12,7 +12,7 @@ class ExpenseExportController extends Controller
     {
         $this->authorize('viewAny', Expense::class);
 
-        $action->execute('expenses', 'xlsx', request()->only(['search', 'category', 'status', 'from_date', 'to_date']));
+        $action->handle('expenses', 'xlsx', request()->only(['search', 'category', 'status', 'from_date', 'to_date']));
 
         return back()->with('flash', [
             'type' => 'export_queued',

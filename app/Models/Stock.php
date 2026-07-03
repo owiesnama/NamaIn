@@ -20,7 +20,7 @@ class Stock extends Pivot
      *
      * @var array<string>
      */
-    protected $appends = ['totalCost'];
+    protected $appends = ['total_cost'];
 
     /**
      * The average cost of this stock (reads from the materialized product column).

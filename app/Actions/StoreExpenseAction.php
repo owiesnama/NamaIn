@@ -8,9 +8,10 @@ use App\Models\Expense;
 use App\Models\RecurringExpense;
 use App\Models\TreasuryAccount;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 
-class StoreExpense
+class StoreExpenseAction
 {
     public function __construct(
         private SyncCategoriesAction $syncCategories,
@@ -34,7 +35,7 @@ class StoreExpense
 
             if (! empty($data['treasury_account_id'])) {
                 $account = TreasuryAccount::findOrFail($data['treasury_account_id']);
-                $amountInCents = (int) round($data['amount'] * 100);
+                $amountInCents = Money::fromMajor($data['amount'])->minor();
 
                 $this->recordMovement->handle(
                     account: $account,

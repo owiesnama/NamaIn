@@ -103,7 +103,7 @@ test('clearing a receivable cheque debits clearing account and credits bank acco
         'reference_number' => 'CHQ-FLOW-04',
     ]);
 
-    $this->put(route('cheques.updateStatus', $cheque->id), [
+    $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ])->assertRedirect();
 
@@ -141,7 +141,7 @@ test('clearing a payable cheque debits the bank account', function () {
         'reference_number' => 'CHQ-FLOW-05',
     ]);
 
-    $this->put(route('cheques.updateStatus', $cheque->id), [
+    $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Cleared->value,
     ])->assertRedirect();
 
@@ -180,7 +180,7 @@ test('returning a receivable cheque reverses the cheque clearing account', funct
         'reference_number' => 'CHQ-FLOW-RETURNED',
     ]);
 
-    $this->put(route('cheques.updateStatus', $cheque->id), [
+    $this->put(route('cheques.update-status', $cheque->id), [
         'status' => ChequeStatus::Returned->value,
     ])->assertRedirect();
 

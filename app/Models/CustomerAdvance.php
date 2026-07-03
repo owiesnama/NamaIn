@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\CustomerAdvanceStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -22,8 +23,8 @@ class CustomerAdvance extends BaseModel
     protected function casts(): array
     {
         return [
-            'amount' => 'decimal:2',
-            'settled_amount' => 'decimal:2',
+            'amount' => MoneyCast::class,
+            'settled_amount' => MoneyCast::class,
             'status' => CustomerAdvanceStatus::class,
             'given_at' => 'datetime',
         ];
@@ -90,7 +91,8 @@ class CustomerAdvance extends BaseModel
      */
     public function updateSettlementStatus(): void
     {
-        $totalSettled = (float) $this->payments()->sum('amount');
+        // The aggregate reads raw minor units; attributes speak major units.
+        $totalSettled = $this->payments()->sum('amount') / 100;
 
         $this->settled_amount = $totalSettled;
         $this->status = match (true) {

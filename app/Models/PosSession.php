@@ -41,9 +41,7 @@ class PosSession extends BaseModel
 
     public function cashSalesTotal(): int
     {
-        // For now, assuming cash payments are linked to invoices
-        // and we'll need a way to sum them.
-        // This is a placeholder for actual payment logic.
+        // Invoice totals and session floats are both stored in minor units.
         return (int) $this->invoices()
             ->where('payment_method', 'cash')
             ->sum('total');

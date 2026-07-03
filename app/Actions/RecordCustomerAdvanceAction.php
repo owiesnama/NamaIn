@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\CustomerAdvance;
 use App\Models\TreasuryAccount;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 
 class RecordCustomerAdvanceAction
@@ -42,7 +43,7 @@ class RecordCustomerAdvanceAction
 
             $this->recordMovement->handle(
                 account: $treasury,
-                amount: -(int) round($amount * 100),
+                amount: -Money::fromMajor($amount)->minor(),
                 reason: TreasuryMovementReason::CustomerAdvanceGiven,
                 movable: $advance,
                 actor: $actor,

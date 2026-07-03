@@ -9,6 +9,7 @@ use App\Models\Bank;
 use App\Models\Storage;
 use App\Models\TreasuryAccount;
 use App\Models\TreasuryMovement;
+use App\ValueObjects\Money;
 
 class TreasuryAccountsController extends Controller
 {
@@ -69,7 +70,10 @@ class TreasuryAccountsController extends Controller
     {
         $this->authorize('create', TreasuryAccount::class);
 
-        TreasuryAccount::create($request->validated());
+        TreasuryAccount::create([
+            ...$request->validated(),
+            'opening_balance' => Money::fromMajor($request->validated('opening_balance'))->minor(),
+        ]);
 
         return redirect()->route('treasury.index')->with('success', 'Treasury account created successfully.');
     }
@@ -82,7 +86,12 @@ class TreasuryAccountsController extends Controller
             ->with('createdBy', 'movable')
             ->latest('occurred_at')
             ->paginate(20)
-            ->withQueryString();
+            ->withQueryString()
+            ->through(fn (TreasuryMovement $movement) => [
+                ...$movement->toArray(),
+                'amount' => Money::fromMinor($movement->amount)->major(),
+                'balance_after' => Money::fromMinor($movement->balance_after)->major(),
+            ]);
 
         return inertia('Treasury/Show', [
             'account' => $this->formatAccount($treasury),
@@ -125,8 +134,8 @@ class TreasuryAccountsController extends Controller
             'type' => $account->type->value,
             'type_label' => $account->type->label(),
             'currency' => $account->currency,
-            'current_balance' => $account->opening_balance + (int) ($account->movements_sum_amount ?? 0),
-            'opening_balance' => $account->opening_balance,
+            'current_balance' => Money::fromMinor($account->opening_balance + (int) ($account->movements_sum_amount ?? 0))->major(),
+            'opening_balance' => Money::fromMinor($account->opening_balance)->major(),
             'is_active' => $account->is_active,
             'notes' => $account->notes,
             'sale_point_id' => $account->sale_point_id,

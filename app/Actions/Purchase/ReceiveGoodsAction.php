@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class ReceiveGoodsAction
 {
-    public function execute(Transaction $transaction, Storage $storage, int $quantity, User $actor, ?string $notes = null): TransactionReceipt
+    public function handle(Transaction $transaction, Storage $storage, int $quantity, User $actor, ?string $notes = null): TransactionReceipt
     {
         return DB::transaction(function () use ($transaction, $storage, $quantity, $actor, $notes) {
             // Lock transaction to prevent over-receiving

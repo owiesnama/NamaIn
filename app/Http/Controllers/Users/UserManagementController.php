@@ -66,9 +66,9 @@ class UserManagementController extends Controller
     {
         $this->authorize('invite', User::class);
 
+        // CreateDirectUserRequest already validates the role belongs to the current tenant.
         $tenant = app('currentTenant');
         $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
-        abort_unless($role->tenant_id === $tenant->id, 403);
 
         $action->handle($tenant, $request->name, $request->email, $role);
 
@@ -82,7 +82,6 @@ class UserManagementController extends Controller
         if ($request->has('role_id')) {
             $this->authorize('assignRole', User::class);
             $role = Role::withoutGlobalScopes()->findOrFail($request->role_id);
-            abort_unless($role->tenant_id === $tenant->id, 403);
             $action->handle($tenant, $user, $role);
         }
 

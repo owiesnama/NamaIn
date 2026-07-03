@@ -10,6 +10,7 @@ use App\Exceptions\ChequeClearingAccountRequired;
 use App\Models\Cheque;
 use App\Models\TreasuryAccount;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 
 class RegisterChequeAction
@@ -38,7 +39,7 @@ class RegisterChequeAction
             if ($clearingAccount) {
                 $this->recordMovement->handle(
                     account: $clearingAccount,
-                    amount: (int) round($attributes['amount'] * 100),
+                    amount: Money::fromMajor($attributes['amount'])->minor(),
                     reason: TreasuryMovementReason::ChequeDeposited,
                     movable: $cheque,
                     actor: $actor,

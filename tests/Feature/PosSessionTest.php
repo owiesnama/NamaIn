@@ -10,6 +10,7 @@ use App\Models\Storage;
 use App\Models\Tenant;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Queries\Reports\PosSessionReportQuery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -57,7 +58,7 @@ function recordDeliveredSale(Storage $storage, Product $product, int $quantity):
 }
 
 test('it can open a pos session', function () {
-    $session = app(OpenPosSessionAction::class)->execute($this->storage, 5000, $this->cashier);
+    $session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
 
     expect($session->storage_id)->toBe($this->storage->id);
     expect($session->opened_by)->toBe($this->cashier->id);
@@ -66,16 +67,16 @@ test('it can open a pos session', function () {
 });
 
 test('it cannot open multiple sessions for the same storage', function () {
-    app(OpenPosSessionAction::class)->execute($this->storage, 5000, $this->cashier);
+    app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
 
-    expect(fn () => app(OpenPosSessionAction::class)->execute($this->storage, 6000, $this->owner))
+    expect(fn () => app(OpenPosSessionAction::class)->handle($this->storage, 6000, $this->owner))
         ->toThrow(DomainException::class, 'Storage already has an active POS session.');
 });
 
 test('it can close a pos session', function () {
-    $session = app(OpenPosSessionAction::class)->execute($this->storage, 5000, $this->cashier);
+    $session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
 
-    app(ClosePosSessionAction::class)->execute($session, 12000, $this->owner);
+    app(ClosePosSessionAction::class)->handle($session, 12000, $this->owner);
 
     $session->refresh();
     expect($session->closed_at)->not->toBeNull();
@@ -85,22 +86,78 @@ test('it can close a pos session', function () {
 });
 
 test('it calculates variance correctly', function () {
-    // Note: Variance depends on cashSalesTotal which is currently a placeholder
-    // In actual implementation, we'd create invoices linked to the session.
-    $session = app(OpenPosSessionAction::class)->execute($this->storage, 5000, $this->cashier);
+    $session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
 
-    // Manual adjustment of variance expectation since cashSalesTotal is placeholder
-    $session->update(['closing_float' => 15000]); // Expected 5000 (if no sales)
+    $session->update(['closing_float' => 15000]); // Expected 5000 (no sales)
 
     expect($session->variance())->toBe(10000);
+});
+
+test('cash sales total converts invoice totals to cents and ignores non-cash invoices', function () {
+    $session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
+
+    Invoice::factory()->create([
+        'pos_session_id' => $session->id,
+        'payment_method' => 'cash',
+        'total' => 150.75,
+    ]);
+
+    Invoice::factory()->create([
+        'pos_session_id' => $session->id,
+        'payment_method' => 'credit',
+        'total' => 999,
+    ]);
+
+    expect($session->cashSalesTotal())->toBe(15075)
+        ->and($session->expectedClosingFloat())->toBe(20075);
+});
+
+test('variance compares the closing float against opening float plus cash sales in cents', function () {
+    $session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
+
+    Invoice::factory()->create([
+        'pos_session_id' => $session->id,
+        'payment_method' => 'cash',
+        'total' => 150.75,
+    ]);
+
+    $session->update(['closing_float' => 20000]);
+
+    expect($session->variance())->toBe(-75);
+});
+
+test('the pos session report converts session floats to major units to match invoice totals', function () {
+    $session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
+
+    Invoice::factory()->create([
+        'pos_session_id' => $session->id,
+        'payment_method' => 'cash',
+        'total' => 150.75,
+    ]);
+
+    app(ClosePosSessionAction::class)->handle($session, 20000, $this->owner);
+
+    $row = collect(app(PosSessionReportQuery::class)->get(now()->subDay(), now()->addDay()))
+        ->firstWhere('id', $session->id);
+
+    expect($row['opening_float'])->toEqual(50.00)
+        ->and($row['cash_sales'])->toEqual(150.75)
+        ->and($row['expected_close'])->toEqual(200.75)
+        ->and($row['closing_float'])->toEqual(200.00)
+        ->and($row['variance'])->toEqual(-0.75);
+
+    $summary = app(PosSessionReportQuery::class)->summary(now()->subDay(), now()->addDay());
+
+    expect($summary['total_cash_sales'])->toEqual(150.75)
+        ->and($summary['total_variance'])->toEqual(-0.75);
 });
 
 test('it can open sessions on two different sale points independently', function () {
     $first = createSalePoint('Register One');
     $second = createSalePoint('Register Two');
 
-    $firstSession = app(OpenPosSessionAction::class)->execute($first, 5000, $this->cashier);
-    $secondSession = app(OpenPosSessionAction::class)->execute($second, 7000, $this->cashier);
+    $firstSession = app(OpenPosSessionAction::class)->handle($first, 5000, $this->cashier);
+    $secondSession = app(OpenPosSessionAction::class)->handle($second, 7000, $this->cashier);
 
     expect($firstSession->storage_id)->toBe($first->id);
     expect($secondSession->storage_id)->toBe($second->id);
@@ -120,7 +177,7 @@ test('show passes hot products ordered by quantity sold and scoped to the sale p
     recordDeliveredSale($salePoint, $runnerUp, 10);
     recordDeliveredSale($otherSalePoint, $otherStorageProduct, 99);
 
-    app(OpenPosSessionAction::class)->execute($salePoint, 5000, $this->cashier);
+    app(OpenPosSessionAction::class)->handle($salePoint, 5000, $this->cashier);
 
     $this->actingAs($this->owner)
         ->get(route('pos.index', ['storage_id' => $salePoint->id]))
@@ -140,7 +197,7 @@ test('show renders the selected sale point with its own products', function () {
     $product = Product::factory()->create(['name' => 'Stocked Product']);
     $second->addStock($product, 12, 'manual_add', actor: $this->owner);
 
-    app(OpenPosSessionAction::class)->execute($second, 5000, $this->cashier);
+    app(OpenPosSessionAction::class)->handle($second, 5000, $this->cashier);
 
     $this->actingAs($this->owner)
         ->get(route('pos.index', ['storage_id' => $second->id]))

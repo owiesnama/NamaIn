@@ -2,11 +2,15 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Traits\WithTrashScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -58,7 +62,7 @@ class Payment extends BaseModel
             'payment_method' => PaymentMethod::class,
             'direction' => PaymentDirection::class,
             'paid_at' => 'datetime',
-            'amount' => 'decimal:2',
+            'amount' => MoneyCast::class,
             'metadata' => 'json',
         ];
     }
@@ -85,6 +89,30 @@ class Payment extends BaseModel
     public function treasuryAccount(): BelongsTo
     {
         return $this->belongsTo(TreasuryAccount::class);
+    }
+
+    /**
+     * The treasury movements this payment produced.
+     */
+    public function treasuryMovements(): MorphMany
+    {
+        return $this->morphMany(TreasuryMovement::class, 'movable');
+    }
+
+    /**
+     * Payments belonging to the given party, whether recorded against one of
+     * its invoices or directly against the party itself.
+     */
+    public function scopeForParty(Builder $query, Model $party): Builder
+    {
+        return $query->where(function (Builder $query) use ($party) {
+            $query->whereHas('invoice', fn (Builder $invoices) => $invoices
+                ->where('invocable_id', $party->id)
+                ->where('invocable_type', $party::class))
+                ->orWhere(fn (Builder $direct) => $direct
+                    ->where('payable_id', $party->id)
+                    ->where('payable_type', $party::class));
+        });
     }
 
     /**

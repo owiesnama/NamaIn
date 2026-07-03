@@ -26,7 +26,7 @@ class TreasuryAccountRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'type' => ['required', Rule::enum(TreasuryAccountType::class)],
-            'opening_balance' => 'required|integer|min:0',
+            'opening_balance' => 'required|numeric|min:0',
             'currency' => 'required|string|size:3',
             'sale_point_id' => 'nullable|exists:storages,id',
             'bank_id' => 'nullable|exists:banks,id',

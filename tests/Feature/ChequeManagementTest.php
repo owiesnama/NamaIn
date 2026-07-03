@@ -46,7 +46,7 @@ test('can register a new cheque via cheques.store', function () {
         'chequeable_id' => $customer->id,
         'chequeable_type' => get_class($customer),
         'invoice_id' => $invoice->id,
-        'amount' => 1250.50,
+        'amount' => 125050,
         'bank_id' => $this->bank->id,
         'bank' => 'Test Bank',
         'reference_number' => 'CHQ-999',
@@ -69,7 +69,7 @@ test('can update status to Issued, Deposited, Returned, Cancelled', function ($s
         'status' => ChequeStatus::Drafted,
     ]);
 
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => $status->value,
     ]);
 
@@ -94,7 +94,7 @@ test('updating status with null cleared_amount passes validation', function ($st
     ]);
 
     // Simulate exactly what the Inertia form sends — explicit nulls for optional fields
-    $response = $this->put(route('cheques.updateStatus', $cheque->id), [
+    $response = $this->put(route('cheques.update-status', $cheque->id), [
         'status' => $status->value,
         'cleared_amount' => null,
         'treasury_account_id' => null,
@@ -133,6 +133,6 @@ test('can register a new cheque with a new bank name', function () {
     $this->assertDatabaseHas('cheques', [
         'bank_id' => $bank->id,
         'reference_number' => 'CHQ-TAG-01',
-        'amount' => 650,
+        'amount' => 65000,
     ]);
 });

@@ -19,15 +19,7 @@ class PartyAccountQuery
 
     public function payments(Model $party, int $perPage): LengthAwarePaginator
     {
-        return Payment::where(function ($query) use ($party) {
-            $query->whereHas('invoice', function ($query) use ($party) {
-                $query->where('invocable_id', $party->id)
-                    ->where('invocable_type', get_class($party));
-            })->orWhere(function ($query) use ($party) {
-                $query->where('payable_id', $party->id)
-                    ->where('payable_type', get_class($party));
-            });
-        })
+        return Payment::forParty($party)
             ->with('invoice')
             ->orderBy('paid_at', 'desc')
             ->paginate($perPage, ['*'], 'payments_page')

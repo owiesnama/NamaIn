@@ -64,7 +64,7 @@ test('it can create a return for a sale invoice', function () {
     $this->assertDatabaseHas('invoices', [
         'parent_invoice_id' => $invoice->id,
         'is_inverse' => true,
-        'total' => 50,
+        'total' => 5000,
         'inverse_reason' => 'Defective products',
     ]);
 
@@ -133,7 +133,7 @@ test('it can create a return for a purchase invoice', function () {
     $this->assertDatabaseHas('invoices', [
         'parent_invoice_id' => $invoice->id,
         'is_inverse' => true,
-        'total' => 100,
+        'total' => 10000,
     ]);
 
     $invoice->refresh();

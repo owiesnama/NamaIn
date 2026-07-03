@@ -102,7 +102,7 @@ test('it can create a recurring expense template', function () {
     $response->assertRedirect(route('recurring-expenses.index'));
     $this->assertDatabaseHas('recurring_expenses', [
         'title' => 'Office Rent',
-        'amount' => 1200.50,
+        'amount' => 120050,
         'created_by' => $user->id,
     ]);
 
@@ -128,6 +128,6 @@ test('it can update a recurring expense template', function () {
     $this->assertDatabaseHas('recurring_expenses', [
         'id' => $template->id,
         'title' => 'Updated Title',
-        'amount' => 1500,
+        'amount' => 150000,
     ]);
 });

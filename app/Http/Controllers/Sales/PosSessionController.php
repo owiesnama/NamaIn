@@ -140,7 +140,7 @@ class PosSessionController extends Controller
         return [
             'id' => $product->id,
             'name' => $product->name,
-            'price' => $product->price / 100,
+            'price' => $product->price,
             'sale_point_qty' => (int) ($product->sale_point_qty ?? 0),
             'replenishment' => $replenishment[$product->id] ?? null,
             'units' => $product->units,
@@ -157,7 +157,7 @@ class PosSessionController extends Controller
 
         $storage = Storage::findOrFail($request->storage_id);
 
-        $action->execute($storage, $request->opening_float * 100, auth()->user());
+        $action->handle($storage, $request->opening_float * 100, auth()->user());
 
         return redirect()->route('pos.index')->with('success', __('POS session opened.'));
     }
@@ -172,7 +172,7 @@ class PosSessionController extends Controller
 
         $session = PosSession::findOrFail($request->session_id);
 
-        $action->execute($session, $request->closing_float * 100, auth()->user());
+        $action->handle($session, $request->closing_float * 100, auth()->user());
 
         return redirect()->route('pos.index')->with('success', __('POS session closed.'));
     }

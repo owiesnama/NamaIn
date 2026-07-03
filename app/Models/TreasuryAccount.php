@@ -78,4 +78,17 @@ class TreasuryAccount extends BaseModel
     {
         return $query->where('type', $type);
     }
+
+    /**
+     * The account cash lands in when none is chosen explicitly: the oldest
+     * active shared cash account (POS drawers are bound to their sale point).
+     */
+    public static function defaultCash(): ?self
+    {
+        return static::ofType(TreasuryAccountType::Cash)
+            ->active()
+            ->shared()
+            ->oldest('id')
+            ->first();
+    }
 }

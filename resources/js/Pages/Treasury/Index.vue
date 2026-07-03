@@ -25,7 +25,7 @@ const formatBalance = (amount, currency = "SDG") => {
     return new Intl.NumberFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
         style: "currency",
         currency: validCurrency,
-    }).format(amount / 100);
+    }).format(amount);
 };
 
 const { formatDate } = useDate();

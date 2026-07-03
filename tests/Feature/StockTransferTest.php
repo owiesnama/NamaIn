@@ -47,7 +47,7 @@ test('it can execute a stock transfer successfully', function () {
     expect(StockTransferLine::where('stock_transfer_id', $transfer->id)->count())->toBe(1);
 
     $action = app(TransferStockAction::class);
-    $action->execute($transfer, $this->owner);
+    $action->handle($transfer, $this->owner);
 
     expect(DB::table('stocks')->where('storage_id', $this->fromStorage->id)->where('product_id', $this->product->id)->value('quantity'))->toBe(60);
     expect(DB::table('stocks')->where('storage_id', $this->toStorage->id)->where('product_id', $this->product->id)->value('quantity'))->toBe(40);
@@ -84,7 +84,7 @@ test('it fails if insufficient stock in source', function () {
         'quantity' => 150, // More than 100 available
     ]);
 
-    expect(fn () => app(TransferStockAction::class)->execute($transfer, $this->owner))
+    expect(fn () => app(TransferStockAction::class)->handle($transfer, $this->owner))
         ->toThrow(InsufficientStockException::class);
 
     // Verify rollback
@@ -100,7 +100,7 @@ test('it fails if source and destination are same', function () {
         'created_by' => $this->owner->id,
     ]);
 
-    expect(fn () => app(TransferStockAction::class)->execute($transfer, $this->owner))
+    expect(fn () => app(TransferStockAction::class)->handle($transfer, $this->owner))
         ->toThrow(InvalidArgumentException::class);
 });
 

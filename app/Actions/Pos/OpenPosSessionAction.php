@@ -17,7 +17,7 @@ class OpenPosSessionAction
         private RecordTreasuryMovementAction $recordMovement,
     ) {}
 
-    public function execute(Storage $storage, int $openingFloat, User $actor): PosSession
+    public function handle(Storage $storage, int $openingFloat, User $actor): PosSession
     {
         return DB::transaction(function () use ($storage, $openingFloat, $actor) {
             // Lock storage row to prevent race condition on opening multiple sessions

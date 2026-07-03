@@ -9,12 +9,13 @@ use App\Enums\TreasuryMovementReason;
 use App\Models\Cheque;
 use App\Models\TreasuryAccount;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 
 class UpdateChequeStatusAction
 {
     public function __construct(
-        private ClearCheque $clearCheque,
+        private ClearChequeAction $clearCheque,
         private RecordTreasuryMovementAction $recordMovement,
     ) {}
 
@@ -62,7 +63,7 @@ class UpdateChequeStatusAction
 
         $this->recordMovement->handle(
             account: $clearingAccount,
-            amount: -(int) round($cheque->amount * 100),
+            amount: -Money::fromMajor($cheque->amount)->minor(),
             reason: TreasuryMovementReason::ChequeBounced,
             movable: $cheque,
             actor: $actor,

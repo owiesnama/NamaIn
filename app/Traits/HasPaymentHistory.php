@@ -12,18 +12,6 @@ trait HasPaymentHistory
      */
     public function getPaymentHistory(): Collection
     {
-        return Payment::where(function ($query) {
-            $query->whereHas('invoice', function ($query) {
-                $query->where('invocable_id', $this->id)
-                    ->where('invocable_type', self::class);
-            })->orWhere(function ($query) {
-                $query->where('payable_id', $this->id)
-                    ->where('payable_type', self::class);
-            });
-        })->with('invoice', 'payable')->latest()->get();
+        return Payment::forParty($this)->with('invoice', 'payable')->latest()->get();
     }
 }
-
-/**
- * Get payment history for this customer.
- */

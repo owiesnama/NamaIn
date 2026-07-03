@@ -10,7 +10,6 @@ use App\Models\Invoice;
 use App\Models\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 
 class StockDeductionController extends Controller
 {
@@ -21,9 +20,7 @@ class StockDeductionController extends Controller
         $invoice = Invoice::with('transactions.product')->findOrFail($request->validated('invoice'));
 
         try {
-            DB::transaction(function () use ($invoice, $storage, $deductStock) {
-                $deductStock->execute($invoice, $storage);
-            });
+            $deductStock->handle($invoice, $storage);
         } catch (InsufficientStockException $e) {
             return back()->with('error', $e->getMessage());
         }

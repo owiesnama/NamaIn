@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\WithTrashScope;
+use App\ValueObjects\Money;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -49,15 +51,16 @@ class Product extends BaseModel
 
     public function recalculateAverageCost(): void
     {
+        // The replay reads raw rows, so it computes in minor units.
         $movingAverage = $this->replayMovingAverageCost();
 
-        $newCost = $movingAverage !== null
+        $newCostMinor = $movingAverage !== null
             ? (int) round($movingAverage)
-            : (int) ($this->cost ?? 0);
+            : Money::fromMajor($this->cost ?? 0)->minor();
 
-        DB::table('products')->where('id', $this->id)->update(['average_cost' => $newCost]);
+        DB::table('products')->where('id', $this->id)->update(['average_cost' => $newCostMinor]);
 
-        $this->average_cost = $newCost;
+        $this->average_cost = Money::fromMinor($newCostMinor)->major();
     }
 
     /**
@@ -212,8 +215,9 @@ class Product extends BaseModel
     {
         return [
             'expire_date' => 'date',
-            'price' => 'integer',
-            'average_cost' => 'integer',
+            'price' => MoneyCast::class,
+            'cost' => MoneyCast::class,
+            'average_cost' => MoneyCast::class,
         ];
     }
 

@@ -3,20 +3,16 @@
 namespace App\Queries\Reports;
 
 use App\Models\Product;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class InventoryValuationQuery
+class InventoryValuationQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(?int $storageId = null, ?int $categoryId = null): array
     {
         $key = "inventory_data_{$storageId}_{$categoryId}";
 
-        return Cache::remember(
-            $this->cacheKey($key),
-            $this->longCacheTtl(),
+        return $this->remember(
+            $key,
             fn () => $this->buildData($storageId, $categoryId),
         );
     }
@@ -25,16 +21,15 @@ class InventoryValuationQuery
     {
         $key = "inventory_summary_{$storageId}_{$categoryId}";
 
-        return Cache::remember(
-            $this->cacheKey($key),
-            $this->longCacheTtl(),
+        return $this->remember(
+            $key,
             fn () => $this->buildSummary($storageId, $categoryId),
         );
     }
 
     private function buildData(?int $storageId, ?int $categoryId): array
     {
-        $tenantId = app()->has('currentTenant') ? app('currentTenant')->id : 0;
+        $tenantId = $this->tenantId();
 
         $query = DB::table('stocks')
             ->join('products', 'stocks.product_id', '=', 'products.id')
@@ -47,8 +42,8 @@ class InventoryValuationQuery
                 'products.name as product_name',
                 'storages.name as storage_name',
                 'stocks.quantity',
-                DB::raw('COALESCE(products.average_cost, products.cost, 0) as average_cost'),
-                DB::raw('stocks.quantity * COALESCE(products.average_cost, products.cost, 0) as total_value'),
+                DB::raw('COALESCE(products.average_cost, products.cost, 0) / 100.0 as average_cost'),
+                DB::raw('stocks.quantity * COALESCE(products.average_cost, products.cost, 0) / 100.0 as total_value'),
             );
 
         if ($storageId) {
@@ -89,14 +84,8 @@ class InventoryValuationQuery
         ];
     }
 
-    private function longCacheTtl(): \DateTimeInterface|int
+    protected function cacheMinutes(): int
     {
-        // Only cache in production; outside it (incl. the 'local'-based Cypress
-        // env) results must stay fresh right after data is seeded.
-        if (! app()->environment('production')) {
-            return 0;
-        }
-
-        return now()->addMinutes(15);
+        return 15;
     }
 }

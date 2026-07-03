@@ -3,6 +3,7 @@
 namespace App\Actions;
 
 use App\Models\Quote;
+use App\ValueObjects\Money;
 
 class UpdateQuoteAction
 {
@@ -22,11 +23,12 @@ class UpdateQuoteAction
 
         $quote->items()->insert(
             array_map(fn ($item) => [
+                'tenant_id' => $quote->tenant_id,
                 'quote_id' => $quote->id,
                 'product_id' => $item['product_id'],
                 'unit_id' => $item['unit_id'] ?? null,
                 'quantity' => $item['quantity'],
-                'unit_price' => $item['unit_price'],
+                'unit_price' => Money::fromMajor($item['unit_price'])->minor(),
                 'created_at' => now(),
                 'updated_at' => now(),
             ], $data['items'])

@@ -12,8 +12,6 @@ class PosSessionReportController extends Controller
 {
     public function index(Request $request, PosSessionReportQuery $query, DatePreset $dateResolver)
     {
-        abort_unless(auth()->user()->hasPermission('reports.view'), 403);
-
         $dates = $dateResolver->fromRequest($request);
 
         return inertia('Reports/PosSession', [

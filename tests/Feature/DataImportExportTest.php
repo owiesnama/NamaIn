@@ -262,7 +262,7 @@ test('can import products with units and categories from CSV', function () {
     ]);
 
     $response->assertStatus(302);
-    $this->assertDatabaseHas('products', ['name' => 'Imported Product', 'cost' => 250]);
+    $this->assertDatabaseHas('products', ['name' => 'Imported Product', 'cost' => 25000]);
 
     $product = Product::where('name', 'Imported Product')->first();
     expect($product->units)->toHaveCount(1);
@@ -356,7 +356,7 @@ test('product export-import roundtrip works', function () {
 
     $this->assertDatabaseHas('products', [
         'name' => $productName,
-        'cost' => '123.45',
+        'cost' => 12345,
     ]);
 
     if (file_exists($tempFile)) {
@@ -379,8 +379,8 @@ test('can import products from quickbooks excel file', function () {
 
     $this->assertDatabaseHas('products', [
         'name' => 'QB Product One',
-        'cost' => 120,
-        'price' => 150,
+        'cost' => 12000,
+        'price' => 15000,
     ]);
 
     $this->assertDatabaseHas('categories', ['name' => 'Food']);
@@ -388,8 +388,8 @@ test('can import products from quickbooks excel file', function () {
 
     $this->assertDatabaseHas('products', [
         'name' => 'QB Product Two',
-        'cost' => 80,
-        'price' => 80,
+        'cost' => 8000,
+        'price' => 8000,
     ]);
 
     $this->assertDatabaseHas('import_logs', [
@@ -490,15 +490,15 @@ test('can import customers from quickbooks excel file', function () {
         'name' => 'QB Customer One',
         'phone_number' => '0551234567',
         'address' => 'Khartoum',
-        'credit_limit' => 5000,
-        'opening_debit' => 1500,
+        'credit_limit' => 500000,
+        'opening_debit' => 150000,
         'opening_credit' => 0,
     ]);
 
     $this->assertDatabaseHas('customers', [
         'name' => 'QB Customer Two',
         'opening_debit' => 0,
-        'opening_credit' => 200,
+        'opening_credit' => 20000,
     ]);
 });
 

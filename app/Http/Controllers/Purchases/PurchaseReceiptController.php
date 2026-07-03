@@ -15,7 +15,7 @@ class PurchaseReceiptController extends Controller
         $this->authorize('update', $transaction->invoice);
         $storage = Storage::findOrFail($request->storage_id);
 
-        $action->execute($transaction, $storage, $request->quantity, $request->user(), $request->notes);
+        $action->handle($transaction, $storage, $request->quantity, $request->user(), $request->notes);
 
         return back()->with('success', __('Goods received successfully'));
     }

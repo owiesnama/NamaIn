@@ -85,7 +85,7 @@
     };
 
     const confirmClearance = () => {
-        form.put(route("cheques.updateStatus", props.cheque.id), {
+        form.put(route("cheques.update-status", props.cheque.id), {
             preserveScroll: true,
             onSuccess: () => {
                 selectedStatus.value = form.status;
@@ -105,7 +105,7 @@
 
     const submit = () => {
         form.status = selectedStatus.value;
-        form.put(route("cheques.updateStatus", props.cheque.id), {
+        form.put(route("cheques.update-status", props.cheque.id), {
             preserveScroll: true,
             onError: () => {
                 selectedStatus.value = props.cheque.status;
@@ -236,7 +236,7 @@
                 <h3
                     :class="cheque.type == 1 ? 'text-emerald-500' : 'text-red-500'"
                     class="mt-1 font-bold sm:mt-0"
-                    v-text="cheque.amount_formated"
+                    v-text="cheque.amount_formatted"
                 ></h3>
             </div>
         </div>

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Expenses;
 
-use App\Actions\StoreExpense;
-use App\Actions\UpdateExpense;
+use App\Actions\StoreExpenseAction;
+use App\Actions\UpdateExpenseAction;
 use App\Filters\ExpenseFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpenseRequest;
@@ -50,7 +50,7 @@ class ExpensesController extends Controller
         ]);
     }
 
-    public function store(ExpenseRequest $request, StoreExpense $action)
+    public function store(ExpenseRequest $request, StoreExpenseAction $action)
     {
         $this->authorize('create', Expense::class);
 
@@ -81,14 +81,14 @@ class ExpensesController extends Controller
         ]);
     }
 
-    public function update(ExpenseRequest $request, Expense $expense, UpdateExpense $action)
+    public function update(ExpenseRequest $request, Expense $expense, UpdateExpenseAction $action)
     {
         $this->authorize('update', $expense);
 
         $data = $request->validated();
         $data['receipt_path'] = $this->resolveTemporaryUpload($request->receipt, 'receipts', $expense->receipt_path);
 
-        $action->handle($data, $expense);
+        $action->handle($expense, $data);
 
         return redirect()->route('expenses.index')->with('success', 'Expense updated successfully');
     }

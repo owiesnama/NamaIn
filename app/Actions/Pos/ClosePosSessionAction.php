@@ -15,7 +15,7 @@ class ClosePosSessionAction
         private RecordTreasuryAdjustmentAction $recordAdjustment,
     ) {}
 
-    public function execute(PosSession $session, int $closingFloat, User $actor): void
+    public function handle(PosSession $session, int $closingFloat, User $actor): void
     {
         if (! $session->isOpen()) {
             throw new \DomainException('POS session is already closed.');

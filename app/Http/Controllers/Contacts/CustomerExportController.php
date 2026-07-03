@@ -9,7 +9,7 @@ class CustomerExportController extends Controller
 {
     public function store(RequestExportAction $action)
     {
-        $action->execute('customers', 'xlsx');
+        $action->handle('customers', 'xlsx');
 
         return back()->with('flash', [
             'type' => 'export_queued',

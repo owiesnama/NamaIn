@@ -10,9 +10,10 @@ use App\Enums\TreasuryAccountType;
 use App\Enums\TreasuryMovementReason;
 use App\Models\Cheque;
 use App\Models\TreasuryAccount;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 
-class ClearCheque
+class ClearChequeAction
 {
     public function __construct(
         private RecordPaymentAction $recordPayment,
@@ -23,7 +24,7 @@ class ClearCheque
     {
         return DB::transaction(function () use ($cheque, $clearedAmount, $treasuryAccountId) {
             $amountToRecord = $clearedAmount ?? ($cheque->amount - $cheque->cleared_amount);
-            $amountInCents = (int) round($amountToRecord * 100);
+            $amountInCents = Money::fromMajor($amountToRecord)->minor();
 
             $totalClearedSoFar = $cheque->cleared_amount + $amountToRecord;
             $newStatus = $totalClearedSoFar < $cheque->amount

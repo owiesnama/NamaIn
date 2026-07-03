@@ -7,7 +7,7 @@ use App\Models\Transaction;
 
 class ReverseTransactionAction
 {
-    public function execute(Transaction $transaction): void
+    public function handle(Transaction $transaction): void
     {
         $storage = $transaction->storage;
 

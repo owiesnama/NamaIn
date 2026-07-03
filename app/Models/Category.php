@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
@@ -20,7 +21,7 @@ class Category extends BaseModel
     protected function casts(): array
     {
         return [
-            'budget_limit' => 'decimal:2',
+            'budget_limit' => MoneyCast::class,
         ];
     }
 

@@ -26,7 +26,7 @@ test('it can set credit_limit on customer creation', function () {
     $response->assertRedirect(route('customers.index'));
     $this->assertDatabaseHas('customers', [
         'name' => 'John Doe',
-        'credit_limit' => 5000,
+        'credit_limit' => 500000,
     ]);
 });
 
@@ -46,7 +46,7 @@ test('it can update credit_limit of a customer', function () {
     $this->assertDatabaseHas('customers', [
         'id' => $customer->id,
         'name' => 'Jane Doe',
-        'credit_limit' => 7500,
+        'credit_limit' => 750000,
     ]);
 });
 
@@ -78,8 +78,8 @@ test('customer account shows payments not related to an invoice', function () {
     $response->assertInertia(fn ($page) => $page
         ->component('Customers/Account')
         ->has('payments.data', 2)
-        ->where('payments.data.0.amount', '200.00')
-        ->where('payments.data.1.amount', '100.00')
+        ->where('payments.data.0.amount', 200)
+        ->where('payments.data.1.amount', 100)
     );
 });
 
@@ -101,7 +101,7 @@ test('it can set payment date on payment creation', function () {
     $response->assertRedirect(route('payments.index'));
     $this->assertDatabaseHas('payments', [
         'payable_id' => $customer->id,
-        'amount' => 500,
+        'amount' => 50000,
         'paid_at' => $customDate,
     ]);
 });
@@ -128,7 +128,7 @@ test('it can set payment date on invoice payment recording', function () {
     $response->assertRedirect(route('payments.index'));
     $this->assertDatabaseHas('payments', [
         'invoice_id' => $invoice->id,
-        'amount' => 500,
+        'amount' => 50000,
         'paid_at' => $customDate,
     ]);
 });

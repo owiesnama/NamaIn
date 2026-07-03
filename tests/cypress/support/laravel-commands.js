@@ -225,6 +225,12 @@ Cypress.Commands.add('refreshDatabase', () => {
             return 'needs-migrate';
         }
 
+        // The schema persists across specs, so newly added migrations must
+        // still be applied — a stale schema otherwise 500s every page.
+        if (app(Illuminate\\Database\\Migrations\\Migrator::class)->repositoryExists()) {
+            Illuminate\\Support\\Facades\\Artisan::call('migrate', ['--force' => true]);
+        }
+
         $tables = collect(Illuminate\\Support\\Facades\\DB::select(
             "SELECT tablename FROM pg_tables WHERE schemaname = 'public'"
         ))->pluck('tablename')

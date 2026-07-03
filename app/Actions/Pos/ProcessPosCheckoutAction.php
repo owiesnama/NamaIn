@@ -34,7 +34,7 @@ class ProcessPosCheckoutAction
         private TransferStockAction $executeStockTransfer,
     ) {}
 
-    public function execute(
+    public function handle(
         PosSession $session,
         Collection $data,
         User $actor,
@@ -127,7 +127,7 @@ class ProcessPosCheckoutAction
                     'delivered' => false,
                 ]);
 
-                $this->deliverAction->execute($transaction, $actor, $session->storage);
+                $this->deliverAction->handle($transaction, $actor, $session->storage);
             }
 
             $invoice->markAs(InvoiceStatus::Delivered);
@@ -169,11 +169,13 @@ class ProcessPosCheckoutAction
 
     private function replenish(Storage $salePoint, int $productId, int $quantityNeeded, User $actor): void
     {
+        $product = Product::findOrFail($productId);
+
         $source = $this->findReplenishmentSource
-            ->handle(Product::findOrFail($productId), $quantityNeeded);
+            ->handle($product, $quantityNeeded);
 
         if (! $source) {
-            throw new InsufficientStockException($productId, $salePoint);
+            throw new InsufficientStockException($product, $salePoint);
         }
 
         $transfer = StockTransfer::create([
@@ -192,6 +194,6 @@ class ProcessPosCheckoutAction
             'quantity' => $quantityNeeded,
         ]);
 
-        $this->executeStockTransfer->execute($transfer, $actor);
+        $this->executeStockTransfer->handle($transfer, $actor);
     }
 }

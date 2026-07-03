@@ -268,7 +268,7 @@ test('opening a POS session credits the cash drawer if one exists', function () 
         'sale_point_id' => $storage->id,
     ]);
 
-    app(OpenPosSessionAction::class)->execute($storage, 10000, $this->cashier);
+    app(OpenPosSessionAction::class)->handle($storage, 10000, $this->cashier);
 
     expect($cashDrawer->currentBalance())->toBe(10000);
     expect(TreasuryMovement::first()->reason)->toBe(TreasuryMovementReason::PosOpeningFloat);
@@ -282,7 +282,7 @@ test('opening a POS session with zero float does not record a movement', functio
         'sale_point_id' => $storage->id,
     ]);
 
-    app(OpenPosSessionAction::class)->execute($storage, 0, $this->cashier);
+    app(OpenPosSessionAction::class)->handle($storage, 0, $this->cashier);
 
     expect(TreasuryMovement::count())->toBe(0);
 });
@@ -295,10 +295,10 @@ test('closing a POS session with variance records an adjustment', function () {
         'sale_point_id' => $storage->id,
     ]);
 
-    $session = app(OpenPosSessionAction::class)->execute($storage, 10000, $this->cashier);
+    $session = app(OpenPosSessionAction::class)->handle($storage, 10000, $this->cashier);
 
     // Cashier counted 9500 but system expects 10000
-    app(ClosePosSessionAction::class)->execute($session, 9500, $this->owner);
+    app(ClosePosSessionAction::class)->handle($session, 9500, $this->owner);
 
     expect($cashDrawer->currentBalance())->toBe(9500);
 
@@ -315,9 +315,9 @@ test('closing a POS session with matching float records no adjustment', function
         'sale_point_id' => $storage->id,
     ]);
 
-    $session = app(OpenPosSessionAction::class)->execute($storage, 10000, $this->cashier);
+    $session = app(OpenPosSessionAction::class)->handle($storage, 10000, $this->cashier);
 
-    app(ClosePosSessionAction::class)->execute($session, 10000, $this->owner);
+    app(ClosePosSessionAction::class)->handle($session, 10000, $this->owner);
 
     // Only the opening float movement, no adjustment
     expect(TreasuryMovement::where('reason', TreasuryMovementReason::ManualAdjustment)->count())->toBe(0);

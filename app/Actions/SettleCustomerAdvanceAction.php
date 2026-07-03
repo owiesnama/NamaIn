@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\TreasuryAccount;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 
 class SettleCustomerAdvanceAction
@@ -60,7 +61,7 @@ class SettleCustomerAdvanceAction
 
         $this->recordMovement->handle(
             account: $treasury,
-            amount: (int) round($amount * 100),
+            amount: Money::fromMajor($amount)->minor(),
             reason: TreasuryMovementReason::CustomerAdvanceRepaid,
             movable: $payment,
             actor: $actor,

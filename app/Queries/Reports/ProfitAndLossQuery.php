@@ -6,27 +6,22 @@ use App\Enums\ExpenseStatus;
 use App\Models\Expense;
 use App\Models\Transaction;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class ProfitAndLossQuery
+class ProfitAndLossQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pnl_data_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pnl_data_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildData($from, $to),
         );
     }
 
     public function summary(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pnl_summary_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pnl_summary_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildSummary($from, $to),
         );
     }
@@ -40,7 +35,7 @@ class ProfitAndLossQuery
             ->whereBetween('transactions.created_at', [$from, $to])
             ->select(
                 DB::raw("$dateFormat as period"),
-                DB::raw('SUM(transactions.price * transactions.quantity) as amount'),
+                DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') / 100.0 as amount'),
             )
             ->groupBy('period')
             ->pluck('amount', 'period');
@@ -50,7 +45,7 @@ class ProfitAndLossQuery
             ->whereBetween('transactions.created_at', [$from, $to])
             ->select(
                 DB::raw("$dateFormat as period"),
-                DB::raw('SUM(transactions.base_quantity * COALESCE(transactions.unit_cost, 0)) as amount'),
+                DB::raw('SUM(transactions.base_quantity * COALESCE(transactions.unit_cost, 0)) / 100.0 as amount'),
             )
             ->groupBy('period')
             ->pluck('amount', 'period');
@@ -94,16 +89,16 @@ class ProfitAndLossQuery
         $revenue = (float) Transaction::delivered()
             ->forCustomer()
             ->whereBetween('transactions.created_at', [$from, $to])
-            ->sum(DB::raw('transactions.price * transactions.quantity'));
+            ->sum(DB::raw(Transaction::lineRevenueSql('transactions'))) / 100;
 
         $cogs = (float) Transaction::delivered()
             ->forCustomer()
             ->whereBetween('transactions.created_at', [$from, $to])
-            ->sum(DB::raw('transactions.base_quantity * COALESCE(transactions.unit_cost, 0)'));
+            ->sum(DB::raw('transactions.base_quantity * COALESCE(transactions.unit_cost, 0)')) / 100;
 
         $expenses = (float) Expense::where('status', ExpenseStatus::Approved)
             ->whereBetween('expensed_at', [$from, $to])
-            ->sum('amount');
+            ->sum('amount') / 100;
 
         $grossProfit = $revenue - $cogs;
         $netProfit = $grossProfit - $expenses;

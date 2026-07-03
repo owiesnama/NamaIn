@@ -22,10 +22,6 @@
             type: Array,
             default: () => [],
         },
-        netTotal: {
-            type: Number,
-            default: 0,
-        },
     });
 
     const methodToAccountType = { cash: 'cash', bank_transfer: 'bank', cheque: 'cheque_clearing' };
@@ -42,20 +38,6 @@
         selectedTreasuryAccount.value = null;
         props.form.treasury_account_id = null;
     });
-
-    // Cash is paid in full by default — prefill the amount with the net total
-    // until the user types their own value (clearing it creates an unpaid invoice).
-    const paymentAmountEdited = ref(false);
-
-    watch(
-        [() => props.form.payment_method, () => props.netTotal],
-        ([method]) => {
-            if (method === 'cash' && ! paymentAmountEdited.value) {
-                props.form.initial_payment_amount = props.netTotal;
-            }
-        },
-        { immediate: true },
-    );
 
     const addBank = (newTag) => {
         props.form.cheque_bank_id = newTag;
@@ -81,11 +63,14 @@
                     <span class="text-xs text-gray-400 ms-1">({{ option.type_label }})</span>
                 </template>
             </CustomSelect>
+            <p v-if="form.payment_method === 'cash' && !form.treasury_account_id" class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                {{ __("Defaults to the main cash account") }}
+            </p>
         </div>
 
         <div>
             <InputLabel for="initial_payment" :value="__('Payment')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-            <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" min="0" step="0.01" class="block w-full" @update:model-value="paymentAmountEdited = true" />
+            <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" min="0" step="0.01" class="block w-full" :placeholder="__('Leave empty for no payment')" />
             <InputError :message="form.errors.initial_payment_amount" class="mt-1" />
         </div>
 

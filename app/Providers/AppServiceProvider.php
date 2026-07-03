@@ -77,6 +77,14 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
+        // Dot-namespaced abilities with no policy or gate (e.g. `can:reports.view`
+        // route middleware) resolve against the tenant role's permission slugs.
+        Gate::after(function (User $user, string $ability) {
+            if (str_contains($ability, '.')) {
+                return $user->hasPermission($ability);
+            }
+        });
+
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });

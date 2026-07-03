@@ -4,36 +4,34 @@ namespace App\Queries\Reports;
 
 use App\Models\TreasuryAccount;
 use App\Models\TreasuryMovement;
+use App\ValueObjects\Money;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class TreasuryReconciliationQuery
+class TreasuryReconciliationQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(Carbon $from, Carbon $to, ?int $accountId = null): array
     {
-        return Cache::remember(
-            $this->cacheKey("treasury_data_{$from->toDateString()}_{$to->toDateString()}_{$accountId}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "treasury_data_{$from->toDateString()}_{$to->toDateString()}_{$accountId}",
             fn () => $this->buildData($from, $to, $accountId),
         );
     }
 
     public function summary(Carbon $from, Carbon $to, ?int $accountId = null): array
     {
-        return Cache::remember(
-            $this->cacheKey("treasury_summary_{$from->toDateString()}_{$to->toDateString()}_{$accountId}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "treasury_summary_{$from->toDateString()}_{$to->toDateString()}_{$accountId}",
             fn () => $this->buildSummary($from, $to, $accountId),
         );
     }
 
     private function buildData(Carbon $from, Carbon $to, ?int $accountId): array
     {
+        // TreasuryMovement carries no tenant_id; scope through the joined account.
         $query = TreasuryMovement::query()
             ->join('treasury_accounts', 'treasury_movements.treasury_account_id', '=', 'treasury_accounts.id')
+            ->where('treasury_accounts.tenant_id', app('currentTenant')->id)
             ->whereBetween('treasury_movements.occurred_at', [$from, $to])
             ->select(
                 'treasury_movements.*',
@@ -51,8 +49,8 @@ class TreasuryReconciliationQuery
                 'account_name' => $m->account_name,
                 'occurred_at' => $m->occurred_at->toDateTimeString(),
                 'reason' => $m->reason?->value,
-                'amount' => $m->amount,
-                'balance_after' => $m->balance_after,
+                'amount' => Money::fromMinor($m->amount)->major(),
+                'balance_after' => Money::fromMinor($m->balance_after)->major(),
             ])
             ->all();
     }
@@ -85,10 +83,10 @@ class TreasuryReconciliationQuery
 
             return [
                 'account_name' => $account->name,
-                'opening_balance' => $openingBalance,
-                'total_credits' => (int) ($periodMovements->total_credits ?? 0),
-                'total_debits' => (int) ($periodMovements->total_debits ?? 0),
-                'closing_balance' => $closingBalance,
+                'opening_balance' => Money::fromMinor($openingBalance)->major(),
+                'total_credits' => Money::fromMinor((int) ($periodMovements->total_credits ?? 0))->major(),
+                'total_debits' => Money::fromMinor((int) ($periodMovements->total_debits ?? 0))->major(),
+                'closing_balance' => Money::fromMinor($closingBalance)->major(),
             ];
         })->all();
 

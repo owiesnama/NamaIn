@@ -40,17 +40,17 @@ trait HasAccountBalance
             'invoiced_total' => Invoice::query()
                 ->whereColumn('invocable_id', "{$table}.id")
                 ->where('invocable_type', $morphType)
-                ->selectRaw('COALESCE(SUM(total - discount), 0)'),
+                ->selectRaw('COALESCE(SUM(total - discount), 0) / 100.0'),
             'settling_paid' => Payment::query()
                 ->whereColumn('payable_id', "{$table}.id")
                 ->where('payable_type', $morphType)
                 ->where('direction', $settling)
-                ->selectRaw('COALESCE(SUM(amount), 0)'),
+                ->selectRaw('COALESCE(SUM(amount), 0) / 100.0'),
             'reversing_paid' => Payment::query()
                 ->whereColumn('payable_id', "{$table}.id")
                 ->where('payable_type', $morphType)
                 ->where('direction', $reversing)
-                ->selectRaw('COALESCE(SUM(amount), 0)'),
+                ->selectRaw('COALESCE(SUM(amount), 0) / 100.0'),
         ]);
     }
 
@@ -62,7 +62,7 @@ trait HasAccountBalance
     {
         $invoicedTotal = (float) $this->invoices()
             ->when($asOfDate, fn ($query) => $query->where('created_at', '<', $asOfDate))
-            ->sum(DB::raw('total - discount'));
+            ->sum(DB::raw('total - discount')) / 100;
 
         $totalPaid = $asOfDate
             ? $this->getTotalPaidAsOf($asOfDate)
@@ -92,12 +92,12 @@ trait HasAccountBalance
         $directSettling = (float) $this->payments()
             ->where('direction', $settling)
             ->where('paid_at', '<', $asOfDate)
-            ->sum('amount');
+            ->sum('amount') / 100;
 
         $directReversing = (float) $this->payments()
             ->where('direction', $reversing)
             ->where('paid_at', '<', $asOfDate)
-            ->sum('amount');
+            ->sum('amount') / 100;
 
         return $directSettling - $directReversing;
     }
@@ -110,8 +110,8 @@ trait HasAccountBalance
         $settling = $this->settlingDirection();
         $reversing = $settling === 'in' ? 'out' : 'in';
 
-        $directSettling = (float) $this->payments()->where('direction', $settling)->sum('amount');
-        $directReversing = (float) $this->payments()->where('direction', $reversing)->sum('amount');
+        $directSettling = (float) $this->payments()->where('direction', $settling)->sum('amount') / 100;
+        $directReversing = (float) $this->payments()->where('direction', $reversing)->sum('amount') / 100;
 
         return $directSettling - $directReversing;
     }

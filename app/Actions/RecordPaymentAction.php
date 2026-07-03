@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Supplier;
 use App\Models\TreasuryAccount;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -55,9 +56,10 @@ class RecordPaymentAction
                 ]);
             }
 
-            if (isset($options['treasury_account_id'])) {
-                $account = TreasuryAccount::findOrFail($options['treasury_account_id']);
-                $amountInCents = (int) round($amount * 100);
+            $account = $this->resolveTreasuryAccount($method, $options);
+
+            if ($account) {
+                $amountInCents = Money::fromMajor($amount)->minor();
 
                 $reason = $options['movement_reason']
                     ?? ($direction === PaymentDirection::In
@@ -77,6 +79,23 @@ class RecordPaymentAction
 
             return $payment;
         });
+    }
+
+    /**
+     * The explicitly chosen account, or the default cash account when cash
+     * changes hands with no account named — cash must always hit the ledger.
+     */
+    private function resolveTreasuryAccount(PaymentMethod $method, array $options): ?TreasuryAccount
+    {
+        if (isset($options['treasury_account_id'])) {
+            return TreasuryAccount::findOrFail($options['treasury_account_id']);
+        }
+
+        if ($method === PaymentMethod::Cash) {
+            return TreasuryAccount::defaultCash();
+        }
+
+        return null;
     }
 
     private function recordForInvoice(Invoice $invoice, float $amount, PaymentMethod $method, PaymentDirection $direction, array $options): Payment

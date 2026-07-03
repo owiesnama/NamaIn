@@ -252,7 +252,8 @@
       "Bash(echo \"exit=$?  \\(inspector should be absent; horizon line present\\)\")",
       "Bash(php -d memory_limit=-1 vendor/bin/pest tests/Feature/ActiveTenantMiddlewareTest.php)",
       "Bash(echo \"EXIT=$?\")",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Read(//Users/owiesnama/.claude/**)"
     ]
   },
   "enableAllProjectMcpServers": true,

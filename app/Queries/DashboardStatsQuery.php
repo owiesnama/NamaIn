@@ -48,19 +48,19 @@ class DashboardStatsQuery
 
         $sales = Transaction::delivered(now()->subMonths(6))
             ->forCustomer()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM('.Transaction::lineRevenueSql().') / 100.0 as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
         $purchases = Transaction::delivered(now()->subMonths(6))
             ->forSupplier()
-            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM(price * quantity) as total'))
+            ->select(DB::raw("$dateFormat as month"), DB::raw('SUM('.Transaction::lineRevenueSql().') / 100.0 as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
         $expenses = Expense::where('status', ExpenseStatus::Approved)
             ->where('expensed_at', '>=', now()->subMonths(6)->startOfMonth())
-            ->select(DB::raw("$expenseDateFormat as month"), DB::raw('SUM(amount) as total'))
+            ->select(DB::raw("$expenseDateFormat as month"), DB::raw('SUM(amount) / 100.0 as total'))
             ->groupBy('month')
             ->pluck('total', 'month');
 
@@ -84,7 +84,7 @@ class DashboardStatsQuery
     {
         return Cache::remember($this->cacheKey('total_inventory_value'), $this->cacheTtl('hour'), function () {
             $result = DB::selectOne('
-                SELECT COALESCE(SUM(s.quantity * COALESCE(p.average_cost, p.cost, 0)), 0) as total_value
+                SELECT COALESCE(SUM(s.quantity * COALESCE(p.average_cost, p.cost, 0)), 0) / 100.0 as total_value
                 FROM stocks s
                 INNER JOIN products p ON p.id = s.product_id
                 WHERE p.tenant_id = ?
@@ -107,7 +107,7 @@ class DashboardStatsQuery
     {
         return Cache::remember($this->cacheKey('outstanding_receivables'), $this->cacheTtl('hour'), fn () => Invoice::forCustomer()
             ->outstanding()
-            ->sum(DB::raw('(total - discount) - paid_amount'))
+            ->sum(DB::raw(Invoice::outstandingBalanceSql())) / 100
         );
     }
 
@@ -115,7 +115,7 @@ class DashboardStatsQuery
     {
         return Cache::remember($this->cacheKey('payments_this_month'), $this->cacheTtl('hour'), fn () => Payment::whereMonth('paid_at', now()->month)
             ->whereYear('paid_at', now()->year)
-            ->sum('amount')
+            ->sum('amount') / 100
         );
     }
 
@@ -126,7 +126,7 @@ class DashboardStatsQuery
                 ->orWhereNull('status');
         })
             ->where('expensed_at', '>', now()->subDays(30))
-            ->sum('amount')
+            ->sum('amount') / 100
         );
     }
 
@@ -134,7 +134,7 @@ class DashboardStatsQuery
     {
         return Cache::remember($this->cacheKey('outstanding_payables'), $this->cacheTtl('hour'), fn () => Invoice::forSupplier()
             ->outstanding()
-            ->sum(DB::raw('(total - discount) - paid_amount'))
+            ->sum(DB::raw(Invoice::outstandingBalanceSql())) / 100
         );
     }
 
@@ -176,7 +176,7 @@ class DashboardStatsQuery
             ->forCustomer()
             ->forStorage($storageId)
             ->with('product')
-            ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM(price * quantity) as total_revenue'))
+            ->select('product_id', DB::raw('SUM(quantity) as total_quantity'), DB::raw('SUM('.Transaction::lineRevenueSql().') / 100.0 as total_revenue'))
             ->groupBy('product_id')
             ->orderByDesc('total_quantity')
             ->limit($limit)
@@ -191,7 +191,7 @@ class DashboardStatsQuery
             ->join('invoices', 'transactions.invoice_id', '=', 'invoices.id')
             ->join('customers', 'invoices.invocable_id', '=', 'customers.id')
             ->where('invoices.invocable_type', Customer::class)
-            ->select('customers.name', DB::raw('SUM(transactions.price * transactions.base_quantity) as total_revenue'))
+            ->select('customers.name', DB::raw('SUM('.Transaction::lineRevenueSql('transactions').') / 100.0 as total_revenue'))
             ->groupBy('customers.id', 'customers.name')
             ->orderByDesc('total_revenue')
             ->limit(5)

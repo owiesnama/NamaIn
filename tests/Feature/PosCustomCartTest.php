@@ -35,7 +35,7 @@ beforeEach(function () {
         'conversion_factor' => 10,
     ]);
 
-    $this->session = app(OpenPosSessionAction::class)->execute($this->storage, 5000, $this->cashier);
+    $this->session = app(OpenPosSessionAction::class)->handle($this->storage, 5000, $this->cashier);
 });
 
 test('it can checkout with a custom price', function () {
@@ -52,7 +52,7 @@ test('it can checkout with a custom price', function () {
         ],
     ]);
 
-    $invoice = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier);
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
 
     expect((int) $invoice->transactions->first()->price)->toBe(1500);
     expect((int) $invoice->total)->toBe(1500);
@@ -73,7 +73,7 @@ test('it can checkout with a custom unit', function () {
         ],
     ]);
 
-    $invoice = app(ProcessPosCheckoutAction::class)->execute($this->session, $data, $this->cashier);
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
 
     $transaction = $invoice->transactions->first();
     expect((int) $transaction->quantity)->toBe(2);

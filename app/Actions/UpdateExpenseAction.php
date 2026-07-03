@@ -4,14 +4,14 @@ namespace App\Actions;
 
 use App\Models\Expense;
 
-class UpdateExpense
+class UpdateExpenseAction
 {
     public function __construct(private SyncCategoriesAction $syncCategories) {}
 
     /**
      * @param  array{title: string, amount: float, expensed_at: string, notes: ?string, receipt_path: ?string, category_objects: ?array}  $data
      */
-    public function handle(array $data, Expense $expense): Expense
+    public function handle(Expense $expense, array $data): Expense
     {
         $expense->update([
             'title' => $data['title'],

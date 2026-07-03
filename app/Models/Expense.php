@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\ExpenseStatus;
 use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -26,7 +27,7 @@ class Expense extends BaseModel
      * @var array<string,string>
      */
     protected $casts = [
-        'amount' => 'decimal:2',
+        'amount' => MoneyCast::class,
         'expensed_at' => 'datetime',
         'status' => ExpenseStatus::class,
         'approved_at' => 'datetime',

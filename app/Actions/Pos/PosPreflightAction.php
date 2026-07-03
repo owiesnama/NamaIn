@@ -16,7 +16,7 @@ class PosPreflightAction
      * @param  array<int, array{product_id: int, quantity: float, unit_id?: int}>  $items
      * @return array<string, mixed>
      */
-    public function execute(PosSession $session, array $items): array
+    public function handle(PosSession $session, array $items): array
     {
         $assessment = collect($items)
             ->map(fn (array $item) => $this->assessCartItem($session, $item))

@@ -4,27 +4,22 @@ namespace App\Queries\Reports;
 
 use App\Models\PosSession;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
-class PosSessionReportQuery
+class PosSessionReportQuery extends ReportQuery
 {
-    use ResolvesReportDates;
-
     public function get(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pos_sessions_data_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pos_sessions_data_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildData($from, $to),
         );
     }
 
     public function summary(Carbon $from, Carbon $to): array
     {
-        return Cache::remember(
-            $this->cacheKey("pos_sessions_summary_{$from->toDateString()}_{$to->toDateString()}"),
-            $this->cacheTtl(),
+        return $this->remember(
+            "pos_sessions_summary_{$from->toDateString()}_{$to->toDateString()}",
             fn () => $this->buildSummary($from, $to),
         );
     }
@@ -37,21 +32,29 @@ class PosSessionReportQuery
             ->withCount('invoices')
             ->latest('pos_sessions.created_at')
             ->get()
-            ->map(fn (PosSession $session) => [
-                'id' => $session->id,
-                'operator' => $session->openedBy?->name,
-                'storage' => $session->storage?->name,
-                'opened_at' => $session->created_at->toDateTimeString(),
-                'closed_at' => $session->closed_at?->toDateTimeString(),
-                'opening_float' => $session->opening_float,
-                'cash_sales' => (int) ($session->invoices_sum_total ?? 0),
-                'expected_close' => $session->opening_float + (int) ($session->invoices_sum_total ?? 0),
-                'closing_float' => $session->closing_float,
-                'variance' => $session->closing_float
-                    ? $session->closing_float - ($session->opening_float + (int) ($session->invoices_sum_total ?? 0))
-                    : null,
-                'invoice_count' => $session->invoices_count,
-            ])
+            ->map(function (PosSession $session) {
+                // Floats and invoice totals are stored in minor units; the report is in major units.
+                $openingFloat = $session->opening_float / 100;
+                $closingFloat = $session->closing_float !== null ? $session->closing_float / 100 : null;
+                $cashSales = ((int) ($session->invoices_sum_total ?? 0)) / 100;
+                $expectedClose = round($openingFloat + $cashSales, 2);
+
+                return [
+                    'id' => $session->id,
+                    'operator' => $session->openedBy?->name,
+                    'storage' => $session->storage?->name,
+                    'opened_at' => $session->created_at->toDateTimeString(),
+                    'closed_at' => $session->closed_at?->toDateTimeString(),
+                    'opening_float' => $openingFloat,
+                    'cash_sales' => $cashSales,
+                    'expected_close' => $expectedClose,
+                    'closing_float' => $closingFloat,
+                    'variance' => $closingFloat !== null
+                        ? round($closingFloat - $expectedClose, 2)
+                        : null,
+                    'invoice_count' => $session->invoices_count,
+                ];
+            })
             ->all();
     }
 
@@ -65,18 +68,21 @@ class PosSessionReportQuery
             )
             ->first();
 
-        $cashSales = PosSession::whereBetween('pos_sessions.created_at', [$from, $to])
+        // Floats and invoice totals are stored in minor units; the report is in major units.
+        $cashSales = ((int) PosSession::whereBetween('pos_sessions.created_at', [$from, $to])
             ->withSum(['invoices' => fn ($q) => $q->where('payment_method', 'cash')], 'total')
             ->get()
-            ->sum('invoices_sum_total');
+            ->sum('invoices_sum_total')) / 100;
+
+        $totalOpening = ($result->total_opening ?? 0) / 100;
+        $totalClosing = ($result->total_closing ?? 0) / 100;
 
         return [
             'session_count' => (int) ($result->session_count ?? 0),
-            'total_opening' => (int) ($result->total_opening ?? 0),
-            'total_cash_sales' => (int) $cashSales,
-            'total_closing' => (int) ($result->total_closing ?? 0),
-            'total_variance' => (int) ($result->total_closing ?? 0)
-                - ((int) ($result->total_opening ?? 0) + (int) $cashSales),
+            'total_opening' => $totalOpening,
+            'total_cash_sales' => $cashSales,
+            'total_closing' => $totalClosing,
+            'total_variance' => round($totalClosing - ($totalOpening + $cashSales), 2),
         ];
     }
 }

@@ -35,7 +35,7 @@ const formatBalance = (amount, currency = "SDG") => {
     return new Intl.NumberFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
         style: "currency",
         currency: validCurrency,
-    }).format(amount / 100);
+    }).format(amount);
 };
 
 const { formatDate } = useDate();
@@ -210,12 +210,13 @@ const typeBgClass = (type) => {
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right">
-                                {{ __("New Balance (in cents)") }}
+                                {{ __("New Balance") }}
                             </label>
                             <input
                                 v-model="adjustForm.new_balance"
                                 type="number"
                                 min="0"
+                                step="0.01"
                                 class="mt-1 w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
                             />
                             <p v-if="adjustForm.errors.new_balance" class="mt-1 text-sm text-red-600 dark:text-red-400">{{ adjustForm.errors.new_balance }}</p>

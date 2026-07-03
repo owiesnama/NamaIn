@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Enums\QuoteStatus;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -20,7 +21,7 @@ class Quote extends BaseModel
         return [
             'status' => QuoteStatus::class,
             'expires_at' => 'date',
-            'discount' => 'decimal:2',
+            'discount' => MoneyCast::class,
         ];
     }
 

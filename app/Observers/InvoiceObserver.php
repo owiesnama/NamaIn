@@ -24,9 +24,9 @@ class InvoiceObserver
         ];
 
         $prefix = $invoice->is_inverse ? 'RET' : 'INV';
-        $typePerfix = $lookup[$invoice->invocable_type];
+        $typePrefix = $lookup[$invoice->invocable_type];
         $date = now()->format('y');
-        $serialNumber = "{$prefix}-{$typePerfix}-{$date}-{$invoice->id}";
+        $serialNumber = "{$prefix}-{$typePrefix}-{$date}-{$invoice->id}";
 
         return $serialNumber;
     }
