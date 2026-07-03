@@ -209,7 +209,7 @@
                                                     <TextInput
                                                         id="cost"
                                                         v-model="product.cost"
-                                                        type="number"
+                                                        type="number" inputmode="decimal"
                                                         min="0"
                                                         step="0.01"
                                                         class="block w-full mt-1"
@@ -228,7 +228,7 @@
                                                     <TextInput
                                                         id="price"
                                                         v-model="product.price"
-                                                        type="number"
+                                                        type="number" inputmode="decimal"
                                                         min="0"
                                                         step="0.01"
                                                         class="block w-full mt-1"
@@ -286,7 +286,7 @@
                                                 <TextInput
                                                     id="alert_quantity"
                                                     v-model="product.alert_quantity"
-                                                    type="number"
+                                                    type="number" inputmode="decimal"
                                                     min="0"
                                                     class="block w-full mt-1"
                                                     :placeholder="__('3')"
@@ -374,7 +374,7 @@
                                                             unit.conversion_factor
                                                         "
                                                         class="block w-full mt-1"
-                                                        type="number"
+                                                        type="number" inputmode="decimal"
                                                         min="1"
                                                         :placeholder="
                                                             __(

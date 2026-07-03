@@ -12,6 +12,7 @@
     import ProductAdjustmentModal from "@/Components/Products/ProductAdjustmentModal.vue";
     import TextInput from "@/Components/TextInput.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import Tooltip from "@/Components/Tooltip.vue";
 
     const props = defineProps({
@@ -20,7 +21,7 @@
         storages: Array,
     });
 
-    const showSidebar = ref(true);
+    const showSidebar = useFilterSidebar();
 
     const showImportModal = ref(false);
 
@@ -375,6 +376,7 @@
                 <!-- Sidebar -->
                 <FilterSidebar
                     v-if="showSidebar"
+                    @close="showSidebar = false"
                     v-model:filters="filters"
                     :categories="categories"
                     :sort-by-options="sortByOptions"
@@ -386,8 +388,8 @@
                         <div class="space-y-2">
                             <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Cost Range") }}</label>
                             <div class="grid grid-cols-2 gap-2">
-                                <TextInput v-model="filters.min_cost" type="number" :placeholder="__('Min')" class="w-full text-xs" />
-                                <TextInput v-model="filters.max_cost" type="number" :placeholder="__('Max')" class="w-full text-xs" />
+                                <TextInput v-model="filters.min_cost" type="number" inputmode="decimal" :placeholder="__('Min')" class="w-full text-xs" />
+                                <TextInput v-model="filters.max_cost" type="number" inputmode="decimal" :placeholder="__('Max')" class="w-full text-xs" />
                             </div>
                         </div>
 
@@ -410,9 +412,9 @@
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                                 <thead class="bg-gray-50/50 dark:bg-gray-800/40">
                                 <tr>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Product") }}</th>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Status") }}</th>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em] leading-tight">
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Product") }}</th>
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Status") }}</th>
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em] leading-tight">
                                         <div class="flex items-center gap-x-1">
                                             {{ __("Stock & Available") }}
                                             <Tooltip :text="__('Stock is physical quantity on hand, Available is stock minus pending sales')" position="bottom">
@@ -422,16 +424,16 @@
                                             </Tooltip>
                                         </div>
                                     </th>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Cost") }}</th>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Avg Cost") }}</th>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Price") }}</th>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Total Value") }}</th>
-                                    <th scope="col" class="px-6 py-4 text-[10px] font-bold text-end text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"></th>
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Cost") }}</th>
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Avg Cost") }}</th>
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Price") }}</th>
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Total Value") }}</th>
+                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-end text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"></th>
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
                                 <tr v-for="product in products.data" :key="product.id" @click="router.visit(route('products.show', product.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
-                                    <td class="px-6 py-4 whitespace-nowrap">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap">
                                         <div class="flex items-center gap-x-3">
                                             <div>
                                                 <div class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug">{{ product.name }}</div>
@@ -444,7 +446,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-4 lg:px-6">
                                         <div class="flex flex-col gap-y-1.5">
                                             <div :class="['inline-flex items-center gap-x-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg border w-fit leading-tight', getStockStatus(product).color]">
                                                 <span v-html="getStockStatus(product).icon"></span>
@@ -463,7 +465,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-4 lg:px-6">
                                         <div class="flex flex-col gap-y-1">
                                             <div class="flex items-end gap-x-2">
                                                 <span class="text-sm font-bold text-gray-900 dark:text-white">{{ product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0) }}</span>
@@ -487,26 +489,26 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    <td class="px-3 py-4 lg:px-6 text-sm font-semibold text-gray-700 dark:text-gray-300">
                                         {{ formatCurrency(product.cost, product.currency) }}
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-bold">
+                                    <td class="px-3 py-4 lg:px-6 text-sm font-bold">
                                         <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-400/5 px-2 py-1 rounded-md w-fit leading-tight">
                                             {{ formatCurrency(product.average_cost, product.currency) }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                    <td class="px-3 py-4 lg:px-6 text-sm font-semibold text-gray-700 dark:text-gray-300">
                                         {{ formatCurrency(product.price, product.currency) }}
                                     </td>
-                                    <td class="px-6 py-4">
+                                    <td class="px-3 py-4 lg:px-6">
                                         <div class="text-sm font-bold text-gray-900 dark:text-white leading-tight">
                                             {{ formatCurrency(product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0) * product.average_cost, product.currency) }}
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
-                                        <div class="flex items-center justify-end gap-x-2">
-                                            <Link @click.stop :href="route('products.show', product.id)" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Details')">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-end text-sm font-medium">
+                                        <div class="flex items-center justify-end gap-x-3">
+                                            <Link @click.stop :href="route('products.show', product.id)" class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Details')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                                                 </svg>
                                             </Link>
@@ -582,7 +584,7 @@
                                                 <input
                                                     v-model="newProductForm.cost"
                                                     name="new-cost"
-                                                    type="number"
+                                                    type="number" inputmode="decimal"
                                                     step="0.01"
                                                     class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
                                                     :placeholder="__('0.00')"
@@ -598,7 +600,7 @@
                                                 <input
                                                     v-model="newProductForm.price"
                                                     name="new-price"
-                                                    type="number"
+                                                    type="number" inputmode="decimal"
                                                     step="0.01"
                                                     class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
                                                     :placeholder="__('0.00')"
@@ -680,7 +682,7 @@
                                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1 rtl:text-right">{{ __("Cost") }}</label>
                                             <div class="relative">
                                                 <input
-                                                    type="number"
+                                                    type="number" inputmode="decimal"
                                                     name="cost"
                                                     step="0.01"
                                                     :value="getDraft(product.id).cost !== undefined ? getDraft(product.id).cost : product.cost"
@@ -696,7 +698,7 @@
                                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1 rtl:text-right">{{ __("Price") }}</label>
                                             <div class="relative">
                                                 <input
-                                                    type="number"
+                                                    type="number" inputmode="decimal"
                                                     name="price"
                                                     step="0.01"
                                                     :value="getDraft(product.id).price !== undefined ? getDraft(product.id).price : product.price"

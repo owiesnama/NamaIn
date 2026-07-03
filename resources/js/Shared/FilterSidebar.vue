@@ -12,7 +12,7 @@ defineProps({
     }
 });
 
-const emit = defineEmits(['reset', 'update:filters']);
+const emit = defineEmits(['reset', 'update:filters', 'close']);
 
 const resetFilters = () => {
     emit('reset');
@@ -20,13 +20,35 @@ const resetFilters = () => {
 </script>
 
 <template>
-    <aside class="w-full lg:w-72 shrink-0 transition-all duration-300">
-        <div class="sticky top-4 space-y-4">
+    <div class="contents">
+        <!-- Drawer backdrop (below lg) -->
+        <Transition
+            enter-active-class="transition-opacity ease-out duration-200"
+            enter-from-class="opacity-0"
+            enter-to-class="opacity-100"
+            leave-active-class="transition-opacity ease-in duration-150"
+            leave-from-class="opacity-100"
+            leave-to-class="opacity-0"
+        >
+            <div class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden" @click="emit('close')" />
+        </Transition>
+
+        <!-- Slide-over drawer below lg; static inline sidebar at lg+ -->
+        <aside class="fixed inset-y-0 start-0 z-50 w-80 max-w-[85vw] overflow-y-auto bg-white dark:bg-gray-900 shadow-xl lg:static lg:z-auto lg:inset-auto lg:w-72 lg:max-w-none lg:overflow-visible lg:bg-transparent lg:shadow-none lg:shrink-0 transition-all duration-300">
+        <div class="sticky top-4 space-y-4 p-4 lg:p-0">
             <!-- Unified Filter Sidebar -->
             <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl space-y-6 transition-all">
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
                     <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ __("Filters") }}</h3>
-                    <button type="button" @click="resetFilters" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium">{{ __("Reset") }}</button>
+                    <div class="flex items-center gap-x-2">
+                        <button type="button" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium" @click="resetFilters">{{ __("Reset") }}</button>
+                        <button type="button" class="lg:hidden inline-flex items-center justify-center w-9 h-9 -me-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500" @click="emit('close')">
+                            <span class="sr-only">{{ __("Close") }}</span>
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Search -->
@@ -38,15 +60,15 @@ const resetFilters = () => {
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                             </svg>
                         </span>
-                        <input :value="filters.search" @input="$emit('update:filters', { ...filters, search: $event.target.value })" type="text" :placeholder="__('Search here') + '...'" class="block w-full py-2 ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40" />
+                        <input :value="filters.search" type="text" :placeholder="__('Search here') + '...'" class="block w-full py-2 ltr:pl-10 ltr:pr-4 rtl:pr-10 rtl:pl-4 text-xs text-gray-700 bg-white border border-gray-200 rounded-lg dark:bg-gray-900 dark:text-gray-300 dark:border-gray-600 focus:border-emerald-400 focus:ring-emerald-300 focus:outline-none focus:ring focus:ring-opacity-40" @input="$emit('update:filters', { ...filters, search: $event.target.value })" />
                     </div>
                 </div>
 
                 <!-- Trash Filter -->
                 <div class="space-y-2 overflow-hidden">
                     <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Status") }}</label>
-                    <div class="flex bg-gray-50 border border-gray-200 divide-x rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse overflow-hidden h-9">
-                        <TrashFilter :model-value="filters.status" @update:model-value="status => $emit('update:filters', { ...filters, status })" class="w-full" />
+                    <div class="flex bg-gray-50 border border-gray-200 divide-x rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse overflow-hidden h-11">
+                        <TrashFilter :model-value="filters.status" class="w-full" @update:model-value="status => $emit('update:filters', { ...filters, status })" />
                     </div>
                 </div>
 
@@ -54,7 +76,7 @@ const resetFilters = () => {
                 <slot name="extra-filters"></slot>
 
                 <!-- Sorting -->
-                <div class="space-y-2" v-if="sortByOptions && sortByOptions.length">
+                <div v-if="sortByOptions && sortByOptions.length" class="space-y-2">
                     <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Sort By") }}</label>
                     <div class="space-y-2">
                         <CustomSelect
@@ -79,29 +101,29 @@ const resetFilters = () => {
                 </div>
 
                 <!-- Categories -->
-                <div class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800" v-if="categories && categories.length">
+                <div v-if="categories && categories.length" class="space-y-3 pt-4 border-t border-gray-100 dark:border-gray-800">
                     <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Categories") }}</label>
                     <div class="flex flex-col gap-y-1 max-h-64 overflow-y-auto custom-scrollbar pr-1">
                         <button
                             type="button"
-                            @click="$emit('update:filters', { ...filters, category: null })"
                             :class="[
                                 'text-start px-3 py-2 text-xs transition-all duration-200 rounded-t-lg',
                                 !filters.category ? 'bg-emerald-50 text-emerald-700 font-bold border-s-4 border-emerald-500' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                             ]"
+                            @click="$emit('update:filters', { ...filters, category: null })"
                         >
                             {{ allLabel }}
                         </button>
                         <button
-                            type="button"
                             v-for="(category, index) in categories"
                             :key="category.id"
-                            @click="$emit('update:filters', { ...filters, category: String(category.id) })"
+                            type="button"
                             :class="[
                                 'text-start px-3 py-2 text-xs transition-all duration-200',
                                 index === categories.length - 1 ? 'rounded-b-lg' : '',
                                 filters.category == category.id ? 'bg-emerald-50 text-emerald-700 font-bold border-s-4 border-emerald-500' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800'
                             ]"
+                            @click="$emit('update:filters', { ...filters, category: String(category.id) })"
                         >
                             {{ category.name }}
                         </button>
@@ -109,5 +131,6 @@ const resetFilters = () => {
                 </div>
             </div>
         </div>
-    </aside>
+        </aside>
+    </div>
 </template>

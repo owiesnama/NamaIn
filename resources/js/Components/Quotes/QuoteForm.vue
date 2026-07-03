@@ -241,13 +241,13 @@ const submit = () => {
 
                                 <div class="md:col-span-2">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Qty") }}</label>
-                                    <TextInput v-model="item.quantity" type="number" min="0.01" step="0.01" class="block w-full" required />
+                                    <TextInput v-model="item.quantity" type="number" inputmode="decimal" min="0.01" step="0.01" class="block w-full" required />
                                     <InputError :message="form.errors[`items.${index}.quantity`]" class="mt-1" />
                                 </div>
 
                                 <div class="md:col-span-2">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Unit price") }}</label>
-                                    <TextInput v-model="item.unit_price" type="number" min="0" step="0.01" class="block w-full" required />
+                                    <TextInput v-model="item.unit_price" type="number" inputmode="decimal" min="0" step="0.01" class="block w-full" required />
                                     <InputError :message="form.errors[`items.${index}.unit_price`]" class="mt-1" />
                                 </div>
 
@@ -354,7 +354,7 @@ const submit = () => {
 
                         <div>
                             <InputLabel :value="__('Discount')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                            <TextInput v-model="form.discount" type="number" min="0" step="0.01" class="block w-full" />
+                            <TextInput v-model="form.discount" type="number" inputmode="decimal" min="0" step="0.01" class="block w-full" />
                             <InputError :message="form.errors.discount" class="mt-1" />
                         </div>
 

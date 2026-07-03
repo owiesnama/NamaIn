@@ -44,7 +44,7 @@
         </div>
 
         <div
-            class="flex rtl:flex-row-reverse flex-row ltr:justify-end px-6 py-4 bg-gray-100 dark:bg-gray-900/40 text-right rtl:justify-start"
+            class="sticky bottom-0 flex rtl:flex-row-reverse flex-row ltr:justify-end px-6 py-4 bg-gray-100 dark:bg-gray-900/40 text-right rtl:justify-start"
             :dir="preferences('language') == 'ar' ? 'rtl' : 'ltr'"
         >
             <slot name="footer" />

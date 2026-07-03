@@ -205,7 +205,7 @@ const paymentMethodLabels = [
 
 <template>
     <AppLayout :title="__('POS Session')">
-        <div class="flex flex-col lg:flex-row h-[calc(100vh-120px)] gap-4">
+        <div class="flex flex-col md:flex-row h-[calc(100dvh-120px)] min-h-0 gap-4">
 
             <!-- Products column -->
             <div class="flex-grow flex flex-col min-w-0 gap-3">
@@ -221,7 +221,7 @@ const paymentMethodLabels = [
             </div>
 
             <!-- Cart Sidebar -->
-            <div class="w-full lg:w-96 flex flex-col bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
+            <div class="w-full md:w-80 lg:w-96 shrink-0 flex flex-col min-h-0 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-2xl shadow-sm overflow-hidden">
 
                 <!-- Cart header -->
                 <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
@@ -232,11 +232,11 @@ const paymentMethodLabels = [
                         <h2 class="text-base font-bold text-gray-900 dark:text-white">{{ __('Cart') }}</h2>
                         <span v-if="cart.length > 0" class="inline-flex items-center justify-center w-5 h-5 text-[10px] font-bold rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">{{ cart.length }}</span>
                     </div>
-                    <button @click="showingCloseModal = true" class="text-xs font-semibold text-red-500 hover:text-red-600 transition-colors uppercase tracking-wider">{{ __('Close Session') }}</button>
+                    <button @click="showingCloseModal = true" class="inline-flex items-center min-h-[44px] px-3 py-2 -me-2 text-xs font-semibold text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-red-500">{{ __('Close Session') }}</button>
                 </div>
 
                 <!-- Cart items -->
-                <div class="flex-grow overflow-y-auto p-4 space-y-2">
+                <div class="flex-grow overflow-y-auto overscroll-contain p-4 space-y-2">
                     <div v-if="cart.length === 0" class="h-full flex flex-col items-center justify-center text-center text-gray-400 py-12">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-12 h-12 mb-4 opacity-20">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
@@ -247,7 +247,7 @@ const paymentMethodLabels = [
                     <div v-for="(item, index) in cart" :key="index" class="flex flex-col p-3 rounded-xl border transition-colors" :class="item.sale_point_qty < item.quantity ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800' : 'bg-gray-50 dark:bg-gray-800/50 border-transparent'">
                         <div class="flex items-start justify-between gap-x-2 mb-2">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{{ item.name }}</p>
-                            <button @click="removeFromCart(index)" class="text-gray-300 hover:text-red-500 transition-colors shrink-0 mt-0.5">
+                            <button @click="removeFromCart(index)" class="flex items-center justify-center min-w-[44px] min-h-[44px] -m-2.5 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors shrink-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
                             </button>
                         </div>
@@ -258,17 +258,17 @@ const paymentMethodLabels = [
                             </select>
                             <div class="flex items-center gap-x-1 flex-1">
                                 <span class="text-[10px] text-gray-400 shrink-0">{{ currency }}</span>
-                                <input type="number" :value="item.price" @input="updateItemPrice(item, $event.target.value)" class="w-full text-xs py-1 px-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
+                                <input type="number" inputmode="decimal" :value="item.price" @input="updateItemPrice(item, $event.target.value)" class="w-full text-xs py-1 px-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-emerald-500 focus:border-emerald-500" />
                             </div>
                         </div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-x-1">
-                                <button @click="updateItemQuantity(item, -1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" /></svg>
+                                <button @click="updateItemQuantity(item, -1)" class="w-11 h-11 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" /></svg>
                                 </button>
-                                <input type="number" v-model.number="item.quantity" class="w-10 text-center text-sm font-bold py-1 px-0 bg-transparent border-0 focus:ring-0" min="1" />
-                                <button @click="updateItemQuantity(item, 1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
+                                <input type="number" inputmode="numeric" v-model.number="item.quantity" class="h-11 w-12 text-center text-base font-bold py-1 px-0 bg-transparent border-0 focus:ring-0" min="1" />
+                                <button @click="updateItemQuantity(item, 1)" class="w-11 h-11 flex items-center justify-center rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
                                 </button>
                             </div>
                             <span class="text-sm font-bold text-gray-900 dark:text-white">{{ fmt(item.quantity * item.price) }}</span>
@@ -300,7 +300,7 @@ const paymentMethodLabels = [
                                 <button type="button" class="px-2.5 py-1.5 text-xs font-semibold transition-colors" :class="discountType === 'percent' ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-50'" @click="discountType = 'percent'">%</button>
                                 <button type="button" class="px-2.5 py-1.5 text-xs font-semibold transition-colors" :class="discountType === 'flat' ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-50'" @click="discountType = 'flat'">{{ currency }}</button>
                             </div>
-                            <input v-model="discountValue" type="number" min="0" :max="discountType === 'percent' ? 100 : cartSubtotal" :placeholder="discountType === 'percent' ? '0' : '0.00'" class="flex-1 text-sm px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
+                            <input v-model="discountValue" type="number" inputmode="decimal" min="0" :max="discountType === 'percent' ? 100 : cartSubtotal" :placeholder="discountType === 'percent' ? '0' : '0.00'" class="flex-1 text-sm px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
                             <span v-if="discountAmount > 0" class="text-xs font-semibold text-red-500 shrink-0">-{{ fmt(discountAmount) }}</span>
                         </div>
                     </div>

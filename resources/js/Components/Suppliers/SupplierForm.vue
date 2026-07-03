@@ -188,7 +188,9 @@
                                     <TextInput
                                         id="phone"
                                         v-model="supplier.phone_number"
-                                        type="text"
+                                        type="tel"
+                                        inputmode="tel"
+                                        autocomplete="tel"
                                         class="block w-full mt-1"
                                         required
                                         autofocus
@@ -208,7 +210,7 @@
                                         <TextInput
                                             id="opening_debit"
                                             v-model="supplier.opening_debit"
-                                            type="number"
+                                            type="number" inputmode="decimal"
                                             step="0.01"
                                             class="block w-full mt-1"
                                             :disabled="props.supplier"
@@ -227,7 +229,7 @@
                                         <TextInput
                                             id="opening_credit"
                                             v-model="supplier.opening_credit"
-                                            type="number"
+                                            type="number" inputmode="decimal"
                                             step="0.01"
                                             class="block w-full mt-1"
                                             :disabled="props.supplier"

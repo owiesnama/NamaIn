@@ -1,5 +1,5 @@
 <script setup>
-    import { computed, ref } from "vue";
+    import { computed, ref, onMounted, onUnmounted } from "vue";
     import { router, Head, Link, usePage } from "@inertiajs/vue3";
     import ApplicationLogo from "@/Components/ApplicationLogo.vue";
     import Banner from "@/Components/Banner.vue";
@@ -24,6 +24,19 @@
     const logout = () => {
         router.post(route("admin.logout"));
     };
+
+    // Auto-close the mobile menu after navigating (tablet/mobile).
+    let stopNavigationListener = null;
+    onMounted(() => {
+        stopNavigationListener = router.on("navigate", () => {
+            showingSidebar.value = false;
+        });
+    });
+    onUnmounted(() => {
+        if (stopNavigationListener) {
+            stopNavigationListener();
+        }
+    });
 </script>
 
 <template>
@@ -32,13 +45,13 @@
 
         <Banner />
 
-        <div class="xl:flex xl:h-screen xl:overflow-hidden">
+        <div class="lg:flex lg:h-screen lg:overflow-hidden">
 
             <!-- SIDEBAR -->
-            <aside class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 xl:flex xl:w-64 xl:shrink-0 xl:flex-col xl:border-b-0 xl:border-e xl:border-e-gray-200 dark:xl:border-e-gray-700">
+            <aside class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 lg:flex lg:w-64 lg:shrink-0 lg:flex-col lg:border-b-0 lg:border-e lg:border-e-gray-200 dark:lg:border-e-gray-700">
 
                 <!-- Mobile header -->
-                <div class="flex h-14 shrink-0 items-center justify-between px-4 xl:hidden">
+                <div class="flex h-14 shrink-0 items-center justify-between px-4 lg:hidden">
                     <Link :href="route('admin.dashboard')" class="inline-flex items-center gap-x-2">
                         <ApplicationLogo class="h-8 w-auto" />
                         <span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">Admin</span>
@@ -57,7 +70,7 @@
                 </div>
 
                 <!-- Desktop logo header -->
-                <div class="hidden h-16 shrink-0 items-center justify-center border-b border-gray-100 px-5 dark:border-gray-800 xl:flex">
+                <div class="hidden h-16 shrink-0 items-center justify-center border-b border-gray-100 px-5 dark:border-gray-800 lg:flex">
                     <Link :href="route('admin.dashboard')" class="group inline-flex items-center gap-x-2.5">
                         <ApplicationLogo class="h-8 w-auto transition-transform duration-200 group-hover:scale-105" />
                         <span class="text-xl font-bold tracking-tight text-gray-900 dark:text-white">NamaIn</span>
@@ -67,7 +80,7 @@
                 <!-- Nav body -->
                 <div
                     :class="showingSidebar ? 'block' : 'hidden'"
-                    class="xl:flex xl:flex-1 xl:flex-col xl:overflow-y-auto px-4 py-5"
+                    class="lg:flex lg:flex-1 lg:flex-col lg:overflow-y-auto px-4 py-5"
                 >
                     <!-- Admin badge -->
                     <div class="mb-4 flex items-center gap-x-2 px-3">
@@ -187,7 +200,7 @@
                 <!-- User footer -->
                 <div
                     :class="showingSidebar ? 'block' : 'hidden'"
-                    class="xl:block shrink-0 border-t border-gray-100 dark:border-gray-800"
+                    class="lg:block shrink-0 border-t border-gray-100 dark:border-gray-800"
                 >
                     <div class="flex items-center gap-x-3 px-4 py-3">
                         <div
@@ -201,10 +214,10 @@
                         </div>
                         <button
                             type="button"
-                            class="inline-flex items-center justify-center rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors duration-200 focus:outline-none"
+                            class="inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-lg p-2.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                             @click.prevent="logout"
                         >
-                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
                             </svg>
                         </button>
@@ -213,8 +226,8 @@
             </aside>
 
             <!-- CONTENT AREA -->
-            <div class="flex min-h-0 flex-1 flex-col xl:overflow-hidden">
-                <main class="xl:flex-1 xl:overflow-y-auto">
+            <div class="flex min-h-0 flex-1 flex-col lg:overflow-hidden">
+                <main class="lg:flex-1 lg:overflow-y-auto">
                     <div class="px-4 py-10 sm:px-6 lg:px-8 2xl:container 2xl:mx-auto">
                         <Flash />
                         <ErrorToast />

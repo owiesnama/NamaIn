@@ -182,7 +182,7 @@
                 <TextInput
                     id="pecentage"
                     v-model="form.pecentage"
-                    type="number"
+                    type="number" inputmode="decimal"
                     min="0"
                     max="100"
                     placeholder="60"

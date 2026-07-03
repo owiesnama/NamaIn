@@ -54,7 +54,7 @@ const submit = () => {
 </script>
 
 <template>
-    <DialogModal :show="show" @close="close">
+    <DialogModal :show="show" :closeable="false" @close="close">
         <template #title>
             {{ __("Add New") }} {{ type === 'customer' ? __("Customer") : __("Supplier") }}
         </template>
@@ -79,7 +79,9 @@ const submit = () => {
                     <TextInput
                         id="phone_number"
                         v-model="form.phone_number"
-                        type="text"
+                        type="tel"
+                        inputmode="tel"
+                        autocomplete="tel"
                         class="mt-1 block w-full"
                         required
                     />

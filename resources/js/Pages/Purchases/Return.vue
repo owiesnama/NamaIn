@@ -111,7 +111,7 @@ const submit = () => {
                                     <td class="px-6 py-4">
                                         <div class="flex justify-center">
                                             <TextInput
-                                                type="number"
+                                                type="number" inputmode="decimal"
                                                 v-model="item.quantity"
                                                 min="0"
                                                 :max="item.max_quantity"
@@ -209,7 +209,7 @@ const submit = () => {
                         <div>
                             <InputLabel :value="__('Refund Amount')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
                             <TextInput
-                                type="number"
+                                type="number" inputmode="decimal"
                                 v-model="form.refund_amount"
                                 min="0"
                                 :max="totalReturn"

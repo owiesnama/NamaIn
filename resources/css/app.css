@@ -11,6 +11,17 @@
     color-scheme: light dark;
 }
 
+/* On touch devices (tablets/phones) iOS zooms the page in when focusing an
+   input whose font-size is below 16px. Enforce a 16px minimum on coarse
+   pointers to disable that zoom-on-focus behaviour. */
+@media (pointer: coarse) {
+    input,
+    select,
+    textarea {
+        font-size: 16px;
+    }
+}
+
 
 /* Vue Multiselect Global Styling - Flat & Simple with RTL/LTR Support */
 .multiselect {

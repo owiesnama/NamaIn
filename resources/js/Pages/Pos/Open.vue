@@ -58,7 +58,7 @@ const submit = () => {
                             <TextInput
                                 id="opening_float"
                                 v-model="form.opening_float"
-                                type="number"
+                                type="number" inputmode="decimal"
                                 step="0.01"
                                 class="block w-full ltr:ps-12 rtl:pe-12"
                                 required

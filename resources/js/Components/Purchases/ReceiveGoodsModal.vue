@@ -64,7 +64,7 @@ const submit = () => {
                         <TextInput
                             id="quantity"
                             v-model.number="form.quantity"
-                            type="number"
+                            type="number" inputmode="decimal"
                             class="mt-1 block w-full"
                             required
                             :max="transaction.remaining_quantity"

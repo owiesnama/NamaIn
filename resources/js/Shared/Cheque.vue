@@ -255,7 +255,7 @@
                     <InputLabel for="cleared_amount" :value="__('Cleared Amount')" />
                     <TextInput
                         id="cleared_amount"
-                        type="number"
+                        type="number" inputmode="decimal"
                         class="mt-1 block w-full"
                         v-model="form.cleared_amount"
                         step="0.01"

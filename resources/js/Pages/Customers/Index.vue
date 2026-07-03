@@ -10,6 +10,7 @@
     import { useQueryString } from "@/Composables/useQueryString";
     import { usePermissions } from "@/Composables/usePermissions";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import ImportModal from "@/Shared/ImportModal.vue";
     import Tooltip from "@/Components/Tooltip.vue";
     import { useDate } from '@/Composables/useDate';
@@ -31,7 +32,7 @@
 
     const { formatDate } = useDate();
 
-    const showSidebar = ref(true);
+    const showSidebar = useFilterSidebar();
 
     const showImportModal = ref(false);
 
@@ -179,6 +180,7 @@
                 <!-- Sidebar -->
                 <FilterSidebar
                     v-if="showSidebar"
+                    @close="showSidebar = false"
                     v-model:filters="filters"
                     :categories="categories"
                     :sort-by-options="sortByOptions"
@@ -254,9 +256,9 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
-                                        <div class="flex items-center justify-end gap-x-2">
-                                            <Link @click.stop :href="route('customers.account', customer.id)" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Statement')">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                                        <div class="flex items-center justify-end gap-x-3">
+                                            <Link @click.stop :href="route('customers.account', customer.id)" class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Statement')">
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                                                 </svg>
                                             </Link>

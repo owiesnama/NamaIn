@@ -161,7 +161,7 @@
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 rtl:text-right">{{ __('Keep Last') }}</label>
                         <input
                             v-model.number="settingsForm.retention_count"
-                            type="number"
+                            type="number" inputmode="decimal"
                             min="1"
                             max="100"
                             class="w-20 px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"

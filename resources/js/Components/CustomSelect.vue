@@ -425,7 +425,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    min-height: 42px;
+    min-height: 44px;
     padding: 0.5rem 0.75rem;
     padding-inline-end: 2.5rem;
     border: 1px solid rgb(229 231 235);
@@ -505,6 +505,13 @@ onBeforeUnmount(() => {
     color: rgb(17 24 39);
 }
 
+@media (pointer: coarse) {
+    .custom-select__search-input,
+    .custom-select__option {
+        font-size: 16px;
+    }
+}
+
 .custom-select__search-input:focus {
     outline: none;
     border-color: rgb(16 185 129);
@@ -524,7 +531,7 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 1rem;
     font-size: 0.875rem;
     color: rgb(17 24 39);
     cursor: pointer;

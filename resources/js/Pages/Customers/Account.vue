@@ -405,7 +405,7 @@ const formatDate = (dateString) => {
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right mb-1">{{ __("Amount") }}</label>
                                 <input
                                     v-model="advanceForm.amount"
-                                    type="number"
+                                    type="number" inputmode="decimal"
                                     step="0.01"
                                     min="0.01"
                                     required
@@ -537,7 +537,7 @@ const formatDate = (dateString) => {
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right mb-1">{{ __("Settlement Amount") }}</label>
                                         <input
                                             v-model="settleForm.amount"
-                                            type="number"
+                                            type="number" inputmode="decimal"
                                             step="0.01"
                                             :max="settlingAdvance.remaining_balance"
                                             min="0.01"
@@ -566,7 +566,7 @@ const formatDate = (dateString) => {
                                         </label>
                                         <input
                                             v-model="settleForm.invoice_id"
-                                            type="number"
+                                            type="number" inputmode="decimal"
                                             placeholder="Invoice ID"
                                             class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600"
                                         />

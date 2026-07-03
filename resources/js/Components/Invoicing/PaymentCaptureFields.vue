@@ -70,7 +70,7 @@
 
         <div>
             <InputLabel for="initial_payment" :value="__('Payment')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-            <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" min="0" step="0.01" class="block w-full" :placeholder="__('Leave empty for no payment')" />
+            <TextInput id="initial_payment" v-model="form.initial_payment_amount" type="number" inputmode="decimal" min="0" step="0.01" class="block w-full" :placeholder="__('Leave empty for no payment')" />
             <InputError :message="form.errors.initial_payment_amount" class="mt-1" />
         </div>
 

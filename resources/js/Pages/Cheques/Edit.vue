@@ -256,7 +256,7 @@
                                 <div class="relative mt-1">
                                     <TextInput
                                         v-model="form.amount"
-                                        type="number"
+                                        type="number" inputmode="decimal"
                                         step="0.01"
                                         class="w-full pr-12 text-lg font-bold"
                                         :class="isCredit(form) ? 'text-emerald-600 focus:border-emerald-500' : 'text-red-600 focus:border-red-500'"

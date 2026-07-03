@@ -268,7 +268,7 @@ const submit = () => {
                     <TextInput
                         id="amount"
                         v-model="form.amount"
-                        type="number"
+                        type="number" inputmode="decimal"
                         step="0.01"
                         class="block w-full"
                         required

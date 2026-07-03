@@ -4,6 +4,7 @@ import { Link, router } from "@inertiajs/vue3";
 import Pagination from "@/Shared/Pagination.vue";
 import EmptySearch from "@/Shared/EmptySearch.vue";
 import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 import DatePicker from "@/Components/DatePicker.vue";
 import { watch, ref, computed, onMounted, onUnmounted } from "vue";
 import { useQueryString } from "@/Composables/useQueryString";
@@ -16,7 +17,7 @@ const props = defineProps({
     payment_methods: [Object, Array],
 });
 
-const showSidebar = ref(true);
+const showSidebar = useFilterSidebar();
 const selectedPayment = ref(null);
 
 const filters = ref({
@@ -262,6 +263,7 @@ watch(
             <!-- Sidebar -->
             <FilterSidebar
                 v-if="showSidebar"
+                @close="showSidebar = false"
                 v-model:filters="filters"
                 :sort-by-options="sortByOptions"
                 :all-label="__('All Payments')"
@@ -271,7 +273,7 @@ watch(
                     <!-- Direction Pills -->
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Direction") }}</label>
-                        <div class="flex bg-gray-50 border border-gray-200 divide-x divide-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse rtl:divide-x-reverse h-9">
+                        <div class="flex bg-gray-50 border border-gray-200 divide-x divide-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse rtl:divide-x-reverse h-11">
                             <button
                                 v-for="opt in [
                                     { label: __('All'), value: null },
@@ -333,7 +335,7 @@ watch(
                     <!-- Party Type Pills -->
                     <div class="space-y-2">
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Party Type") }}</label>
-                        <div class="flex bg-gray-50 border border-gray-200 divide-x divide-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse rtl:divide-x-reverse h-9">
+                        <div class="flex bg-gray-50 border border-gray-200 divide-x divide-gray-200 rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse rtl:divide-x-reverse h-11">
                             <button
                                 v-for="opt in [
                                     { label: __('All'), value: null },
@@ -367,56 +369,56 @@ watch(
                                 <tr>
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         #
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Party") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Amount") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Method") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Treasury") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Reference") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Invoice Balance") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-6 py-4 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Date") }}
                                     </th>
@@ -435,11 +437,11 @@ watch(
                                     class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer"
                                     @click="selectedPayment = payment"
                                 >
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                                         {{ payment.id }}
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm">
                                         <div class="flex flex-col">
                                             <span class="font-medium text-gray-900 dark:text-white">
                                                 {{
@@ -461,7 +463,7 @@ watch(
                                         </div>
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm font-semibold">
                                         <div class="flex items-center gap-x-1.5">
                                             <span
                                                 class="inline-flex items-center justify-center w-5 h-5 rounded-full shrink-0"
@@ -514,7 +516,7 @@ watch(
                                         </div>
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm">
                                         <span
                                             class="px-2 py-1 text-xs rounded-full"
                                             :class="{
@@ -533,20 +535,20 @@ watch(
                                     </td>
 
                                     <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
                                     >
                                         {{ payment.treasury_account?.name ?? "—" }}
                                     </td>
 
                                     <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
                                     >
                                         <span class="truncate max-w-[120px] block">
                                             {{ payment.reference ?? "—" }}
                                         </span>
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm">
                                         <template v-if="payment.invoice">
                                             <span
                                                 :class="payment.invoice.remaining_balance > 0
@@ -560,15 +562,15 @@ watch(
                                     </td>
 
                                     <td
-                                        class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
+                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
                                     >
                                         {{ formatDate(payment.paid_at) }}
                                     </td>
 
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-end">
+                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-end">
                                         <button
                                             @click.stop="selectedPayment = payment"
-                                            class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
+                                            class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
                                             :title="__('Details')"
                                         >
                                             <svg
@@ -577,7 +579,7 @@ watch(
                                                 viewBox="0 0 24 24"
                                                 stroke-width="1.5"
                                                 stroke="currentColor"
-                                                class="w-4 h-4 rtl:rotate-180"
+                                                class="w-5 h-5 rtl:rotate-180"
                                             >
                                                 <path
                                                     stroke-linecap="round"

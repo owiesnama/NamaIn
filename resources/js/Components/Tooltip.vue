@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 
 defineProps({
     text: {
@@ -13,6 +13,33 @@ defineProps({
 });
 
 const show = ref(false);
+const root = ref(null);
+
+// Tablets have no hover, so support tap-to-toggle with tap-away to close,
+// while keeping the hover behaviour intact for pointer devices.
+const onDocumentClick = (event) => {
+    if (root.value && !root.value.contains(event.target)) {
+        close();
+    }
+};
+
+const open = () => {
+    if (show.value) return;
+    show.value = true;
+    document.addEventListener('click', onDocumentClick);
+};
+
+const close = () => {
+    if (!show.value) return;
+    show.value = false;
+    document.removeEventListener('click', onDocumentClick);
+};
+
+const toggle = () => {
+    show.value ? close() : open();
+};
+
+onUnmounted(() => document.removeEventListener('click', onDocumentClick));
 
 const positionClasses = {
     top: 'bottom-full left-1/2 -translate-x-1/2 mb-2',
@@ -30,7 +57,7 @@ const arrowClasses = {
 </script>
 
 <template>
-    <div class="relative inline-block" @mouseenter="show = true" @mouseleave="show = false">
+    <div ref="root" class="relative inline-block" @mouseenter="open" @mouseleave="close" @click="toggle">
         <slot />
 
         <div v-if="show"

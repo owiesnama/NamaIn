@@ -102,7 +102,7 @@ const submit = () => {
                         </label>
                         <input
                             v-model.number="form.new_quantity"
-                            type="number"
+                            type="number" inputmode="decimal"
                             min="0"
                             :disabled="selectedStorageId === null"
                             class="mt-1 w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
