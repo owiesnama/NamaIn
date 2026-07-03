@@ -363,15 +363,22 @@ Route::middleware([ResolveTenant::class])->group(function () {
         */
         Route::prefix('reports')->middleware('can:reports.view')->group(function () {
             Route::get('/', [Reports\ReportsIndexController::class, 'index'])->name('reports.index');
-            Route::get('/sales', Reports\ReportController::class)->defaults('report', 'sales')->name('reports.sales');
-            Route::get('/purchases', [Reports\PurchaseReportController::class, 'index'])->name('reports.purchases');
-            Route::get('/pos-sessions', [Reports\PosSessionReportController::class, 'index'])->name('reports.pos-sessions');
-            Route::get('/inventory-valuation', [Reports\InventoryValuationController::class, 'index'])->name('reports.inventory-valuation');
-            Route::get('/customer-aging', [Reports\CustomerAgingController::class, 'index'])->name('reports.customer-aging');
-            Route::get('/supplier-aging', [Reports\SupplierAgingController::class, 'index'])->name('reports.supplier-aging');
-            Route::get('/treasury-reconciliation', [Reports\TreasuryReconciliationController::class, 'index'])->name('reports.treasury');
-            Route::get('/expense-summary', [Reports\ExpenseSummaryController::class, 'index'])->name('reports.expenses');
-            Route::get('/profit-and-loss', [Reports\ProfitAndLossController::class, 'index'])->name('reports.pnl');
+
+            $reportRoutes = [
+                'sales' => 'reports.sales',
+                'purchases' => 'reports.purchases',
+                'pos-sessions' => 'reports.pos-sessions',
+                'inventory-valuation' => 'reports.inventory-valuation',
+                'customer-aging' => 'reports.customer-aging',
+                'supplier-aging' => 'reports.supplier-aging',
+                'treasury-reconciliation' => 'reports.treasury',
+                'expense-summary' => 'reports.expenses',
+                'profit-and-loss' => 'reports.pnl',
+            ];
+
+            foreach ($reportRoutes as $slug => $name) {
+                Route::get("/{$slug}", Reports\ReportController::class)->defaults('report', $slug)->name($name);
+            }
         });
 
         /*

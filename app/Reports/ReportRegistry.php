@@ -13,7 +13,23 @@ class ReportRegistry
      */
     private const REPORTS = [
         'sales' => SalesReport::class,
+        'purchases' => PurchaseReport::class,
+        'pos-sessions' => PosSessionReport::class,
+        'inventory-valuation' => InventoryValuationReport::class,
+        'customer-aging' => CustomerAgingReport::class,
+        'supplier-aging' => SupplierAgingReport::class,
+        'treasury-reconciliation' => TreasuryReconciliationReport::class,
+        'expense-summary' => ExpenseSummaryReport::class,
+        'profit-and-loss' => ProfitAndLossReport::class,
     ];
+
+    /**
+     * @return array<int, string>
+     */
+    public static function slugs(): array
+    {
+        return array_keys(self::REPORTS);
+    }
 
     public function __construct(private Container $container) {}
 
