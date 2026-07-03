@@ -86,6 +86,8 @@ const formatCurrency = (amount, currency = null) => {
     return new Intl.NumberFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
         style: "currency",
         currency: validCurrency,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2,
     }).format(amount || 0);
 };
 
@@ -173,7 +175,7 @@ watch(
             <div
                 class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex items-center gap-x-4"
             >
-                <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 flex-shrink-0">
+                <div class="hidden lg:block p-2 rounded-lg bg-emerald-500/10 text-emerald-600 flex-shrink-0">
                     <svg
                         class="w-5 h-5"
                         xmlns="http://www.w3.org/2000/svg"
@@ -189,7 +191,7 @@ watch(
                     <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                         {{ __("Total IN") }}
                     </p>
-                    <p class="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1 tracking-tight">
+                    <p class="text-base lg:text-lg xl:text-xl break-all font-bold text-emerald-600 dark:text-emerald-400 mt-1 tracking-tight">
                         {{ formatCurrency(summary.total_in) }}
                     </p>
                 </div>
@@ -199,7 +201,7 @@ watch(
             <div
                 class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex items-center gap-x-4"
             >
-                <div class="p-2 rounded-lg bg-red-500/10 text-red-600 flex-shrink-0">
+                <div class="hidden lg:block p-2 rounded-lg bg-red-500/10 text-red-600 flex-shrink-0">
                     <svg
                         class="w-5 h-5"
                         xmlns="http://www.w3.org/2000/svg"
@@ -215,7 +217,7 @@ watch(
                     <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
                         {{ __("Total OUT") }}
                     </p>
-                    <p class="text-xl font-bold text-red-600 dark:text-red-400 mt-1 tracking-tight">
+                    <p class="text-base lg:text-lg xl:text-xl break-all font-bold text-red-600 dark:text-red-400 mt-1 tracking-tight">
                         {{ formatCurrency(summary.total_out) }}
                     </p>
                 </div>
@@ -225,7 +227,7 @@ watch(
             <div
                 class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex items-center gap-x-4"
             >
-                <div class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex-shrink-0">
+                <div class="hidden lg:block p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex-shrink-0">
                     <svg
                         class="w-5 h-5"
                         xmlns="http://www.w3.org/2000/svg"
@@ -246,7 +248,7 @@ watch(
                         {{ __("Net") }}
                     </p>
                     <p
-                        class="text-xl font-bold mt-1 tracking-tight"
+                        class="text-base lg:text-lg xl:text-xl break-all font-bold mt-1 tracking-tight"
                         :class="netAmount > 0
                             ? 'text-emerald-600 dark:text-emerald-400'
                             : netAmount < 0
@@ -397,14 +399,14 @@ watch(
 
                                     <th
                                         scope="col"
-                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="hidden lg:table-cell px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Treasury") }}
                                     </th>
 
                                     <th
                                         scope="col"
-                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
+                                        class="hidden lg:table-cell px-3 py-4 lg:px-6 whitespace-nowrap text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"
                                     >
                                         {{ __("Reference") }}
                                     </th>
@@ -535,13 +537,13 @@ watch(
                                     </td>
 
                                     <td
-                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
+                                        class="hidden lg:table-cell px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
                                     >
                                         {{ payment.treasury_account?.name ?? "—" }}
                                     </td>
 
                                     <td
-                                        class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
+                                        class="hidden lg:table-cell px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300"
                                     >
                                         <span class="truncate max-w-[120px] block">
                                             {{ payment.reference ?? "—" }}
