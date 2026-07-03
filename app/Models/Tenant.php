@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Schema;
 
 class Tenant extends Model
 {
@@ -42,6 +43,16 @@ class Tenant extends Model
     protected static function booted(): void
     {
         static::unguard();
+
+        // Every tenant owns a reserved cloud register (R0) that numbers all
+        // cloud-web sales. Guarded so historical migrations that create tenants
+        // before the registers table exists do not fail; those tenants are
+        // provisioned by the dedicated seed migration instead.
+        static::created(function (Tenant $tenant): void {
+            if (Schema::hasTable('registers')) {
+                Register::cloudRegisterFor($tenant);
+            }
+        });
     }
 
     /**
