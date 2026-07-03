@@ -363,7 +363,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         */
         Route::prefix('reports')->middleware('can:reports.view')->group(function () {
             Route::get('/', [Reports\ReportsIndexController::class, 'index'])->name('reports.index');
-            Route::get('/sales', [Reports\SalesReportController::class, 'index'])->name('reports.sales');
+            Route::get('/sales', Reports\ReportController::class)->defaults('report', 'sales')->name('reports.sales');
             Route::get('/purchases', [Reports\PurchaseReportController::class, 'index'])->name('reports.purchases');
             Route::get('/pos-sessions', [Reports\PosSessionReportController::class, 'index'])->name('reports.pos-sessions');
             Route::get('/inventory-valuation', [Reports\InventoryValuationController::class, 'index'])->name('reports.inventory-valuation');
