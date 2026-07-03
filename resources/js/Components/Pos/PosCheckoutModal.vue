@@ -22,6 +22,21 @@ const changeAmount = computed(() => {
     return tendered > 0 ? Math.max(0, tendered - props.total) : null;
 });
 
+// Shortcut cash amounts: the exact total plus the next round-up for common
+// denominations, so cashiers can set the tendered amount in a single tap.
+const quickTenderOptions = computed(() => {
+    const total = props.total || 0;
+    if (total <= 0) return [];
+    const roundUpTo = (step) => Math.ceil(total / step) * step;
+    const rounded = [roundUpTo(5), roundUpTo(10), roundUpTo(50)]
+        .filter((value) => value > total);
+    return [...new Set(rounded)].slice(0, 3);
+});
+
+const setCashTendered = (value) => {
+    cashTendered.value = String(value);
+};
+
 const paymentMethods = [
     { value: 'cash', label: __('Cash'), icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0 1 15.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 0 1 3 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 0 0-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 0 1-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 0 0 3 15h-.75M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Zm3 0h.008v.008H18V10.5Zm-12 0h.008v.008H6V10.5Z" />`, color: 'emerald' },
     { value: 'bank_transfer', label: __('Bank Transfer'), icon: `<path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 0 0 2.25-2.25V6.75A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25v10.5A2.25 2.25 0 0 0 4.5 19.5Z" />`, color: 'blue' },
@@ -52,8 +67,8 @@ defineExpose({ reset, selectedPaymentMethod, changeAmount });
 <template>
     <Teleport to="body">
         <Transition enter-active-class="ease-out duration-200" enter-from-class="opacity-0" enter-to-class="opacity-100" leave-active-class="ease-in duration-150" leave-from-class="opacity-100" leave-to-class="opacity-0">
-            <div v-if="show" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center px-4 pb-4 sm:pb-0">
-                <div class="fixed inset-0 bg-gray-500/20 dark:bg-gray-900/60 backdrop-blur-sm" @click="emit('close')" />
+            <div v-if="show" class="fixed inset-0 z-50 flex items-end lg:items-center justify-center px-4 pb-4 lg:pb-0">
+                <div class="fixed inset-0 bg-gray-500/20 dark:bg-gray-900/60 backdrop-blur-sm" />
                 <Transition enter-active-class="ease-out duration-200" enter-from-class="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enter-to-class="opacity-100 translate-y-0 sm:scale-100">
                     <div v-if="show" class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-sm p-6">
                         <div class="text-center mb-6">
@@ -81,7 +96,11 @@ defineExpose({ reset, selectedPaymentMethod, changeAmount });
                             <div v-if="selectedPaymentMethod === 'cash'" class="mb-5 space-y-3">
                                 <div>
                                     <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">{{ __('Amount Tendered') }}</label>
-                                    <input v-model="cashTendered" type="number" min="0" step="0.01" :placeholder="fmt(total)" class="w-full px-4 py-3 text-lg font-semibold text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
+                                    <div class="flex flex-wrap gap-2 mb-2">
+                                        <button type="button" class="min-h-[44px] px-3 py-2 text-sm font-semibold rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500" @click="setCashTendered(total)">{{ __('Exact') }}</button>
+                                        <button v-for="amount in quickTenderOptions" :key="amount" type="button" class="min-h-[44px] px-3 py-2 text-sm font-semibold rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500" @click="setCashTendered(amount)">{{ fmt(amount) }}</button>
+                                    </div>
+                                    <input v-model="cashTendered" type="number" inputmode="decimal" min="0" step="0.01" :placeholder="fmt(total)" class="w-full px-4 py-3 text-lg font-semibold text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
                                 </div>
                                 <div v-if="changeAmount !== null" class="flex items-center justify-between px-4 py-3 rounded-xl" :class="changeAmount >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-red-50 dark:bg-red-900/20'">
                                     <span class="text-sm font-semibold" :class="changeAmount >= 0 ? 'text-emerald-700 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'">{{ __('Change Due') }}</span>

@@ -124,7 +124,7 @@ onUnmounted(() => {
             </div>
         </div>
 
-        <div class="flex-grow overflow-y-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-1 auto-rows-max">
+        <div class="flex-grow overflow-y-auto overscroll-contain grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 p-1 auto-rows-max">
             <button
                 v-for="product in products"
                 :key="product.id"

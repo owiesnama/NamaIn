@@ -69,7 +69,7 @@ const submit = () => {
                         <TextInput
                             id="new_quantity"
                             v-model.number="form.new_quantity"
-                            type="number"
+                            type="number" inputmode="decimal"
                             class="mt-1 block w-full rounded-xl py-3"
                             required
                         />

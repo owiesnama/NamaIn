@@ -9,6 +9,7 @@
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import { useQueryString } from "@/Composables/useQueryString";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import ImportModal from "@/Shared/ImportModal.vue";
     import Tooltip from "@/Components/Tooltip.vue";
     import { useDate } from '@/Composables/useDate';
@@ -28,7 +29,7 @@
 
     const { formatDate } = useDate();
 
-    const showSidebar = ref(true);
+    const showSidebar = useFilterSidebar();
     const showImportModal = ref(false);
 
     const importForm = useForm({
@@ -156,6 +157,7 @@
                 <!-- Sidebar -->
                 <FilterSidebar
                     v-if="showSidebar"
+                    @close="showSidebar = false"
                     v-model:filters="filters"
                     :categories="categories"
                     :sort-by-options="sortByOptions"

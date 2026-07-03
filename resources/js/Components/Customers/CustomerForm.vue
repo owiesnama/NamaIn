@@ -189,7 +189,9 @@
                                     <TextInput
                                         id="phone"
                                         v-model="customer.phone_number"
-                                        type="text"
+                                        type="tel"
+                                        inputmode="tel"
+                                        autocomplete="tel"
                                         class="block w-full mt-1"
                                         required
                                         autofocus
@@ -208,7 +210,7 @@
                                     <TextInput
                                         id="credit_limit"
                                         v-model="customer.credit_limit"
-                                        type="number"
+                                        type="number" inputmode="decimal"
                                         step="0.01"
                                         class="block w-full mt-1"
                                         required
@@ -228,7 +230,7 @@
                                         <TextInput
                                             id="opening_debit"
                                             v-model="customer.opening_debit"
-                                            type="number"
+                                            type="number" inputmode="decimal"
                                             step="0.01"
                                             class="block w-full mt-1"
                                             :disabled="props.customer"
@@ -247,7 +249,7 @@
                                         <TextInput
                                             id="opening_credit"
                                             v-model="customer.opening_credit"
-                                            type="number"
+                                            type="number" inputmode="decimal"
                                             step="0.01"
                                             class="block w-full mt-1"
                                             :disabled="props.customer"

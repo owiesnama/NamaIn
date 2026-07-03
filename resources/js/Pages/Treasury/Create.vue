@@ -167,7 +167,7 @@ watch(() => form.bank_id, (bankId) => {
                             <TextInput
                                 id="opening_balance"
                                 v-model="form.opening_balance"
-                                type="number"
+                                type="number" inputmode="decimal"
                                 min="0"
                                 step="0.01"
                                 class="mt-1 block w-full"

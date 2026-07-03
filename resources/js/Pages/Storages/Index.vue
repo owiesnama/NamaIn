@@ -6,6 +6,7 @@
     import StorageForm from "@/Components/Storages/StorageForm.vue";
     import DeleteStorage from "@/Components/Storages/DeleteStorage.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import { watch, ref } from "vue";
     import debounce from "lodash/debounce";
     import { router, Link } from "@inertiajs/vue3";
@@ -28,7 +29,7 @@
 
     const { formatDate } = useDate();
 
-    const showSidebar = ref(true);
+    const showSidebar = useFilterSidebar();
 
     const filters = ref({
         search: useQueryString("search").value,
@@ -107,6 +108,7 @@
                 <!-- Sidebar -->
                 <FilterSidebar
                     v-if="showSidebar"
+                    @close="showSidebar = false"
                     v-model:filters="filters"
                     :sort-by-options="sortByOptions"
                     :all-label="__('All Storages')"

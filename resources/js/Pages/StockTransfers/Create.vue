@@ -145,7 +145,7 @@ const submit = () => {
                                 <InputLabel :value="__('Quantity')" class="mb-1" />
                                 <TextInput
                                     v-model.number="item.quantity"
-                                    type="number"
+                                    type="number" inputmode="decimal"
                                     class="w-full"
                                     min="1"
                                     required

@@ -72,7 +72,7 @@ const closeSession = () => form.post(route('pos.close'));
             <div class="space-y-4">
                 <div>
                     <InputLabel for="closing_float" :value="__('Actual Cash in Hand')" />
-                    <TextInput v-model="form.closing_float" id="closing_float" type="number" step="0.01" min="0" class="mt-1 block w-full rounded-xl" :placeholder="sessionStats ? String(sessionStats.expected_closing_float) : '0.00'" />
+                    <TextInput v-model="form.closing_float" id="closing_float" type="number" inputmode="decimal" step="0.01" min="0" class="mt-1 block w-full rounded-xl" :placeholder="sessionStats ? String(sessionStats.expected_closing_float) : '0.00'" />
                     <InputError :message="form.errors.closing_float" class="mt-1" />
                 </div>
                 <div v-if="liveVariance !== null" class="flex items-center justify-between rounded-xl px-4 py-3 transition-colors" :class="liveVariance < 0 ? 'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800' : 'bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800'">

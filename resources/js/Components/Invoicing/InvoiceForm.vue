@@ -219,7 +219,7 @@
                         </span>
                     </div>
 
-                    <div class="hidden md:grid md:grid-cols-12 gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-900/50 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700">
+                    <div class="hidden lg:grid lg:grid-cols-12 gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-900/50 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 border-b border-gray-100 dark:border-gray-700">
                         <div class="col-span-4">{{ __("Product") }}</div>
                         <div class="col-span-2">{{ __("Unit") }}</div>
                         <div class="col-span-2">{{ __("Qty") }}</div>
@@ -229,9 +229,9 @@
 
                     <div class="divide-y divide-gray-50 dark:divide-gray-700/50" v-auto-animate>
                         <div v-for="(item, index) in lineItems" :key="index" class="px-5 py-4">
-                            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
-                                <div class="md:col-span-4">
-                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
+                            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-start">
+                                <div class="lg:col-span-4">
+                                    <label class="lg:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
                                     <CustomSelect
                                         v-model="item.product"
                                         :options="productOptions"
@@ -250,8 +250,8 @@
                                     <InputError :message="form.errors[`products.${index}.product`]" class="mt-1" />
                                 </div>
 
-                                <div class="md:col-span-2">
-                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Unit") }}</label>
+                                <div class="lg:col-span-2">
+                                    <label class="lg:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Unit") }}</label>
                                     <CustomSelect
                                         v-model="item.unit"
                                         :options="productUnits(item.product) || []"
@@ -266,30 +266,30 @@
                                     <InputError :message="form.errors[`products.${index}.unit`]" class="mt-1" />
                                 </div>
 
-                                <div class="md:col-span-2">
-                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Qty") }}</label>
-                                    <TextInput v-model="item.quantity" type="number" min="0.01" step="0.01" class="block w-full" required />
+                                <div class="lg:col-span-2">
+                                    <label class="lg:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Qty") }}</label>
+                                    <TextInput v-model="item.quantity" type="number" inputmode="numeric" min="0.01" step="0.01" class="block w-full" required />
                                     <InputError :message="form.errors[`products.${index}.quantity`]" class="mt-1" />
                                 </div>
 
-                                <div class="md:col-span-2">
-                                    <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Price") }}</label>
-                                    <TextInput v-model="item.price" type="number" min="0" step="0.01" class="block w-full" required />
+                                <div class="lg:col-span-2">
+                                    <label class="lg:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Price") }}</label>
+                                    <TextInput v-model="item.price" type="number" inputmode="decimal" min="0" step="0.01" class="block w-full" required />
                                     <InputError :message="form.errors[`products.${index}.price`]" class="mt-1" />
                                 </div>
 
-                                <div class="md:col-span-2 flex items-center justify-between md:justify-end gap-2 md:pt-1.5">
+                                <div class="lg:col-span-2 flex items-center justify-between lg:justify-end gap-2 lg:pt-1.5">
                                     <div>
-                                        <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Total") }}</label>
+                                        <label class="lg:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Total") }}</label>
                                         <span class="font-bold text-gray-900 dark:text-white tabular-nums text-sm">{{ item.total().toFixed(2) }}</span>
                                     </div>
                                     <button
                                         v-if="lineItems.length > 1"
                                         type="button"
                                         @click="lineItems.splice(index, 1)"
-                                        class="p-1.5 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                                        class="p-2.5 min-h-11 min-w-11 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
                                         </svg>
                                     </button>
@@ -405,7 +405,7 @@
 
                         <div>
                             <InputLabel for="discount" :value="__('Discount')" class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-gray-500" />
-                            <TextInput id="discount" v-model="form.discount" type="number" min="0" step="0.01" class="block w-full" />
+                            <TextInput id="discount" v-model="form.discount" type="number" inputmode="decimal" min="0" step="0.01" class="block w-full" />
                             <InputError :message="form.errors.discount" class="mt-1" />
                         </div>
 

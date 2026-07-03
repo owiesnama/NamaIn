@@ -36,7 +36,7 @@ const toggle = () => {
     <section>
         <button
             :class="[
-                'group flex w-full items-center justify-between rounded-lg px-3 py-2 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/40',
+                'group flex w-full items-center justify-between rounded-lg px-3 py-2.5 min-h-[44px] transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500/40',
                 active && !isOpen
                     ? 'bg-emerald-50 text-emerald-500 dark:bg-emerald-900/20 dark:text-emerald-400 shadow-sm ring-1 ring-inset ring-emerald-500/10'
                     : active && isOpen

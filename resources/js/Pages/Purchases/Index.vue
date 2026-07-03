@@ -11,6 +11,7 @@
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import { useQueryString } from "@/Composables/useQueryString";
     import debounce from "lodash/debounce";
     import axios from "axios";
@@ -26,7 +27,7 @@
     const selectedStorage = ref(null);
     const showInvoiceSelector = ref(false);
 
-    const showSidebar = ref(true);
+    const showSidebar = useFilterSidebar();
 
     const invoicesToReturn = ref([]);
     const searchingInvoices = ref(false);
@@ -186,6 +187,7 @@
             <!-- Sidebar -->
             <FilterSidebar
                 v-if="showSidebar"
+                @close="showSidebar = false"
                 v-model:filters="filters"
                 :sort-by-options="sortByOptions"
                 :all-label="__('All Invoices')"

@@ -7,6 +7,7 @@
     import debounce from "lodash/debounce";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import CustomSelect from "@/Components/CustomSelect.vue";
     const props = defineProps({
         initialCheques: Object,
@@ -15,7 +16,7 @@
         bank_treasury_accounts: Array,
     });
 
-    const showSidebar = ref(true);
+    const showSidebar = useFilterSidebar();
 
     const formatCurrency = (amount, currency = null) => {
         const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : 'SDG';
@@ -215,6 +216,7 @@
         <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
             <FilterSidebar
                 v-if="showSidebar"
+                @close="showSidebar = false"
                 v-model:filters="filters"
                 :sort-by-options="sortByOptions"
                 :all-label="__('All Cheques')"
