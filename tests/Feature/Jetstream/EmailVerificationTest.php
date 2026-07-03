@@ -37,9 +37,9 @@ class EmailVerificationTest extends MainDomainTestCase
             return;
         }
 
-        Event::fake();
-
         $user = User::factory()->unverified()->create();
+
+        Event::fake([Verified::class]);
 
         $verificationUrl = URL::temporarySignedRoute(
             'verification.verify',

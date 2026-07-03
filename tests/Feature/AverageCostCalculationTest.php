@@ -12,6 +12,7 @@ use App\Queries\DashboardStatsQuery;
 use App\Queries\Reports\ProfitAndLossQuery;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -69,7 +70,7 @@ test('pending sales and purchases are tracked correctly', function () {
     $user = User::factory()->create();
     $storage = Storage::factory()->create();
     $product = Product::factory()->create(['alert_quantity' => 5]);
-    $product->stock()->attach($storage->id, ['quantity' => 10]);
+    $product->stock()->attach($storage->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
 
     // Pending Purchase: 5 units
     $purchase = Invoice::create([
@@ -117,7 +118,7 @@ test('inventory value uses average cost', function () {
     $user = User::factory()->create();
     $storage = Storage::factory()->create();
     $product = Product::factory()->create(['cost' => 50]);
-    $product->stock()->attach($storage->id, ['quantity' => 10]);
+    $product->stock()->attach($storage->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
 
     // Purchase @ $20 (avg cost will be 20 if it's the only delivered purchase)
     $purchase = Invoice::create([

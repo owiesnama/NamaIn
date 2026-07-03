@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\StockTransfer;
 use App\Models\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class StockTransfersController extends Controller
 {
@@ -51,6 +52,7 @@ class StockTransfersController extends Controller
             ]);
 
             $transfer->lines()->insert(array_map(fn ($item) => [
+                'public_id' => strtolower((string) Str::ulid()),
                 'tenant_id' => $transfer->tenant_id,
                 'stock_transfer_id' => $transfer->id,
                 'product_id' => $item['product_id'],

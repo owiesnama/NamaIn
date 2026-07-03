@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Quote;
 use App\ValueObjects\Money;
+use Illuminate\Support\Str;
 
 class UpdateQuoteAction
 {
@@ -23,6 +24,7 @@ class UpdateQuoteAction
 
         $quote->items()->insert(
             array_map(fn ($item) => [
+                'public_id' => strtolower((string) Str::ulid()),
                 'tenant_id' => $quote->tenant_id,
                 'quote_id' => $quote->id,
                 'product_id' => $item['product_id'],

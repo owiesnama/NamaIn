@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionStatus;
+use App\Traits\HasPublicId;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
-    use HasFactory;
+    use HasFactory, HasPublicId;
 
     /** @var string[] */
     public const RESERVED_SLUGS = [

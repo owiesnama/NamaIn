@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -18,7 +19,7 @@ test('storage dashboard displays correctly', function () {
     $product = Product::factory()->create(['name' => 'Widget', 'cost' => 100]);
 
     // Add stock to storage
-    $storage->stock()->attach($product->id, ['quantity' => 10]);
+    $storage->stock()->attach($product->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
 
     // Create a Purchase transaction for this storage
     $supplier = Supplier::factory()->create();

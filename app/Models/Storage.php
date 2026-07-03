@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class Storage extends BaseModel
 {
@@ -121,6 +122,7 @@ class Storage extends BaseModel
 
             if (! $stockData) {
                 DB::table('stocks')->insert([
+                    'public_id' => strtolower((string) Str::ulid()),
                     'tenant_id' => $this->tenant_id,
                     'storage_id' => $this->id,
                     'product_id' => $productId,
@@ -195,6 +197,7 @@ class Storage extends BaseModel
 
         DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
             DB::table('stocks')->insertOrIgnore([
+                'public_id' => strtolower((string) Str::ulid()),
                 'tenant_id' => $this->tenant_id,
                 'storage_id' => $this->id,
                 'product_id' => $productId,
