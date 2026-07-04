@@ -65,6 +65,7 @@ Schedule::command('expenses:generate-recurring')->daily();
 // stock-movement ledger (source of truth). Read-only.
 Schedule::command('stock:reconcile')->daily();
 Schedule::command('exports:prune')->daily();
+Schedule::command('sync:prune-snapshots')->daily();
 Schedule::command('telescope:prune --hours=48')->daily();
 Schedule::command('horizon:snapshot')->everyFiveMinutes();
 try {
