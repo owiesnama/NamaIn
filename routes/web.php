@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\Admin\AnnouncementsController as AdminAnnouncementsController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BackupsController as AdminBackupsController;
 use App\Http\Controllers\Admin\BackupSettingsController;
@@ -92,6 +93,10 @@ Route::prefix('__admin')->name('admin.')->group(function () {
 
         Route::get('messages', [AdminMessagesController::class, 'index'])->name('messages.index');
         Route::post('messages', [AdminMessagesController::class, 'store'])->name('messages.store');
+
+        Route::get('announcements', [AdminAnnouncementsController::class, 'index'])->name('announcements.index');
+        Route::post('announcements', [AdminAnnouncementsController::class, 'store'])->name('announcements.store');
+        Route::get('tenants/{tenant}/roles', [AdminAnnouncementsController::class, 'tenantRoles'])->name('tenants.roles');
 
         Route::resource('backups', AdminBackupsController::class)->only(['index', 'store', 'show', 'destroy']);
         Route::put('backups/settings', [BackupSettingsController::class, 'update'])->name('backups.settings');

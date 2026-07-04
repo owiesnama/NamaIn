@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Notifications\ChequeDueNotification;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schedule;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,6 +30,9 @@ Artisan::command('cheques:notify-for-due', function () {
 })->purpose('Notify platform admins of cheques due within the configured window');
 
 Schedule::command('cheques:notify-for-due')->daily();
+Schedule::call(fn () => DB::table('notifications')->where('created_at', '<', now()->subDays(90))->delete())
+    ->daily()
+    ->name('notifications:prune');
 Schedule::command('expenses:generate-recurring')->daily();
 Schedule::command('exports:prune')->daily();
 Schedule::command('telescope:prune --hours=48')->daily();

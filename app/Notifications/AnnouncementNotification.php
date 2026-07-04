@@ -2,22 +2,17 @@
 
 namespace App\Notifications;
 
+use App\Models\Announcement;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AnnouncementNotification extends Notification
+class AnnouncementNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(public Announcement $announcement) {}
 
     /**
      * Get the notification's delivery channels.
@@ -26,18 +21,31 @@ class AnnouncementNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $channels = ['database', 'broadcast'];
+
+        if ($this->announcement->send_email) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
+    public function databaseType(object $notifiable): string
+    {
+        return 'announcement';
+    }
+
+    public function broadcastType(): string
+    {
+        return 'announcement';
+    }
+
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
+            ->subject($this->announcement->subject)
+            ->greeting(__('Hello :name,', ['name' => $notifiable->name]))
+            ->lines(explode("\n", $this->announcement->body));
     }
 
     /**
@@ -48,7 +56,10 @@ class AnnouncementNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'title' => $this->announcement->subject,
+            'body' => $this->announcement->body,
+            'url' => '/notifications',
+            'meta' => ['announcement_id' => $this->announcement->id],
         ];
     }
 }
