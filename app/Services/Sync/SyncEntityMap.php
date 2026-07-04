@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Customer;
 use App\Models\CustomerAdvance;
 use App\Models\Device;
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Permission;
@@ -14,9 +15,13 @@ use App\Models\Preference;
 use App\Models\Product;
 use App\Models\Register;
 use App\Models\Role;
+use App\Models\StockMovement;
 use App\Models\Storage;
 use App\Models\Supplier;
+use App\Models\Transaction;
+use App\Models\TransactionReceipt;
 use App\Models\TreasuryAccount;
+use App\Models\TreasuryMovement;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -248,6 +253,164 @@ class SyncEntityMap
                     'treasury_account' => ['treasury_account_id', TreasuryAccount::class],
                     'created_by' => ['created_by', User::class],
                 ],
+            ),
+
+            // ── Transactional records (pull-only, §4: a fresh device has no
+            //    history; it needs its own sales back, not other registers') ─
+            new SyncEntityDefinition(
+                table: 'invoices',
+                query: fn (Device $device) => Invoice::query()->where('register_id', $device->register_id),
+                columns: [
+                    'serial_number' => 'serial_number',
+                    'status' => 'status',
+                    'payment_method' => 'payment_method',
+                    'payment_status' => 'payment_status',
+                    'currency' => 'currency',
+                    'is_inverse' => 'is_inverse',
+                    'inverse_reason' => 'inverse_reason',
+                    'created_at' => 'created_at',
+                ],
+                integers: ['total' => 'total', 'discount' => 'discount', 'paid_amount' => 'paid_amount'],
+                references: [
+                    'parent_invoice' => ['parent_invoice_id', Invoice::class],
+                    'pos_session' => ['pos_session_id', PosSession::class],
+                    'register' => ['register_id', Register::class],
+                ],
+                morphs: ['invocable' => ['invocable_type', 'invocable_id']],
+                inSnapshot: false,
+            ),
+            new SyncEntityDefinition(
+                table: 'transactions',
+                query: fn (Device $device) => Transaction::query()->whereIn(
+                    'invoice_id',
+                    Invoice::query()->where('register_id', $device->register_id)->select('id')->toBase()
+                ),
+                columns: [
+                    'quantity' => 'quantity',
+                    'base_quantity' => 'base_quantity',
+                    'description' => 'description',
+                    'currency' => 'currency',
+                    'delivered' => 'delivered',
+                    'delivered_at' => 'delivered_at',
+                    'created_at' => 'created_at',
+                ],
+                integers: ['price' => 'price', 'unit_cost' => 'unit_cost'],
+                references: [
+                    'invoice' => ['invoice_id', Invoice::class],
+                    'storage' => ['storage_id', Storage::class],
+                    'product' => ['product_id', Product::class],
+                    'unit' => ['unit_id', Unit::class],
+                    'delivered_by' => ['delivered_by', User::class],
+                    'fulfilled_from_storage' => ['fulfilled_from_storage_id', Storage::class],
+                ],
+                inSnapshot: false,
+            ),
+            new SyncEntityDefinition(
+                table: 'transaction_receipts',
+                query: fn (Device $device) => TransactionReceipt::query()
+                    ->where('storage_id', $device->register->storage_id),
+                columns: ['quantity' => 'quantity', 'received_at' => 'received_at', 'notes' => 'notes'],
+                references: [
+                    'transaction' => ['transaction_id', Transaction::class],
+                    'storage' => ['storage_id', Storage::class],
+                    'received_by' => ['received_by', User::class],
+                ],
+                inSnapshot: false,
+            ),
+            new SyncEntityDefinition(
+                table: 'payments',
+                query: fn (Device $device) => Payment::query()->whereIn(
+                    'invoice_id',
+                    Invoice::query()->where('register_id', $device->register_id)->select('id')->toBase()
+                ),
+                columns: [
+                    'payment_method' => 'payment_method',
+                    'direction' => 'direction',
+                    'reference' => 'reference',
+                    'notes' => 'notes',
+                    'paid_at' => 'paid_at',
+                    'currency' => 'currency',
+                ],
+                integers: ['amount' => 'amount'],
+                references: [
+                    'invoice' => ['invoice_id', Invoice::class],
+                    'created_by' => ['created_by', User::class],
+                    'treasury_account' => ['treasury_account_id', TreasuryAccount::class],
+                ],
+                morphs: ['payable' => ['payable_type', 'payable_id']],
+                inSnapshot: false,
+            ),
+            // sessions are keyed by sale point today (storages.active_session_id);
+            // register-keyed sessions arrive with the multi-register runtime
+            new SyncEntityDefinition(
+                table: 'pos_sessions',
+                query: fn (Device $device) => PosSession::query()
+                    ->where('storage_id', $device->register->storage_id),
+                columns: ['closed_at' => 'closed_at', 'created_at' => 'created_at'],
+                integers: ['opening_float' => 'opening_float', 'closing_float' => 'closing_float'],
+                references: [
+                    'storage' => ['storage_id', Storage::class],
+                    'opened_by' => ['opened_by', User::class],
+                    'closed_by' => ['closed_by', User::class],
+                ],
+                inSnapshot: false,
+            ),
+            new SyncEntityDefinition(
+                table: 'expenses',
+                query: fn (Device $device) => Expense::query()->whereIn(
+                    'treasury_account_id',
+                    TreasuryAccount::query()->where('register_id', $device->register_id)->select('id')->toBase()
+                ),
+                columns: [
+                    'title' => 'title',
+                    'currency' => 'currency',
+                    'notes' => 'notes',
+                    'expensed_at' => 'expensed_at',
+                    'status' => 'status',
+                    'approved_at' => 'approved_at',
+                    'created_at' => 'created_at',
+                ],
+                integers: ['amount' => 'amount'],
+                references: [
+                    'created_by' => ['created_by', User::class],
+                    'approved_by' => ['approved_by', User::class],
+                    'treasury_account' => ['treasury_account_id', TreasuryAccount::class],
+                ],
+                inSnapshot: false,
+            ),
+            new SyncEntityDefinition(
+                table: 'treasury_movements',
+                query: fn (Device $device) => TreasuryMovement::query()->whereIn(
+                    'treasury_account_id',
+                    TreasuryAccount::query()->where('register_id', $device->register_id)->select('id')->toBase()
+                ),
+                columns: ['reason' => 'reason', 'notes' => 'notes', 'occurred_at' => 'occurred_at'],
+                integers: ['amount' => 'amount', 'balance_after' => 'balance_after'],
+                references: [
+                    'treasury_account' => ['treasury_account_id', TreasuryAccount::class],
+                    'created_by' => ['created_by', User::class],
+                ],
+                morphs: ['movable' => ['movable_type', 'movable_id']],
+                inSnapshot: false,
+            ),
+            new SyncEntityDefinition(
+                table: 'stock_movements',
+                query: fn (Device $device) => StockMovement::query()
+                    ->where('storage_id', $device->register->storage_id),
+                columns: [
+                    'reason' => 'reason',
+                    'quantity' => 'quantity',
+                    'quantity_before' => 'quantity_before',
+                    'quantity_after' => 'quantity_after',
+                    'created_at' => 'created_at',
+                ],
+                references: [
+                    'storage' => ['storage_id', Storage::class],
+                    'product' => ['product_id', Product::class],
+                    'user' => ['user_id', User::class],
+                ],
+                morphs: ['movable' => ['movable_type', 'movable_id']],
+                inSnapshot: false,
             ),
         ];
     }

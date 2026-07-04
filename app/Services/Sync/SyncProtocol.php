@@ -18,6 +18,9 @@ final class SyncProtocol
     /** Oldest protocol this server still speaks; older clients get 426. */
     public const MIN_PROTOCOL = 1;
 
+    /** Advertised alongside upgrade_required so the client can name the update. */
+    public const MIN_APP_VERSION = '1.0.0';
+
     public const HEADER_PROTOCOL = 'X-Sync-Protocol';
 
     public const HEADER_APP = 'X-App-Version';

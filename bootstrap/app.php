@@ -4,6 +4,7 @@ use App\Exceptions\InsufficientStockException;
 use App\Http\Middleware\EnsureFeatureIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLocale;
+use App\Http\Middleware\Sync\EnsureSupportedProtocol;
 use App\Models\Tenant;
 use App\Services\TenantLocaleResolver;
 use Illuminate\Foundation\Application;
@@ -11,6 +12,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -24,7 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         channels: __DIR__.'/../routes/channels.php',
         then: function () {
-            Route::middleware('api')
+            Route::middleware('sync-api')
                 ->prefix('api/sync/v1')
                 ->name('sync.')
                 ->group(base_path('routes/sync.php'));
@@ -83,6 +85,12 @@ return Application::configure(basePath: dirname(__DIR__))
             'feature' => EnsureFeatureIsActive::class,
             'abilities' => CheckAbilities::class,
             'ability' => CheckForAnyAbility::class,
+        ]);
+
+        $middleware->group('sync-api', [
+            'throttle:sync',
+            EnsureSupportedProtocol::class,
+            SubstituteBindings::class,
         ]);
 
     })
