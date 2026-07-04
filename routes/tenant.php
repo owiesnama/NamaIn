@@ -154,8 +154,8 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::put('/notifications/read-all', [NotificationsController::class, 'markAllRead'])->name('notifications.read-all');
         Route::put('/notifications/{id}/read', [NotificationsController::class, 'markRead'])->name('notifications.read');
         Route::get('/preferences', [PreferenceController::class, 'index'])->name('preferences.index');
-        Route::post('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
-        Route::put('/preferences', [PreferenceController::class, 'update']);
+        Route::post('/preferences', [PreferenceController::class, 'update'])->name('preferences.update')->middleware('runtime.online');
+        Route::put('/preferences', [PreferenceController::class, 'update'])->middleware('runtime.online');
         Route::put('/user/preferences', [UserPreferencesController::class, 'update'])->name('user-preferences.update');
 
         // Lazy usage/cap lookup for a single limit feature (frontend "used / cap").
@@ -243,7 +243,8 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::put('/stock/{storage}/add', [StockAdditionController::class, 'store'])->name('stock.add');
         Route::put('/stock/{storage}/deduct', [StockDeductionController::class, 'store'])->name('stock.deduct');
 
-        Route::middleware('feature:multi_warehouse')->group(function () {
+        // Online-only (runtime seam S4): stock transfers.
+        Route::middleware(['feature:multi_warehouse', 'runtime.online'])->group(function () {
             Route::get('/stock-transfers', [StockTransfersController::class, 'index'])->name('stock-transfers.index');
             Route::get('/stock-transfers/create', [StockTransfersController::class, 'create'])->name('stock-transfers.create');
             Route::post('/stock-transfers', [StockTransfersController::class, 'store'])->name('stock-transfers.store');
@@ -257,10 +258,13 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Purchase invoices, goods receiving, and purchase return (credit notes).
         */
-        Route::resource('/purchases', PurchasesController::class)->except(['show', 'destroy'])->parameters(['purchases' => 'invoice']);
-        Route::post('/purchases/receive/{transaction}', [PurchaseReceiptController::class, 'store'])->name('purchases.receive');
-        Route::get('/purchases/{invoice}/return', [PurchaseReturnController::class, 'create'])->name('purchases.return.create');
-        Route::post('/purchases/{invoice}/return', [PurchaseReturnController::class, 'store'])->name('purchases.return.store');
+        // Online-only (runtime seam S4): purchases.
+        Route::middleware('runtime.online')->group(function () {
+            Route::resource('/purchases', PurchasesController::class)->except(['show', 'destroy'])->parameters(['purchases' => 'invoice']);
+            Route::post('/purchases/receive/{transaction}', [PurchaseReceiptController::class, 'store'])->name('purchases.receive');
+            Route::get('/purchases/{invoice}/return', [PurchaseReturnController::class, 'create'])->name('purchases.return.create');
+            Route::post('/purchases/{invoice}/return', [PurchaseReturnController::class, 'store'])->name('purchases.return.store');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -287,7 +291,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Quotes (Price Quotations)
         |--------------------------------------------------------------------------
         */
-        Route::prefix('quotes')->name('quotes.')->middleware('feature:quotes')->group(function () {
+        Route::prefix('quotes')->name('quotes.')->middleware(['feature:quotes', 'runtime.online'])->group(function () {
             Route::get('/', [QuotesController::class, 'index'])->name('index');
             Route::get('/create', [QuotesController::class, 'create'])->name('create');
             Route::post('/', [QuotesController::class, 'store'])->name('store');
@@ -332,8 +336,12 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | One-time and recurring expense management, expense approval workflow,
         | receipt viewing, and bulk export.
         */
-        Route::resource('/recurring-expenses', RecurringExpensesController::class)->except(['show']);
-        Route::put('/recurring-expenses/{recurring_expense}/toggle', [RecurringExpenseStatusController::class, 'update'])->name('recurring-expenses.toggle');
+        // Online-only (runtime seam S4): recurring expenses.
+        Route::middleware('runtime.online')->group(function () {
+            Route::resource('/recurring-expenses', RecurringExpensesController::class)->except(['show']);
+            Route::put('/recurring-expenses/{recurring_expense}/toggle', [RecurringExpenseStatusController::class, 'update'])->name('recurring-expenses.toggle');
+        });
+
         Route::get('/expenses/export', [ExpenseExportController::class, 'store'])->name('expenses.export');
         Route::resource('/expenses', ExpensesController::class);
         Route::put('/expenses/{expense}/approval', [ExpenseApprovalController::class, 'update'])->name('expenses.approval');
@@ -346,16 +354,19 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Treasury accounts, movement ledger, inter-account transfers,
         | and manual balance adjustments.
         */
-        Route::get('/treasury', [TreasuryAccountsController::class, 'index'])->name('treasury.index');
-        Route::get('/treasury/create', [TreasuryAccountsController::class, 'create'])->name('treasury.create');
-        Route::post('/treasury', [TreasuryAccountsController::class, 'store'])->name('treasury.store');
-        Route::get('/treasury/transfer', [TreasuryTransfersController::class, 'create'])->name('treasury.transfer.create');
-        Route::post('/treasury/transfer', [TreasuryTransfersController::class, 'store'])->name('treasury.transfer.store');
-        Route::get('/treasury/transfer/{transfer}', [TreasuryTransfersController::class, 'show'])->name('treasury.transfer.show');
-        Route::get('/treasury/{treasury}', [TreasuryAccountsController::class, 'show'])->name('treasury.show');
-        Route::get('/treasury/{treasury}/edit', [TreasuryAccountsController::class, 'edit'])->name('treasury.edit');
-        Route::put('/treasury/{treasury}', [TreasuryAccountsController::class, 'update'])->name('treasury.update');
-        Route::post('/treasury/{treasury}/adjust', [TreasuryAdjustmentsController::class, 'store'])->name('treasury.adjust');
+        // Online-only (runtime seam S4): treasury.
+        Route::middleware('runtime.online')->group(function () {
+            Route::get('/treasury', [TreasuryAccountsController::class, 'index'])->name('treasury.index');
+            Route::get('/treasury/create', [TreasuryAccountsController::class, 'create'])->name('treasury.create');
+            Route::post('/treasury', [TreasuryAccountsController::class, 'store'])->name('treasury.store');
+            Route::get('/treasury/transfer', [TreasuryTransfersController::class, 'create'])->name('treasury.transfer.create');
+            Route::post('/treasury/transfer', [TreasuryTransfersController::class, 'store'])->name('treasury.transfer.store');
+            Route::get('/treasury/transfer/{transfer}', [TreasuryTransfersController::class, 'show'])->name('treasury.transfer.show');
+            Route::get('/treasury/{treasury}', [TreasuryAccountsController::class, 'show'])->name('treasury.show');
+            Route::get('/treasury/{treasury}/edit', [TreasuryAccountsController::class, 'edit'])->name('treasury.edit');
+            Route::put('/treasury/{treasury}', [TreasuryAccountsController::class, 'update'])->name('treasury.update');
+            Route::post('/treasury/{treasury}/adjust', [TreasuryAdjustmentsController::class, 'store'])->name('treasury.adjust');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -363,15 +374,18 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Invite, enable/disable, assign roles, and remove team members.
         */
-        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
-        Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
-        Route::post('/users/invite', [UserInvitationController::class, 'store'])->name('users.invite');
-        Route::delete('/users/invitations/{invitation}', [UserInvitationController::class, 'destroy'])->name('users.invitations.cancel');
-        Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
-        Route::put('/users/{user}/role', [UserRoleController::class, 'update'])->name('users.assign-role');
-        Route::put('/users/{user}/toggle-status', [UserStatusController::class, 'update'])->name('users.toggle-status');
-        Route::post('/users/{user}/resend-credentials', [UserManagementController::class, 'resendCredentials'])->name('users.credentials.resend');
-        Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+        // Online-only (runtime seam S4): team management.
+        Route::middleware('runtime.online')->group(function () {
+            Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+            Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+            Route::post('/users/invite', [UserInvitationController::class, 'store'])->name('users.invite');
+            Route::delete('/users/invitations/{invitation}', [UserInvitationController::class, 'destroy'])->name('users.invitations.cancel');
+            Route::put('/users/{user}', [UserManagementController::class, 'update'])->name('users.update');
+            Route::put('/users/{user}/role', [UserRoleController::class, 'update'])->name('users.assign-role');
+            Route::put('/users/{user}/toggle-status', [UserStatusController::class, 'update'])->name('users.toggle-status');
+            Route::post('/users/{user}/resend-credentials', [UserManagementController::class, 'resendCredentials'])->name('users.credentials.resend');
+            Route::delete('/users/{user}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -379,10 +393,13 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Create, update, and delete tenant-scoped roles with custom permissions.
         */
-        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+        // Online-only (runtime seam S4): role management.
+        Route::middleware('runtime.online')->group(function () {
+            Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+            Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+            Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+            Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -390,7 +407,8 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Queued export requests, history, and downloads.
         */
-        Route::middleware('feature:exports')->group(function () {
+        // Online-only (runtime seam S4): exports.
+        Route::middleware(['feature:exports', 'runtime.online'])->group(function () {
             Route::get('/exports', [Exports\ExportController::class, 'index'])->name('exports.index');
             Route::post('/exports', [Exports\ExportController::class, 'store'])->name('exports.store');
             Route::get('/exports/{exportLog}/download', [Exports\ExportController::class, 'download'])->name('exports.download');
@@ -402,7 +420,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Filterable report pages with export and print support.
         */
-        Route::prefix('reports')->middleware(['can:reports.view', 'feature:advanced_reports'])->group(function () {
+        Route::prefix('reports')->middleware(['runtime.online', 'can:reports.view', 'feature:advanced_reports'])->group(function () {
             Route::get('/', [Reports\ReportsIndexController::class, 'index'])->name('reports.index');
 
             $reportRoutes = [

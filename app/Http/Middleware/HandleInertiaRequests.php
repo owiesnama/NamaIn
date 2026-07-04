@@ -50,6 +50,7 @@ class HandleInertiaRequests extends Middleware
         return array_merge(parent::share($request), [
             'appName' => config('app.name'),
             'appDomain' => config('app.domain'),
+            'runtime' => config('runtime.profile'),
             'user' => $request->user() ? [
                 'id' => $request->user()->id,
                 'name' => $request->user()->name,

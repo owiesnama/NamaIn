@@ -2,11 +2,13 @@
 
 use App\Exceptions\InsufficientStockException;
 use App\Http\Middleware\EnsureFeatureIsActive;
+use App\Http\Middleware\EnsureRuntimeIsOnline;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLocale;
 use App\Http\Middleware\Sync\EnsureSupportedProtocol;
 use App\Models\Tenant;
 use App\Services\TenantLocaleResolver;
+use App\Support\Runtime;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -26,6 +28,22 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         channels: __DIR__.'/../routes/channels.php',
         then: function () {
+            // Runtime seam S3 (Design 03 §2.2): the local profile mounts the
+            // tenant surface without a domain constraint (ResolveTenant passes
+            // through when the `tenant` param is absent) plus the offline
+            // overlay's routes/local.php, and never mounts the admin surface.
+            // The sync API is deliberately cloud-only: an offline client is a
+            // sync *client* and must not expose the device-ingest surface.
+            if (Runtime::isLocal()) {
+                Route::middleware('web')->group(base_path('routes/tenant.php'));
+
+                if (file_exists(base_path('routes/local.php'))) {
+                    Route::middleware('web')->group(base_path('routes/local.php'));
+                }
+
+                return;
+            }
+
             Route::middleware('sync-api')
                 ->prefix('api/sync/v1')
                 ->name('sync.')
@@ -51,6 +69,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ['middleware' => ['web', 'auth:sanctum']],
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'runtime.online' => EnsureRuntimeIsOnline::class,
+        ]);
+
         $middleware->redirectGuestsTo(function ($request) {
             if (in_array('auth:admin', $request->route()?->middleware() ?? [])) {
                 return '/__admin/login';
