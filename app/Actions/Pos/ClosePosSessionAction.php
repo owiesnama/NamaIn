@@ -3,10 +3,10 @@
 namespace App\Actions\Pos;
 
 use App\Actions\Treasury\RecordTreasuryAdjustmentAction;
-use App\Enums\TreasuryAccountType;
 use App\Models\PosSession;
-use App\Models\TreasuryAccount;
+use App\Models\Register;
 use App\Models\User;
+use App\Services\Pos\DrawerResolver;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\DB;
 
@@ -14,15 +14,22 @@ class ClosePosSessionAction
 {
     public function __construct(
         private RecordTreasuryAdjustmentAction $recordAdjustment,
+        private DrawerResolver $drawerResolver,
     ) {}
 
-    public function handle(PosSession $session, int $closingFloat, User $actor): void
+    /**
+     * Close a POS session and reconcile its cash drawer. The register decides
+     * which drawer is reconciled (Design 01 §2.3): the cloud web default (R0)
+     * keeps the sale-point drawer; sync/local callers pass their device
+     * register to reconcile the register-linked drawer.
+     */
+    public function handle(PosSession $session, int $closingFloat, User $actor, ?Register $register = null): void
     {
         if (! $session->isOpen()) {
             throw new \DomainException('POS session is already closed.');
         }
 
-        DB::transaction(function () use ($session, $closingFloat, $actor) {
+        DB::transaction(function () use ($session, $closingFloat, $actor, $register) {
             $session->update([
                 'closed_by' => $actor->id,
                 'closing_float' => $closingFloat,
@@ -33,9 +40,8 @@ class ClosePosSessionAction
                 'active_session_id' => null,
             ]);
 
-            $cashDrawer = TreasuryAccount::where('sale_point_id', $session->storage_id)
-                ->ofType(TreasuryAccountType::Cash)
-                ->first();
+            $register ??= Register::cloudRegisterFor($session->tenant_id);
+            $cashDrawer = $this->drawerResolver->resolve($register, $session->storage);
 
             if ($cashDrawer) {
                 $expected = $cashDrawer->currentBalance();

@@ -3,23 +3,30 @@
 namespace App\Actions\Pos;
 
 use App\Actions\Treasury\RecordTreasuryMovementAction;
-use App\Enums\TreasuryAccountType;
 use App\Enums\TreasuryMovementReason;
 use App\Models\PosSession;
+use App\Models\Register;
 use App\Models\Storage;
-use App\Models\TreasuryAccount;
 use App\Models\User;
+use App\Services\Pos\DrawerResolver;
 use Illuminate\Support\Facades\DB;
 
 class OpenPosSessionAction
 {
     public function __construct(
         private RecordTreasuryMovementAction $recordMovement,
+        private DrawerResolver $drawerResolver,
     ) {}
 
-    public function handle(Storage $storage, int $openingFloat, User $actor): PosSession
+    /**
+     * Open a POS session on a sale point. The register decides which cash
+     * drawer receives the opening float (Design 01 §2.3): the cloud web
+     * default (R0) keeps the sale-point drawer; sync/local callers pass
+     * their device register to hit the register-linked drawer.
+     */
+    public function handle(Storage $storage, int $openingFloat, User $actor, ?Register $register = null): PosSession
     {
-        return DB::transaction(function () use ($storage, $openingFloat, $actor) {
+        return DB::transaction(function () use ($storage, $openingFloat, $actor, $register) {
             // Lock storage row to prevent race condition on opening multiple sessions
             $storage = Storage::where('id', $storage->id)->lockForUpdate()->first();
 
@@ -38,9 +45,8 @@ class OpenPosSessionAction
                 'active_session_id' => $session->id,
             ]);
 
-            $cashDrawer = TreasuryAccount::where('sale_point_id', $storage->id)
-                ->ofType(TreasuryAccountType::Cash)
-                ->first();
+            $register ??= Register::cloudRegisterFor($storage->tenant_id);
+            $cashDrawer = $this->drawerResolver->resolve($register, $storage);
 
             if ($cashDrawer && $openingFloat > 0) {
                 $this->recordMovement->handle(

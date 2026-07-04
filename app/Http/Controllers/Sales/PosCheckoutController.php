@@ -7,6 +7,7 @@ use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PosCheckoutRequest;
 use App\Models\PosSession;
+use App\ValueObjects\CheckoutContext;
 use DomainException;
 
 class PosCheckoutController extends Controller
@@ -17,12 +18,13 @@ class PosCheckoutController extends Controller
         $session = PosSession::findOrFail($request->session_id);
 
         try {
-            $invoice = $action->handle($session,
+            $invoice = $action->handle(
+                $session,
                 collect($request->validated()),
-
                 $request->user(),
                 $request->idempotency_key,
-                $request->boolean('acknowledge_transfers')
+                $request->boolean('acknowledge_transfers'),
+                CheckoutContext::cloudWeb($session->tenant_id)
             );
         } catch (InsufficientStockException|DomainException $e) {
             return back()->with('error', $e->getMessage());

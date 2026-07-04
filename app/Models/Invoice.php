@@ -332,7 +332,8 @@ class Invoice extends BaseModel
     }
 
     /**
-     * Record a payment for this invoice.
+     * Record a payment for this invoice. A non-null $publicId presets the
+     * payment's sync identity (replayed offline sales, Design 03 §5.2).
      */
     public function recordPayment(
         float $amount,
@@ -342,12 +343,14 @@ class Invoice extends BaseModel
         ?array $metadata = null,
         ?string $receiptPath = null,
         ?string $paidAt = null,
-        PaymentDirection $direction = PaymentDirection::In
+        PaymentDirection $direction = PaymentDirection::In,
+        ?string $publicId = null
     ): Payment {
-        return DB::transaction(function () use ($amount, $method, $reference, $notes, $metadata, $receiptPath, $paidAt, $direction) {
+        return DB::transaction(function () use ($amount, $method, $reference, $notes, $metadata, $receiptPath, $paidAt, $direction, $publicId) {
             self::lockForUpdate()->find($this->id);
 
             $payment = $this->payments()->create([
+                'public_id' => $publicId,
                 'payable_id' => $this->invocable_id,
                 'payable_type' => $this->invocable_type,
                 'amount' => $amount,

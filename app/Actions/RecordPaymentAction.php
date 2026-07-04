@@ -30,7 +30,9 @@ class RecordPaymentAction
      *
      * Pass treasury_account_id to link the payment to a treasury account and record a movement.
      *
-     * @param  array{reference?: string, notes?: string, metadata?: array, receipt_path?: string, paid_at?: string, cheque_due?: string, cheque_bank_id?: int|string|null, cheque_reference?: string|null, treasury_account_id?: int|null, movement_reason?: TreasuryMovementReason}  $options
+     * Pass public_id to preset the payment's sync identity (replayed offline sales).
+     *
+     * @param  array{reference?: string, notes?: string, metadata?: array, receipt_path?: string, paid_at?: string, cheque_due?: string, cheque_bank_id?: int|string|null, cheque_reference?: string|null, treasury_account_id?: int|null, movement_reason?: TreasuryMovementReason, public_id?: string|null}  $options
      */
     public function handle(
         ?Invoice $invoice,
@@ -109,12 +111,14 @@ class RecordPaymentAction
             receiptPath: $options['receipt_path'] ?? null,
             paidAt: $options['paid_at'] ?? null,
             direction: $direction,
+            publicId: $options['public_id'] ?? null,
         );
     }
 
     private function recordStandalone(Model $payable, float $amount, PaymentMethod $method, PaymentDirection $direction, array $options): Payment
     {
         return Payment::create([
+            'public_id' => $options['public_id'] ?? null,
             'payable_id' => $payable->id,
             'payable_type' => get_class($payable),
             'amount' => $amount,
