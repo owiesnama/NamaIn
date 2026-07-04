@@ -22,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         channels: __DIR__.'/../routes/channels.php',
         then: function () {
+            Route::middleware('api')
+                ->prefix('api/sync/v1')
+                ->name('sync.')
+                ->group(base_path('routes/sync.php'));
+
             Route::middleware('web')
                 ->domain(config('app.domain'))
                 ->group(base_path('routes/web.php'));

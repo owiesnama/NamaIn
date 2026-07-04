@@ -69,6 +69,7 @@ use App\Http\Controllers\Sales\QuoteConvertController;
 use App\Http\Controllers\Sales\QuotePrintController;
 use App\Http\Controllers\Sales\QuotesController;
 use App\Http\Controllers\Sales\SalesController;
+use App\Http\Controllers\Sync\DevicesController;
 use App\Http\Controllers\Treasury\TreasuryAccountsController;
 use App\Http\Controllers\Treasury\TreasuryAdjustmentsController;
 use App\Http\Controllers\Treasury\TreasuryTransfersController;
@@ -421,6 +422,16 @@ Route::middleware([ResolveTenant::class])->group(function () {
                 Route::get("/{$slug}", Reports\ReportController::class)->defaults('report', $slug)->name($name);
             }
         });
+
+        /*
+        |--------------------------------------------------------------------------
+        | Devices (offline POS enrollment)
+        |--------------------------------------------------------------------------
+        | Backend-only for Phase 1; the fleet management UI lands in Phase 3.
+        */
+        Route::post('/devices', [DevicesController::class, 'store'])
+            ->middleware('can:devices.manage')
+            ->name('devices.store');
 
         /*
         |--------------------------------------------------------------------------

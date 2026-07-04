@@ -83,6 +83,9 @@ class PermissionSeeder extends Seeder
             'reports' => [
                 'reports.view' => 'View reports',
             ],
+            'devices' => [
+                'devices.manage' => 'Enroll and manage offline POS devices',
+            ],
         ];
     }
 
