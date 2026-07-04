@@ -683,3 +683,35 @@ Detailed DTO shapes are specified in [Design 02 §9](02-sync-protocol.md).
 
 PRs 1→4 are ordered (later ones depend on `public_id` + registers); PR-5 and PR-6 are
 independent. Every PR keeps the web app behavior identical except the serial format (PR-3).
+
+---
+
+## Implementation deviations (Phase 0, shipped 2026-07-04)
+
+Recorded during implementation on `feat/offline-sync-foundations`
+(`cb10e91..192f42c`). None weaken a settled decision; each is noted with why.
+
+1. **Serial generation is centralized in `Invoice`'s `creating` hook**, not
+   duplicated inside the three invoice-creating Actions (§3.3 sketch). Strictly
+   stronger: every creation site (POS checkout, store, inverse, factories,
+   seeders) gets the serial atomically in the same insert, and it can never be
+   null. A pre-set serial is respected (legacy imports, factories); an explicit
+   `register_id` (device path, Phase 1+) wins over the R0 default.
+2. **`RecordsChanges` registers events via `registerModelEvent()`** instead of
+   the `static::restored(...)` static-helper form shown in §4.2 — the magic
+   static re-enters model booting on Laravel 13 and throws a `LogicException`.
+   Behavior is identical.
+3. **`HasPublicId` and `ChangeLog` tolerate their columns/tables not existing
+   yet** (memoized `Schema::hasColumn`/`hasTable` guards). Historical migrations
+   run seeders that create models before the sync schema exists; the guards make
+   `migrate:fresh` order-safe. Steady-state cost is zero (positives are cached).
+4. **`Tenant::created` provisions `tenant_sync_state` and the R0 register** for
+   tenants created after the seed migrations (onboarding flows through
+   `ProvisionTenantAction` → `Tenant::create`). The counter is inserted before
+   R0 because creating R0 already emits a change-log entry.
+5. **The `namain/sync-protocol` package (D10/§8) was not started in Phase 0** —
+   no Phase-0 slice consumes it. `DeviceStatus` lives in `App\Enums` for now and
+   moves to the package when Phase 1 extracts the wire contract.
+6. **PHP 8.5 note:** `config/database.php`'s `PDO::MYSQL_ATTR_SSL_CA` deprecation
+   breaks header flushing under `php -S` (see the packaging-spike verdict). The
+   guard ships as its own PR, not on the Phase-0 branch.
