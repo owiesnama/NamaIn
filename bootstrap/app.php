@@ -69,8 +69,13 @@ return Application::configure(basePath: dirname(__DIR__))
         ['middleware' => ['web', 'auth:sanctum']],
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Single alias() call on purpose: Middleware::alias() replaces the
+        // custom alias map, so split calls silently clobber each other.
         $middleware->alias([
+            'feature' => EnsureFeatureIsActive::class,
             'runtime.online' => EnsureRuntimeIsOnline::class,
+            'abilities' => CheckAbilities::class,
+            'ability' => CheckForAnyAbility::class,
         ]);
 
         $middleware->redirectGuestsTo(function ($request) {
@@ -101,12 +106,6 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
-        ]);
-
-        $middleware->alias([
-            'feature' => EnsureFeatureIsActive::class,
-            'abilities' => CheckAbilities::class,
-            'ability' => CheckForAnyAbility::class,
         ]);
 
         $middleware->group('sync-api', [
