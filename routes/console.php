@@ -60,6 +60,7 @@ Schedule::command('bookings:notify-upcoming')->hourly();
 Schedule::call(fn () => DB::table('notifications')->where('created_at', '<', now()->subDays(90))->delete())
     ->daily()
     ->name('notifications:prune');
+Schedule::command('reconciliation:digest')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
 // Post-cutover guardrail: surface any drift between the stocks cache and the
 // stock-movement ledger (source of truth). Read-only.
