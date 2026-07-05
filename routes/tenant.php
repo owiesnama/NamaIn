@@ -59,6 +59,7 @@ use App\Http\Controllers\Payments\PaymentsController;
 use App\Http\Controllers\Profile\UserPreferencesController;
 use App\Http\Controllers\Purchases\PurchaseReceiptController;
 use App\Http\Controllers\Purchases\PurchasesController;
+use App\Http\Controllers\Reconciliation\ReconciliationController;
 use App\Http\Controllers\Reports;
 use App\Http\Controllers\Sales\PosCheckoutController;
 use App\Http\Controllers\Sales\PosFavoriteController;
@@ -450,6 +451,23 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::post('/devices', [DevicesController::class, 'store'])
             ->middleware('can:devices.manage')
             ->name('devices.store');
+
+        /*
+        |--------------------------------------------------------------------------
+        | Reconciliation inbox (offline divergences)
+        |--------------------------------------------------------------------------
+        | Oversell, credit-breach, session-variance and parked-mutation items
+        | raised by the sync pipeline; resolved by owner/manager (Design 04 §2).
+        */
+        Route::get('/reconciliation', [ReconciliationController::class, 'index'])
+            ->middleware('can:reconciliation.view')
+            ->name('reconciliation.index');
+        Route::get('/reconciliation/{reconciliation}', [ReconciliationController::class, 'show'])
+            ->middleware('can:reconciliation.view')
+            ->name('reconciliation.show');
+        Route::post('/reconciliation/{reconciliation}/resolve', [ReconciliationController::class, 'resolve'])
+            ->middleware('can:reconciliation.resolve')
+            ->name('reconciliation.resolve');
 
         /*
         |--------------------------------------------------------------------------

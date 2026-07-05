@@ -37,4 +37,9 @@ class CreditBreachFlag extends Model
     {
         return $this->belongsTo(Customer::class);
     }
+
+    public function device(): BelongsTo
+    {
+        return $this->belongsTo(Device::class);
+    }
 }

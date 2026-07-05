@@ -6,10 +6,12 @@ use App\Enums\NumeralSystem;
 use App\Facades\Cache;
 use App\Features\Facades\Entitlements;
 use App\Models\Preference;
+use App\Models\ReconciliationItem;
 use App\Models\Tenant;
 use App\Services\Utils\OperationFeed;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Inertia\Middleware;
 
@@ -81,6 +83,7 @@ class HandleInertiaRequests extends Middleware
             'userPreferences' => fn () => $request->user()?->user_preferences ?? [],
             'operations' => fn () => $this->operations($request),
             'unreadNotifications' => fn () => $request->user()?->unreadNotifications()->count() ?? 0,
+            'reconciliationOpenCount' => fn () => $this->reconciliationOpenCount($request),
             'flash' => session()->get('flash') ?? [
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
@@ -155,6 +158,27 @@ class HandleInertiaRequests extends Middleware
         }
 
         return app(OperationFeed::class)->forUser($request->user(), $tenant);
+    }
+
+    /**
+     * The open reconciliation-item count for the nav badge (Design 04 §3.2).
+     * Permission-gated, tenant-scoped, and defensive against the pre-migration
+     * window so it never errors on non-tenant or unauthenticated requests.
+     */
+    private function reconciliationOpenCount(Request $request): int
+    {
+        $tenant = app()->bound('currentTenant') ? app('currentTenant') : null;
+        $user = $request->user();
+
+        if (! $tenant || ! $user || ! $user->hasPermission('reconciliation.view')) {
+            return 0;
+        }
+
+        if (! Schema::hasTable('reconciliation_items')) {
+            return 0;
+        }
+
+        return ReconciliationItem::open()->count();
     }
 
     public function getJsonFileContent($path)

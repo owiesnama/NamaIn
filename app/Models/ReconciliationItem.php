@@ -62,6 +62,22 @@ class ReconciliationItem extends BaseModel
     }
 
     /**
+     * Flip the item to resolved with its typed resolution and audit (Design 04
+     * §2, R3). The single source of truth for lifecycle — subjects carry no
+     * resolution columns, so nothing is mirrored.
+     */
+    public function resolveWith(ResolutionKind $resolution, User $actor, ?string $note = null): void
+    {
+        $this->update([
+            'status' => self::STATUS_RESOLVED,
+            'resolution' => $resolution,
+            'resolution_note' => $note,
+            'resolved_by' => $actor->id,
+            'resolved_at' => now(),
+        ]);
+    }
+
+    /**
      * @param  Builder<ReconciliationItem>  $query
      * @return Builder<ReconciliationItem>
      */

@@ -36,4 +36,14 @@ class OversellReconciliation extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    public function storage(): BelongsTo
+    {
+        return $this->belongsTo(Storage::class);
+    }
+
+    public function device(): BelongsTo
+    {
+        return $this->belongsTo(Device::class);
+    }
 }
