@@ -61,6 +61,7 @@ Schedule::call(fn () => DB::table('notifications')->where('created_at', '<', now
     ->daily()
     ->name('notifications:prune');
 Schedule::command('reconciliation:digest')->daily();
+Schedule::command('sync:compact-change-log')->daily();
 Schedule::command('expenses:generate-recurring')->daily();
 // Post-cutover guardrail: surface any drift between the stocks cache and the
 // stock-movement ledger (source of truth). Read-only.

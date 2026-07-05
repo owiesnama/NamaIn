@@ -6,6 +6,7 @@ use App\Enums\MutationOutcome;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sync\PushRequest;
 use App\Models\Device;
+use App\Services\Sync\ClockSkew;
 use App\Services\Sync\Push\PushProcessor;
 use App\Services\Sync\SyncLogContext;
 use App\Services\Sync\SyncProtocol;
@@ -51,6 +52,7 @@ class PushController extends Controller
             'pending_count' => $request->input('pending_count'),
             'oldest_pending_at' => $request->input('oldest_pending_at'),
             'app_version' => $request->input('app_version'),
+            'clock_skew_seconds' => ClockSkew::fromRequest($request),
         ], fn ($value): bool => $value !== null);
     }
 

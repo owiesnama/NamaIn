@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Sync;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Sync\HeartbeatRequest;
 use App\Models\Device;
+use App\Services\Sync\ClockSkew;
 use App\Services\Sync\SyncProtocol;
 use Illuminate\Http\JsonResponse;
 
@@ -27,6 +28,7 @@ class HeartbeatController extends Controller
             'app_version' => $request->input('app_version'),
             'crash_count' => $request->input('crash_count'),
             'session_count' => $request->input('session_count'),
+            'clock_skew_seconds' => ClockSkew::fromRequest($request),
         ], fn ($value): bool => $value !== null))->saveQuietly();
 
         return response()->json([

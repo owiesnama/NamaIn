@@ -90,7 +90,19 @@ class PullController extends Controller
             ->where('tenant_id', $device->tenant_id)
             ->min('seq');
 
-        if ($oldestRetained !== null && $cursor < (int) $oldestRetained - 1) {
+        if ($oldestRetained === null) {
+            return null;
+        }
+
+        // Pruned past the retained horizon: continuity is lost, re-snapshot.
+        $belowHorizon = $cursor < (int) $oldestRetained - 1;
+
+        // Backlog cheaper than state (Design 04 §5.3): a fresh snapshot (O(current
+        // state)) beats replaying more log entries than the tenant has live rows,
+        // bounding a weeks-offline device to one snapshot instead of endless pulls.
+        // Only for a device already past bootstrap (a real cursor from its
+        // snapshot manifest); a cursor-0 initial pull is always served.
+        if ($belowHorizon || ($cursor > 0 && $this->backlogExceedsLiveRows($device, $cursor))) {
             return response()->json([
                 'error' => 'cursor_expired',
                 'min_cursor' => (int) $oldestRetained,
@@ -98,6 +110,28 @@ class PullController extends Controller
         }
 
         return null;
+    }
+
+    /**
+     * The number of change-log entries above the cursor versus the tenant's live
+     * syncable row count (distinct non-tombstone (table, public_id) pairs).
+     */
+    private function backlogExceedsLiveRows(Device $device, int $cursor): bool
+    {
+        $backlog = DB::table('change_log')
+            ->where('tenant_id', $device->tenant_id)
+            ->where('seq', '>', $cursor)
+            ->count();
+
+        $liveRowsSubquery = DB::table('change_log')
+            ->where('tenant_id', $device->tenant_id)
+            ->where('operation', '!=', 'delete')
+            ->select('table_name', 'public_id')
+            ->distinct();
+
+        $liveRows = DB::query()->fromSub($liveRowsSubquery, 'live')->count();
+
+        return $liveRows > 0 && $backlog > $liveRows;
     }
 
     /**
