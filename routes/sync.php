@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Http\Controllers\Sync\ProvisionController;
 use App\Http\Controllers\Sync\PullController;
+use App\Http\Controllers\Sync\PushController;
 use App\Http\Controllers\Sync\SnapshotController;
 use App\Http\Middleware\Sync\BindDeviceTenant;
 use App\Http\Middleware\Sync\EnsureDeviceActive;
@@ -23,6 +24,10 @@ Route::middleware(['auth:sync', EnsureDeviceActive::class, BindDeviceTenant::cla
     Route::get('/pull', PullController::class)
         ->middleware('abilities:sync:pull')
         ->name('pull');
+
+    Route::post('/push', PushController::class)
+        ->middleware('abilities:sync:push')
+        ->name('push');
 
     Route::middleware('abilities:sync:snapshot')->group(function () {
         Route::post('/snapshot', [SnapshotController::class, 'store'])->name('snapshot.store');

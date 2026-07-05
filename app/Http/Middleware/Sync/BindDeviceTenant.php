@@ -26,6 +26,11 @@ class BindDeviceTenant
 
         app()->instance('currentTenant', $tenant);
 
+        // Every syncable write in this request is attributed to the device that
+        // pushed it: ChangeLog::record stamps source_device_id from this binding
+        // so other devices can tell a pushed row from a cloud-web one (§8.2).
+        app()->instance('currentDevice', $device);
+
         $preferences = Preference::where('tenant_id', $tenant->id)->pluck('value', 'key');
         app()->setLocale($preferences['language'] ?? config('app.locale'));
 

@@ -24,9 +24,9 @@ class OpenPosSessionAction
      * default (R0) keeps the sale-point drawer; sync/local callers pass
      * their device register to hit the register-linked drawer.
      */
-    public function handle(Storage $storage, int $openingFloat, User $actor, ?Register $register = null): PosSession
+    public function handle(Storage $storage, int $openingFloat, User $actor, ?Register $register = null, ?string $sessionPublicId = null): PosSession
     {
-        return DB::transaction(function () use ($storage, $openingFloat, $actor, $register) {
+        return DB::transaction(function () use ($storage, $openingFloat, $actor, $register, $sessionPublicId) {
             // Lock storage row to prevent race condition on opening multiple sessions
             $storage = Storage::where('id', $storage->id)->lockForUpdate()->first();
 
@@ -35,6 +35,10 @@ class OpenPosSessionAction
             }
 
             $session = PosSession::create([
+                // Push replay (Design 02 §5.3) reproduces the device-minted
+                // identity so sales referencing this session by public_id resolve
+                // and the pulled-back row matches; the web path mints a fresh one.
+                'public_id' => $sessionPublicId,
                 'tenant_id' => $storage->tenant_id,
                 'storage_id' => $storage->id,
                 'opened_by' => $actor->id,
