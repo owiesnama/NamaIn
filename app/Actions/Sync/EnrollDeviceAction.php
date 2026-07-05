@@ -5,6 +5,7 @@ namespace App\Actions\Sync;
 use App\Enums\DeviceStatus;
 use App\Enums\StorageType;
 use App\Enums\TreasuryAccountType;
+use App\Exceptions\Sync\ProvisionException;
 use App\Models\ChangeLog;
 use App\Models\Device;
 use App\Models\Register;
@@ -33,6 +34,10 @@ class EnrollDeviceAction
     {
         if ($storage->type !== StorageType::SALE_POINT) {
             throw new InvalidArgumentException('A device register must bind to a sale-point storage.');
+        }
+
+        if (! $storage->tenant->isOfflineEnabled()) {
+            throw ProvisionException::offlineDisabled();
         }
 
         return DB::transaction(function () use ($storage, $name) {

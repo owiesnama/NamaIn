@@ -1753,5 +1753,19 @@
     "There are :count open reconciliation items that need a decision.": "يوجد :count عناصر تسوية مفتوحة تحتاج إلى قرار.",
     "Device health warnings:": "تحذيرات حالة الأجهزة:",
     "Open reconciliation inbox": "فتح صندوق التسويات",
-    "Resolve items promptly to keep stock and balances accurate.": "عالج العناصر بسرعة للحفاظ على دقة المخزون والأرصدة."
+    "Resolve items promptly to keep stock and balances accurate.": "عالج العناصر بسرعة للحفاظ على دقة المخزون والأرصدة.",
+    "Offline mode updated.": "تم تحديث وضع العمل دون اتصال.",
+    "Offline mode is not enabled for this organization.": "وضع العمل دون اتصال غير مفعّل لهذه المؤسسة.",
+    "Device fleet": "أسطول الأجهزة",
+    "Offline device health across all tenants.": "حالة الأجهزة دون اتصال عبر جميع المؤسسات.",
+    "Offline": "دون اتصال",
+    "Active / Revoked": "نشط / مُبطل",
+    "Open items": "عناصر مفتوحة",
+    "Last sync": "آخر مزامنة",
+    "On": "مفعّل",
+    "Off": "معطّل",
+    "Back to fleet": "العودة إلى الأسطول",
+    "Offline mode": "وضع دون اتصال",
+    "Toggle offline mode for this tenant?": "تبديل وضع العمل دون اتصال لهذه المؤسسة؟",
+    "No devices enrolled.": "لا توجد أجهزة مسجلة."
 }

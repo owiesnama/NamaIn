@@ -73,6 +73,7 @@ class Tenant extends Model
     {
         return [
             'is_active' => 'boolean',
+            'offline_enabled' => 'boolean',
         ];
     }
 
@@ -175,6 +176,21 @@ class Tenant extends Model
     public function activate(): bool
     {
         return $this->update(['is_active' => true]);
+    }
+
+    public function isOfflineEnabled(): bool
+    {
+        return (bool) $this->offline_enabled;
+    }
+
+    public function enableOffline(): bool
+    {
+        return $this->update(['offline_enabled' => true]);
+    }
+
+    public function disableOffline(): bool
+    {
+        return $this->update(['offline_enabled' => false]);
     }
 
     public function resolveRouteBinding($value, $field = null): ?Model

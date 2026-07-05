@@ -31,7 +31,7 @@ uses(
 */
 
 uses(TestCase::class, RefreshDatabase::class)->beforeEach(function () {
-    $tenant = Tenant::create(['name' => 'Test Org', 'slug' => 'test-org', 'is_active' => true]);
+    $tenant = Tenant::create(['name' => 'Test Org', 'slug' => 'test-org', 'is_active' => true, 'offline_enabled' => true]);
     app()->instance('currentTenant', $tenant);
     URL::defaults(['tenant' => $tenant->slug]);
 })->in('Feature');

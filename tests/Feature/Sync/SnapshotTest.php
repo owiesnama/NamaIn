@@ -182,7 +182,7 @@ it('rejects snapshot access from another tenant device', function () {
     $snapshotId = $this->postJson('/api/sync/v1/snapshot', [], ['Authorization' => "Bearer {$environment['token']}"])
         ->json('snapshot_id');
 
-    $tenantB = Tenant::create(['name' => 'B Co', 'slug' => 'b-'.uniqid(), 'is_active' => true]);
+    $tenantB = Tenant::create(['name' => 'B Co', 'slug' => 'b-'.uniqid(), 'is_active' => true, 'offline_enabled' => true]);
     app()->instance('currentTenant', $tenantB);
     $storageB = Storage::create([
         'name' => 'B Store', 'address' => 'x', 'type' => StorageType::SALE_POINT, 'tenant_id' => $tenantB->id,
