@@ -1767,5 +1767,22 @@
     "Back to fleet": "العودة إلى الأسطول",
     "Offline mode": "وضع دون اتصال",
     "Toggle offline mode for this tenant?": "تبديل وضع العمل دون اتصال لهذه المؤسسة؟",
-    "No devices enrolled.": "لا توجد أجهزة مسجلة."
+    "No devices enrolled.": "لا توجد أجهزة مسجلة.",
+    "Pilot health": "صحة التجربة",
+    "Offline pilot SLOs computed from the sync audit trail.": "مؤشرات تجربة العمل دون اتصال محسوبة من سجل تدقيق المزامنة.",
+    "Select tenant": "اختر المؤسسة",
+    "Sale latency p95": "زمن وصول المبيعات (p95)",
+    "Target: < 60s": "الهدف: أقل من 60 ثانية",
+    "Duplicated sales": "مبيعات مكررة",
+    "Target: 0": "الهدف: 0",
+    "Applied sales": "مبيعات مطبقة",
+    "Window total": "إجمالي الفترة",
+    "Resolution p95": "زمن المعالجة (p95)",
+    "Target: < 48h": "الهدف: أقل من 48 ساعة",
+    "Lower is better": "الأقل أفضل",
+    "Crash-free sessions": "جلسات دون أعطال",
+    "Client-reported": "مُبلّغ من الجهاز",
+    "Select a tenant to compute its pilot SLOs.": "اختر مؤسسة لحساب مؤشرات تجربتها.",
+    "Item": "العنصر",
+    "Resolved by": "تمت المعالجة بواسطة"
 }

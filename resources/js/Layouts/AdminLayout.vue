@@ -142,6 +142,20 @@
                             <span class="text-sm">{{ __('Device fleet') }}</span>
                         </Link>
 
+                        <!-- Pilot health -->
+                        <Link
+                            :href="route('admin.pilot-health.index')"
+                            class="flex items-center gap-x-3 px-3 py-2 rounded-lg transition-all duration-200"
+                            :class="route().current('admin.pilot-health.*')
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'"
+                        >
+                            <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 12h-2.25l-2.25 6-4.5-12-2.25 6H7.5" />
+                            </svg>
+                            <span class="text-sm">{{ __('Pilot health') }}</span>
+                        </Link>
+
                         <!-- Messaging -->
                         <Link
                             :href="route('admin.messages.index')"
