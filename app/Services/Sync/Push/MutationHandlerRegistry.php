@@ -8,6 +8,7 @@ use App\Services\Sync\Push\Handlers\CustomerCreateHandler;
 use App\Services\Sync\Push\Handlers\ExpenseCreateHandler;
 use App\Services\Sync\Push\Handlers\PosSessionCloseHandler;
 use App\Services\Sync\Push\Handlers\PosSessionOpenHandler;
+use App\Services\Sync\Push\Handlers\SaleCreateHandler;
 use Illuminate\Contracts\Container\Container;
 
 /**
@@ -22,7 +23,7 @@ class MutationHandlerRegistry
         MutationType::ExpenseCreate->value => ExpenseCreateHandler::class,
         MutationType::PosSessionOpen->value => PosSessionOpenHandler::class,
         MutationType::PosSessionClose->value => PosSessionCloseHandler::class,
-        // MutationType::SaleCreate registered by PR-5 (ReplayPosSaleAction).
+        MutationType::SaleCreate->value => SaleCreateHandler::class,
     ];
 
     public function __construct(private Container $container) {}

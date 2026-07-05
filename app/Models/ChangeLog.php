@@ -86,7 +86,7 @@ class ChangeLog extends Model
             'public_id' => $publicId,
             'operation' => $operation,
             'source_device_id' => static::sourceDeviceId(),
-            'actor_user_id' => static::actorUserId(),
+            'actor_user_id' => auth()->id(),
             'changed_at' => now(),
         ]);
     }
@@ -102,20 +102,6 @@ class ChangeLog extends Model
         }
 
         return app('currentDevice')->id;
-    }
-
-    /**
-     * The user the current write is attributed to: the resolved push actor when
-     * a device pushed it (bound per mutation by PushProcessor), otherwise the
-     * authenticated web user.
-     */
-    private static function actorUserId(): ?int
-    {
-        if (app()->bound('currentActor')) {
-            return app('currentActor')->id;
-        }
-
-        return auth()->id();
     }
 
     private static function allocateSeq(int $tenantId): int

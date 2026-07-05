@@ -9,7 +9,9 @@ use App\Models\User;
 use App\Services\Sync\IdempotencyOutcome;
 use App\Services\Sync\IdempotentMutation;
 use App\Services\Sync\PublicIdResolver;
+use Closure;
 use DomainException;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * The push engine (Design 02 §5.2): applies an ordered mutation batch, each
@@ -47,13 +49,13 @@ class PushProcessor
             $actor = $this->resolveActor($mutation, $device);
             $handler = $this->handlers->for($mutation->type);
 
-            $outcome = $this->idempotent->run(
+            $outcome = $this->actingAs($actor, fn (): IdempotencyOutcome => $this->idempotent->run(
                 $device->tenant_id,
                 $mutation->idempotencyKey,
                 $mutation->type->value,
                 fn (): array => $handler->handle($mutation, $actor, $device),
                 $device->id,
-            );
+            ));
 
             return $this->success($mutation, $outcome);
         } catch (RejectedMutation $rejection) {
@@ -67,11 +69,9 @@ class PushProcessor
     }
 
     /**
-     * Resolve the mutation's actor (the device authenticates the channel; the
-     * user attributes the work — Design 02 §1.2) and bind it so ChangeLog stamps
-     * actor_user_id from the mutation, not the request. Tenant assignment on
-     * created rows falls back to the bound currentTenant (the device's tenant),
-     * so no global auth state is mutated.
+     * Resolve the mutation's actor — the device authenticates the channel; the
+     * user attributes the work (Design 02 §1.2). The actor must belong to the
+     * device's tenant.
      */
     private function resolveActor(PushMutation $mutation, Device $device): User
     {
@@ -82,9 +82,33 @@ class PushProcessor
             throw RejectedMutation::tenantMismatch(__('The mutation actor does not belong to this organization.'));
         }
 
-        app()->instance('currentActor', $actor);
-
         return $actor;
+    }
+
+    /**
+     * Run a mutation as its actor so the reused domain Actions attribute the
+     * work to the user (`created_by`, treasury actor, change-log actor) instead
+     * of the authenticated device. The actor is set on the web guard and made
+     * the default only for the duration of the closure — the sync guard is left
+     * untouched, so it still re-resolves the device from the token per request.
+     *
+     * @template T
+     *
+     * @param  Closure(): T  $run
+     * @return T
+     */
+    private function actingAs(User $actor, Closure $run): mixed
+    {
+        $previousGuard = Auth::getDefaultDriver();
+
+        Auth::guard('web')->setUser($actor);
+        Auth::shouldUse('web');
+
+        try {
+            return $run();
+        } finally {
+            Auth::shouldUse($previousGuard);
+        }
     }
 
     /**
