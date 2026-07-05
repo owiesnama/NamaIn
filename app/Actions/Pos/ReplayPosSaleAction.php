@@ -2,7 +2,9 @@
 
 namespace App\Actions\Pos;
 
+use App\Actions\Reconciliation\RaiseReconciliationItem;
 use App\Enums\PaymentMethod;
+use App\Enums\ReconciliationType;
 use App\Models\CreditBreachFlag;
 use App\Models\Customer;
 use App\Models\Device;
@@ -27,7 +29,10 @@ use Illuminate\Support\Collection;
  */
 class ReplayPosSaleAction
 {
-    public function __construct(private ProcessPosCheckoutAction $processCheckout) {}
+    public function __construct(
+        private ProcessPosCheckoutAction $processCheckout,
+        private RaiseReconciliationItem $raiseReconciliationItem,
+    ) {}
 
     public function handle(PosSession $session, Collection $data, User $actor, CheckoutContext $context, Device $device): SaleReplayResult
     {
@@ -40,8 +45,8 @@ class ReplayPosSaleAction
 
         $invoice = $this->processCheckout->handle($session, $data, $actor, null, false, $context);
 
-        $oversell = $this->recordOversell($invoice, $storage->id, $onHandBefore, $device);
-        $creditBreach = $this->recordCreditBreach($invoice, $data, $device);
+        $oversell = $this->recordOversell($invoice, $storage->id, $onHandBefore, $device, $context, $actor);
+        $creditBreach = $this->recordCreditBreach($invoice, $data, $device, $context, $actor);
 
         return new SaleReplayResult($invoice, $oversell, $creditBreach);
     }
@@ -54,7 +59,7 @@ class ReplayPosSaleAction
      * @param  Collection<int, int>  $onHandBefore  product_id => on-hand before the sale
      * @return list<array{product: string, oversold_qty: int}>
      */
-    private function recordOversell(Invoice $invoice, int $storageId, Collection $onHandBefore, Device $device): array
+    private function recordOversell(Invoice $invoice, int $storageId, Collection $onHandBefore, Device $device, CheckoutContext $context, User $actor): array
     {
         $flags = [];
 
@@ -69,7 +74,7 @@ class ReplayPosSaleAction
                 continue;
             }
 
-            OversellReconciliation::create([
+            $oversellRow = OversellReconciliation::create([
                 'tenant_id' => $invoice->tenant_id,
                 'device_id' => $device->id,
                 'storage_id' => $storageId,
@@ -79,6 +84,15 @@ class ReplayPosSaleAction
                 'on_hand_before' => $before,
                 'occurred_at' => now(),
             ]);
+
+            $this->raiseReconciliationItem->for(
+                subject: $oversellRow,
+                type: ReconciliationType::Oversell,
+                device: $device,
+                register: $context->register,
+                actor: $actor,
+                occurredAt: $oversellRow->occurred_at,
+            );
 
             $flags[] = ['product' => $lines->first()->product->public_id, 'oversold_qty' => $oversold];
         }
@@ -90,7 +104,7 @@ class ReplayPosSaleAction
      * Flag a credit sale whose post-sale balance exceeds the customer's cached
      * limit (Design 02 §6.2). Never rejected — the sale is already recorded.
      */
-    private function recordCreditBreach(Invoice $invoice, Collection $data, Device $device): bool
+    private function recordCreditBreach(Invoice $invoice, Collection $data, Device $device, CheckoutContext $context, User $actor): bool
     {
         if (($data->get('payment_method') ?? PaymentMethod::Cash->value) !== PaymentMethod::Credit->value) {
             return false;
@@ -115,7 +129,7 @@ class ReplayPosSaleAction
             return false;
         }
 
-        CreditBreachFlag::create([
+        $breachRow = CreditBreachFlag::create([
             'tenant_id' => $invoice->tenant_id,
             'device_id' => $device->id,
             'customer_id' => $customer->id,
@@ -124,6 +138,15 @@ class ReplayPosSaleAction
             'balance_after' => $balanceAfter,
             'occurred_at' => now(),
         ]);
+
+        $this->raiseReconciliationItem->for(
+            subject: $breachRow,
+            type: ReconciliationType::CreditBreach,
+            device: $device,
+            register: $context->register,
+            actor: $actor,
+            occurredAt: $breachRow->occurred_at,
+        );
 
         return true;
     }

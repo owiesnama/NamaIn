@@ -2,16 +2,22 @@
 
 namespace App\Services\Sync\Push;
 
+use App\Actions\Reconciliation\RaiseReconciliationItem;
 use App\Enums\MutationOutcome;
+use App\Enums\ReconciliationType;
 use App\Exceptions\Sync\RejectedMutation;
+use App\Models\ChangeLog;
 use App\Models\Device;
+use App\Models\ParkedMutation;
 use App\Models\User;
 use App\Services\Sync\IdempotencyOutcome;
 use App\Services\Sync\IdempotentMutation;
 use App\Services\Sync\PublicIdResolver;
+use Carbon\CarbonImmutable;
 use Closure;
 use DomainException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 /**
  * The push engine (Design 02 §5.2): applies an ordered mutation batch, each
@@ -26,6 +32,7 @@ class PushProcessor
         private IdempotentMutation $idempotent,
         private PublicIdResolver $resolver,
         private MutationHandlerRegistry $handlers,
+        private RaiseReconciliationItem $raiseReconciliationItem,
     ) {}
 
     /**
@@ -59,13 +66,90 @@ class PushProcessor
 
             return $this->success($mutation, $outcome);
         } catch (RejectedMutation $rejection) {
+            $this->parkIfTerminal($mutation, $device, $rejection);
+
             return $this->rejected($mutation, $rejection);
         } catch (DomainException $violation) {
             // A domain precondition (closed session, missing customer on a
             // credit sale) is a terminal rejection, never a 500 that fails the
             // whole push. The transaction already rolled back — zero writes.
-            return $this->rejected($mutation, RejectedMutation::validationFailed($violation->getMessage()));
+            $rejection = RejectedMutation::validationFailed($violation->getMessage());
+            $this->parkIfTerminal($mutation, $device, $rejection);
+
+            return $this->rejected($mutation, $rejection);
         }
+    }
+
+    /**
+     * Park a *terminally* rejected mutation (Design 04 §1.2, §1.3): non-retriable
+     * reasons store the raw envelope and raise a `ParkedMutation` inbox item in
+     * their own tiny transaction (the rejected business mutation itself wrote
+     * nothing). Retriable rejections are never parked — the device re-pushes once
+     * the missing reference lands. The unique (tenant_id, idempotency_key) makes
+     * a re-push of a still-broken mutation a no-op: the row is not re-created, so
+     * no duplicate inbox item is raised.
+     */
+    private function parkIfTerminal(PushMutation $mutation, Device $device, RejectedMutation $rejection): void
+    {
+        if ($rejection->reason->isRetriable()) {
+            return;
+        }
+
+        DB::transaction(function () use ($mutation, $device, $rejection): void {
+            ChangeLog::lockTenant($device->tenant_id);
+
+            $existing = ParkedMutation::where('tenant_id', $device->tenant_id)
+                ->where('idempotency_key', $mutation->idempotencyKey)
+                ->exists();
+
+            if ($existing) {
+                return;
+            }
+
+            $parked = ParkedMutation::create([
+                'tenant_id' => $device->tenant_id,
+                'device_id' => $device->id,
+                'mutation_type' => $mutation->type->value,
+                'idempotency_key' => $mutation->idempotencyKey,
+                'rejection_reason' => $rejection->reason,
+                'rejection_message' => $rejection->getMessage(),
+                'envelope' => $this->envelope($mutation),
+                'occurred_at' => $this->occurredAt($mutation),
+            ]);
+
+            $this->raiseReconciliationItem->for(
+                subject: $parked,
+                type: ReconciliationType::ParkedMutation,
+                device: $device,
+                register: $device->register,
+                actor: null,
+                occurredAt: $parked->occurred_at,
+            );
+        });
+    }
+
+    /**
+     * The full mutation DTO as received, for audit/replay.
+     *
+     * @return array<string, mixed>
+     */
+    private function envelope(PushMutation $mutation): array
+    {
+        return [
+            'idempotency_key' => $mutation->idempotencyKey,
+            'type' => $mutation->type->value,
+            'public_id' => $mutation->publicId,
+            'actor' => $mutation->actorPublicId,
+            'occurred_at' => $mutation->occurredAt,
+            'payload' => $mutation->payload,
+        ];
+    }
+
+    private function occurredAt(PushMutation $mutation): CarbonImmutable
+    {
+        return $mutation->occurredAt !== null
+            ? CarbonImmutable::parse($mutation->occurredAt)
+            : CarbonImmutable::now();
     }
 
     /**
