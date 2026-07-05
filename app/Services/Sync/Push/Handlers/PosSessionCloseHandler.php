@@ -2,7 +2,7 @@
 
 namespace App\Services\Sync\Push\Handlers;
 
-use App\Actions\Pos\ClosePosSessionAction;
+use App\Actions\Pos\ReplayCloseSessionAction;
 use App\Exceptions\Sync\RejectedMutation;
 use App\Models\Device;
 use App\Models\PosSession;
@@ -12,15 +12,16 @@ use App\Services\Sync\Push\MutationHandler;
 use App\Services\Sync\Push\PushMutation;
 
 /**
- * `pos_session.close` (Design 02 §5.3): reconciles the device register's drawer
- * against the counted `closing_float` (integer minor units). Session-variance
- * capture is Phase 3 — this handler is intentionally shaped so Phase 3 can wrap
- * the close call without changing the push surface.
+ * `pos_session.close` (Design 02 §5.3, Design 04 §2.3): reconciles the device
+ * register's drawer against the counted `closing_float` (integer minor units)
+ * through {@see ReplayCloseSessionAction}, which resolves the drawer by
+ * `register_id`, absorbs the variance into a drawer adjustment (unchanged cash
+ * flow), and surfaces any offline-close variance to the reconciliation inbox.
  */
 class PosSessionCloseHandler implements MutationHandler
 {
     public function __construct(
-        private ClosePosSessionAction $closeSession,
+        private ReplayCloseSessionAction $closeSession,
         private PublicIdResolver $resolver,
     ) {}
 
@@ -43,6 +44,8 @@ class PosSessionCloseHandler implements MutationHandler
             closingFloat: (int) ($mutation->payload['closing_float'] ?? 0),
             actor: $actor,
             register: $device->register,
+            device: $device,
+            occurredAt: $mutation->occurredAt,
         );
 
         return ['public_id' => $session->public_id, 'serial' => null];
