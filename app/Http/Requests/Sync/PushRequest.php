@@ -27,6 +27,8 @@ class PushRequest extends FormRequest
             'protocol' => ['nullable', 'integer'],
             'app_version' => ['nullable', 'string'],
             'client_pushed_at' => ['nullable', 'date'],
+            'pending_count' => ['nullable', 'integer', 'min:0'],
+            'oldest_pending_at' => ['nullable', 'date'],
             'mutations' => ['required', 'array', 'min:1', 'max:'.self::BATCH_CAP],
             'mutations.*.idempotency_key' => ['required', 'string'],
             'mutations.*.type' => ['required', new Enum(MutationType::class)],

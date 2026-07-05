@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\Sync\PublicIdResolver;
 use App\Services\Sync\Push\MutationHandler;
 use App\Services\Sync\Push\PushMutation;
+use App\Services\Sync\SyncReceiptStore;
 use App\ValueObjects\Money;
 
 /**
@@ -25,11 +26,13 @@ class ExpenseCreateHandler implements MutationHandler
     public function __construct(
         private StoreExpenseAction $storeExpense,
         private PublicIdResolver $resolver,
+        private SyncReceiptStore $receipts,
     ) {}
 
     public function handle(PushMutation $mutation, User $actor, Device $device): array
     {
         $payload = $mutation->payload;
+        $receiptPublicId = $payload['receipt_public_id'] ?? null;
 
         $treasuryAccountId = $this->resolver->id(TreasuryAccount::class, $payload['treasury_account'] ?? null);
 
@@ -39,7 +42,10 @@ class ExpenseCreateHandler implements MutationHandler
 
         $expense = $this->storeExpense->handle([
             'public_id' => $mutation->publicId,
-            'receipt_public_id' => $payload['receipt_public_id'] ?? null,
+            'receipt_public_id' => $receiptPublicId,
+            // Link a receipt that was uploaded before this mutation landed; a
+            // receipt that arrives later is linked by the attachment endpoint.
+            'receipt_path' => $receiptPublicId ? $this->receipts->existingPathFor($receiptPublicId) : null,
             'title' => $payload['title'],
             'amount' => Money::fromMinor((int) $payload['amount'])->major(),
             'expensed_at' => $payload['expensed_at'],

@@ -11,6 +11,7 @@ use App\Observers\QuoteObserver;
 use App\Services\Core\Cache as TenantCacheService;
 use App\Services\Inventory\InventoryStrategy;
 use App\Services\Inventory\InventoryStrategyResolver;
+use App\Services\Sync\SyncLogContext;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -36,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
             InventoryStrategy::class,
             fn ($app) => $app->make(InventoryStrategyResolver::class)->resolve(),
         );
+
+        $this->app->singleton(SyncLogContext::class);
     }
 
     public function boot(): void

@@ -7,6 +7,7 @@ use App\Models\Device;
 use App\Services\Sync\RowProjector;
 use App\Services\Sync\SyncEntityDefinition;
 use App\Services\Sync\SyncEntityMap;
+use App\Services\Sync\SyncLogContext;
 use App\Services\Sync\SyncProtocol;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Http\JsonResponse;
@@ -62,6 +63,11 @@ class PullController extends Controller
             'last_pull_at' => now(),
             'last_acked_seq' => $cursor,
         ])->saveQuietly();
+
+        app(SyncLogContext::class)->set([
+            'cursor_from' => $cursor,
+            'cursor_to' => $nextCursor,
+        ]);
 
         return response()->json([
             'changes' => $changes,

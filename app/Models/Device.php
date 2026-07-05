@@ -66,6 +66,7 @@ class Device extends Model implements AuthenticatableContract
             'last_seen_at' => 'datetime',
             'last_pull_at' => 'datetime',
             'last_push_at' => 'datetime',
+            'oldest_pending_at' => 'datetime',
         ];
     }
 
