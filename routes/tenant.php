@@ -448,9 +448,21 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Backend-only for Phase 1; the fleet management UI lands in Phase 3.
         */
+        Route::get('/devices', [DevicesController::class, 'index'])
+            ->middleware('can:devices.view')
+            ->name('devices.index');
+        Route::get('/devices/{device}', [DevicesController::class, 'show'])
+            ->middleware('can:devices.view')
+            ->name('devices.show');
         Route::post('/devices', [DevicesController::class, 'store'])
             ->middleware('can:devices.manage')
             ->name('devices.store');
+        Route::post('/devices/{device}/revoke', [DevicesController::class, 'revoke'])
+            ->middleware('can:devices.manage')
+            ->name('devices.revoke');
+        Route::post('/devices/{device}/replace', [DevicesController::class, 'replace'])
+            ->middleware('can:devices.manage')
+            ->name('devices.replace');
 
         /*
         |--------------------------------------------------------------------------
