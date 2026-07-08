@@ -10,14 +10,16 @@
     import { useQueryString } from "@/Composables/useQueryString";
     import { usePermissions } from "@/Composables/usePermissions";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+    import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
+    import { useFilterChips } from "@/Composables/useFilterChips";
     import ImportModal from "@/Shared/ImportModal.vue";
     import Tooltip from "@/Components/Tooltip.vue";
     import { useDate } from '@/Composables/useDate';
 
     const { can } = usePermissions();
 
-    defineProps({
+    const props = defineProps({
         customers: Object,
         categories: Array
     });
@@ -85,6 +87,20 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             sort_order: "asc"
         };
     };
+
+    const { chips, removeChip } = useFilterChips(filters, [
+        { key: "search", label: __("Search") },
+        {
+            key: "status",
+            label: __("Status"),
+            default: "all",
+            options: [
+                { value: "withTrash", label: __("With Trashed") },
+                { value: "trash", label: __("Trashed") },
+            ],
+        },
+        { key: "category", label: __("Category"), options: props.categories, optionValue: "id", optionLabel: "name" },
+    ]);
 
     const sortByOptions = [
         { label: __("Name"), value: "name" },
@@ -179,7 +195,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
                 <!-- Sidebar -->
                 <FilterSidebar
-                    v-if="showSidebar"
+                    :show="showSidebar"
                     @close="showSidebar = false"
                     v-model:filters="filters"
                     :categories="categories"
@@ -190,6 +206,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
                 <!-- Table Content -->
                 <div class="flex-grow min-w-0 overflow-hidden">
+                    <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
                     <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

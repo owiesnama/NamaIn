@@ -3,6 +3,10 @@ import TrashFilter from "@/Shared/TrashFilter.vue";
 import CustomSelect from "@/Components/CustomSelect.vue";
 
 defineProps({
+    show: {
+        type: Boolean,
+        default: false
+    },
     filters: Object,
     categories: Array,
     sortByOptions: Array,
@@ -21,7 +25,7 @@ const resetFilters = () => {
 
 <template>
     <div class="contents">
-        <!-- Drawer backdrop (below lg) -->
+        <!-- Drawer backdrop -->
         <Transition
             enter-active-class="transition-opacity ease-out duration-200"
             enter-from-class="opacity-0"
@@ -30,19 +34,27 @@ const resetFilters = () => {
             leave-from-class="opacity-100"
             leave-to-class="opacity-0"
         >
-            <div class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm lg:hidden" @click="emit('close')" />
+            <div v-if="show" class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm" @click="emit('close')" />
         </Transition>
 
-        <!-- Slide-over drawer below lg; static inline sidebar at lg+ -->
-        <aside class="fixed inset-y-0 start-0 z-50 w-80 max-w-[85vw] overflow-y-auto bg-white dark:bg-gray-900 shadow-xl lg:static lg:z-auto lg:inset-auto lg:w-72 lg:max-w-none lg:overflow-visible lg:bg-transparent lg:shadow-none lg:shrink-0 transition-all duration-300">
-        <div class="sticky top-4 space-y-4 p-4 lg:p-0">
+        <!-- Slide-over drawer (all breakpoints) -->
+        <Transition
+            enter-active-class="transition ease-out duration-300"
+            enter-from-class="-translate-x-full rtl:translate-x-full opacity-0"
+            enter-to-class="translate-x-0 opacity-100"
+            leave-active-class="transition ease-in duration-200"
+            leave-from-class="translate-x-0 opacity-100"
+            leave-to-class="-translate-x-full rtl:translate-x-full opacity-0"
+        >
+        <aside v-if="show" class="fixed inset-y-0 start-0 z-50 w-80 max-w-[85vw] overflow-y-auto bg-white dark:bg-gray-900 shadow-xl">
+        <div class="space-y-4 p-4">
             <!-- Unified Filter Sidebar -->
             <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl space-y-6 transition-all">
                 <div class="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-4">
                     <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{{ __("Filters") }}</h3>
                     <div class="flex items-center gap-x-2">
                         <button type="button" class="text-xs text-emerald-600 hover:text-emerald-700 font-medium" @click="resetFilters">{{ __("Reset") }}</button>
-                        <button type="button" class="lg:hidden inline-flex items-center justify-center w-9 h-9 -me-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500" @click="emit('close')">
+                        <button type="button" class="inline-flex items-center justify-center w-9 h-9 -me-2 rounded-lg text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500" @click="emit('close')">
                             <span class="sr-only">{{ __("Close") }}</span>
                             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
@@ -132,5 +144,6 @@ const resetFilters = () => {
             </div>
         </div>
         </aside>
+        </Transition>
     </div>
 </template>

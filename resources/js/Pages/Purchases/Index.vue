@@ -11,7 +11,9 @@
     import Dropdown from "@/Components/Dropdown.vue";
     import DropdownLink from "@/Components/DropdownLink.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+    import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
+    import { useFilterChips } from "@/Composables/useFilterChips";
     import { useQueryString } from "@/Composables/useQueryString";
     import debounce from "lodash/debounce";
     import axios from "axios";
@@ -77,6 +79,19 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             sort_order: "desc"
         };
     };
+
+    const { chips, removeChip } = useFilterChips(filters, [
+        { key: "search", label: __("Search") },
+        {
+            key: "status",
+            label: __("Status"),
+            default: "all",
+            options: [
+                { value: "withTrash", label: __("With Trashed") },
+                { value: "trash", label: __("Trashed") },
+            ],
+        },
+    ]);
 
     const sortByOptions = [
         { label: __("Date"), value: "created_at" },
@@ -186,7 +201,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
             <!-- Sidebar -->
             <FilterSidebar
-                v-if="showSidebar"
+                :show="showSidebar"
                 @close="showSidebar = false"
                 v-model:filters="filters"
                 :sort-by-options="sortByOptions"
@@ -196,6 +211,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
             <!-- Invoices List -->
             <div class="flex-1 min-w-0">
+                <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
+
                 <div class="space-y-6">
                     <div
                         v-for="invoice in invoices.data"

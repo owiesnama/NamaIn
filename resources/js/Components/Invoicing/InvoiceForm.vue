@@ -96,7 +96,6 @@
         initial_payment_amount: 0,
         payment_reference: '',
         payment_notes: '',
-        bank_name: '',
         receipt: null,
         cheque_bank_id: null,
         cheque_due_date: '',

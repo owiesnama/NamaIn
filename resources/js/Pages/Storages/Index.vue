@@ -6,7 +6,9 @@
     import StorageForm from "@/Components/Storages/StorageForm.vue";
     import DeleteStorage from "@/Components/Storages/DeleteStorage.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+    import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
+    import { useFilterChips } from "@/Composables/useFilterChips";
     import { watch, ref } from "vue";
     import debounce from "lodash/debounce";
     import { router, Link } from "@inertiajs/vue3";
@@ -46,6 +48,19 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             sort_order: "asc"
         };
     };
+
+    const { chips, removeChip } = useFilterChips(filters, [
+        { key: "search", label: __("Search") },
+        {
+            key: "status",
+            label: __("Status"),
+            default: "all",
+            options: [
+                { value: "withTrash", label: __("With Trashed") },
+                { value: "trash", label: __("Trashed") },
+            ],
+        },
+    ]);
 
     const sortByOptions = [
         { label: __("Name"), value: "name" },
@@ -107,7 +122,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
                 <!-- Sidebar -->
                 <FilterSidebar
-                    v-if="showSidebar"
+                    :show="showSidebar"
                     @close="showSidebar = false"
                     v-model:filters="filters"
                     :sort-by-options="sortByOptions"
@@ -117,6 +132,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
                 <!-- Table Content -->
                 <div class="flex-grow min-w-0 overflow-hidden">
+                    <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
+
                     <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

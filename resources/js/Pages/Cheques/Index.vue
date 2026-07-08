@@ -7,7 +7,9 @@
     import debounce from "lodash/debounce";
     import EmptySearch from "@/Shared/EmptySearch.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+    import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
+    import { useFilterChips } from "@/Composables/useFilterChips";
     import CustomSelect from "@/Components/CustomSelect.vue";
     const props = defineProps({
         initialCheques: Object,
@@ -56,6 +58,25 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             sort_order: "asc"
         };
     };
+
+    const { chips, removeChip } = useFilterChips(filters, [
+        { key: "search", label: __("Search") },
+        {
+            key: "type",
+            label: __("Type"),
+            options: [
+                { value: 1, label: __("Receivable") },
+                { value: 0, label: __("Payable") },
+            ],
+        },
+        {
+            key: "status",
+            label: __("Status"),
+            default: [],
+            format: (value) => (Array.isArray(value) ? value.map((option) => option.label ?? option).join(", ") : value),
+        },
+        { key: "due", label: __("Due Before") },
+    ]);
 
     const loadMore = () => {
         if (!props.initialCheques.next_page_url) return;
@@ -215,7 +236,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
         <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
             <FilterSidebar
-                v-if="showSidebar"
+                :show="showSidebar"
                 @close="showSidebar = false"
                 v-model:filters="filters"
                 :sort-by-options="sortByOptions"
@@ -281,6 +302,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             </FilterSidebar>
 
             <div class="flex-1 min-w-0">
+                <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
+
                 <div v-if="cheques.length">
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                         <Cheque

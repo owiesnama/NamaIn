@@ -105,7 +105,7 @@ class StoreInvoiceAction
             'notes' => $method === PaymentMethod::Cash
                 ? ($isSale ? 'Cash payment on sale' : 'Cash payment on purchase')
                 : $data->get('payment_notes'),
-            'metadata' => $method === PaymentMethod::BankTransfer ? ['bank_name' => $data->get('bank_name')] : null,
+            'metadata' => null,
             'receipt_path' => $method === PaymentMethod::BankTransfer
                 ? $this->resolveTemporaryUpload($data->get('receipt'), 'receipts', disk: 'public')
                 : null,
