@@ -57,7 +57,6 @@ class CreateInvoiceRequest extends FormRequest
                 'nullable',
                 Rule::exists('treasury_accounts', 'id')->where('tenant_id', $tenantId),
             ],
-            'bank_name' => 'nullable|string|max:255',
             'cheque_due_date' => 'nullable|date',
             'cheque_bank_id' => 'nullable|integer',
             'cheque_number' => 'nullable|string|max:255',

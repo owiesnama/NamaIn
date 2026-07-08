@@ -112,14 +112,14 @@ function requestExport() {
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                    <tr v-for="row in data" :key="row.supplier" class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ row.supplier }}</td>
+                                    <tr v-for="row in data" :key="row.supplier_id" class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{{ row.supplier_name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ formatCurrency(row.bucket_0_30) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ formatCurrency(row.bucket_31_60) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ formatCurrency(row.bucket_61_90) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold"
-                                            :class="(row.bucket_over_90 ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'">
-                                            {{ formatCurrency(row.bucket_over_90) }}
+                                            :class="(row.bucket_90_plus ?? 0) > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300'">
+                                            {{ formatCurrency(row.bucket_90_plus) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-900 dark:text-white">{{ formatCurrency(row.total) }}</td>
                                     </tr>

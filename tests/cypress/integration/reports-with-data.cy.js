@@ -180,7 +180,8 @@ describe('Inventory Valuation with data', () => {
 describe('Customer Aging with data', () => {
     it('shows customers with outstanding balances', () => {
         cy.visit('/reports/customer-aging');
-        cy.contains('Cypress Customer').should('exist');
+        // The customer name column must render the real name (not blank).
+        cy.get('table tbody').contains('td', 'Cypress Customer').should('be.visible');
     });
 
     it('shows amounts in aging buckets', () => {
@@ -192,7 +193,8 @@ describe('Customer Aging with data', () => {
 describe('Supplier Aging with data', () => {
     it('shows suppliers with outstanding balances', () => {
         cy.visit('/reports/supplier-aging');
-        cy.contains('Cypress Supplier').should('exist');
+        // The supplier name column must render the real name (not blank).
+        cy.get('table tbody').contains('td', 'Cypress Supplier').should('be.visible');
     });
 });
 
@@ -207,5 +209,12 @@ describe('Treasury Reconciliation with data', () => {
     it('shows treasury movements', () => {
         cy.visit('/reports/treasury-reconciliation');
         cy.get('table tbody tr').should('have.length.at.least', 1);
+    });
+
+    it('renders the account name and date in the table', () => {
+        cy.visit('/reports/treasury-reconciliation');
+        // Account (1st cell) and Date (2nd cell) columns must render, not be blank.
+        cy.get('table tbody').contains('td', 'Main Cash').should('be.visible');
+        cy.get('table tbody tr').first().find('td').eq(1).invoke('text').should('not.be.empty');
     });
 });

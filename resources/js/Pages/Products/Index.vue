@@ -12,7 +12,9 @@
     import ProductAdjustmentModal from "@/Components/Products/ProductAdjustmentModal.vue";
     import TextInput from "@/Components/TextInput.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
+    import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
+    import { useFilterChips } from "@/Composables/useFilterChips";
     import Tooltip from "@/Components/Tooltip.vue";
 
     const props = defineProps({
@@ -60,6 +62,24 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             sort_order: "desc"
         };
     };
+
+    const { chips, removeChip } = useFilterChips(filters, [
+        { key: "search", label: __("Search") },
+        {
+            key: "status",
+            label: __("Status"),
+            default: "all",
+            options: [
+                { value: "withTrash", label: __("With Trashed") },
+                { value: "trash", label: __("Trashed") },
+            ],
+        },
+        { key: "category", label: __("Category"), options: props.categories, optionValue: "id", optionLabel: "name" },
+        { key: "min_cost", label: __("Min Cost") },
+        { key: "max_cost", label: __("Max Cost") },
+        { key: "expire_from", label: __("Expires From") },
+        { key: "expire_to", label: __("Expires To") },
+    ]);
 
     const sortByOptions = [
         { label: __("Availability"), value: "quantity_on_hand" },
@@ -375,7 +395,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
                 <!-- Sidebar -->
                 <FilterSidebar
-                    v-if="showSidebar"
+                    :show="showSidebar"
                     @close="showSidebar = false"
                     v-model:filters="filters"
                     :categories="categories"
@@ -406,6 +426,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
                 <!-- Products List -->
                 <div class="flex-1 min-w-0 overflow-hidden">
+                    <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
+
                     <!-- Table Mode -->
                     <div v-if="layout === 'table'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                         <div class="overflow-x-auto">
@@ -531,7 +553,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
                     <!-- Cards Mode -->
                     <div v-if="layout === 'cards'" data-testid="product-cards-grid">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
                             <!-- New Product Card -->
                             <div
                                 class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"

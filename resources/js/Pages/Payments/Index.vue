@@ -4,7 +4,9 @@ import { Link, router } from "@inertiajs/vue3";
 import Pagination from "@/Shared/Pagination.vue";
 import EmptySearch from "@/Shared/EmptySearch.vue";
 import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
+import { useFilterChips } from "@/Composables/useFilterChips";
 import DatePicker from "@/Components/DatePicker.vue";
 import { watch, ref, computed, onMounted, onUnmounted } from "vue";
 import { useQueryString } from "@/Composables/useQueryString";
@@ -70,6 +72,38 @@ const methodLabel = (method) => {
     const found = methodOptions.value.find(m => m.value === method);
     return found ? __(found.label) : __(method);
 };
+
+const { chips, removeChip } = useFilterChips(filters, [
+    { key: "search", label: __("Search") },
+    {
+        key: "status",
+        label: __("Status"),
+        default: "all",
+        options: [
+            { value: "withTrash", label: __("With Trashed") },
+            { value: "trash", label: __("Trashed") },
+        ],
+    },
+    {
+        key: "direction",
+        label: __("Direction"),
+        options: [
+            { value: "in", label: __("Incoming") },
+            { value: "out", label: __("Outgoing") },
+        ],
+    },
+    { key: "method", label: __("Method"), format: methodLabel },
+    { key: "date_from", label: __("Date From") },
+    { key: "date_to", label: __("Date To") },
+    {
+        key: "party_type",
+        label: __("Party Type"),
+        options: [
+            { value: "Customer", label: __("Customer") },
+            { value: "Supplier", label: __("Supplier") },
+        ],
+    },
+]);
 
 function isIncoming(payment) {
     return payment.direction === "in";
@@ -264,7 +298,7 @@ watch(
         <div class="flex flex-col lg:flex-row lg:gap-x-6">
             <!-- Sidebar -->
             <FilterSidebar
-                v-if="showSidebar"
+                :show="showSidebar"
                 @close="showSidebar = false"
                 v-model:filters="filters"
                 :sort-by-options="sortByOptions"
@@ -362,6 +396,8 @@ watch(
 
             <!-- Payments List -->
             <div class="flex-1 min-w-0 overflow-hidden">
+                <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
+
                 <div
                     class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all"
                 >

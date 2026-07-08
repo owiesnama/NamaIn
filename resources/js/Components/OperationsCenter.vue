@@ -55,8 +55,8 @@ function dismiss(id) {
     operations.value = operations.value.filter(o => o.id !== id);
 }
 
-function clearDone() {
-    operations.value = operations.value.filter(o => o.status !== 'completed' && o.status !== 'failed');
+function clearAll() {
+    operations.value = [];
 }
 
 // ─── Event handlers ─────────────────────────────────────────────────
@@ -172,7 +172,7 @@ const ringCircumference = 2 * Math.PI * 13;
                         </div>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button v-if="done.length" @click="clearDone" class="text-[11px] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium px-2 py-1.5 rounded-md transition-colors">
+                        <button v-if="operations.length" @click="clearAll" class="text-[11px] text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 font-medium px-2 py-1.5 rounded-md transition-colors">
                             {{ __('Clear') }}
                         </button>
                         <button @click="panelOpen = false" class="w-11 h-11 inline-flex items-center justify-center text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-600 dark:hover:text-gray-300 rounded-md transition-colors">
@@ -220,6 +220,11 @@ const ringCircumference = 2 * Math.PI * 13;
                                     {{ statusText(op) }}
                                 </div>
                             </div>
+                            <button @click="dismiss(op.id)" class="w-11 h-11 flex-shrink-0 inline-flex items-center justify-center rounded-md text-gray-300 dark:text-gray-600 hover:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                                <svg class="h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         </div>
                     </template>
 
@@ -281,18 +286,13 @@ const ringCircumference = 2 * Math.PI * 13;
             leave-to-class="opacity-0 scale-90"
         >
             <button
-                v-if="!panelOpen"
+                v-if="!panelOpen && pillState !== 'idle'"
                 @click="panelOpen = true"
                 data-testid="operations-pill"
                 class="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 inline-flex items-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
                 :class="[isRtl ? 'left-4' : 'right-4']"
             >
-                <span v-if="pillState === 'idle'" class="w-[30px] h-[30px] rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 inline-flex items-center justify-center">
-                    <svg class="h-[15px] w-[15px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                    </svg>
-                </span>
-                <span v-else class="relative w-[30px] h-[30px] flex-shrink-0">
+                <span class="relative w-[30px] h-[30px] flex-shrink-0">
                     <svg width="30" height="30" class="-rotate-90">
                         <circle cx="15" cy="15" r="13" fill="none" stroke="currentColor" stroke-width="2" class="text-gray-100 dark:text-gray-800" />
                         <circle cx="15" cy="15" r="13" fill="none"
@@ -311,9 +311,35 @@ const ringCircumference = 2 * Math.PI * 13;
                     </span>
                 </span>
                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                    <template v-if="pillState === 'idle'">{{ __('Operations') }}</template>
-                    <template v-else-if="pillState === 'active'">{{ active.length }} {{ __('in progress') }}</template>
+                    <template v-if="pillState === 'active'">{{ active.length }} {{ __('in progress') }}</template>
                     <template v-else>{{ __('Done') }}</template>
+                </span>
+            </button>
+        </Transition>
+
+        <!-- Idle nudge — a tab tucked against the screen edge when there is no work -->
+        <Transition
+            enter-active-class="transition ease-out duration-200"
+            enter-from-class="opacity-0 translate-x-2 rtl:-translate-x-2"
+            enter-to-class="opacity-100 translate-x-0"
+            leave-active-class="transition ease-in duration-150"
+            leave-from-class="opacity-100 translate-x-0"
+            leave-to-class="opacity-0 translate-x-2 rtl:-translate-x-2"
+        >
+            <button
+                v-if="!panelOpen && pillState === 'idle'"
+                @click="panelOpen = true"
+                data-testid="operations-pill"
+                class="group fixed top-1/2 -translate-y-1/2 z-50 inline-flex items-center gap-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 shadow-sm py-3 px-2.5 hover:px-3 transition-all duration-200 cursor-pointer"
+                :class="[isRtl ? 'left-0 rounded-e-xl border-s-0' : 'right-0 rounded-s-xl border-e-0']"
+            >
+                <span class="w-7 h-7 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500 inline-flex items-center justify-center flex-shrink-0">
+                    <svg class="h-[15px] w-[15px]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75v-.7V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                    </svg>
+                </span>
+                <span class="max-w-0 overflow-hidden opacity-0 group-hover:max-w-[8rem] group-hover:opacity-100 transition-all duration-200 text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                    {{ __('Operations') }}
                 </span>
             </button>
         </Transition>

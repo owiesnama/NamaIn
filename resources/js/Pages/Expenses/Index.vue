@@ -6,11 +6,13 @@ import debounce from "lodash/debounce";
 import Pagination from "@/Shared/Pagination.vue";
 import EmptySearch from "@/Shared/EmptySearch.vue";
 import FilterSidebar from "@/Shared/FilterSidebar.vue";
+import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
+import { useFilterChips } from "@/Composables/useFilterChips";
 import CustomSelect from "@/Components/CustomSelect.vue";
 import { useQueryString } from "@/Composables/useQueryString";
 
-defineProps({
+const props = defineProps({
     expenses: Object,
     categories: Array,
     users: Array,
@@ -43,6 +45,25 @@ const resetFilters = () => {
         created_by: null,
     };
 };
+
+const { chips, removeChip } = useFilterChips(filters, [
+    { key: "search", label: __("Search") },
+    { key: "category", label: __("Category"), options: props.categories, optionValue: "id", optionLabel: "name" },
+    {
+        key: "status",
+        label: __("Status"),
+        options: [
+            { value: "pending", label: __("Pending") },
+            { value: "approved", label: __("Approved") },
+            { value: "rejected", label: __("Rejected") },
+        ],
+    },
+    { key: "from_date", label: __("From Date") },
+    { key: "to_date", label: __("To Date") },
+    { key: "min_amount", label: __("Min Amount") },
+    { key: "max_amount", label: __("Max Amount") },
+    { key: "created_by", label: __("Created By"), options: props.users, optionValue: "id", optionLabel: "name" },
+]);
 
 watch(
     filters,
@@ -161,7 +182,7 @@ const getBudgetColor = (budget) => {
 
             <div class="flex flex-col lg:flex-row gap-8 mt-8">
                 <FilterSidebar
-                    v-if="showSidebar"
+                    :show="showSidebar"
                     @close="showSidebar = false"
                     v-model:filters="filters"
                     @reset="resetFilters"
@@ -219,6 +240,8 @@ const getBudgetColor = (budget) => {
                 </FilterSidebar>
 
                 <div class="flex-1 overflow-hidden">
+                    <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
+
                     <div v-if="spending_by_category && spending_by_category.length" class="mb-6 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl transition-all">
                         <h3 class="text-[10px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">{{ __("Spending by Category") }}</h3>
                         <div class="flex flex-wrap gap-4">

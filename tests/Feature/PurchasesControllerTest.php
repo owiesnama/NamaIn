@@ -122,7 +122,6 @@ test('it can store a purchase with bank transfer payment', function () {
         'payment_method' => PaymentMethod::BankTransfer->value,
         'initial_payment_amount' => 500,
         'payment_reference' => 'BT-001',
-        'bank_name' => 'Test Bank',
         'receipt' => $tempFilename,
     ];
 
@@ -138,7 +137,7 @@ test('it can store a purchase with bank transfer payment', function () {
     ]);
 
     $payment = $invoice->payments->first();
-    expect($payment->metadata['bank_name'])->toBe('Test Bank');
+    expect($payment->metadata)->toBeNull();
     Illuminate\Support\Facades\Storage::disk('public')->assertExists($payment->receipt_path);
     Illuminate\Support\Facades\Storage::disk('local')->assertMissing('tmp/'.$tempFilename);
 });
