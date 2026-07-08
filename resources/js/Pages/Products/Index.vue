@@ -406,7 +406,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     <template #extra-filters>
                         <!-- Cost Range -->
                         <div class="space-y-2">
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Cost Range") }}</label>
+                            <label class="text-xs font-semibold text-gray-700 dark:text-gray-200">{{ __("Cost Range") }}</label>
                             <div class="grid grid-cols-2 gap-2">
                                 <TextInput v-model="filters.min_cost" type="number" inputmode="decimal" :placeholder="__('Min')" class="w-full text-xs" />
                                 <TextInput v-model="filters.max_cost" type="number" inputmode="decimal" :placeholder="__('Max')" class="w-full text-xs" />
@@ -415,7 +415,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
                         <!-- Expiry Range -->
                         <div class="space-y-2">
-                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Expiration Date") }}</label>
+                            <label class="text-xs font-semibold text-gray-700 dark:text-gray-200">{{ __("Expiration Date") }}</label>
                             <div class="space-y-2">
                                 <DatePicker v-model="filters.expire_from" class="w-full text-xs" />
                                 <DatePicker v-model="filters.expire_to" class="w-full text-xs" />

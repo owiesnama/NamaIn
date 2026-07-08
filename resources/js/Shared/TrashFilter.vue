@@ -38,8 +38,10 @@
         <button
             v-for="(tab,key) in tabs"
             :key="'tab'+key+ (new Date).valueOf()"
-            class="px-2 flex-1 shrink-0 py-2 text-xs font-semibold text-gray-600 transition-colors duration-200 dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100 whitespace-nowrap overflow-hidden text-ellipsis"
-            :class="isActive(key) || (isDefault(key) && ! activeTab) ? 'bg-gray-100 dark:bg-gray-700' : '' "
+            class="px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 whitespace-nowrap overflow-hidden text-ellipsis"
+            :class="isActive(key) || (isDefault(key) && ! activeTab)
+                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'"
             @click="tabbed(key)"
             :title="tab"
             v-text="tab"
