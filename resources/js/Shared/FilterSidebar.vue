@@ -37,16 +37,16 @@ const resetFilters = () => {
             <div v-if="show" class="fixed inset-0 z-40 bg-gray-900/50 backdrop-blur-sm" @click="emit('close')" />
         </Transition>
 
-        <!-- Slide-over drawer (all breakpoints) -->
+        <!-- Slide-over drawer, anchored to the edge opposite the nav (all breakpoints) -->
         <Transition
             enter-active-class="transition ease-out duration-300"
-            enter-from-class="-translate-x-full rtl:translate-x-full opacity-0"
+            enter-from-class="translate-x-full rtl:-translate-x-full opacity-0"
             enter-to-class="translate-x-0 opacity-100"
             leave-active-class="transition ease-in duration-200"
             leave-from-class="translate-x-0 opacity-100"
-            leave-to-class="-translate-x-full rtl:translate-x-full opacity-0"
+            leave-to-class="translate-x-full rtl:-translate-x-full opacity-0"
         >
-        <aside v-if="show" class="fixed inset-y-0 start-0 z-50 w-80 max-w-[85vw] overflow-y-auto bg-white dark:bg-gray-900 shadow-xl">
+        <aside v-if="show" class="fixed inset-y-0 end-0 z-50 w-80 max-w-[85vw] overflow-y-auto bg-white dark:bg-gray-900 shadow-xl">
         <div class="space-y-4 p-4">
             <!-- Unified Filter Sidebar -->
             <div class="p-5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl space-y-6 transition-all">
