@@ -498,7 +498,7 @@
 
                 <!-- Main content -->
                 <main class="lg:flex-1 dark:bg-gray-900 lg:overflow-y-auto">
-                    <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-[1800px] 2xl:mx-auto min-h-screen lg:min-h-full">
+                    <div class="px-4 py-10 sm:px-6 lg:px-8 max-w-[1400px] mx-auto min-h-screen lg:min-h-full">
                         <Flash />
                         <ErrorToast />
                         <OperationsCenter />
