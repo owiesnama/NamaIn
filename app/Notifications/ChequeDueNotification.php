@@ -22,7 +22,38 @@ class ChequeDueNotification extends Notification implements ShouldQueue
      */
     public function via($notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database', 'broadcast'];
+    }
+
+    public function databaseType(object $notifiable): string
+    {
+        return 'cheque_due';
+    }
+
+    public function broadcastType(): string
+    {
+        return 'cheque_due';
+    }
+
+    /**
+     * Get the array representation of the notification.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'title' => 'Cheque :reference is due soon',
+            'title_params' => ['reference' => "#{$this->cheque->reference_number}"],
+            'body' => "{$this->cheque->payee->name} — {$this->cheque->amount_formatted}",
+            'url' => '/cheques?search='.urlencode($this->cheque->reference_number),
+            'meta' => [
+                'reference_number' => $this->cheque->reference_number,
+                'amount_formatted' => $this->cheque->amount_formatted,
+                'due_date' => $this->cheque->due->toDateString(),
+                'direction' => $this->cheque->isReceivable() ? 'receivable' : 'payable',
+            ],
+        ];
     }
 
     public function toMail($notifiable): MailMessage

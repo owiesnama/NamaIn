@@ -22,6 +22,7 @@ use App\Http\Controllers\Contacts\SuppliersController;
 use App\Http\Controllers\Contacts\SupplierStatementController;
 use App\Http\Controllers\Core\DashboardController;
 use App\Http\Controllers\Core\GlobalSearchController;
+use App\Http\Controllers\Core\NotificationsController;
 use App\Http\Controllers\Core\PreferenceController;
 use App\Http\Controllers\Core\TenantSelectionController;
 use App\Http\Controllers\Expenses\ExpenseApprovalController;
@@ -139,6 +140,10 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::redirect('/', '/dashboard');
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::get('/global-search', GlobalSearchController::class)->name('global-search');
+        Route::get('/notifications', [NotificationsController::class, 'index'])->name('notifications.index');
+        Route::get('/notifications/feed', [NotificationsController::class, 'feed'])->name('notifications.feed');
+        Route::put('/notifications/read-all', [NotificationsController::class, 'markAllRead'])->name('notifications.read-all');
+        Route::put('/notifications/{id}/read', [NotificationsController::class, 'markRead'])->name('notifications.read');
         Route::get('/preferences', [PreferenceController::class, 'index'])->name('preferences.index');
         Route::post('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
         Route::put('/preferences', [PreferenceController::class, 'update']);

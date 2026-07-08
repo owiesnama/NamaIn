@@ -8,6 +8,7 @@
     import NavLink from "@/Components/NavLink.vue";
     import SidebarGroup from "@/Components/SidebarGroup.vue";
     import GlobalSearch from "@/Components/GlobalSearch.vue";
+    import NotificationBell from "@/Components/NotificationBell.vue";
     import Flash from "@/Shared/Flash.vue";
     import ErrorToast from "@/Shared/ErrorToast.vue";
     import OperationsCenter from "@/Components/OperationsCenter.vue";
@@ -492,6 +493,7 @@
                     <div class="min-w-0 flex-1">
                         <GlobalSearch />
                     </div>
+                    <NotificationBell />
                 </div>
 
                 <!-- Main content -->
