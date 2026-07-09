@@ -22,6 +22,10 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    favoriteProducts: {
+        type: Array,
+        default: () => [],
+    },
     salePoints: {
         type: Array,
         default: () => [],
@@ -68,6 +72,21 @@ const addToCart = (product) => {
             unit_id: null,
             units: product.units || [],
         });
+    }
+};
+
+// ── Favourites ─────────────────────────────────────────────────────────────
+const toggleFavorite = async (product) => {
+    const previous = product.is_favorite;
+    product.is_favorite = !previous; // optimistic star update
+
+    try {
+        const { data } = await axios.post(route('pos.favorites.toggle', product.id));
+        product.is_favorite = data.favorited; // reconcile with server truth
+        // Re-query the favourites section so membership/ordering reflects the change.
+        router.reload({ only: ['favoriteProducts'], preserveScroll: true, preserveState: true });
+    } catch (error) {
+        product.is_favorite = previous; // revert on failure
     }
 };
 
@@ -219,7 +238,7 @@ const paymentMethodLabels = [
                 />
 
                 <!-- Products Grid -->
-                <PosProductGrid :initial-products="initialProducts" :hot-products="hotProducts" :currency="currency" @add-to-cart="addToCart" />
+                <PosProductGrid :initial-products="initialProducts" :hot-products="hotProducts" :favorite-products="favoriteProducts" :currency="currency" @add-to-cart="addToCart" @toggle-favorite="toggleFavorite" />
             </div>
 
             <!-- Backdrop for the cart bottom sheet (stacked layout only) -->

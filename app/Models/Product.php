@@ -218,6 +218,7 @@ class Product extends BaseModel
             'price' => MoneyCast::class,
             'cost' => MoneyCast::class,
             'average_cost' => MoneyCast::class,
+            'is_global_favorite' => 'boolean',
         ];
     }
 
@@ -229,6 +230,14 @@ class Product extends BaseModel
         return $this->belongsToMany(Storage::class, 'stocks')->withPivot([
             'quantity',
         ])->withTimestamps();
+    }
+
+    /**
+     * Users who have starred this product as a personal favourite.
+     */
+    public function favoritedByUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'favorite_products')->withTimestamps();
     }
 
     /**

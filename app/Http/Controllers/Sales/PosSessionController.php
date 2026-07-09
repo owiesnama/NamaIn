@@ -9,6 +9,7 @@ use App\Models\PosSession;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Queries\DashboardStatsQuery;
+use App\Queries\PosFavoriteProductsQuery;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 
@@ -46,20 +47,30 @@ class PosSessionController extends Controller
                     ->whereNull('stocks.deleted_at');
             })
             ->select('products.*', 'stocks.quantity as sale_point_qty')
-            ->orderByDesc('stocks.quantity')
+            // Availability-first: out-of-stock (no stock row => NULL) sinks last.
+            // Orders on the indexed stocks.quantity column, not an in-memory CASE.
+            ->orderByRaw('stocks.quantity desc nulls last')
             ->orderBy('products.name')
             ->paginate(24)
             ->withQueryString();
 
+        $userFavoriteIds = $this->userFavoriteIds();
+
         $productIds = $products->getCollection()->pluck('id');
         $replenishment = $this->batchReplenishmentInfo($productIds);
+
+        $favorites = (new PosFavoriteProductsQuery($storage, $userFavoriteIds))->get();
+        $favoriteReplenishment = $this->batchReplenishmentInfo($favorites->pluck('id'));
 
         return inertia('Pos/Session', [
             'session' => $session->load(['storage', 'openedBy']),
             'salePoints' => $salePointOptions,
             'selectedStorageId' => $storage->id,
-            'hotProducts' => $this->hotProducts($storage, $stats),
-            'initialProducts' => $products->through(fn (Product $product) => $this->presentProduct($product, $replenishment)),
+            'hotProducts' => $this->hotProducts($storage, $stats, $userFavoriteIds),
+            'favoriteProducts' => $favorites
+                ->map(fn (Product $product) => $this->presentProduct($product, $favoriteReplenishment, $userFavoriteIds))
+                ->all(),
+            'initialProducts' => $products->through(fn (Product $product) => $this->presentProduct($product, $replenishment, $userFavoriteIds)),
             'session_stats' => [
                 'opening_float' => $session->opening_float / 100,
                 'cash_sales_total' => $session->cashSalesTotal() / 100,
@@ -97,11 +108,23 @@ class PosSessionController extends Controller
     }
 
     /**
+     * Product ids the current user has starred as personal favourites (scoped to
+     * the current tenant via the Product global scope on the relation).
+     *
+     * @return array<int, int>
+     */
+    private function userFavoriteIds(): array
+    {
+        return auth()->user()->favorites()->pluck('products.id')->all();
+    }
+
+    /**
      * Most-sold products for the given sale point, shaped like the product grid rows.
      *
+     * @param  array<int, int>  $userFavoriteIds
      * @return array<int, array<string, mixed>>
      */
-    private function hotProducts(Storage $storage, DashboardStatsQuery $stats): array
+    private function hotProducts(Storage $storage, DashboardStatsQuery $stats, array $userFavoriteIds): array
     {
         $orderedProductIds = $stats->topSellingProducts($storage->id, 8)
             ->pluck('product_id')
@@ -126,16 +149,17 @@ class PosSessionController extends Controller
 
         $replenishment = $this->batchReplenishmentInfo($products->pluck('id'));
 
-        return $products->map(fn (Product $product) => $this->presentProduct($product, $replenishment))->all();
+        return $products->map(fn (Product $product) => $this->presentProduct($product, $replenishment, $userFavoriteIds))->all();
     }
 
     /**
      * Shape a product row for the POS product grid.
      *
      * @param  array<int, array{warehouse_id: int, warehouse_name: string, available_qty: int}>  $replenishment
+     * @param  array<int, int>  $userFavoriteIds
      * @return array<string, mixed>
      */
-    private function presentProduct(Product $product, array $replenishment): array
+    private function presentProduct(Product $product, array $replenishment, array $userFavoriteIds): array
     {
         return [
             'id' => $product->id,
@@ -144,6 +168,9 @@ class PosSessionController extends Controller
             'sale_point_qty' => (int) ($product->sale_point_qty ?? 0),
             'replenishment' => $replenishment[$product->id] ?? null,
             'units' => $product->units,
+            'is_favorite' => in_array($product->id, $userFavoriteIds, true),
+            'is_global_favorite' => (bool) $product->is_global_favorite,
+            'favorite_scope' => $product->favorite_scope ?? null,
         ];
     }
 
