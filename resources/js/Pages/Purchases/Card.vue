@@ -36,25 +36,25 @@
     };
 </script>
 <template>
-    <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden transition-all">
-        <div class="p-6 md:flex rtl:flex-row-reverse md:items-center md:justify-between border-b border-gray-50 dark:border-gray-800">
+    <div class="bg-surface border border-line rounded-xl overflow-hidden transition-all">
+        <div class="p-6 md:flex rtl:flex-row-reverse md:items-center md:justify-between border-b border-line">
             <div class="flex rtl:flex-row-reverse items-center gap-x-4">
 
-                <h2 v-text="formatCurrency(invoice.total, invoice.currency)" class="text-base font-semibold text-gray-800 sm:text-lg"></h2>
+                <h2 v-text="formatCurrency(invoice.total, invoice.currency)" class="text-base font-semibold text-primary sm:text-lg"></h2>
 
-                <label for="totalCost" class="text-sm font-medium text-gray-600">
+                <label for="totalCost" class="text-sm font-medium text-secondary">
                     {{ __("Total Cost") }}
                 </label>
             </div>
 
             <div class="flex-col gap-4 mt-4 sm:flex-row sm:items-center md:mt-0">
-                <h2 v-text="invoice.invocable.name" class="text-gray-900 text-xl mb-3"></h2>
+                <h2 v-text="invoice.invocable.name" class="text-primary text-xl mb-3"></h2>
                 <div class="flex rtl:flex-row-reverse gap-x-3">
                     <a
                         v-if="printable"
                         :href="route('invoices.print', invoice)"
                         target="_blank"
-                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
+                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-400 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
                         :title="__('Print')"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -67,7 +67,7 @@
                     <button
                         v-if="!invoice.locked"
                         @click="moveToStorage(invoice)"
-                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
+                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-400 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
                         :title="actionTitle"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
@@ -80,7 +80,7 @@
                     <Link
                         v-if="invoice.is_editable"
                         :href="route(`${resourcePrefix}.edit`, invoice)"
-                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
+                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-400 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
                         :title="__('Edit Invoice')"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
@@ -91,7 +91,7 @@
                     <Link
                         v-if="invoice.can_be_inversed"
                         :href="route(`${resourcePrefix}.return.create`, invoice)"
-                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
+                        class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-400 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all focus:outline-none"
                         :title="__('Return Items')"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">

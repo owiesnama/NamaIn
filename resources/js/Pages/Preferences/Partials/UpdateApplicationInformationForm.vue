@@ -122,7 +122,7 @@
                     id="invoicesHeadline"
                     v-model="form.invoicesHeadline"
                     name="invoicesHeadline"
-                    class="w-full h-32 px-3 py-2 mt-1 border border-gray-200 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                    class="w-full h-32 px-3 py-2 mt-1 text-primary bg-surface border border-line rounded-lg placeholder-disabled focus:border-emerald-300 dark:focus:border-emerald-600 focus:ring focus:ring-emerald-200 dark:focus:ring-emerald-800 focus:ring-opacity-50"
                 ></textarea>
                 <InputError
                     :message="form.errors.invoicesHeadline"
@@ -163,7 +163,7 @@
                         />
                     </div>
 
-                    <p class="mx-3 text-sm text-gray-500">
+                    <p class="mx-3 text-sm text-secondary">
                         {{ __("Send Notifications When Stocks Running Out") }}
                     </p>
                 </div>
@@ -206,7 +206,7 @@
                         id="currency"
                         v-model="form.currency"
                         type="text"
-                        class="block w-full uppercase bg-gray-50"
+                        class="block w-full uppercase bg-surface-sunken"
                         maxlength="3"
                         readonly
                         :placeholder="__('SDG')"

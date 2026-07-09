@@ -43,35 +43,35 @@
                             <tr>
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-tertiary uppercase tracking-widest"
                                 >
                                     {{__('The Product')}}
                                 </th>
 
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-tertiary uppercase tracking-widest"
                                 >
                                     {{__('Quantity')}}
                                 </th>
 
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-tertiary uppercase tracking-widest"
                                 >
                                     {{__('Price')}}
                                 </th>
 
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-tertiary uppercase tracking-widest"
                                 >
                                     {{__('Total Price')}}
                                 </th>
 
                                 <th
                                     scope="col"
-                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-gray-500 dark:text-gray-400 uppercase tracking-widest"
+                                    class="px-8 py-3.5 whitespace-nowrap text-[10px] font-bold text-left rtl:text-right text-tertiary uppercase tracking-widest"
                                 >
                                     {{__('Status')}}
                                 </th>
@@ -84,15 +84,15 @@
                             <tr
                                 v-for="record in deliveredRecords"
                                 :key="record.id"
-                                :class="remainingRecords.length ? 'bg-gray-100' : ''"
+                                :class="remainingRecords.length ? 'bg-surface-sunken' : ''"
                             >
                                 <td
-                                    class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm text-left rtl:text-right text-primary whitespace-nowrap"
                                     v-text="record.product?.name"
                                 ></td>
 
                                 <td
-                                    class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
+                                    class="px-8 py-3 text-sm text-left rtl:text-right text-primary whitespace-nowrap"
                                 >
                                     {{ record.quantity }}
                                     <strong v-if="record.unit">({{ record.unit?.name }})</strong>
@@ -109,8 +109,8 @@
                                     v-text="totalPrice(record)"
                                 ></td>
 
-                                <td class="px-8 py-3 text-xs text-left rtl:text-right text-gray-500 whitespace-nowrap">
-                                    <span class="text-emerald-600 font-medium">✓ {{ invoice.invocable_type === 'App\\Models\\Customer' ? __('Delivered') : __('Received') }}</span>
+                                <td class="px-8 py-3 text-xs text-left rtl:text-right text-secondary whitespace-nowrap">
+                                    <span class="text-emerald-600 dark:text-emerald-400 font-medium">✓ {{ invoice.invocable_type === 'App\\Models\\Customer' ? __('Delivered') : __('Received') }}</span>
                                 </td>
                             </tr>
 
@@ -120,7 +120,7 @@
                                 >
                                     <td
                                         colspan="4"
-                                        class="py-2  text-center text-gray-500 font-semibold bg-gray-100 border-t border-b"
+                                        class="py-2  text-center text-secondary font-semibold bg-surface-sunken border-t border-b border-line"
                                     >
                                         {{__('Invoice Remaining')}}
                                     </td>
@@ -131,12 +131,12 @@
                                     :key="record.id"
                                 >
                                     <td
-                                        class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm text-left rtl:text-right text-primary whitespace-nowrap"
                                         v-text="record.product?.name"
                                     ></td>
 
                                     <td
-                                        class="px-8 py-3 text-sm text-left rtl:text-right text-gray-800 whitespace-nowrap"
+                                        class="px-8 py-3 text-sm text-left rtl:text-right text-primary whitespace-nowrap"
                                     >
                                         {{ record.quantity }}
                                         <strong v-if="record.unit">({{ record.unit?.name }})</strong>
@@ -154,9 +154,9 @@
                                     ></td>
 
                                     <td
-                                        class="px-8 py-3 text-xs text-left rtl:text-right text-gray-500 whitespace-nowrap"
+                                        class="px-8 py-3 text-xs text-left rtl:text-right text-secondary whitespace-nowrap"
                                     >
-                                        <span class="text-amber-600 font-medium">{{ __('Pending') }}</span>
+                                        <span class="text-amber-600 dark:text-amber-400 font-medium">{{ __('Pending') }}</span>
                                     </td>
                                 </tr>
                             </template>

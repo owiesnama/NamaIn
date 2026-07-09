@@ -41,7 +41,7 @@
                     <template #trigger>
                         <button
                             type="button"
-                            class="inline-flex items-center px-3 py-2 mt-1 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none"
+                            class="inline-flex items-center px-3 py-2 mt-1 text-sm font-medium leading-4 text-secondary transition bg-surface border border-line rounded-lg gap-x-2 focus:border-emerald-300 dark:focus:border-emerald-600 focus:ring focus:ring-emerald-200 dark:focus:ring-emerald-800 focus:ring-opacity-50 focus:outline-none"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +70,7 @@
                             (GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi
                         </DropdownLink>
 
-                        <div class="border-t border-gray-100" />
+                        <div class="border-t border-line" />
 
                         <DropdownLink
                             as="button"
@@ -80,7 +80,7 @@
                         </DropdownLink>
 
                         <div
-                            class="border-t border-gray-100"
+                            class="border-t border-line"
                             @click="form.timezone = '+2:00'"
                         />
 
@@ -109,7 +109,7 @@
                     <template #trigger>
                         <button
                             type="button"
-                            class="inline-flex items-center px-3 py-2 mt-1 text-sm font-medium leading-4 text-gray-500 transition bg-white border border-gray-200 rounded-lg gap-x-2 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 focus:outline-none"
+                            class="inline-flex items-center px-3 py-2 mt-1 text-sm font-medium leading-4 text-secondary transition bg-surface border border-line rounded-lg gap-x-2 focus:border-emerald-300 dark:focus:border-emerald-600 focus:ring focus:ring-emerald-200 dark:focus:ring-emerald-800 focus:ring-opacity-50 focus:outline-none"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -138,7 +138,7 @@
                             Month D, Y
                         </DropdownLink>
 
-                        <div class="border-t border-gray-100" />
+                        <div class="border-t border-line" />
 
                         <DropdownLink
                             as="button"
@@ -147,7 +147,7 @@
                             YY/MM/DD
                         </DropdownLink>
 
-                        <div class="border-t border-gray-100" />
+                        <div class="border-t border-line" />
 
                         <DropdownLink
                             as="button"
@@ -156,7 +156,7 @@
                             DD/MM/YY
                         </DropdownLink>
 
-                        <div class="border-t border-gray-100" />
+                        <div class="border-t border-line" />
 
                         <DropdownLink
                             as="button"
