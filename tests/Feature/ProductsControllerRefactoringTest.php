@@ -104,6 +104,19 @@ test('products index payload includes cost for each product', function () {
     );
 });
 
+test('products index payload exposes the global favourite flag for the toggle', function () {
+    $user = User::factory()->create();
+    Product::factory()->create(['name' => 'Baseline Product', 'is_global_favorite' => true]);
+
+    $response = $this->actingAs($user)->get(route('products.index'));
+
+    $response->assertStatus(200);
+    $response->assertInertia(fn (Assert $page) => $page
+        ->component('Products/Index')
+        ->where('products.data.0.is_global_favorite', true)
+    );
+});
+
 test('can sort products by cost', function () {
     $user = User::factory()->create();
     Product::factory()->create(['name' => 'Cheap Product', 'cost' => 100]);

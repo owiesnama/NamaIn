@@ -2,9 +2,9 @@
 
 namespace App\Models;
 
+use App\Facades\Cache;
 use App\Notifications\ResetPassword as ResetPasswordNotification;
 use App\Notifications\VerifyEmail as VerifyEmailNotification;
-use App\Facades\Cache;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -74,6 +74,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function tenants(): BelongsToMany
     {
         return $this->belongsToMany(Tenant::class)->withPivot('role', 'role_id', 'is_active')->withTimestamps();
+    }
+
+    /**
+     * Products this user has starred as personal (user-level) favourites.
+     */
+    public function favorites(): BelongsToMany
+    {
+        return $this->belongsToMany(Product::class, 'favorite_products')->withTimestamps();
     }
 
     public function currentTenant(): BelongsTo

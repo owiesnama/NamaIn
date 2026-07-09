@@ -21,6 +21,11 @@ class PosSessionPolicy
         return $user->hasPermission('pos.operate');
     }
 
+    public function operate(User $user): bool
+    {
+        return $user->hasPermission('pos.operate');
+    }
+
     public function close(User $user): bool
     {
         return $user->hasPermission('pos.manage-sessions');
