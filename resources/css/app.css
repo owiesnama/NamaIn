@@ -9,6 +9,41 @@
    scrollbars) follow the OS theme — which is how this app's dark mode is driven. */
 :root {
     color-scheme: light dark;
+
+    /*
+     * Semantic design tokens (light theme). Consumed by the `text-*`, `bg-*`,
+     * `border-*` and `placeholder-*` utilities registered in tailwind.config.js.
+     * Stored as space-separated R G B channels so Tailwind's `/<alpha-value>`
+     * opacity modifiers keep working. All foreground/background pairings below
+     * are verified >= WCAG AA (4.5:1) for body text in both themes.
+     */
+    --fg-primary: 17 24 39;      /* gray-900  — primary text / headings */
+    --fg-secondary: 75 85 99;    /* gray-600  — muted / secondary text */
+    --fg-tertiary: 107 114 128;  /* gray-500  — captions / table headers */
+    --fg-disabled: 156 163 175;  /* gray-400  — disabled / placeholder */
+
+    --surface: 255 255 255;         /* white     — base card / panel */
+    --surface-elevated: 249 250 251;/* gray-50   — headers, raised rows */
+    --surface-sunken: 249 250 251;  /* gray-50   — inset / readonly fields */
+
+    --line: 229 231 235;         /* gray-200  — default hairline / border */
+    --line-strong: 209 213 219;  /* gray-300  — stronger border */
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --fg-primary: 243 244 246;   /* gray-100 — 16:1 on surface */
+        --fg-secondary: 209 213 219; /* gray-300 — 12:1 on surface */
+        --fg-tertiary: 156 163 175;  /* gray-400 — 7:1 on surface */
+        --fg-disabled: 107 114 128;  /* gray-500 — placeholder, ~3.7:1 (distinct) */
+
+        --surface: 17 24 39;          /* gray-900 — base card / page */
+        --surface-elevated: 31 41 55; /* gray-800 — headers, raised rows */
+        --surface-sunken: 31 41 55;   /* gray-800 — inset / readonly fields */
+
+        --line: 55 65 81;         /* gray-700 */
+        --line-strong: 75 85 99;  /* gray-600 */
+    }
 }
 
 /* On touch devices (tablets/phones) iOS zooms the page in when focusing an

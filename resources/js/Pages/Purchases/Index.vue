@@ -287,7 +287,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                     <div class="font-medium text-gray-900 dark:text-gray-100">
                                         #{{ option.serial_number }}
                                     </div>
-                                    <div class="text-xs text-gray-500">
+                                    <div class="text-xs text-tertiary">
                                         {{ option.invocable_name }} • {{ option.date }}
                                     </div>
                                 </div>
@@ -301,7 +301,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     </CustomSelect>
 
                     <div v-if="searchingInvoices" class="mt-4 text-center">
-                        <span class="text-sm text-gray-500">{{ __("Searching...") }}</span>
+                        <span class="text-sm text-secondary">{{ __("Searching...") }}</span>
                     </div>
                 </div>
             </template>
