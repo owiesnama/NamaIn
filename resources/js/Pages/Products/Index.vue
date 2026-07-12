@@ -567,7 +567,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                                 <ProductAdjustmentModal :product="product" :storages="storages" />
                                             </div>
                                             <div @click.stop>
-                                                <ProductForm :product="product" :categories="categories" />
+                                                <ProductForm :product="product" :categories="categories" :storages="storages" />
                                             </div>
                                             <div @click.stop>
                                                 <DeleteProduct :product="product" />

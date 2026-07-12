@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Catalog;
 
+use App\Actions\Stock\RecordAdjustmentAction;
 use App\Actions\SyncCategoriesAction;
+use App\Exceptions\ManualStockIncreaseNotAllowedException;
 use App\Filters\ProductFilter;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ProductRequest;
@@ -55,7 +57,7 @@ class ProductsController extends Controller
     {
         $this->authorize('create', Product::class);
 
-        $product = Product::create($request->safe()->except(['units', 'categories']));
+        $product = Product::create($request->safe()->except(['units', 'categories', 'quantity', 'storage_id']));
 
         $units = $request->get('units');
 
@@ -79,17 +81,46 @@ class ProductsController extends Controller
         return back()->with('success', __('Product updated successfully'));
     }
 
-    public function update(Product $product, ProductRequest $request, SyncCategoriesAction $syncCategoriesAction)
+    public function update(Product $product, ProductRequest $request, SyncCategoriesAction $syncCategoriesAction, RecordAdjustmentAction $recordAdjustment)
     {
         $this->authorize('update', $product);
 
-        $product->update($request->safe()->except(['units', 'categories']));
+        $product->update($request->safe()->except(['units', 'categories', 'quantity', 'storage_id']));
 
         $product->syncUnits($request->get('units'));
 
         $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
 
+        try {
+            $this->syncOnHandQuantity($product, $request, $recordAdjustment);
+        } catch (ManualStockIncreaseNotAllowedException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+
         return back()->with('success', __('Product updated successfully'));
+    }
+
+    /**
+     * Apply a directly-edited on-hand quantity as an adjustment delta.
+     *
+     * The product form never overwrites stock; it records the difference between
+     * the requested quantity and the current balance as an adjustment movement,
+     * gated by the tenant's inventory strategy.
+     */
+    private function syncOnHandQuantity(Product $product, ProductRequest $request, RecordAdjustmentAction $recordAdjustment): void
+    {
+        if (! $request->filled('quantity') || ! $request->filled('storage_id')) {
+            return;
+        }
+
+        $storage = Storage::findOrFail($request->integer('storage_id'));
+        $newQuantity = $request->integer('quantity');
+
+        if ($newQuantity === $storage->quantityOf($product)) {
+            return;
+        }
+
+        $recordAdjustment->handle($storage, $product, $newQuantity, 'product_edit', auth()->user());
     }
 
     public function destroy(Product $product)
