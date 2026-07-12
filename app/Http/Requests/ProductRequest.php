@@ -29,6 +29,8 @@ class ProductRequest extends FormRequest
             'currency' => 'nullable|string|max:3',
             'expire_date' => 'nullable|date',
             'alert_quantity' => 'nullable|numeric|min:0',
+            'quantity' => 'nullable|integer|min:0',
+            'storage_id' => 'nullable|integer|exists:storages,id|required_with:quantity',
             'units' => 'nullable|array',
             'units.*.name' => 'required_with:units',
             'units.*.conversion_factor' => 'required_with:units|numeric|gt:0',
