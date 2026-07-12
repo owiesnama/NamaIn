@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Jobs\BackfillProvisionalCostsJob;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -39,6 +40,7 @@ class Transaction extends BaseModel
     {
         return [
             'delivered' => 'boolean',
+            'cost_provisional' => 'boolean',
             'created_at' => 'datetime',
             'delivered_at' => 'datetime',
             'price' => MoneyCast::class,
@@ -179,6 +181,7 @@ class Transaction extends BaseModel
 
         if ($this->getTypeAttribute() === 'Purchases') {
             $this->product->recalculateAverageCost();
+            BackfillProvisionalCostsJob::dispatch($this->tenant_id, $this->product_id);
         }
 
         return $this;

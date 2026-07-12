@@ -127,6 +127,7 @@ class ProcessPosCheckoutAction
                     'base_quantity' => $quantity,
                     'price' => $item['price'],
                     'unit_cost' => $averageCosts[$item['product_id']]->average_cost ?? 0,
+                    'cost_provisional' => ($averageCosts[$item['product_id']]->average_cost ?? 0) <= 0,
                     'delivered' => false,
                 ]);
 
