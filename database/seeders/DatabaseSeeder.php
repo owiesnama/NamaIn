@@ -54,11 +54,9 @@ class DatabaseSeeder extends Seeder
         });
 
         $products->each(function ($product) use ($storages) {
-            // Attach stock to storages
-            $product->stock()->attach(
-                $storages->random()->id,
-                ['quantity' => fake()->numberBetween(10, 1000)]
-            );
+            // Route through addStock so the movement ledger stays consistent
+            // with the cache (SUM(movements) == stocks.quantity).
+            $storages->random()->addStock($product, fake()->numberBetween(10, 1000), 'opening_balance');
         });
 
         // 4. Customers & Sales
