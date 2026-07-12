@@ -55,9 +55,10 @@ class DashboardExampleSeeder extends Seeder
             ['cost' => 125, 'expire_date' => now()->addYear()],
         );
 
-        $product->stock()->syncWithoutDetaching([
-            $storage->id => ['quantity' => 60],
-        ]);
+        // setStockTo keeps the seed idempotent while recording a ledger movement.
+        if ($storage->quantityOf($product) !== 60) {
+            $storage->setStockTo($product, 60, 'opening_balance');
+        }
 
         $customer = Customer::firstOrCreate(
             ['name' => 'Demo Customer', 'tenant_id' => $tenant->id],
