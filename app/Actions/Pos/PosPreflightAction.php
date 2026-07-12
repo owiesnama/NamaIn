@@ -5,6 +5,7 @@ namespace App\Actions\Pos;
 use App\Models\PosSession;
 use App\Models\Product;
 use App\Models\Unit;
+use App\Services\Inventory\InventoryStrategy;
 
 class PosPreflightAction
 {
@@ -49,7 +50,8 @@ class PosPreflightAction
         $quantityRequested = $item['quantity'] * ($unit->conversion_factor ?? 1);
         $quantityAtSalePoint = $session->storage->quantityOf($product);
 
-        if ($quantityAtSalePoint >= $quantityRequested) {
+        // Overselling tenants are never blocked, so nothing needs confirming.
+        if ($quantityAtSalePoint >= $quantityRequested || app(InventoryStrategy::class)->allowsOverselling()) {
             return [];
         }
 

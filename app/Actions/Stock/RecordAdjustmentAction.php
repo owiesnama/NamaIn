@@ -2,10 +2,12 @@
 
 namespace App\Actions\Stock;
 
+use App\Exceptions\ManualStockIncreaseNotAllowedException;
 use App\Models\Adjustment;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\User;
+use App\Services\Inventory\InventoryStrategy;
 use Illuminate\Support\Facades\DB;
 
 class RecordAdjustmentAction
@@ -14,6 +16,11 @@ class RecordAdjustmentAction
     {
         return DB::transaction(function () use ($storage, $product, $newQuantity, $type, $actor, $notes) {
             $quantityBefore = $storage->quantityOf($product);
+
+            // Under purchase-driven, stock may only rise via purchase invoices.
+            if ($newQuantity > $quantityBefore && ! app(InventoryStrategy::class)->allowsManualStockIncrease()) {
+                throw new ManualStockIncreaseNotAllowedException($product);
+            }
 
             $adjustment = Adjustment::create([
                 'tenant_id' => $storage->tenant_id,
