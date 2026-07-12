@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\MovementType;
 use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\Storage;
@@ -17,12 +18,14 @@ class StockMovementFactory extends Factory
     {
         $quantityBefore = $this->faker->numberBetween(0, 500);
         $quantity = $this->faker->numberBetween(-100, 100);
+        $reason = $this->faker->randomElement(['invoice_deduction', 'invoice_addition', 'adjustment', 'transfer_in', 'sales_return', 'purchase_return']);
 
         return [
             'storage_id' => Storage::factory(),
             'product_id' => Product::factory(),
             'user_id' => User::factory(),
-            'reason' => $this->faker->randomElement(['invoice_deduction', 'invoice_addition', 'manual_adjustment', 'transfer', 'sales_return', 'purchase_return']),
+            'reason' => $reason,
+            'movement_type' => MovementType::fromReason($reason),
             'quantity' => $quantity,
             'quantity_before' => $quantityBefore,
             'quantity_after' => $quantityBefore + $quantity,

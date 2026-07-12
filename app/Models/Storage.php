@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MovementType;
 use App\Enums\StorageType;
 use App\Exceptions\InsufficientStockException;
 use App\Traits\WithTrashScope;
@@ -204,6 +205,7 @@ class Storage extends BaseModel
             'movable_type' => $movable?->getMorphClass(),
             'movable_id' => $movable?->getKey(),
             'reason' => $reason,
+            'movement_type' => MovementType::fromReason($reason),
             'quantity' => $quantity,
             'quantity_before' => $before,
             'quantity_after' => $after,
