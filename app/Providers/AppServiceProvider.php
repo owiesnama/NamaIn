@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Observers\InvoiceObserver;
 use App\Observers\QuoteObserver;
 use App\Services\Core\Cache as TenantCacheService;
+use App\Services\Inventory\InventoryStrategy;
+use App\Services\Inventory\InventoryStrategyResolver;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -27,6 +29,13 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton('tenant-cache', fn () => new TenantCacheService);
+
+        // Resolve the acting tenant's inventory strategy fresh each time it is
+        // injected (not a singleton — it depends on per-tenant preferences).
+        $this->app->bind(
+            InventoryStrategy::class,
+            fn ($app) => $app->make(InventoryStrategyResolver::class)->resolve(),
+        );
     }
 
     public function boot(): void
