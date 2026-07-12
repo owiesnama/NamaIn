@@ -21,6 +21,7 @@ use App\Models\Storage;
 use App\Models\TreasuryAccount;
 use App\Models\Unit;
 use App\Models\User;
+use App\Services\Inventory\InventoryStrategy;
 use DomainException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -71,7 +72,9 @@ class ProcessPosCheckoutAction
                 $available = $session->storage->quantityOf($item['product_id']);
                 $needed = $quantity;
 
-                if ($available < $needed) {
+                // Overselling tenants never block on stock; the sale drives the
+                // sale-point balance negative and is surfaced for reconciliation.
+                if ($available < $needed && ! app(InventoryStrategy::class)->allowsOverselling()) {
                     if (! $acknowledgeTransfers) {
                         throw new InsufficientStockException(Product::findOrFail($item['product_id']), $session->storage);
                     }
