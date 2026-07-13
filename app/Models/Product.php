@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Enums\ProductType;
 use App\Queries\StockBalanceQuery;
 use App\Traits\WithTrashScope;
 use App\ValueObjects\Money;
@@ -220,7 +221,45 @@ class Product extends BaseModel
             'cost' => MoneyCast::class,
             'average_cost' => MoneyCast::class,
             'is_global_favorite' => 'boolean',
+            'type' => ProductType::class,
+            'duration_minutes' => 'integer',
+            'requires_booking' => 'boolean',
+            'on_site' => 'boolean',
+            'allow_overlap' => 'boolean',
+            'travel_buffer_minutes' => 'integer',
         ];
+    }
+
+    /**
+     * Whether this product is a bookable/sellable service (vs a physical good).
+     */
+    public function isService(): bool
+    {
+        return $this->type === ProductType::Service;
+    }
+
+    /**
+     * Scope to only service products.
+     */
+    public function scopeServices(Builder $query): Builder
+    {
+        return $query->where('type', ProductType::Service);
+    }
+
+    /**
+     * Scope to only physical products (includes every backfilled legacy row).
+     */
+    public function scopePhysical(Builder $query): Builder
+    {
+        return $query->where('type', ProductType::Physical);
+    }
+
+    /**
+     * The add-ons defined for this service.
+     */
+    public function serviceAddons(): HasMany
+    {
+        return $this->hasMany(ServiceAddon::class);
     }
 
     /**

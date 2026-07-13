@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ProductType;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -73,5 +74,52 @@ class ProductFactory extends Factory
             'average_cost' => $cost,
             'expire_date' => $this->faker->dateTimeBetween('+1 month', '+2 years'),
         ];
+    }
+
+    /**
+     * A physical good — explicit equivalent of the default state.
+     */
+    public function physical(): static
+    {
+        return $this->state(fn () => ['type' => ProductType::Physical->value]);
+    }
+
+    /**
+     * A bookable service: no stock/expiry, a positive duration, priced by its
+     * base price. Defaults to a non-on-site, non-overlapping, bookable service.
+     */
+    public function service(): static
+    {
+        return $this->state(fn () => [
+            'type' => ProductType::Service->value,
+            'cost' => 0,
+            'price' => $this->faker->numberBetween(50, 500),
+            'average_cost' => 0,
+            'expire_date' => null,
+            'duration_minutes' => $this->faker->randomElement([30, 45, 60, 90]),
+            'requires_booking' => true,
+            'on_site' => false,
+            'allow_overlap' => false,
+            'travel_buffer_minutes' => null,
+        ]);
+    }
+
+    /**
+     * An on-site service that requires travel (address + travel buffer apply).
+     */
+    public function onSite(int $bufferMinutes = 30): static
+    {
+        return $this->state(fn () => [
+            'on_site' => true,
+            'travel_buffer_minutes' => $bufferMinutes,
+        ]);
+    }
+
+    /**
+     * A service that permits overlapping (double-booked) appointments.
+     */
+    public function allowOverlap(): static
+    {
+        return $this->state(fn () => ['allow_overlap' => true]);
     }
 }
