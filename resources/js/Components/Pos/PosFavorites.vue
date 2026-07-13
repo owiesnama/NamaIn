@@ -1,5 +1,6 @@
 <script setup>
 import FavoriteStar from "@/Components/Pos/FavoriteStar.vue";
+import { useInventoryStrategy } from "@/Composables/useInventoryStrategy";
 
 const props = defineProps({
     favorites: {
@@ -14,7 +15,7 @@ const emit = defineEmits(['add-to-cart', 'toggle-favorite']);
 const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${props.currency}`;
 
 // Overselling tenants never block on stock; favourites stay addable.
-const oversellingEnabled = [true, 1, '1', 'true'].includes(window.preferences?.('allow_overselling', false));
+const { oversellingEnabled } = useInventoryStrategy();
 const isAvailable = (product) => oversellingEnabled || product.sale_point_qty > 0;
 </script>
 
@@ -58,7 +59,7 @@ const isAvailable = (product) => oversellingEnabled || product.sale_point_qty > 
                     <h4 class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 truncate leading-snug ltr:pr-8 rtl:pl-8">{{ product.name }}</h4>
 
                     <div class="flex items-center justify-between mt-2">
-                        <span class="text-sm font-bold text-emerald-600">{{ fmt(product.price || 0) }}</span>
+                        <span class="text-sm font-bold text-emerald-600"><Ltr>{{ fmt(product.price || 0) }}</Ltr></span>
                         <span v-if="isAvailable(product)" class="text-[10px] font-medium text-gray-400">{{ product.sale_point_qty }}</span>
                         <span v-else class="text-[10px] font-bold uppercase tracking-wider text-red-500 dark:text-red-400">{{ __('Out of Stock') }}</span>
                     </div>

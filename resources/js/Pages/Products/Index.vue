@@ -17,6 +17,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import { useFilterChips } from "@/Composables/useFilterChips";
     import Tooltip from "@/Components/Tooltip.vue";
     import Dropdown from "@/Components/Dropdown.vue";
+    import { useCurrency } from "@/Composables/useCurrency";
 
     const props = defineProps({
         products: Object,
@@ -123,20 +124,11 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         };
     };
 
-    const formatCurrency = (amount, currency = 'SDG') => {
-        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-        // Latin digits regardless of locale; wrap the output in <Ltr> at render.
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: validCurrency,
-        }).format(amount);
-    };
-
     // ── Table numbers ────────────────────────────────────────────────────────
     // The currency symbol lives in the column header; cells render bare Latin
-    // numbers (em dash for zero/null so a column of zeros isn't noise).
+    // numbers via the shared useCurrency() formatter (em dash for zero/null).
+    const { formatCurrency, formatAmount } = useCurrency();
     const currencyCode = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'SDG';
-    const money = (amount) => amount ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(amount) : '—';
     const onHandOf = (product) => product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0);
     const availableClass = (product) => {
         if (product.available_qty <= 0) return 'text-red-600 dark:text-red-400';
@@ -541,9 +533,9 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ money(product.cost) }}</Ltr></td>
-                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ money(product.average_cost) }}</Ltr></td>
-                                    <td class="w-28 px-3 py-2.5 text-end text-sm font-semibold text-gray-900 dark:text-white"><Ltr>{{ money(product.price) }}</Ltr></td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ formatAmount(product.cost) }}</Ltr></td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ formatAmount(product.average_cost) }}</Ltr></td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm font-semibold text-gray-900 dark:text-white"><Ltr>{{ formatAmount(product.price) }}</Ltr></td>
                                     <td class="w-24 px-3 py-2.5 text-end" @click.stop>
                                         <div class="flex items-center justify-end gap-x-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-opacity">
                                             <ProductForm :product="product" :categories="categories" :storages="storages" />

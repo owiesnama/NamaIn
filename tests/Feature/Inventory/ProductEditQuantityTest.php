@@ -65,6 +65,26 @@ test('creating a product with per-storage quantities sets stock via adjustments'
     ]);
 });
 
+test('creating a product rolls back entirely when the stock step is rejected', function () {
+    // purchase_driven (default) blocks the upward manual increase mid-transaction.
+    $storage = Storage::factory()->create();
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('products.index'), [
+            'name' => 'Should Not Persist',
+            'cost' => 10,
+            'units' => [['name' => 'Box', 'conversion_factor' => 1]],
+            'categories' => [],
+            'quantities' => [
+                ['storage_id' => $storage->id, 'quantity' => 40],
+            ],
+        ])->assertSessionHas('error');
+
+    // The whole create is atomic: no product, no units, no stock movement.
+    expect(Product::where('name', 'Should Not Persist')->exists())->toBeFalse();
+    expect(StockMovement::count())->toBe(0);
+});
+
 test('editing quantities upward is blocked under purchase-driven', function () {
     $storage = Storage::factory()->create();
     $product = Product::factory()->create();

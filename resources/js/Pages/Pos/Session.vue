@@ -8,6 +8,7 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import CustomSelect from "@/Components/CustomSelect.vue";
 import QuickAddPartyModal from "@/Components/QuickAddPartyModal.vue";
 import { useAsyncOptions } from "@/Composables/useAsyncOptions";
+import { useInventoryStrategy } from "@/Composables/useInventoryStrategy";
 
 import PosProductGrid from "@/Components/Pos/PosProductGrid.vue";
 import PosCheckoutModal from "@/Components/Pos/PosCheckoutModal.vue";
@@ -41,7 +42,7 @@ const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDig
 
 // When the tenant allows overselling, the POS never blocks on stock — sales
 // drive the sale-point balance negative and are reconciled later.
-const oversellingEnabled = [true, 1, '1', 'true'].includes(window.preferences?.('allow_overselling', false));
+const { oversellingEnabled } = useInventoryStrategy();
 
 // ── Customer ─────────────────────────────────────────────────────────────────
 const {
@@ -309,7 +310,7 @@ const paymentMethodLabels = [
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
                                 </button>
                             </div>
-                            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ fmt(item.quantity * item.price) }}</span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white"><Ltr>{{ fmt(item.quantity * item.price) }}</Ltr></span>
                         </div>
                         <div v-if="!oversellingEnabled && item.sale_point_qty < item.quantity && item.replenishment" class="flex items-center gap-x-1 mt-2 px-2 py-1.5 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
                             <svg class="h-3 w-3 text-amber-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
@@ -346,7 +347,7 @@ const paymentMethodLabels = [
                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Total') }}</span>
                         <div class="text-end">
                             <span v-if="discountAmount > 0" class="block text-xs line-through text-gray-400 dark:text-gray-600 ltr:text-right rtl:text-left">{{ fmt(cartSubtotal) }}</span>
-                            <span class="text-2xl font-bold text-emerald-600">{{ fmt(total) }}</span>
+                            <span class="text-2xl font-bold text-emerald-600"><Ltr>{{ fmt(total) }}</Ltr></span>
                         </div>
                     </div>
                     <button type="button" class="w-full py-4 text-base font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" :class="!oversellingEnabled && cart.some(i => i.sale_point_qty < i.quantity) ? 'bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500' : 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500'" :disabled="cart.length === 0 || checkoutForm.processing || (!oversellingEnabled && cart.some(i => i.sale_point_qty < i.quantity && !i.replenishment))" @click="openCheckoutModal">
@@ -371,7 +372,7 @@ const paymentMethodLabels = [
                     {{ __('Cart') }}
                     <span v-if="cart.length > 0" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full bg-white/20">{{ cart.length }}</span>
                 </span>
-                <span class="text-base font-bold">{{ fmt(total) }}</span>
+                <span class="text-base font-bold"><Ltr>{{ fmt(total) }}</Ltr></span>
             </button>
         </div>
 
