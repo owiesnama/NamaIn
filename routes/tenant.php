@@ -378,6 +378,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
                 'purchases' => 'reports.purchases',
                 'pos-sessions' => 'reports.pos-sessions',
                 'inventory-valuation' => 'reports.inventory-valuation',
+                'negative-stock' => 'reports.negative-stock',
                 'customer-aging' => 'reports.customer-aging',
                 'supplier-aging' => 'reports.supplier-aging',
                 'treasury-reconciliation' => 'reports.treasury',

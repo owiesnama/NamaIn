@@ -2,6 +2,7 @@
 
 namespace App\Actions\Purchase;
 
+use App\Jobs\BackfillProvisionalCostsJob;
 use App\Models\Storage;
 use App\Models\Transaction;
 use App\Models\TransactionReceipt;
@@ -41,6 +42,7 @@ class ReceiveGoodsAction
             );
 
             $transaction->product->recalculateAverageCost();
+            BackfillProvisionalCostsJob::dispatch($transaction->tenant_id, $transaction->product_id);
 
             if ($transaction->isFullyReceived()) {
                 $transaction->deliver($actor, $storage);

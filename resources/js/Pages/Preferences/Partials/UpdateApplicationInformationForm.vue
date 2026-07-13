@@ -10,12 +10,17 @@
     import TextInput from "@/Components/TextInput.vue";
     const alertsToggle = ref(preferences('alerts', true));
 
+    const truthy = (value) => [true, 1, "1", "true"].includes(value);
+    const oversellingToggle = ref(truthy(preferences('allow_overselling', false)));
+
     const form = useForm({
         logo: preferences('logo'),
         invoicesHeadline: preferences('invoicesHeadline'),
         alerts: alertsToggle.value,
         currency: preferences('currency', 'SDG'),
         pecentage: preferences('pecentage', 60),
+        inventory_strategy: preferences('inventory_strategy', 'purchase_driven'),
+        allow_overselling: oversellingToggle.value,
     });
 
     const logoPreview = ref(null);
@@ -23,6 +28,9 @@
 
     const updateApplicationInformation = () => {
         form.alerts = alertsToggle.value;
+        // allow_overselling only applies under free-form; purchase-driven always blocks.
+        form.allow_overselling =
+            form.inventory_strategy === "free_form" ? oversellingToggle.value : false;
         if (logoInput.value && logoInput.value.files[0]) {
             form.logo = logoInput.value.files[0];
         }
@@ -214,6 +222,89 @@
                 </div>
                 <InputError
                     :message="form.errors.currency"
+                    class="mt-2"
+                />
+            </div>
+
+            <!-- Inventory strategy -->
+            <div class="col-span-6 sm:col-span-4">
+                <InputLabel :value="__('Inventory Management')" />
+                <p class="mt-1 text-sm text-secondary">
+                    {{ __("Choose how you want to manage your inventory.") }}
+                </p>
+
+                <div class="mt-3 space-y-3">
+                    <label
+                        class="flex items-start gap-x-3 p-3 border border-line rounded-lg cursor-pointer bg-surface"
+                        :class="{ 'ring-1 ring-emerald-500/40 border-emerald-400': form.inventory_strategy === 'purchase_driven' }"
+                    >
+                        <input
+                            v-model="form.inventory_strategy"
+                            type="radio"
+                            value="purchase_driven"
+                            class="mt-0.5 text-emerald-600 border-line focus:ring-emerald-200"
+                        />
+                        <span>
+                            <span class="block text-sm font-medium text-primary">
+                                {{ __("Purchase-driven (strict)") }}
+                            </span>
+                            <span class="block text-xs text-secondary">
+                                {{ __("Stock enters only through purchase invoices. Sales are blocked when stock runs out.") }}
+                            </span>
+                        </span>
+                    </label>
+
+                    <label
+                        class="flex items-start gap-x-3 p-3 border border-line rounded-lg cursor-pointer bg-surface"
+                        :class="{ 'ring-1 ring-emerald-500/40 border-emerald-400': form.inventory_strategy === 'free_form' }"
+                    >
+                        <input
+                            v-model="form.inventory_strategy"
+                            type="radio"
+                            value="free_form"
+                            class="mt-0.5 text-emerald-600 border-line focus:ring-emerald-200"
+                        />
+                        <span>
+                            <span class="block text-sm font-medium text-primary">
+                                {{ __("Free-form (flexible)") }}
+                            </span>
+                            <span class="block text-xs text-secondary">
+                                {{ __("Adjust quantities freely without purchase invoices.") }}
+                            </span>
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Overselling toggle: only meaningful under free-form -->
+                <div
+                    v-if="form.inventory_strategy === 'free_form'"
+                    class="flex items-center mt-4 cursor-pointer"
+                    @click="oversellingToggle = !oversellingToggle"
+                >
+                    <div
+                        class="relative w-10 h-5 transition duration-200 ease-linear rounded-full"
+                        :class="[oversellingToggle ? 'bg-emerald-500' : 'bg-gray-300']"
+                    >
+                        <label
+                            class="absolute left-0 w-5 h-5 mb-2 transition duration-100 ease-linear transform bg-white border-2 rounded-full cursor-pointer"
+                            :class="[
+                                oversellingToggle
+                                    ? 'translate-x-full border-emerald-500'
+                                    : 'translate-x-0 border-gray-300',
+                            ]"
+                        ></label>
+                    </div>
+                    <p class="mx-3 text-sm text-secondary">
+                        {{ __("Allow selling below zero (overselling). Negative balances are surfaced for later reconciliation.") }}
+                    </p>
+                </div>
+
+                <InputError
+                    :message="form.errors.inventory_strategy"
+                    class="mt-2"
+                />
+                <InputError
+                    :message="form.errors.allow_overselling"
                     class="mt-2"
                 />
             </div>

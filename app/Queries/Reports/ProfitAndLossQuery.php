@@ -103,6 +103,12 @@ class ProfitAndLossQuery extends ReportQuery
         $grossProfit = $revenue - $cogs;
         $netProfit = $grossProfit - $expenses;
 
+        $hasProvisionalCosts = Transaction::delivered()
+            ->forCustomer()
+            ->whereBetween('transactions.created_at', [$from, $to])
+            ->where('transactions.cost_provisional', true)
+            ->exists();
+
         return [
             'revenue' => round($revenue, 2),
             'cogs' => round($cogs, 2),
@@ -111,6 +117,7 @@ class ProfitAndLossQuery extends ReportQuery
             'expenses' => round($expenses, 2),
             'net_profit' => round($netProfit, 2),
             'net_margin' => $revenue > 0 ? round(($netProfit / $revenue) * 100, 1) : 0,
+            'has_provisional_costs' => $hasProvisionalCosts,
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Exports\ProductExport;
 use App\Exports\Reports\CustomerAgingExport;
 use App\Exports\Reports\ExpenseSummaryExport;
 use App\Exports\Reports\InventoryValuationExport;
+use App\Exports\Reports\NegativeStockExport;
 use App\Exports\Reports\PosSessionExport;
 use App\Exports\Reports\ProfitAndLossExport;
 use App\Exports\Reports\PurchaseReportExport;
@@ -30,6 +31,7 @@ class ExportRegistry
             'report-purchases' => PurchaseReportExport::class,
             'report-pos-sessions' => PosSessionExport::class,
             'report-inventory-valuation' => InventoryValuationExport::class,
+            'report-negative-stock' => NegativeStockExport::class,
             'report-customer-aging' => CustomerAgingExport::class,
             'report-supplier-aging' => SupplierAgingExport::class,
             'report-treasury' => TreasuryReconciliationExport::class,

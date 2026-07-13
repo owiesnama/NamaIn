@@ -34,6 +34,9 @@ Schedule::call(fn () => DB::table('notifications')->where('created_at', '<', now
     ->daily()
     ->name('notifications:prune');
 Schedule::command('expenses:generate-recurring')->daily();
+// Post-cutover guardrail: surface any drift between the stocks cache and the
+// stock-movement ledger (source of truth). Read-only.
+Schedule::command('stock:reconcile')->daily();
 Schedule::command('exports:prune')->daily();
 Schedule::command('telescope:prune --hours=48')->daily();
 Schedule::command('horizon:snapshot')->everyFiveMinutes();
