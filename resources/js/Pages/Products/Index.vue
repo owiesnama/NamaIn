@@ -400,7 +400,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                         </a>
                     </div>
 
-                    <ProductForm :categories="categories"></ProductForm>
+                    <ProductForm :categories="categories" :storages="storages"></ProductForm>
                 </div>
             </div>
 

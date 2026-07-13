@@ -32,7 +32,15 @@
         return entry?.pivot?.quantity ?? 0;
     };
 
-    const firstStorageId = props.storages?.[0]?.id ?? null;
+    const storageOf = (storageId) =>
+        (props.storages || []).find((s) => s.id === storageId) || {};
+    const storageName = (storageId) => storageOf(storageId).name ?? "";
+    const storageType = (storageId) => storageOf(storageId).type ?? "";
+
+    // Under purchase-driven, stock only enters via purchase invoices, so the
+    // per-location quantities are shown read-only. Free-form allows editing them.
+    const manualStockAllowed =
+        preferences("inventory_strategy", "purchase_driven") === "free_form";
 
     const show = ref(false);
     const product = useForm({
@@ -46,15 +54,11 @@
         units: props.product?.units?.length
             ? props.product?.units
             : [],
-        storage_id: firstStorageId,
-        quantity: isEditing ? currentQuantityFor(firstStorageId) : "",
+        quantities: (props.storages || []).map((storage) => ({
+            storage_id: storage.id,
+            quantity: currentQuantityFor(storage.id),
+        })),
     });
-
-    // Editing the storage re-reads that storage's current on-hand quantity so the
-    // field always shows the balance the delta will be computed against.
-    const onStorageChange = () => {
-        product.quantity = currentQuantityFor(product.storage_id);
-    };
 
     const setCurrency = (value) => {
         product.currency = (value || "").toUpperCase();
@@ -165,7 +169,7 @@
                         class="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0"
                     >
                         <div
-                            class="relative w-full px-6 pt-6 pb-6 overflow-hidden text-left transition-all transform bg-white border border-gray-200 shadow-xl dark:bg-gray-900 dark:border-gray-700 rounded-xl sm:my-8 sm:max-w-2xl"
+                            class="relative w-full px-6 pt-6 pb-6 overflow-hidden text-left transition-all transform bg-white border border-gray-200 shadow-xl dark:bg-gray-900 dark:border-gray-700 rounded-xl sm:my-8 sm:max-w-4xl"
                         >
                             <!-- Header -->
                             <div class="flex items-start justify-between gap-x-4">
@@ -320,50 +324,54 @@
                                             </div>
                                         </div>
 
-                                        <!-- On-hand quantity as an adjustment delta (edit only) -->
-                                        <div
-                                            v-if="isEditing && props.storages.length"
-                                            class="grid grid-cols-2 gap-4"
-                                        >
-                                            <div>
-                                                <InputLabel
-                                                    for="storage_id"
-                                                    :value="__('Storage')"
-                                                />
-                                                <select
-                                                    id="storage_id"
-                                                    v-model="product.storage_id"
-                                                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                                    @change="onStorageChange"
+                                        <!-- Stock per location (add + edit) -->
+                                        <div v-if="props.storages.length">
+                                            <div class="flex items-center justify-between gap-x-2">
+                                                <InputLabel :value="__('Stock per location')" />
+                                                <span
+                                                    v-if="!manualStockAllowed"
+                                                    class="text-xs text-gray-400 dark:text-gray-500 rtl:text-right"
                                                 >
-                                                    <option
-                                                        v-for="storage in props.storages"
-                                                        :key="storage.id"
-                                                        :value="storage.id"
-                                                    >
-                                                        {{ storage.name }}
-                                                    </option>
-                                                </select>
+                                                    {{ __("Stock is managed through purchase invoices.") }}
+                                                </span>
                                             </div>
-                                            <div>
-                                                <InputLabel
-                                                    for="quantity"
-                                                    :value="__('On-hand Quantity')"
-                                                />
-                                                <TextInput
-                                                    id="quantity"
-                                                    v-model="product.quantity"
-                                                    type="number" inputmode="numeric"
-                                                    min="0"
-                                                    class="block w-full mt-1"
-                                                />
-                                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                                    {{ __("Saving records the difference as a stock adjustment.") }}
-                                                </p>
-                                                <InputError
-                                                    class="mt-1"
-                                                    :message="product.errors.quantity"
-                                                />
+                                            <p
+                                                v-if="manualStockAllowed"
+                                                class="mt-1 text-xs text-gray-400 dark:text-gray-500"
+                                            >
+                                                {{ __("Saving records the difference as a stock adjustment.") }}
+                                            </p>
+                                            <div class="mt-2 space-y-2 overflow-y-auto max-h-60 ltr:pr-1 rtl:pl-1">
+                                                <div
+                                                    v-for="(row, index) in product.quantities"
+                                                    :key="row.storage_id"
+                                                    class="flex items-center gap-3"
+                                                >
+                                                    <div class="flex items-center flex-1 min-w-0 gap-2">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                                            {{ storageName(row.storage_id) }}
+                                                        </span>
+                                                        <span
+                                                            class="shrink-0 px-1.5 py-0.5 text-[9px] font-medium rounded-md"
+                                                            :class="storageType(row.storage_id) === 'warehouse'
+                                                                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                                                                : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'"
+                                                        >
+                                                            {{ storageType(row.storage_id) === 'warehouse' ? __('Warehouse') : __('Sale Point') }}
+                                                        </span>
+                                                    </div>
+                                                    <TextInput
+                                                        v-model="row.quantity"
+                                                        type="number" inputmode="numeric"
+                                                        min="0"
+                                                        :disabled="!manualStockAllowed"
+                                                        class="w-28 shrink-0"
+                                                        :class="{ 'opacity-60 cursor-not-allowed': !manualStockAllowed }"
+                                                    />
+                                                    <InputError
+                                                        :message="product.errors['quantities.' + index + '.quantity']"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 

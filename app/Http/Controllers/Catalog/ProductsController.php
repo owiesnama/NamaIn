@@ -23,7 +23,7 @@ class ProductsController extends Controller
         return inertia('Products/Index', [
             'products_count' => Product::count(),
             'categories' => Category::ofType('product')->get(),
-            'storages' => Storage::select('id', 'name')->orderBy('name')->get(),
+            'storages' => Storage::select('id', 'name', 'type')->orderBy('name')->get(),
             'products' => Product::filter($filter)
                 ->with(['units', 'categories', 'stock'])
                 ->withStockAggregates()
@@ -53,11 +53,11 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function store(ProductRequest $request, SyncCategoriesAction $syncCategoriesAction)
+    public function store(ProductRequest $request, SyncCategoriesAction $syncCategoriesAction, RecordAdjustmentAction $recordAdjustment)
     {
         $this->authorize('create', Product::class);
 
-        $product = Product::create($request->safe()->except(['units', 'categories', 'quantity', 'storage_id']));
+        $product = Product::create($request->safe()->except(['units', 'categories', 'quantities']));
 
         $units = $request->get('units');
 
@@ -68,6 +68,12 @@ class ProductsController extends Controller
         }
 
         $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
+
+        try {
+            $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+        } catch (ManualStockIncreaseNotAllowedException $e) {
+            return redirect()->route('products.index')->with('error', $e->getMessage());
+        }
 
         return redirect()->route('products.index')->with('success', __('Product created successfully.'));
     }
@@ -85,14 +91,14 @@ class ProductsController extends Controller
     {
         $this->authorize('update', $product);
 
-        $product->update($request->safe()->except(['units', 'categories', 'quantity', 'storage_id']));
+        $product->update($request->safe()->except(['units', 'categories', 'quantities']));
 
         $product->syncUnits($request->get('units'));
 
         $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
 
         try {
-            $this->syncOnHandQuantity($product, $request, $recordAdjustment);
+            $this->syncOnHandQuantities($product, $request, $recordAdjustment);
         } catch (ManualStockIncreaseNotAllowedException $e) {
             return back()->with('error', $e->getMessage());
         }
@@ -101,26 +107,29 @@ class ProductsController extends Controller
     }
 
     /**
-     * Apply a directly-edited on-hand quantity as an adjustment delta.
+     * Apply directly-edited on-hand quantities, one per storage, as adjustment
+     * deltas.
      *
-     * The product form never overwrites stock; it records the difference between
-     * the requested quantity and the current balance as an adjustment movement,
-     * gated by the tenant's inventory strategy.
+     * The product form never overwrites stock; for each location it records the
+     * difference between the requested quantity and the current balance as an
+     * adjustment movement, gated by the tenant's inventory strategy.
      */
-    private function syncOnHandQuantity(Product $product, ProductRequest $request, RecordAdjustmentAction $recordAdjustment): void
+    private function syncOnHandQuantities(Product $product, ProductRequest $request, RecordAdjustmentAction $recordAdjustment): void
     {
-        if (! $request->filled('quantity') || ! $request->filled('storage_id')) {
-            return;
+        foreach ($request->collect('quantities') as $row) {
+            if (! isset($row['storage_id'], $row['quantity'])) {
+                continue;
+            }
+
+            $storage = Storage::findOrFail((int) $row['storage_id']);
+            $newQuantity = (int) $row['quantity'];
+
+            if ($newQuantity === $storage->quantityOf($product)) {
+                continue;
+            }
+
+            $recordAdjustment->handle($storage, $product, $newQuantity, 'product_edit', auth()->user());
         }
-
-        $storage = Storage::findOrFail($request->integer('storage_id'));
-        $newQuantity = $request->integer('quantity');
-
-        if ($newQuantity === $storage->quantityOf($product)) {
-            return;
-        }
-
-        $recordAdjustment->handle($storage, $product, $newQuantity, 'product_edit', auth()->user());
     }
 
     public function destroy(Product $product)
