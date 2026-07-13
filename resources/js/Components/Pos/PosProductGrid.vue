@@ -23,6 +23,9 @@ const emit = defineEmits(['add-to-cart', 'toggle-favorite']);
 
 const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${props.currency}`;
 
+// Overselling tenants never block on stock; every product stays addable.
+const oversellingEnabled = [true, 1, '1', 'true'].includes(window.preferences?.('allow_overselling', false));
+
 const search = ref('');
 const products = ref(props.initialProducts.data);
 const loadingMore = ref(false);
@@ -110,9 +113,9 @@ onUnmounted(() => {
                     v-for="product in hotProducts"
                     :key="`hot-${product.id}`"
                     type="button"
-                    :disabled="product.sale_point_qty === 0 && !product.replenishment"
+                    :disabled="!oversellingEnabled && product.sale_point_qty === 0 && !product.replenishment"
                     class="shrink-0 w-36 bg-white dark:bg-gray-900 p-3 rounded-xl border border-gray-200 dark:border-gray-700 text-start shadow-sm group flex flex-col transition-all duration-150 active:scale-95"
-                    :class="product.sale_point_qty === 0 && !product.replenishment
+                    :class="!oversellingEnabled && product.sale_point_qty === 0 && !product.replenishment
                         ? 'opacity-40 cursor-not-allowed grayscale'
                         : 'hover:border-emerald-400 hover:shadow-md cursor-pointer'"
                     @click="emit('add-to-cart', product)"
@@ -142,9 +145,9 @@ onUnmounted(() => {
             <div v-for="product in products" :key="product.id" class="relative h-fit">
                 <button
                     type="button"
-                    :disabled="product.sale_point_qty === 0 && !product.replenishment"
+                    :disabled="!oversellingEnabled && product.sale_point_qty === 0 && !product.replenishment"
                     class="w-full bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-700 text-start shadow-sm group flex flex-col transition-all duration-150 active:scale-95"
-                    :class="product.sale_point_qty === 0 && !product.replenishment
+                    :class="!oversellingEnabled && product.sale_point_qty === 0 && !product.replenishment
                         ? 'opacity-40 cursor-not-allowed grayscale'
                         : 'hover:border-emerald-400 hover:shadow-md cursor-pointer'"
                     @click="emit('add-to-cart', product)"
@@ -154,7 +157,7 @@ onUnmounted(() => {
                             <div class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></div>
                             {{ __('Transfer') }}
                         </div>
-                        <div v-else-if="product.sale_point_qty === 0" class="absolute inset-0 bg-gray-900/10 dark:bg-gray-900/30 flex items-center justify-center rounded-lg">
+                        <div v-else-if="!oversellingEnabled && product.sale_point_qty === 0" class="absolute inset-0 bg-gray-900/10 dark:bg-gray-900/30 flex items-center justify-center rounded-lg">
                             <span class="bg-gray-800/80 text-white px-2 py-1 rounded text-[10px] font-bold uppercase">{{ __('Out of Stock') }}</span>
                         </div>
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8">

@@ -39,6 +39,10 @@ const page = usePage();
 const currency = window.preferences?.('currency') || 'SDG';
 const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${currency}`;
 
+// When the tenant allows overselling, the POS never blocks on stock — sales
+// drive the sale-point balance negative and are reconciled later.
+const oversellingEnabled = [true, 1, '1', 'true'].includes(window.preferences?.('allow_overselling', false));
+
 // ── Customer ─────────────────────────────────────────────────────────────────
 const {
     options: customerOptions,
@@ -57,7 +61,7 @@ const onCustomerCreated = (customer) => {
 const cart = ref([]);
 
 const addToCart = (product) => {
-    if (product.sale_point_qty === 0 && !product.replenishment) return;
+    if (!oversellingEnabled && product.sale_point_qty === 0 && !product.replenishment) return;
     const existing = cart.value.find(item => item.product_id === product.id);
     if (existing) {
         existing.quantity++;
@@ -278,7 +282,7 @@ const paymentMethodLabels = [
                         <p class="text-sm">{{ __('Cart is empty') }}</p>
                     </div>
 
-                    <div v-for="(item, index) in cart" :key="index" class="flex flex-col p-3 rounded-xl border transition-colors" :class="item.sale_point_qty < item.quantity ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800' : 'bg-gray-50 dark:bg-gray-800/50 border-transparent'">
+                    <div v-for="(item, index) in cart" :key="index" class="flex flex-col p-3 rounded-xl border transition-colors" :class="!oversellingEnabled && item.sale_point_qty < item.quantity ? 'bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800' : 'bg-gray-50 dark:bg-gray-800/50 border-transparent'">
                         <div class="flex items-start justify-between gap-x-2 mb-2">
                             <p class="text-sm font-semibold text-gray-900 dark:text-white leading-snug">{{ item.name }}</p>
                             <button class="flex items-center justify-center min-w-[44px] min-h-[44px] -m-2.5 text-gray-400 dark:text-gray-500 hover:text-red-500 transition-colors shrink-0" @click="removeFromCart(index)">
@@ -307,11 +311,11 @@ const paymentMethodLabels = [
                             </div>
                             <span class="text-sm font-bold text-gray-900 dark:text-white">{{ fmt(item.quantity * item.price) }}</span>
                         </div>
-                        <div v-if="item.sale_point_qty < item.quantity && item.replenishment" class="flex items-center gap-x-1 mt-2 px-2 py-1.5 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
+                        <div v-if="!oversellingEnabled && item.sale_point_qty < item.quantity && item.replenishment" class="flex items-center gap-x-1 mt-2 px-2 py-1.5 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
                             <svg class="h-3 w-3 text-amber-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
                             <span class="text-[10px] font-semibold text-amber-700 dark:text-amber-400">{{ item.replenishment.available_qty }} {{ __('at') }} {{ item.replenishment.warehouse_name }}</span>
                         </div>
-                        <div v-else-if="item.sale_point_qty < item.quantity" class="flex items-center gap-x-1 mt-2 px-2 py-1.5 bg-red-50 dark:bg-red-900/10 rounded-lg">
+                        <div v-else-if="!oversellingEnabled && item.sale_point_qty < item.quantity" class="flex items-center gap-x-1 mt-2 px-2 py-1.5 bg-red-50 dark:bg-red-900/10 rounded-lg">
                             <svg class="h-3 w-3 text-red-500 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>
                             <span class="text-[10px] font-semibold text-red-600 dark:text-red-400">{{ __('Out of stock everywhere') }}</span>
                         </div>
@@ -345,8 +349,8 @@ const paymentMethodLabels = [
                             <span class="text-2xl font-bold text-emerald-600">{{ fmt(total) }}</span>
                         </div>
                     </div>
-                    <button type="button" class="w-full py-4 text-base font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" :class="cart.some(i => i.sale_point_qty < i.quantity) ? 'bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500' : 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500'" :disabled="cart.length === 0 || checkoutForm.processing || cart.some(i => i.sale_point_qty < i.quantity && !i.replenishment)" @click="openCheckoutModal">
-                        <span v-if="cart.some(i => i.sale_point_qty < i.quantity)">{{ __('Review & Complete') }} — {{ fmt(total) }}</span>
+                    <button type="button" class="w-full py-4 text-base font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" :class="!oversellingEnabled && cart.some(i => i.sale_point_qty < i.quantity) ? 'bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500' : 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500'" :disabled="cart.length === 0 || checkoutForm.processing || (!oversellingEnabled && cart.some(i => i.sale_point_qty < i.quantity && !i.replenishment))" @click="openCheckoutModal">
+                        <span v-if="!oversellingEnabled && cart.some(i => i.sale_point_qty < i.quantity)">{{ __('Review & Complete') }} — {{ fmt(total) }}</span>
                         <span v-else>{{ __('Complete Sale') }} — {{ fmt(total) }}</span>
                     </button>
                     <div v-if="cartErrorMessage" class="p-3 rounded-lg bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700 text-red-600 dark:text-red-400 text-sm">{{ cartErrorMessage }}</div>

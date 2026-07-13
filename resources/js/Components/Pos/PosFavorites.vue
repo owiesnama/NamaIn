@@ -13,7 +13,9 @@ const emit = defineEmits(['add-to-cart', 'toggle-favorite']);
 
 const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${props.currency}`;
 
-const isAvailable = (product) => product.sale_point_qty > 0;
+// Overselling tenants never block on stock; favourites stay addable.
+const oversellingEnabled = [true, 1, '1', 'true'].includes(window.preferences?.('allow_overselling', false));
+const isAvailable = (product) => oversellingEnabled || product.sale_point_qty > 0;
 </script>
 
 <template>
