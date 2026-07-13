@@ -38,6 +38,13 @@ const selectedService = ref(props.booking?.service ?? null);
 const showQuickAddModal = ref(false);
 const bufferWarnings = ref([]);
 
+// On edit, pre-check the add-ons that were snapshotted onto the booking (by
+// their source add-on id; add-ons whose source was deleted can't be re-picked).
+const initialAddonIds = () =>
+    (props.booking?.addons ?? [])
+        .map((addon) => addon.service_addon_id)
+        .filter((id) => id != null);
+
 const form = useForm({
     service_product_id: props.booking?.service_product_id ?? null,
     customer_id: props.booking?.customer_id ?? null,
@@ -47,7 +54,7 @@ const form = useForm({
     address: props.booking?.address ?? "",
     notes: props.booking?.notes ?? "",
     status: props.booking?.status ?? "confirmed",
-    addons: [],
+    addons: initialAddonIds(),
     acknowledge_buffer: false,
 });
 
@@ -68,7 +75,7 @@ watch(
             address: props.booking?.address ?? "",
             notes: props.booking?.notes ?? "",
             status: props.booking?.status ?? "confirmed",
-            addons: [],
+            addons: initialAddonIds(),
             acknowledge_buffer: false,
         });
         form.reset();

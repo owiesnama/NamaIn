@@ -27,7 +27,7 @@ class BookingsController extends Controller
     {
         return inertia('Bookings/Index', [
             'bookings' => Booking::query()
-                ->with(['service:id,name,duration_minutes,on_site', 'customer:id,name', 'addons'])
+                ->with(['service:id,name,duration_minutes,on_site,price', 'service.serviceAddons', 'customer:id,name', 'addons'])
                 ->orderByDesc('starts_at')
                 ->paginate(parent::ELEMENTS_PER_PAGE)
                 ->withQueryString(),

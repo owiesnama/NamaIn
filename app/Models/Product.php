@@ -263,6 +263,20 @@ class Product extends BaseModel
     }
 
     /**
+     * Products that may be sold as an ordinary invoice/POS line item: every
+     * physical good, plus services that are not booking-driven (walk-in
+     * services). Bookable services are excluded — they are booked, not
+     * line-sold.
+     */
+    public function scopeSellableAsLineItem(Builder $query): Builder
+    {
+        return $query->where(function (Builder $query) {
+            $query->where('type', '!=', ProductType::Service->value)
+                ->orWhere('requires_booking', false);
+        });
+    }
+
+    /**
      * The stock details for this product.
      */
     public function stock(): BelongsToMany

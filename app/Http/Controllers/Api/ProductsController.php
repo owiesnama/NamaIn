@@ -15,6 +15,9 @@ class ProductsController extends Controller
             ->with('units')
             ->when($request->filled('type'), fn ($query) => $query->where('type', $request->get('type')))
             ->when($request->get('type') === 'service', fn ($query) => $query->with('serviceAddons'))
+            // Line-sale pickers (invoices, quotes) exclude bookable services;
+            // those are booked, not line-sold.
+            ->when($request->boolean('line_sale'), fn ($query) => $query->sellableAsLineItem())
             ->search($request->get('search'))
             ->latest()
             ->simplePaginate(20);
