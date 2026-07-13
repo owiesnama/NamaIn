@@ -1,119 +1,74 @@
 <script setup>
-    import { ref } from "vue";
-    import { useForm } from "@inertiajs/vue3";
-    import ActionMessage from "@/Components/ActionMessage.vue";
-    import FormSection from "@/Components/FormSection.vue";
+    import { computed, inject, watch } from "vue";
+    import CurrencySelect from "@/Components/CurrencySelect.vue";
     import InputError from "@/Components/InputError.vue";
     import InputLabel from "@/Components/InputLabel.vue";
-    import PrimaryButton from "@/Components/PrimaryButton.vue";
-    import SecondaryButton from "@/Components/SecondaryButton.vue";
-    import TextInput from "@/Components/TextInput.vue";
-    const alertsToggle = ref(preferences('alerts', true));
+    import LogoUploader from "@/Components/LogoUploader.vue";
+    import NumberField from "@/Components/NumberField.vue";
+    import SettingsSection from "@/Components/SettingsSection.vue";
+    import ToggleField from "@/Components/ToggleField.vue";
 
-    const truthy = (value) => [true, 1, "1", "true"].includes(value);
-    const oversellingToggle = ref(truthy(preferences('allow_overselling', false)));
+    // Form is owned by the page (Show.vue) so Save can live in the sticky header.
+    // This partial only renders the fields bound to that shared form.
+    const form = inject("settingsForm");
 
-    const form = useForm({
-        logo: preferences('logo'),
-        invoicesHeadline: preferences('invoicesHeadline'),
-        alerts: alertsToggle.value,
-        currency: preferences('currency', 'SDG'),
-        pecentage: preferences('pecentage', 60),
-        inventory_strategy: preferences('inventory_strategy', 'purchase_driven'),
-        allow_overselling: oversellingToggle.value,
+    const isFlexible = computed(
+        () => form.inventory_strategy === "free_form"
+    );
+
+    // Overselling is only meaningful under the flexible strategy. Reset it when
+    // the user switches to strict (change only — never on initial load, so an
+    // untouched form stays clean).
+    watch(
+        () => form.inventory_strategy,
+        (strategy) => {
+            if (strategy !== "free_form") {
+                form.allow_overselling = false;
+            }
+        }
+    );
+
+    // Resolve the stored logo path to a URL the browser can load. Bare disk
+    // paths (e.g. "logos/x.png") are served from the public storage symlink.
+    const currentLogoUrl = computed(() => {
+        const path = preferences("logo");
+        if (!path) {
+            return "/images/logo.svg";
+        }
+        if (path.startsWith("http") || path.startsWith("/")) {
+            return path;
+        }
+        return `/storage/${path}`;
     });
 
-    const logoPreview = ref(null);
-    const logoInput = ref(null);
-
-    const updateApplicationInformation = () => {
-        form.alerts = alertsToggle.value;
-        // allow_overselling only applies under free-form; purchase-driven always blocks.
-        form.allow_overselling =
-            form.inventory_strategy === "free_form" ? oversellingToggle.value : false;
-        if (logoInput.value && logoInput.value.files[0]) {
-            form.logo = logoInput.value.files[0];
-        }
-
-        form.post(route("preferences.update"), {
-            onSuccess: () => {
-                logoPreview.value = null;
-                if (logoInput.value) {
-                    logoInput.value.value = null;
-                }
-            },
-        });
-    };
-
-    const selectNewLogo = () => {
-        logoInput.value.click();
-    };
-
-    const updateLogoPreview = () => {
-        const logo = logoInput.value.files[0];
-        const reader = new FileReader();
-
-        if (!logo) return;
-        reader.onload = (e) => (logoPreview.value = e.target.result);
-        reader.readAsDataURL(logo);
-    };
+    const cardClass = (selected) => [
+        "rounded-xl border bg-surface transition-colors",
+        selected
+            ? "border-emerald-500 ring-1 ring-inset ring-emerald-500"
+            : "border-line hover:border-line-strong",
+    ];
 </script>
 
 <template>
-    <FormSection @submitted="updateApplicationInformation">
-        <template #title> {{ __("Application Information") }} </template>
-
-        <template #description>
-            {{ __("Update your Application information and Basic Data") }}.
-        </template>
-
-        <template #form>
-            <!-- Logo logo -->
-            <div class="col-span-6 sm:col-span-4">
-                <!-- Logo logo File Input -->
-                <input
-                    ref="logoInput"
-                    type="file"
-                    class="hidden"
-                    @change="updateLogoPreview"
-                />
-
+    <!-- Identity -->
+    <SettingsSection
+        id="identity"
+        :title="__('Identity')"
+        :description="__('Your logo and the header printed on invoices.')"
+    >
+        <div class="space-y-6">
+            <!-- Logo -->
+            <div>
                 <InputLabel
                     for="logo"
                     :value="__('Logo')"
                 />
-
-                <!-- Current Profile Logo -->
-                <div
-                    v-show="!logoPreview"
-                    class="mt-2"
-                >
-                    <img
-                        :src="preferences('logo', '/images/logo.svg')"
-                        alt="App Logo"
-                        class="object-contain w-12 h-12"
+                <div class="mt-2">
+                    <LogoUploader
+                        v-model="form.logo"
+                        :current-url="currentLogoUrl"
                     />
                 </div>
-
-                <!-- New Logo Preview -->
-                <div
-                    v-show="logoPreview"
-                    class="mt-2"
-                >
-                    <img
-                        :src="logoPreview"
-                        class="object-contain w-12 h-12"
-                    />
-                </div>
-
-                <SecondaryButton
-                    class="mt-2 mr-2"
-                    type="button"
-                    @click.prevent="selectNewLogo"
-                >
-                    {{ __("Select A New Logo") }}
-                </SecondaryButton>
-
                 <InputError
                     :message="form.errors.logo"
                     class="mt-2"
@@ -121,7 +76,7 @@
             </div>
 
             <!-- Invoices Headline -->
-            <div class="col-span-6 sm:col-span-4">
+            <div>
                 <InputLabel
                     for="invoicesHeadline"
                     :value="__('Invoices Headline')"
@@ -137,87 +92,47 @@
                     class="mt-2"
                 />
             </div>
+        </div>
+    </SettingsSection>
 
-            <!-- Alerts -->
-            <div class="col-span-6 sm:col-span-4">
-                <InputLabel
-                    for="alerts"
-                    :value="__('Alerts')"
-                />
-                <div
-                    class="flex items-center cursor-pointer"
-                    @click="alertsToggle = !alertsToggle"
-                >
-                    <div
-                        class="relative w-10 h-5 transition duration-200 ease-linear rounded-full"
-                        :class="[
-                            alertsToggle ? 'bg-emerald-500' : 'bg-gray-300',
-                        ]"
-                    >
-                        <label
-                            for="alertsToggle"
-                            class="absolute left-0 w-5 h-5 mb-2 transition duration-100 ease-linear transform bg-white border-2 rounded-full cursor-pointer"
-                            :class="[
-                                alertsToggle
-                                    ? 'translate-x-full border-emerald-500'
-                                    : 'translate-x-0 border-gray-300',
-                            ]"
-                            @click="alertsToggle = !alertsToggle"
-                        ></label>
-                        <input
-                            type="checkbox"
-                            name="alertsToggle"
-                            class="hidden w-full h-full rounded-full appearance-none active:outline-none focus:outline-none"
-                        />
-                    </div>
-
-                    <p class="mx-3 text-sm text-secondary">
-                        {{ __("Send Notifications When Stocks Running Out") }}
-                    </p>
-                </div>
-                <InputError
-                    :message="form.errors.alerts"
-                    class="mt-2"
-                />
-            </div>
-
-            <!-- Pecentage -->
-            <div class="col-span-6 sm:col-span-4">
+    <!-- Pricing & currency -->
+    <SettingsSection
+        id="pricing"
+        :title="__('Pricing & currency')"
+        :description="__('Default profit margin and the system-wide currency.')"
+    >
+        <div class="space-y-6">
+            <!-- Margin percentage -->
+            <div>
                 <InputLabel
                     for="pecentage"
-                    :value="__('Margin Revenu Percentage') + ' ' + '(%)'"
+                    :value="__('Margin Revenu Percentage')"
                 />
-                <TextInput
-                    id="pecentage"
-                    v-model="form.pecentage"
-                    type="number" inputmode="decimal"
-                    min="0"
-                    max="100"
-                    placeholder="60"
-                    class="block w-full mt-1"
-                    autocomplete="pecentage"
-                />
+                <div class="mt-1">
+                    <NumberField
+                        id="pecentage"
+                        v-model="form.pecentage"
+                        suffix="%"
+                        placeholder="60"
+                        class="sm:max-w-xs"
+                    />
+                </div>
                 <InputError
                     :message="form.errors.pecentage"
                     class="mt-2"
                 />
             </div>
 
-            <!-- currency (System Wide SDG) -->
-            <div class="col-span-6 sm:col-span-4">
+            <!-- Currency -->
+            <div>
                 <InputLabel
                     for="currency"
                     :value="__('Currency')"
                 />
-                <div class="flex gap-x-2 mt-1">
-                    <TextInput
+                <div class="mt-1">
+                    <CurrencySelect
                         id="currency"
                         v-model="form.currency"
-                        type="text"
-                        class="block w-full uppercase bg-surface-sunken"
-                        maxlength="3"
-                        readonly
-                        :placeholder="__('SDG')"
                     />
                 </div>
                 <InputError
@@ -225,106 +140,102 @@
                     class="mt-2"
                 />
             </div>
+        </div>
+    </SettingsSection>
 
-            <!-- Inventory strategy -->
-            <div class="col-span-6 sm:col-span-4">
-                <InputLabel :value="__('Inventory Management')" />
-                <p class="mt-1 text-sm text-secondary">
-                    {{ __("Choose how you want to manage your inventory.") }}
-                </p>
+    <!-- Inventory policy -->
+    <SettingsSection
+        id="inventory"
+        :title="__('Inventory policy')"
+        :description="__('How stock is tracked, and whether selling below zero is allowed.')"
+    >
+        <p class="text-sm text-secondary">
+            {{ __("Choose how you want to manage your inventory.") }}
+        </p>
 
-                <div class="mt-3 space-y-3">
-                    <label
-                        class="flex items-start gap-x-3 p-3 border border-line rounded-lg cursor-pointer bg-surface"
-                        :class="{ 'ring-1 ring-emerald-500/40 border-emerald-400': form.inventory_strategy === 'purchase_driven' }"
-                    >
-                        <input
-                            v-model="form.inventory_strategy"
-                            type="radio"
-                            value="purchase_driven"
-                            class="mt-0.5 text-emerald-600 border-line focus:ring-emerald-200"
-                        />
-                        <span>
-                            <span class="block text-sm font-medium text-primary">
-                                {{ __("Purchase-driven (strict)") }}
-                            </span>
-                            <span class="block text-xs text-secondary">
-                                {{ __("Stock enters only through purchase invoices. Sales are blocked when stock runs out.") }}
-                            </span>
+        <div class="mt-3 space-y-3">
+            <!-- Strict: whole card is the hit target -->
+            <label
+                class="block cursor-pointer p-4"
+                :class="cardClass(form.inventory_strategy === 'purchase_driven')"
+            >
+                <span class="flex items-start gap-x-3">
+                    <input
+                        v-model="form.inventory_strategy"
+                        type="radio"
+                        value="purchase_driven"
+                        class="mt-0.5 h-4 w-4 text-emerald-600 border-line focus:ring-emerald-200"
+                    />
+                    <span>
+                        <span class="block text-sm font-medium text-primary">
+                            {{ __("Purchase-driven (strict)") }}
                         </span>
-                    </label>
-
-                    <label
-                        class="flex items-start gap-x-3 p-3 border border-line rounded-lg cursor-pointer bg-surface"
-                        :class="{ 'ring-1 ring-emerald-500/40 border-emerald-400': form.inventory_strategy === 'free_form' }"
-                    >
-                        <input
-                            v-model="form.inventory_strategy"
-                            type="radio"
-                            value="free_form"
-                            class="mt-0.5 text-emerald-600 border-line focus:ring-emerald-200"
-                        />
-                        <span>
-                            <span class="block text-sm font-medium text-primary">
-                                {{ __("Free-form (flexible)") }}
-                            </span>
-                            <span class="block text-xs text-secondary">
-                                {{ __("Adjust quantities freely without purchase invoices.") }}
-                            </span>
+                        <span class="block text-xs text-secondary">
+                            {{ __("Stock enters only through purchase invoices. Sales are blocked when stock runs out.") }}
                         </span>
-                    </label>
-                </div>
+                    </span>
+                </span>
+            </label>
 
-                <!-- Overselling toggle: only meaningful under free-form -->
-                <div
-                    v-if="form.inventory_strategy === 'free_form'"
-                    class="flex items-center mt-4 cursor-pointer"
-                    @click="oversellingToggle = !oversellingToggle"
-                >
-                    <div
-                        class="relative w-10 h-5 transition duration-200 ease-linear rounded-full"
-                        :class="[oversellingToggle ? 'bg-emerald-500' : 'bg-gray-300']"
-                    >
-                        <label
-                            class="absolute left-0 w-5 h-5 mb-2 transition duration-100 ease-linear transform bg-white border-2 rounded-full cursor-pointer"
-                            :class="[
-                                oversellingToggle
-                                    ? 'translate-x-full border-emerald-500'
-                                    : 'translate-x-0 border-gray-300',
-                            ]"
-                        ></label>
-                    </div>
-                    <p class="mx-3 text-sm text-secondary">
-                        {{ __("Allow selling below zero (overselling). Negative balances are surfaced for later reconciliation.") }}
-                    </p>
-                </div>
+            <!-- Flexible: selectable header + nested overselling sub-row -->
+            <div
+                class="overflow-hidden"
+                :class="cardClass(isFlexible)"
+            >
+                <label class="flex cursor-pointer items-start gap-x-3 p-4">
+                    <input
+                        v-model="form.inventory_strategy"
+                        type="radio"
+                        value="free_form"
+                        class="mt-0.5 h-4 w-4 text-emerald-600 border-line focus:ring-emerald-200"
+                    />
+                    <span>
+                        <span class="block text-sm font-medium text-primary">
+                            {{ __("Free-form (flexible)") }}
+                        </span>
+                        <span class="block text-xs text-secondary">
+                            {{ __("Adjust quantities freely without purchase invoices.") }}
+                        </span>
+                    </span>
+                </label>
 
-                <InputError
-                    :message="form.errors.inventory_strategy"
-                    class="mt-2"
-                />
-                <InputError
-                    :message="form.errors.allow_overselling"
-                    class="mt-2"
-                />
+                <!-- Nested: only meaningful under flexible. Kept mounted (muted +
+                     disabled) under strict to avoid a layout jump. -->
+                <div class="border-t border-line bg-surface-sunken px-4 py-3">
+                    <ToggleField
+                        v-model="form.allow_overselling"
+                        :disabled="!isFlexible"
+                        :label="__('Allow overselling')"
+                        :description="__('Allow selling below zero (overselling). Negative balances are surfaced for later reconciliation.')"
+                    />
+                </div>
             </div>
-        </template>
+        </div>
 
-        <template #actions>
-            <ActionMessage
-                :on="form.recentlySuccessful"
-                class="mr-3"
-            >
-                {{ __("Saved.") }}
-            </ActionMessage>
+        <InputError
+            :message="form.errors.inventory_strategy"
+            class="mt-2"
+        />
+        <InputError
+            :message="form.errors.allow_overselling"
+            class="mt-2"
+        />
+    </SettingsSection>
 
-            <PrimaryButton
-                type="submit"
-                :class="{ 'opacity-25': form.processing }"
-                :disabled="form.processing"
-            >
-                {{ __("Save") }}
-            </PrimaryButton>
-        </template>
-    </FormSection>
+    <!-- Notifications -->
+    <SettingsSection
+        id="notifications"
+        :title="__('Notifications')"
+        :description="__('Alerts sent to keep you informed about your inventory.')"
+    >
+        <ToggleField
+            v-model="form.alerts"
+            :label="__('Alerts')"
+            :description="__('Send Notifications When Stocks Running Out')"
+        />
+        <InputError
+            :message="form.errors.alerts"
+            class="mt-2"
+        />
+    </SettingsSection>
 </template>
