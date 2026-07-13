@@ -2,6 +2,8 @@
 
 Product requirements for migrating NamaIn's inventory from a mutable `stocks.quantity` source of truth to an **append-only, signed stock-movement ledger** with a **per-tenant inventory strategy** (`purchase_driven` vs `free_form` + nested `allow_overselling`).
 
+> **Cutover status (M10):** the append-only `stock_movements` ledger is the **source of truth** for stock. `stocks.quantity` is retained as its incrementally-maintained, row-locked **cache** (equal to `SUM(movements)` on every write) and remains the O(1) hot-path read — nothing was destructively dropped. Use `Product::ledgerBalance()` / `StockBalanceQuery` for authoritative reads and reconciliation; `stock:reconcile` runs daily as a drift guardrail. Valuation and stock views now include negative (oversold) balances.
+
 See the audit & verdict that motivate this work in the approved plan (Phase 1 findings + Phase 2 verdict). **Headline:** the ledger (`stock_movements`) already exists, is written through a single choke point (`Storage::addStock/deductStock/setStockTo`), is signed + polymorphic + append-only in practice, and is currently latent (no readers). `stocks.quantity` already behaves as an incrementally-updated, row-locked cached balance. The one unavoidable structural change is that `stocks.quantity` is **unsigned** today, so negatives are impossible. We therefore **extend, not replace**, and migrate incrementally (parallel-run), defaulting every existing tenant to `purchase_driven`.
 
 ## Milestones

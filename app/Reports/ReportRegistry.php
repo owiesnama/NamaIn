@@ -16,6 +16,7 @@ class ReportRegistry
         'purchases' => PurchaseReport::class,
         'pos-sessions' => PosSessionReport::class,
         'inventory-valuation' => InventoryValuationReport::class,
+        'negative-stock' => NegativeStockReport::class,
         'customer-aging' => CustomerAgingReport::class,
         'supplier-aging' => SupplierAgingReport::class,
         'treasury-reconciliation' => TreasuryReconciliationReport::class,

@@ -18,7 +18,21 @@
             default: () => [],
             required: false,
         },
+        storages: {
+            type: Array,
+            default: () => [],
+            required: false,
+        },
     });
+
+    const isEditing = !!props.product;
+
+    const currentQuantityFor = (storageId) => {
+        const entry = (props.product?.stock || []).find((s) => s.id === storageId);
+        return entry?.pivot?.quantity ?? 0;
+    };
+
+    const firstStorageId = props.storages?.[0]?.id ?? null;
 
     const show = ref(false);
     const product = useForm({
@@ -32,9 +46,15 @@
         units: props.product?.units?.length
             ? props.product?.units
             : [],
+        storage_id: firstStorageId,
+        quantity: isEditing ? currentQuantityFor(firstStorageId) : "",
     });
 
-    const isEditing = !!props.product;
+    // Editing the storage re-reads that storage's current on-hand quantity so the
+    // field always shows the balance the delta will be computed against.
+    const onStorageChange = () => {
+        product.quantity = currentQuantityFor(product.storage_id);
+    };
 
     const setCurrency = (value) => {
         product.currency = (value || "").toUpperCase();
@@ -296,6 +316,53 @@
                                                     :message="
                                                         product.errors.alert_quantity
                                                     "
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <!-- On-hand quantity as an adjustment delta (edit only) -->
+                                        <div
+                                            v-if="isEditing && props.storages.length"
+                                            class="grid grid-cols-2 gap-4"
+                                        >
+                                            <div>
+                                                <InputLabel
+                                                    for="storage_id"
+                                                    :value="__('Storage')"
+                                                />
+                                                <select
+                                                    id="storage_id"
+                                                    v-model="product.storage_id"
+                                                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                                    @change="onStorageChange"
+                                                >
+                                                    <option
+                                                        v-for="storage in props.storages"
+                                                        :key="storage.id"
+                                                        :value="storage.id"
+                                                    >
+                                                        {{ storage.name }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <InputLabel
+                                                    for="quantity"
+                                                    :value="__('On-hand Quantity')"
+                                                />
+                                                <TextInput
+                                                    id="quantity"
+                                                    v-model="product.quantity"
+                                                    type="number" inputmode="numeric"
+                                                    min="0"
+                                                    class="block w-full mt-1"
+                                                />
+                                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                                    {{ __("Saving records the difference as a stock adjustment.") }}
+                                                </p>
+                                                <InputError
+                                                    class="mt-1"
+                                                    :message="product.errors.quantity"
                                                 />
                                             </div>
                                         </div>

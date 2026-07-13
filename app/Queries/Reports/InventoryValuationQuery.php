@@ -36,7 +36,10 @@ class InventoryValuationQuery extends ReportQuery
             ->join('storages', 'stocks.storage_id', '=', 'storages.id')
             ->where('products.tenant_id', $tenantId)
             ->whereNull('stocks.deleted_at')
-            ->where('stocks.quantity', '>', 0)
+            // Include negative (oversold) balances so they are not silently
+            // dropped from valuation; they contribute negative value. Only true
+            // zeros (nothing on hand) are excluded.
+            ->where('stocks.quantity', '!=', 0)
             ->select(
                 'products.id as product_id',
                 'products.name as product_name',

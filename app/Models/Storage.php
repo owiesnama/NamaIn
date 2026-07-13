@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\MovementType;
 use App\Enums\StorageType;
 use App\Exceptions\InsufficientStockException;
+use App\Services\Inventory\InventoryStrategy;
 use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -154,17 +155,33 @@ class Storage extends BaseModel
                 ->lockForUpdate()
                 ->first();
 
-            if (! $stockData || $stockData->quantity < $quantity) {
+            $available = (int) ($stockData->quantity ?? 0);
+            $overselling = app(InventoryStrategy::class)->allowsOverselling();
+
+            // Without overselling, keep the original guard exactly: a missing row
+            // or an insufficient balance blocks the sale. Overselling bypasses it
+            // and drives the balance negative.
+            if (! $overselling && (! $stockData || $available < $quantity)) {
                 throw new InsufficientStockException($productModel, $this);
             }
 
+            if (! $stockData) {
+                DB::table('stocks')->insert([
+                    'tenant_id' => $this->tenant_id,
+                    'storage_id' => $this->id,
+                    'product_id' => $productId,
+                    'quantity' => 0,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
             DB::table('stocks')
-                ->where('id', $stockData->id)
+                ->where('storage_id', $this->id)
+                ->where('product_id', $productId)
                 ->decrement('quantity', $quantity, ['updated_at' => now()]);
 
-            $quantityBefore = $stockData->quantity;
-
-            $this->recordMovement($productModel, -$quantity, $quantityBefore, $quantityBefore - $quantity, $reason, $movable, $actor);
+            $this->recordMovement($productModel, -$quantity, $available, $available - $quantity, $reason, $movable, $actor);
         });
     }
 

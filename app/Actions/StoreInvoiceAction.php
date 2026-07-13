@@ -68,6 +68,9 @@ class StoreInvoiceAction
                 'unit_cost' => $isSale
                     ? ($averageCosts[$product['product']]->average_cost ?? 0)
                     : null,
+                'cost_provisional' => $isSale
+                    ? (($averageCosts[$product['product']]->average_cost ?? 0) <= 0)
+                    : false,
                 'base_quantity' => isset($units[$product['unit'] ?? null])
                     ? $units[$product['unit']]->conversion_factor * $product['quantity']
                     : $product['quantity'],

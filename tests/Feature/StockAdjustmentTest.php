@@ -2,6 +2,7 @@
 
 use App\Actions\Stock\RecordAdjustmentAction;
 use App\Models\Adjustment;
+use App\Models\Preference;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\Tenant;
@@ -13,6 +14,10 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create();
     app()->instance('currentTenant', $this->tenant);
+
+    // Free upward/downward adjustments are a free-form capability; under the
+    // purchase-driven strategy upward adjustments are blocked (see FreeFormModeTest).
+    Preference::create(['key' => 'inventory_strategy', 'value' => 'free_form']);
 
     $this->owner = User::factory()->create(['current_tenant_id' => $this->tenant->id]);
     $this->tenant->users()->attach($this->owner, ['role' => 'owner']);

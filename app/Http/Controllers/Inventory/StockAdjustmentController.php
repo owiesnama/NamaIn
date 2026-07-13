@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Inventory;
 
 use App\Actions\Stock\RecordAdjustmentAction;
 use App\Exceptions\InsufficientStockException;
+use App\Exceptions\ManualStockIncreaseNotAllowedException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StockAdjustmentRequest;
 use App\Models\Product;
@@ -24,7 +25,7 @@ class StockAdjustmentController extends Controller
                 auth()->user(),
                 $request->validated('notes')
             );
-        } catch (InsufficientStockException $e) {
+        } catch (InsufficientStockException|ManualStockIncreaseNotAllowedException $e) {
             return back()->with('error', $e->getMessage());
         }
 

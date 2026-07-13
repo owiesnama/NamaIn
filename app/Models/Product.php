@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Queries\StockBalanceQuery;
 use App\Traits\WithTrashScope;
 use App\ValueObjects\Money;
 use Carbon\Carbon;
@@ -257,11 +258,26 @@ class Product extends BaseModel
     }
 
     /**
-     * Quantity on hand for this product
+     * Quantity on hand for this product, read from the `stocks` cache.
+     *
+     * Post-cutover the append-only `stock_movements` ledger is the source of
+     * truth; `stocks.quantity` is its incrementally-maintained, row-locked cache
+     * kept equal to SUM(movements) on every write. This is the O(1) hot-path
+     * read — use `ledgerBalance()` to read authoritatively from the ledger.
      */
     public function quantityOnHand(): int
     {
         return $this->stock->sum('pivot.quantity');
+    }
+
+    /**
+     * Authoritative on-hand derived from the movement ledger. Equal to
+     * quantityOnHand() whenever the cache is reconciled; prefer the cache for
+     * hot reads and reserve this for verification/reconciliation.
+     */
+    public function ledgerBalance(): int
+    {
+        return (new StockBalanceQuery)->forProduct($this->id);
     }
 
     /**
