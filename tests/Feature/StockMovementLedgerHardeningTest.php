@@ -3,6 +3,7 @@
 use App\Actions\Stock\RecordAdjustmentAction;
 use App\Enums\MovementType;
 use App\Exceptions\StockMovementIsImmutableException;
+use App\Models\Preference;
 use App\Models\Product;
 use App\Models\StockMovement;
 use App\Models\Storage;
@@ -38,6 +39,8 @@ test('recordMovement persists the typed movement_type for each write path', func
 ]);
 
 test('the adjustment action records a typed adjustment movement', function () {
+    // Free-form allows the manual upward adjustment (purchase-driven blocks it).
+    Preference::create(['key' => 'inventory_strategy', 'value' => 'free_form']);
     $storage = Storage::factory()->create();
     $product = Product::factory()->create();
     $actor = User::factory()->create();

@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\StorageType;
 use App\Models\Role;
+use App\Models\Storage;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Services\OnBoarding\DefaultRolesService;
@@ -112,4 +114,18 @@ function actingAsTenantUser(?User $user = null, string $role = 'owner'): TestCas
     app()->instance('currentTenant', $tenant);
 
     return test()->actingAs($user);
+}
+
+/**
+ * Shared POS helper: create a sale-point storage for the current tenant.
+ * Lives here (not in a single test file) so every test process has it,
+ * including isolated/parallel runs.
+ */
+function createSalePoint(string $name): Storage
+{
+    return Storage::factory()->create([
+        'tenant_id' => app('currentTenant')->id,
+        'type' => StorageType::SALE_POINT,
+        'name' => $name,
+    ]);
 }
