@@ -32,15 +32,6 @@ beforeEach(function () {
     $this->storage = Storage::factory()->create(['tenant_id' => $this->tenant->id]);
 });
 
-function createSalePoint(string $name): Storage
-{
-    return Storage::factory()->create([
-        'tenant_id' => app('currentTenant')->id,
-        'type' => StorageType::SALE_POINT,
-        'name' => $name,
-    ]);
-}
-
 function recordDeliveredSale(Storage $storage, Product $product, int $quantity): void
 {
     $invoice = Invoice::factory()->create();
