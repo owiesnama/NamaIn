@@ -14,14 +14,17 @@ class DeliverTransactionAction
         DB::transaction(function () use ($transaction, $actor, $fromStorage) {
             $storage = $fromStorage ?? $transaction->storage;
 
-            // Deduct stock
-            $storage->deductStock(
-                product: $transaction->product_id,
-                quantity: (int) $transaction->base_quantity,
-                reason: 'sale_delivery',
-                movable: $transaction,
-                actor: $actor
-            );
+            // Services carry no stock — they sell as line items with no ledger
+            // movement. Only physical goods deduct on delivery.
+            if (! $transaction->product?->isService()) {
+                $storage->deductStock(
+                    product: $transaction->product_id,
+                    quantity: (int) $transaction->base_quantity,
+                    reason: 'sale_delivery',
+                    movable: $transaction,
+                    actor: $actor
+                );
+            }
 
             // Mark as delivered
             $transaction->deliver($actor, $storage);

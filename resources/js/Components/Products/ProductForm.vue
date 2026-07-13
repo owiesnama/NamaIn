@@ -44,6 +44,7 @@
 
     const show = ref(false);
     const product = useForm({
+        type: props.product?.type || "physical",
         name: props.product?.name,
         cost: props.product?.cost ? String(props.product?.cost) : "",
         price: props.product?.price ? String(props.product?.price) : "",
@@ -58,6 +59,37 @@
             storage_id: storage.id,
             quantity: currentQuantityFor(storage.id),
         })),
+        // Service-only fields (ignored server-side for physical products).
+        duration_minutes: props.product?.duration_minutes || "",
+        requires_booking: props.product?.requires_booking ?? true,
+        on_site: props.product?.on_site ?? false,
+        allow_overlap: props.product?.allow_overlap ?? false,
+        travel_buffer_minutes: props.product?.travel_buffer_minutes || "",
+        addons: (props.product?.service_addons || []).map((a) => ({
+            id: a.id,
+            name: a.name,
+            price_delta: a.price_delta,
+        })),
+    });
+
+    const isService = computed(() => product.type === "service");
+
+    const addAddon = () => {
+        product.addons.push({ name: "", price_delta: "" });
+    };
+
+    const removeAddon = (index) => {
+        product.addons.splice(index, 1);
+    };
+
+    // Live preview of a booking's total (base price + all add-on deltas).
+    const serviceTotal = computed(() => {
+        const base = parseFloat(product.price) || 0;
+        const extras = product.addons.reduce(
+            (sum, a) => sum + (parseFloat(a.price_delta) || 0),
+            0
+        );
+        return base + extras;
     });
 
     const addUnit = () => {
@@ -223,6 +255,33 @@
                                 class="mt-6"
                                 @submit.prevent="save"
                             >
+                                <!-- Product type toggle -->
+                                <div class="mb-6">
+                                    <InputLabel :value="__('Product type')" class="mb-2" />
+                                    <div class="inline-flex p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                        <button
+                                            type="button"
+                                            class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors duration-200"
+                                            :class="!isService
+                                                ? 'bg-white dark:bg-gray-900 text-emerald-700 dark:text-emerald-400 shadow-sm'
+                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            @click="product.type = 'physical'"
+                                        >
+                                            {{ __("Physical") }}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            class="px-4 py-1.5 text-sm font-medium rounded-md transition-colors duration-200"
+                                            :class="isService
+                                                ? 'bg-white dark:bg-gray-900 text-emerald-700 dark:text-emerald-400 shadow-sm'
+                                                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                                            @click="product.type = 'service'"
+                                        >
+                                            {{ __("Service") }}
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <div class="grid gap-6 md:grid-cols-2">
                                     <!-- Left column: product details -->
                                     <div class="space-y-5">
@@ -250,8 +309,8 @@
                                             <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 rtl:text-right">
                                                 {{ __("Pricing") }}
                                             </p>
-                                            <div class="grid grid-cols-2 gap-4">
-                                                <div>
+                                            <div class="grid gap-4" :class="isService ? 'grid-cols-1' : 'grid-cols-2'">
+                                                <div v-if="!isService">
                                                     <InputLabel
                                                         for="cost"
                                                         :value="__('Cost')"
@@ -273,7 +332,7 @@
                                                 <div>
                                                     <InputLabel
                                                         for="price"
-                                                        :value="__('Price')"
+                                                        :value="isService ? __('Base price') : __('Price')"
                                                     />
                                                     <TextInput
                                                         id="price"
@@ -324,7 +383,7 @@
                                         </div>
 
                                         <!-- Stock & alerts group -->
-                                        <div class="grid grid-cols-2 gap-4">
+                                        <div v-if="!isService" class="grid grid-cols-2 gap-4">
                                             <div>
                                                 <InputLabel
                                                     for="expire_date"
@@ -367,7 +426,7 @@
                                         </div>
 
                                         <!-- Stock per location (add + edit) -->
-                                        <div v-if="props.storages.length">
+                                        <div v-if="!isService && props.storages.length">
                                             <div class="flex items-center justify-between gap-x-2">
                                                 <InputLabel :value="__('Stock per location')" />
                                                 <span
@@ -441,8 +500,8 @@
                                         </div>
                                     </div>
 
-                                    <!-- Right column: units (collapsible) -->
-                                    <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg self-start">
+                                    <!-- Right column: units (collapsible) — physical only -->
+                                    <div v-if="!isService" class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg self-start">
                                         <button
                                             type="button"
                                             class="flex items-center justify-between w-full"
@@ -553,6 +612,157 @@
                                             >
                                                 {{ __("Add Unit") }}
                                             </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Right column: service settings + add-ons — service only -->
+                                    <div v-if="isService" class="space-y-5 self-start">
+                                        <!-- Scheduling -->
+                                        <div class="p-4 space-y-4 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 rtl:text-right">
+                                                {{ __("Service settings") }}
+                                            </p>
+
+                                            <div>
+                                                <InputLabel for="duration_minutes" :value="__('Duration (minutes)')" />
+                                                <TextInput
+                                                    id="duration_minutes"
+                                                    v-model="product.duration_minutes"
+                                                    type="number" inputmode="numeric"
+                                                    min="1"
+                                                    dir="ltr"
+                                                    class="block w-full mt-1"
+                                                    :placeholder="__('30')"
+                                                />
+                                                <InputError class="mt-1" :message="product.errors.duration_minutes" />
+                                            </div>
+
+                                            <!-- Flags -->
+                                            <label class="flex items-start gap-x-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    v-model="product.requires_booking"
+                                                    class="mt-0.5 border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                                />
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                    {{ __("Requires booking") }}
+                                                    <span class="block text-xs text-gray-400 dark:text-gray-500">
+                                                        {{ __("Selling this service creates a calendar booking.") }}
+                                                    </span>
+                                                </span>
+                                            </label>
+
+                                            <label class="flex items-start gap-x-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    v-model="product.allow_overlap"
+                                                    class="mt-0.5 border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                                />
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                    {{ __("Allow overlapping bookings") }}
+                                                    <span class="block text-xs text-gray-400 dark:text-gray-500">
+                                                        {{ __("Permit double-booking this service.") }}
+                                                    </span>
+                                                </span>
+                                            </label>
+
+                                            <label class="flex items-start gap-x-3 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    v-model="product.on_site"
+                                                    class="mt-0.5 border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                                />
+                                                <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                    {{ __("On-site service") }}
+                                                    <span class="block text-xs text-gray-400 dark:text-gray-500">
+                                                        {{ __("Staff travel to the client; a booking address is required.") }}
+                                                    </span>
+                                                </span>
+                                            </label>
+
+                                            <!-- Travel buffer, revealed only when on-site -->
+                                            <div v-if="product.on_site">
+                                                <InputLabel for="travel_buffer_minutes" :value="__('Travel buffer (minutes)')" />
+                                                <TextInput
+                                                    id="travel_buffer_minutes"
+                                                    v-model="product.travel_buffer_minutes"
+                                                    type="number" inputmode="numeric"
+                                                    min="0"
+                                                    dir="ltr"
+                                                    class="block w-full mt-1"
+                                                    :placeholder="__('30')"
+                                                />
+                                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                                    {{ __("Warns the scheduler when a booking starts too soon after the previous one.") }}
+                                                </p>
+                                                <InputError class="mt-1" :message="product.errors.travel_buffer_minutes" />
+                                            </div>
+                                        </div>
+
+                                        <!-- Add-ons editor -->
+                                        <div class="p-4 space-y-3 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                            <div class="flex items-center justify-between">
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 rtl:text-right">
+                                                    {{ __("Add-ons") }}
+                                                    <span v-if="product.addons.length" class="text-emerald-500">({{ product.addons.length }})</span>
+                                                </p>
+                                                <button
+                                                    type="button"
+                                                    class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"
+                                                    @click="addAddon"
+                                                >
+                                                    + {{ __("Add") }}
+                                                </button>
+                                            </div>
+
+                                            <p v-if="!product.addons.length" class="text-xs text-gray-400 dark:text-gray-500">
+                                                {{ __("Optional extras a client can select on a booking; each adds its price to the base price.") }}
+                                            </p>
+
+                                            <div
+                                                v-for="(addon, index) in product.addons"
+                                                :key="`addon-` + index"
+                                                class="flex items-start gap-2"
+                                            >
+                                                <div class="flex-1 min-w-0">
+                                                    <TextInput
+                                                        v-model="addon.name"
+                                                        type="text"
+                                                        class="block w-full"
+                                                        :placeholder="__('Add-on name')"
+                                                    />
+                                                    <InputError class="mt-1" :message="product.errors[`addons.${index}.name`]" />
+                                                </div>
+                                                <div class="w-28 shrink-0">
+                                                    <TextInput
+                                                        v-model="addon.price_delta"
+                                                        type="number" inputmode="decimal"
+                                                        min="0" step="0.01"
+                                                        dir="ltr"
+                                                        class="block w-full"
+                                                        :placeholder="__('0.00')"
+                                                    />
+                                                    <InputError class="mt-1" :message="product.errors[`addons.${index}.price_delta`]" />
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    class="p-2 text-gray-300 dark:text-gray-600 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors shrink-0"
+                                                    @click="removeAddon(index)"
+                                                    :title="__('Remove')"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+
+                                            <div
+                                                v-if="product.addons.length"
+                                                class="flex items-center justify-between px-3 py-2 text-sm rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
+                                            >
+                                                <span class="font-medium">{{ __("Total with all add-ons") }}</span>
+                                                <Ltr class="font-semibold">{{ serviceTotal.toFixed(2) }} {{ product.currency }}</Ltr>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

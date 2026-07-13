@@ -54,7 +54,7 @@
         loading: productsLoading,
         loadMore: loadMoreProducts,
         onSearch: searchProduct,
-    } = useAsyncOptions(route('api.products.index'));
+    } = useAsyncOptions(route('api.products.index', { line_sale: 1 }));
 
     const lineItems = ref(
         props.prefill?.items?.length

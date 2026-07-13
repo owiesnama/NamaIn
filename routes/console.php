@@ -1,9 +1,13 @@
 <?php
 
+use App\Enums\BookingStatus;
 use App\Enums\ChequeStatus;
 use App\Models\BackupSetting;
+use App\Models\Booking;
 use App\Models\Cheque;
+use App\Models\Tenant;
 use App\Models\User;
+use App\Notifications\BookingReminderNotification;
 use App\Notifications\ChequeDueNotification;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -29,7 +33,30 @@ Artisan::command('cheques:notify-for-due', function () {
     });
 })->purpose('Notify platform admins of cheques due within the configured window');
 
+Artisan::command('bookings:notify-upcoming', function () {
+    // Runs without a tenant bound, so the tenant scope must be lifted; each
+    // booking's own tenant resolves the merchant recipients. Reminds once,
+    // deduped by `reminder_sent_at`.
+    $bookings = Booking::withoutGlobalScopes()
+        ->with(['service', 'customer'])
+        ->where('status', BookingStatus::Confirmed)
+        ->whereNull('reminder_sent_at')
+        ->where('starts_at', '>=', now())
+        ->where('starts_at', '<=', now()->addDay())
+        ->get();
+
+    $bookings->groupBy('tenant_id')->each(function ($group, $tenantId) {
+        $recipients = Tenant::find($tenantId)?->merchantUsers() ?? collect();
+
+        $group->each(function (Booking $booking) use ($recipients) {
+            $recipients->each(fn (User $user) => $user->notify(new BookingReminderNotification($booking)));
+            $booking->forceFill(['reminder_sent_at' => now()])->saveQuietly();
+        });
+    });
+})->purpose('Remind merchants of bookings starting within the next 24 hours');
+
 Schedule::command('cheques:notify-for-due')->daily();
+Schedule::command('bookings:notify-upcoming')->hourly();
 Schedule::call(fn () => DB::table('notifications')->where('created_at', '<', now()->subDays(90))->delete())
     ->daily()
     ->name('notifications:prune');

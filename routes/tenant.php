@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Auth\MustChangePasswordController;
 use App\Http\Controllers\Auth\ResendVerificationController;
 use App\Http\Controllers\Auth\TenantLoginController;
+use App\Http\Controllers\BookingsController;
 use App\Http\Controllers\Catalog\ProductExportController;
 use App\Http\Controllers\Catalog\ProductGlobalFavoriteController;
 use App\Http\Controllers\Catalog\ProductImportController;
@@ -206,6 +207,16 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::patch('/products/{product}/quick-update', [ProductsController::class, 'quickUpdate'])->name('products.quick-update');
         Route::patch('/products/{product}/global-favorite', [ProductGlobalFavoriteController::class, 'update'])->name('products.global-favorite');
         Route::resource('/products', ProductsController::class);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bookings
+        |--------------------------------------------------------------------------
+        | Merchant-side appointments for bookable service products: create/edit,
+        | a tenant-wide calendar, and merchant-only cancellation.
+        */
+        Route::patch('/bookings/{booking}/cancel', [BookingsController::class, 'cancel'])->name('bookings.cancel');
+        Route::resource('/bookings', BookingsController::class)->except(['show', 'create', 'edit', 'destroy']);
 
         /*
         |--------------------------------------------------------------------------

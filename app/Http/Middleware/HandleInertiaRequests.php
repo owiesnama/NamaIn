@@ -77,6 +77,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
                 'response' => session()->get('response'),
+                'travel_buffer_warnings' => session()->get('travel_buffer_warnings'),
             ],
             'isSuperAdmin' => fn () => Auth::guard('admin')->check(),
             'isImpersonating' => fn () => (bool) session('impersonating_from'),
