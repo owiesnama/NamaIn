@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Catalog;
 
+use App\Actions\Bookings\SyncServiceAddonsAction;
 use App\Actions\Stock\RecordAdjustmentAction;
 use App\Actions\SyncCategoriesAction;
 use App\Exceptions\ManualStockIncreaseNotAllowedException;
@@ -54,25 +55,29 @@ class ProductsController extends Controller
         ]);
     }
 
-    public function store(ProductRequest $request, SyncCategoriesAction $syncCategoriesAction, RecordAdjustmentAction $recordAdjustment)
+    public function store(ProductRequest $request, SyncCategoriesAction $syncCategoriesAction, RecordAdjustmentAction $recordAdjustment, SyncServiceAddonsAction $syncServiceAddons)
     {
         $this->authorize('create', Product::class);
 
         try {
-            DB::transaction(function () use ($request, $syncCategoriesAction, $recordAdjustment) {
-                $product = Product::create($request->safe()->except(['units', 'categories', 'quantities']));
+            DB::transaction(function () use ($request, $syncCategoriesAction, $recordAdjustment, $syncServiceAddons) {
+                $product = Product::create($request->safe()->except(['units', 'categories', 'quantities', 'addons']));
 
-                $units = $request->get('units');
-
-                if (empty($units)) {
-                    $product->units()->create(['name' => __('Base Unit'), 'conversion_factor' => 1]);
+                if ($product->isService()) {
+                    $syncServiceAddons->handle($product, $request->get('addons', []));
                 } else {
-                    $product->syncUnits($units);
+                    $units = $request->get('units');
+
+                    if (empty($units)) {
+                        $product->units()->create(['name' => __('Base Unit'), 'conversion_factor' => 1]);
+                    } else {
+                        $product->syncUnits($units);
+                    }
+
+                    $this->syncOnHandQuantities($product, $request, $recordAdjustment);
                 }
 
-                $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
-
-                $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+                $syncCategoriesAction->handle($product, $request->get('categories') ?? [], 'product');
             });
         } catch (ManualStockIncreaseNotAllowedException $e) {
             return redirect()->route('products.index')->with('error', $e->getMessage());
@@ -90,19 +95,23 @@ class ProductsController extends Controller
         return back()->with('success', __('Product updated successfully'));
     }
 
-    public function update(Product $product, ProductRequest $request, SyncCategoriesAction $syncCategoriesAction, RecordAdjustmentAction $recordAdjustment)
+    public function update(Product $product, ProductRequest $request, SyncCategoriesAction $syncCategoriesAction, RecordAdjustmentAction $recordAdjustment, SyncServiceAddonsAction $syncServiceAddons)
     {
         $this->authorize('update', $product);
 
         try {
-            DB::transaction(function () use ($product, $request, $syncCategoriesAction, $recordAdjustment) {
-                $product->update($request->safe()->except(['units', 'categories', 'quantities']));
+            DB::transaction(function () use ($product, $request, $syncCategoriesAction, $recordAdjustment, $syncServiceAddons) {
+                $product->update($request->safe()->except(['units', 'categories', 'quantities', 'addons']));
 
-                $product->syncUnits($request->get('units'));
+                if ($product->isService()) {
+                    $syncServiceAddons->handle($product, $request->get('addons', []));
+                } else {
+                    $product->syncUnits($request->get('units'));
 
-                $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
+                    $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+                }
 
-                $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+                $syncCategoriesAction->handle($product, $request->get('categories') ?? [], 'product');
             });
         } catch (ManualStockIncreaseNotAllowedException $e) {
             return back()->with('error', $e->getMessage());

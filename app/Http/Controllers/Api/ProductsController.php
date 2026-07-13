@@ -13,6 +13,7 @@ class ProductsController extends Controller
     {
         $products = Product::query()
             ->with('units')
+            ->when($request->filled('type'), fn ($query) => $query->where('type', $request->get('type')))
             ->search($request->get('search'))
             ->latest()
             ->simplePaginate(20);
