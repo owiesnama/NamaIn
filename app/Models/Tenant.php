@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Tenant extends Model
 {
@@ -69,6 +70,17 @@ class Tenant extends Model
     public function owner(): ?User
     {
         return $this->users()->wherePivot('role', 'owner')->first();
+    }
+
+    /**
+     * The "merchant" recipients for booking notifications: the owner and every
+     * admin of the tenant. Resolved in the unbound reminder scan.
+     *
+     * @return Collection<int, User>
+     */
+    public function merchantUsers(): Collection
+    {
+        return $this->users()->wherePivotIn('role', ['owner', 'admin'])->get();
     }
 
     public function isActive(): bool

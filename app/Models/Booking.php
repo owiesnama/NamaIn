@@ -40,6 +40,7 @@ class Booking extends BaseModel
             'status' => BookingStatus::class,
             'base_price' => MoneyCast::class,
             'total' => MoneyCast::class,
+            'reminder_sent_at' => 'datetime',
         ];
     }
 

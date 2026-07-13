@@ -9,9 +9,11 @@ use App\Http\Requests\BookingRequest;
 use App\Models\Booking;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Notifications\BookingCancelledNotification;
 use App\Services\Bookings\BookingScheduler;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
 
 class BookingsController extends Controller
@@ -86,6 +88,9 @@ class BookingsController extends Controller
     public function cancel(Booking $booking): RedirectResponse
     {
         $booking->update(['status' => BookingStatus::Cancelled]);
+
+        $recipients = app('currentTenant')->merchantUsers();
+        Notification::send($recipients, new BookingCancelledNotification($booking->load(['service', 'customer'])));
 
         return back()->with('success', __('Booking cancelled.'));
     }
