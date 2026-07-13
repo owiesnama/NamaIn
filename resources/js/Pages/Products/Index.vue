@@ -42,6 +42,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     const filters = ref({
         search: useQueryString("search").value,
         status: useQueryString("status").value,
+        type: useQueryString("type").value,
         category: useQueryString("category").value,
         min_cost: useQueryString("min_cost").value,
         max_cost: useQueryString("max_cost").value,
@@ -55,6 +56,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         filters.value = {
             search: null,
             status: null,
+            type: null,
             category: null,
             min_cost: null,
             max_cost: null,
@@ -74,6 +76,15 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             options: [
                 { value: "withTrash", label: __("With Trashed") },
                 { value: "trash", label: __("Trashed") },
+            ],
+        },
+        {
+            key: "type",
+            label: __("Type"),
+            default: "all",
+            options: [
+                { value: "physical", label: __("Physical") },
+                { value: "service", label: __("Service") },
             ],
         },
         { key: "category", label: __("Category"), options: props.categories, optionValue: "id", optionLabel: "name" },
@@ -440,6 +451,25 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     @reset="resetFilters"
                 >
                     <template #extra-filters>
+                        <!-- Type -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-semibold text-gray-700 dark:text-gray-200">{{ __("Type") }}</label>
+                            <div class="flex p-1 bg-gray-100 dark:bg-gray-800 rounded-lg">
+                                <button
+                                    v-for="opt in [{ value: null, label: __('All') }, { value: 'physical', label: __('Physical') }, { value: 'service', label: __('Service') }]"
+                                    :key="opt.label"
+                                    type="button"
+                                    class="flex-1 px-2 py-1 text-xs font-medium rounded-md transition-colors duration-200"
+                                    :class="(filters.type ?? null) === opt.value
+                                        ? 'bg-white dark:bg-gray-900 text-emerald-700 dark:text-emerald-400 shadow-sm'
+                                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'"
+                                    @click="filters.type = opt.value"
+                                >
+                                    {{ opt.label }}
+                                </button>
+                            </div>
+                        </div>
+
                         <!-- Cost Range -->
                         <div class="space-y-2">
                             <label class="text-xs font-semibold text-gray-700 dark:text-gray-200">{{ __("Cost Range") }}</label>
@@ -510,7 +540,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                     </td>
                                     <td class="px-3 py-2.5 sm:sticky sm:start-0 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
                                         <div class="min-w-0">
-                                            <div class="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" :title="product.name">{{ product.name }}</div>
+                                            <div class="flex items-center gap-x-2 min-w-0">
+                                                <div class="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" :title="product.name">{{ product.name }}</div>
+                                                <span v-if="product.type === 'service'" class="shrink-0 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide rounded-md bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                                                    {{ __("Service") }}
+                                                </span>
+                                            </div>
                                             <div class="flex items-center gap-x-1.5 mt-0.5 text-[11px] text-gray-400 dark:text-gray-500 truncate">
                                                 <Ltr>#{{ product.id }}</Ltr>
                                                 <template v-if="product.categories.length">

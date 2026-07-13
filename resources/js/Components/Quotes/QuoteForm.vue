@@ -205,6 +205,9 @@ const submit = () => {
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
                                 <div class="md:col-span-4">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
+                                    <!-- TODO(B3.T3.6): this picker lists all products, so requires_booking=false
+                                         services sell as ordinary lines (backend skips their stock). A follow-up
+                                         could hide requires_booking=true services here so they are booked, not line-sold. -->
                                     <CustomSelect
                                         :model-value="item.product"
                                         :options="productOptions"
