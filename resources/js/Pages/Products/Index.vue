@@ -16,6 +16,7 @@
 import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     import { useFilterChips } from "@/Composables/useFilterChips";
     import Tooltip from "@/Components/Tooltip.vue";
+    import Dropdown from "@/Components/Dropdown.vue";
 
     const props = defineProps({
         products: Object,
@@ -124,11 +125,42 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
     const formatCurrency = (amount, currency = 'SDG') => {
         const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-        return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
+        // Latin digits regardless of locale; wrap the output in <Ltr> at render.
+        return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: validCurrency,
         }).format(amount);
     };
+
+    // ── Table numbers ────────────────────────────────────────────────────────
+    // The currency symbol lives in the column header; cells render bare Latin
+    // numbers (em dash for zero/null so a column of zeros isn't noise).
+    const currencyCode = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'SDG';
+    const money = (amount) => amount ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(amount) : '—';
+    const onHandOf = (product) => product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0);
+    const availableClass = (product) => {
+        if (product.available_qty <= 0) return 'text-red-600 dark:text-red-400';
+        if (product.available_qty <= (product.alert_quantity || 10)) return 'text-orange-600 dark:text-orange-400';
+        return 'text-gray-900 dark:text-white';
+    };
+    // A single compact severity note under the stock line (only when relevant).
+    const stockNote = (product) => {
+        if (product.pending_sales > 0) return { icon: '⚠', label: `${product.pending_sales} ${__('Pending')}`, class: 'text-amber-600 dark:text-amber-400' };
+        if (onHandOf(product) === 0) return { icon: '✕', label: __('Out of Stock'), class: 'text-red-600 dark:text-red-400' };
+        if (onHandOf(product) <= (product.alert_quantity || 10)) return { icon: '⚠', label: __('Low Stock'), class: 'text-orange-600 dark:text-orange-400' };
+        return null;
+    };
+
+    // ── Selection & bulk actions ─────────────────────────────────────────────
+    const selectedIds = ref([]);
+    const allSelected = computed(() => props.products.data.length > 0 && selectedIds.value.length === props.products.data.length);
+    const someSelected = computed(() => selectedIds.value.length > 0 && !allSelected.value);
+    const selectAllRef = ref(null);
+    watch(someSelected, (v) => { if (selectAllRef.value) selectAllRef.value.indeterminate = v; });
+    const toggleAll = (e) => { selectedIds.value = e.target.checked ? props.products.data.map((p) => String(p.id)) : []; };
+    const clearSelection = () => { selectedIds.value = []; };
+    // UI only — backend bulk endpoints are follow-up work (see summary).
+    const bulkAction = (action) => { console.warn(`[bulk:${action}] no backend endpoint yet`, [...selectedIds.value]); };
 
     const submitImport = ({ file, template }) => {
         importForm.file = file;
@@ -400,7 +432,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                         </a>
                     </div>
 
-                    <ProductForm :categories="categories"></ProductForm>
+                    <ProductForm :categories="categories" :storages="storages"></ProductForm>
                 </div>
             </div>
 
@@ -441,137 +473,100 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
 
                     <!-- Table Mode -->
-                    <div v-if="layout === 'table'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                                <thead class="bg-gray-50/50 dark:bg-gray-800/40">
-                                <tr>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Product") }}</th>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Status") }}</th>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em] leading-tight">
+                    <div v-if="layout === 'table'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+                        <!-- Bulk action bar -->
+                        <div v-if="selectedIds.length" class="sticky top-0 z-20 flex flex-wrap items-center gap-3 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-200 dark:border-emerald-800 rounded-t-xl">
+                            <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ selectedIds.length }} {{ __("selected") }}</span>
+                            <div class="flex items-center gap-2 ms-auto">
+                                <button type="button" @click="bulkAction('price')" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Update Price") }}</button>
+                                <button type="button" @click="bulkAction('stock')" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Adjust Stock") }}</button>
+                                <button type="button" @click="bulkAction('export')" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Export") }}</button>
+                                <button type="button" @click="bulkAction('delete')" class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">{{ __("Delete") }}</button>
+                                <button type="button" @click="clearSelection" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg" :aria-label="__('Clear selection')">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl">
+                            <table class="min-w-full table-fixed divide-y divide-gray-200 dark:divide-gray-700 [font-feature-settings:'tnum']">
+                                <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
+                                <tr class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">
+                                    <th scope="col" class="w-10 px-3 py-3 text-center">
+                                        <input ref="selectAllRef" type="checkbox" :checked="allSelected" @change="toggleAll" :aria-label="__('Select all')" class="border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
+                                    </th>
+                                    <th scope="col" class="px-3 py-3 text-start sm:sticky sm:start-0 bg-gray-50 dark:bg-gray-800">{{ __("Product") }}</th>
+                                    <th scope="col" class="w-40 px-3 py-3 text-start">
                                         <div class="flex items-center gap-x-1">
-                                            {{ __("Stock & Available") }}
-                                            <Tooltip :text="__('Stock is physical quantity on hand, Available is stock minus pending sales')" position="bottom">
+                                            {{ __("Available / On-hand") }}
+                                            <Tooltip :text="__('Available is on-hand minus pending sales')" position="bottom">
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-3.5 h-3.5 cursor-help text-gray-400">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" />
                                                 </svg>
                                             </Tooltip>
                                         </div>
                                     </th>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Cost") }}</th>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Avg Cost") }}</th>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Price") }}</th>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-start text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">{{ __("Total Value") }}</th>
-                                    <th scope="col" class="px-3 py-4 lg:px-6 text-[10px] font-bold text-end text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]"></th>
+                                    <th scope="col" class="w-28 px-3 py-3 text-end">{{ __("Cost") }} <Ltr class="text-gray-300 dark:text-gray-600">({{ currencyCode }})</Ltr></th>
+                                    <th scope="col" class="w-28 px-3 py-3 text-end">{{ __("Avg Cost") }} <Ltr class="text-gray-300 dark:text-gray-600">({{ currencyCode }})</Ltr></th>
+                                    <th scope="col" class="w-28 px-3 py-3 text-end">{{ __("Price") }} <Ltr class="text-gray-300 dark:text-gray-600">({{ currencyCode }})</Ltr></th>
+                                    <th scope="col" class="w-24 px-3 py-3 text-end"><span class="sr-only">{{ __("Actions") }}</span></th>
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                <tr v-for="product in products.data" :key="product.id" @click="router.visit(route('products.show', product.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
-                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap">
-                                        <div class="flex items-center gap-x-3">
-                                            <div>
-                                                <div class="text-sm font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors leading-snug">{{ product.name }}</div>
-                                                <div class="flex flex-wrap items-center gap-2 mt-1">
-                                                    <span class="text-[10px] font-medium text-gray-400 dark:text-gray-500">#{{ product.id }}</span>
-                                                    <span v-for="cat in product.categories" :key="cat.id" class="px-1.5 py-0.5 text-[9px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 rounded-md leading-tight uppercase tracking-wider">
-                                                        {{ cat.name }}
-                                                    </span>
-                                                </div>
+                                <tr v-for="product in products.data" :key="product.id" @click="router.visit(route('products.show', product.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 focus-within:bg-gray-50 dark:focus-within:bg-gray-800 transition-colors cursor-pointer">
+                                    <td class="w-10 px-3 py-2.5 text-center" @click.stop>
+                                        <input type="checkbox" :value="String(product.id)" v-model="selectedIds" :aria-label="__('Select') + ' ' + product.name" class="border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
+                                    </td>
+                                    <td class="px-3 py-2.5 sm:sticky sm:start-0 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
+                                        <div class="min-w-0">
+                                            <div class="text-sm font-semibold text-gray-900 dark:text-white truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors" :title="product.name">{{ product.name }}</div>
+                                            <div class="flex items-center gap-x-1.5 mt-0.5 text-[11px] text-gray-400 dark:text-gray-500 truncate">
+                                                <Ltr>#{{ product.id }}</Ltr>
+                                                <template v-if="product.categories.length">
+                                                    <span aria-hidden="true">·</span>
+                                                    <span class="truncate">{{ product.categories.map(c => c.name).join('، ') }}</span>
+                                                </template>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="px-3 py-4 lg:px-6">
-                                        <div class="flex flex-col gap-y-1.5">
-                                            <div :class="['inline-flex items-center gap-x-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg border w-fit leading-tight', getStockStatus(product).color]">
-                                                <span v-html="getStockStatus(product).icon"></span>
-                                                {{ getStockStatus(product).label }}
-                                            </div>
-                                            <div v-if="product.pending_sales > 0" class="inline-flex items-center gap-x-1 px-2 py-0.5 text-[10px] font-bold bg-amber-50 text-amber-600 border border-amber-100 rounded-md w-fit dark:bg-amber-900/10 dark:border-amber-900/30 leading-tight">
-                                                <Tooltip :text="__('Quantity committed in unexecuted sales invoices.')" position="top">
-                                                    <div class="flex items-center gap-x-1 cursor-help">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-3 h-3 shrink-0">
-                                                            <path d="M10 12.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5z" />
-                                                            <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 010-1.186A10.004 10.004 0 0110 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0110 17c-4.257 0-7.893-2.66-9.336-6.41zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
-                                                        </svg>
-                                                        {{ product.pending_sales }} {{ __("Pending Sales") }}
-                                                    </div>
-                                                </Tooltip>
-                                            </div>
+                                    <td class="w-40 px-3 py-2.5">
+                                        <div class="flex flex-col gap-y-0.5">
+                                            <Ltr class="text-sm font-semibold">
+                                                <span :class="availableClass(product)">{{ product.available_qty }}</span>
+                                                <span class="text-gray-300 dark:text-gray-600"> / </span>
+                                                <span class="text-gray-500 dark:text-gray-400">{{ onHandOf(product) }}</span>
+                                            </Ltr>
+                                            <span v-if="stockNote(product)" :class="['inline-flex items-center gap-x-1 text-[11px] font-medium', stockNote(product).class]">
+                                                <span aria-hidden="true">{{ stockNote(product).icon }}</span>
+                                                {{ stockNote(product).label }}
+                                            </span>
                                         </div>
                                     </td>
-                                    <td class="px-3 py-4 lg:px-6">
-                                        <div class="flex flex-col gap-y-1">
-                                            <div class="flex items-end gap-x-2">
-                                                <span class="text-sm font-bold text-gray-900 dark:text-white">{{ product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0) }}</span>
-                                                <span class="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider mb-0.5 leading-tight">{{ __("Qty on Hand") }}</span>
-                                            </div>
-                                            <div class="flex items-center gap-x-2">
-                                                <div class="w-16 h-1.5 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden shrink-0">
-                                                    <div
-                                                        class="h-full transition-all duration-500"
-                                                        :class="[
-                                                            product.available_qty <= 0 ? 'bg-red-500' :
-                                                            product.available_qty <= (product.alert_quantity || 10) ? 'bg-orange-500' : 'bg-emerald-500'
-                                                        ]"
-                                                        :style="{ width: Math.min(100, Math.max(0, (product.available_qty / (product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0) || 1)) * 100)) + '%' }"
-                                                    ></div>
-                                                </div>
-                                                <span :class="['text-xs font-bold', product.available_qty <= 0 ? 'text-red-600' : 'text-emerald-600']">
-                                                    {{ product.available_qty }}
-                                                </span>
-                                                <span class="text-[10px] text-gray-400 dark:text-gray-500 uppercase font-bold tracking-wider leading-tight">{{ __("Available") }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="px-3 py-4 lg:px-6 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                        {{ formatCurrency(product.cost, product.currency) }}
-                                    </td>
-                                    <td class="px-3 py-4 lg:px-6 text-sm font-bold">
-                                        <div class="text-emerald-600 dark:text-emerald-400 bg-emerald-50/50 dark:bg-emerald-400/5 px-2 py-1 rounded-md w-fit leading-tight">
-                                            {{ formatCurrency(product.average_cost, product.currency) }}
-                                        </div>
-                                    </td>
-                                    <td class="px-3 py-4 lg:px-6 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                                        {{ formatCurrency(product.price, product.currency) }}
-                                    </td>
-                                    <td class="px-3 py-4 lg:px-6">
-                                        <div class="text-sm font-bold text-gray-900 dark:text-white leading-tight">
-                                            {{ formatCurrency(product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0) * product.average_cost, product.currency) }}
-                                        </div>
-                                    </td>
-                                    <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-end text-sm font-medium">
-                                        <div class="flex items-center justify-end gap-x-3">
-                                            <button
-                                                type="button"
-                                                @click.stop="toggleGlobalFavorite(product)"
-                                                :aria-pressed="product.is_global_favorite"
-                                                :title="product.is_global_favorite ? __('Remove store favourite') : __('Mark as store favourite')"
-                                                class="inline-flex items-center justify-center p-2.5 rounded-lg transition-all"
-                                                :class="product.is_global_favorite
-                                                    ? 'text-emerald-600 bg-emerald-50 dark:text-emerald-400 dark:bg-emerald-900/20'
-                                                    : 'text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20'"
-                                            >
-                                                <svg v-if="product.is_global_favorite" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5">
-                                                    <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.007Z" clip-rule="evenodd" />
-                                                </svg>
-                                                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.66a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
-                                                </svg>
-                                            </button>
-                                            <Link @click.stop :href="route('products.show', product.id)" class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Details')">
-                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                                                </svg>
-                                            </Link>
-                                            <div @click.stop>
-                                                <ProductAdjustmentModal :product="product" :storages="storages" />
-                                            </div>
-                                            <div @click.stop>
-                                                <ProductForm :product="product" :categories="categories" :storages="storages" />
-                                            </div>
-                                            <div @click.stop>
-                                                <DeleteProduct :product="product" />
-                                            </div>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ money(product.cost) }}</Ltr></td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ money(product.average_cost) }}</Ltr></td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm font-semibold text-gray-900 dark:text-white"><Ltr>{{ money(product.price) }}</Ltr></td>
+                                    <td class="w-24 px-3 py-2.5 text-end" @click.stop>
+                                        <div class="flex items-center justify-end gap-x-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-opacity">
+                                            <ProductForm :product="product" :categories="categories" :storages="storages" />
+                                            <Dropdown align="left" width="48">
+                                                <template #trigger>
+                                                    <button type="button" :aria-label="__('More actions')" class="inline-flex items-center justify-center w-9 h-9 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path d="M10 3a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM10 8.5a1.5 1.5 0 110 3 1.5 1.5 0 010-3zM11.5 15.5a1.5 1.5 0 10-3 0 1.5 1.5 0 003 0z" /></svg>
+                                                    </button>
+                                                </template>
+                                                <template #content>
+                                                    <Link :href="route('products.show', product.id)" class="flex items-center gap-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
+                                                        {{ __("Details") }}
+                                                    </Link>
+                                                    <button type="button" @click="toggleGlobalFavorite(product)" class="flex items-center w-full gap-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" :fill="product.is_global_favorite ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" :class="product.is_global_favorite ? 'text-emerald-500' : ''"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.66a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" /></svg>
+                                                        {{ product.is_global_favorite ? __('Remove favourite') : __('Mark favourite') }}
+                                                    </button>
+                                                    <div class="px-2 py-1"><ProductAdjustmentModal :product="product" :storages="storages" /></div>
+                                                    <div class="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                                                    <div class="px-2 py-1"><DeleteProduct :product="product" /></div>
+                                                </template>
+                                            </Dropdown>
                                         </div>
                                     </td>
                                 </tr>

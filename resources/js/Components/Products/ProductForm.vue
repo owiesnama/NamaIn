@@ -1,6 +1,6 @@
 <script setup>
     import { useForm } from "@inertiajs/vue3";
-    import { ref } from "vue";
+    import { ref, computed, watch } from "vue";
     import InputError from "@/Components/InputError.vue";
     import InputLabel from "@/Components/InputLabel.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
@@ -32,7 +32,15 @@
         return entry?.pivot?.quantity ?? 0;
     };
 
-    const firstStorageId = props.storages?.[0]?.id ?? null;
+    const storageOf = (storageId) =>
+        (props.storages || []).find((s) => s.id === storageId) || {};
+    const storageName = (storageId) => storageOf(storageId).name ?? "";
+    const storageType = (storageId) => storageOf(storageId).type ?? "";
+
+    // Under purchase-driven, stock only enters via purchase invoices, so the
+    // per-location quantities are shown read-only. Free-form allows editing them.
+    const manualStockAllowed =
+        preferences("inventory_strategy", "purchase_driven") === "free_form";
 
     const show = ref(false);
     const product = useForm({
@@ -46,15 +54,11 @@
         units: props.product?.units?.length
             ? props.product?.units
             : [],
-        storage_id: firstStorageId,
-        quantity: isEditing ? currentQuantityFor(firstStorageId) : "",
+        quantities: (props.storages || []).map((storage) => ({
+            storage_id: storage.id,
+            quantity: currentQuantityFor(storage.id),
+        })),
     });
-
-    // Editing the storage re-reads that storage's current on-hand quantity so the
-    // field always shows the balance the delta will be computed against.
-    const onStorageChange = () => {
-        product.quantity = currentQuantityFor(product.storage_id);
-    };
 
     const setCurrency = (value) => {
         product.currency = (value || "").toUpperCase();
@@ -92,9 +96,36 @@
     };
 
     const cancel = () => {
+        if (product.isDirty && !window.confirm(__("Discard unsaved changes?"))) {
+            return;
+        }
         product.reset();
         show.value = false;
     };
+
+    const modalDir = preferences("language", "en") === "ar" ? "rtl" : "ltr";
+
+    // Common currencies, always including the product's current one.
+    const currencies = [...new Set(["SDG", "USD", "EUR", "SAR", "AED", "EGP", product.currency].filter(Boolean))];
+
+    // Live, debounced-ish margin readout between cost and price.
+    const margin = computed(() => {
+        const cost = parseFloat(product.cost);
+        const price = parseFloat(product.price);
+        if (!product.cost || !product.price || isNaN(cost) || isNaN(price)) return null;
+        const profit = price - cost;
+        return { profit, pct: cost > 0 ? (profit / cost) * 100 : 0, belowCost: price < cost };
+    });
+
+    // Units are demoted to a collapsible section; expand it when units exist.
+    const showUnits = ref((props.product?.units?.length || 0) > 0);
+
+    // Esc closes the dialog (with the dirty guard).
+    const onKeydown = (e) => { if (e.key === "Escape") cancel(); };
+    watch(show, (open) => {
+        if (open) window.addEventListener("keydown", onKeydown);
+        else window.removeEventListener("keydown", onKeydown);
+    });
 </script>
 
 <template>
@@ -146,6 +177,7 @@
                 <div
                     v-show="show"
                     class="fixed inset-0 transition-opacity bg-gray-500/20 dark:bg-gray-900/60 backdrop-blur-sm"
+                    @click="cancel"
                 ></div>
             </transition>
 
@@ -165,12 +197,14 @@
                         class="flex items-end justify-center min-h-full p-4 text-center sm:items-center sm:p-0"
                     >
                         <div
-                            class="relative w-full px-6 pt-6 pb-6 overflow-hidden text-left transition-all transform bg-white border border-gray-200 shadow-xl dark:bg-gray-900 dark:border-gray-700 rounded-xl sm:my-8 sm:max-w-2xl"
+                            :dir="modalDir"
+                            class="relative w-full px-6 pt-6 pb-6 overflow-hidden text-start transition-all transform bg-white border border-gray-200 shadow-xl dark:bg-gray-900 dark:border-gray-700 rounded-xl sm:my-8 sm:max-w-4xl"
+                            @click.stop
                         >
                             <!-- Header -->
                             <div class="flex items-start justify-between gap-x-4">
-                                <div class="rtl:text-right">
-                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                <div>
+                                    <h3 id="modal-title" class="text-lg font-semibold text-gray-900 dark:text-white">
                                         {{ isEditing ? __("Edit Product") : __("Add New Product") }}
                                     </h3>
                                     <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -260,20 +294,32 @@
                                                     />
                                                 </div>
                                             </div>
+                                            <!-- Live margin readout -->
+                                            <div
+                                                v-if="margin"
+                                                class="flex items-center justify-between px-3 py-2 text-sm rounded-lg"
+                                                :class="margin.belowCost
+                                                    ? 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+                                                    : 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'"
+                                            >
+                                                <span class="font-medium">
+                                                    {{ margin.belowCost ? __("Priced below cost") : __("Profit") }}
+                                                </span>
+                                                <Ltr class="font-semibold">{{ margin.profit.toFixed(2) }} {{ product.currency }} ({{ margin.pct.toFixed(0) }}%)</Ltr>
+                                            </div>
+
                                             <div>
                                                 <InputLabel
                                                     for="currency"
                                                     :value="__('Currency')"
                                                 />
-                                                <TextInput
+                                                <select
                                                     id="currency"
-                                                    :model-value="product.currency"
-                                                    @update:model-value="setCurrency"
-                                                    type="text"
-                                                    maxlength="3"
-                                                    class="block w-full mt-1 uppercase"
-                                                    :placeholder="__('SDG')"
-                                                />
+                                                    v-model="product.currency"
+                                                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                                >
+                                                    <option v-for="code in currencies" :key="code" :value="code">{{ code }}</option>
+                                                </select>
                                                 <InputError
                                                     class="mt-1"
                                                     :message="product.errors.currency"
@@ -306,11 +352,15 @@
                                                 <TextInput
                                                     id="alert_quantity"
                                                     v-model="product.alert_quantity"
-                                                    type="number" inputmode="decimal"
+                                                    type="number" inputmode="numeric"
                                                     min="0"
+                                                    dir="ltr"
                                                     class="block w-full mt-1"
                                                     :placeholder="__('3')"
                                                 />
+                                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                                                    {{ __("Alerts you when stock drops to this level or below.") }}
+                                                </p>
                                                 <InputError
                                                     class="mt-1"
                                                     :message="
@@ -320,50 +370,54 @@
                                             </div>
                                         </div>
 
-                                        <!-- On-hand quantity as an adjustment delta (edit only) -->
-                                        <div
-                                            v-if="isEditing && props.storages.length"
-                                            class="grid grid-cols-2 gap-4"
-                                        >
-                                            <div>
-                                                <InputLabel
-                                                    for="storage_id"
-                                                    :value="__('Storage')"
-                                                />
-                                                <select
-                                                    id="storage_id"
-                                                    v-model="product.storage_id"
-                                                    class="block w-full px-3 py-2 mt-1 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
-                                                    @change="onStorageChange"
+                                        <!-- Stock per location (add + edit) -->
+                                        <div v-if="props.storages.length">
+                                            <div class="flex items-center justify-between gap-x-2">
+                                                <InputLabel :value="__('Stock per location')" />
+                                                <span
+                                                    v-if="!manualStockAllowed"
+                                                    class="text-xs text-gray-400 dark:text-gray-500 rtl:text-right"
                                                 >
-                                                    <option
-                                                        v-for="storage in props.storages"
-                                                        :key="storage.id"
-                                                        :value="storage.id"
-                                                    >
-                                                        {{ storage.name }}
-                                                    </option>
-                                                </select>
+                                                    {{ __("Stock is managed through purchase invoices.") }}
+                                                </span>
                                             </div>
-                                            <div>
-                                                <InputLabel
-                                                    for="quantity"
-                                                    :value="__('On-hand Quantity')"
-                                                />
-                                                <TextInput
-                                                    id="quantity"
-                                                    v-model="product.quantity"
-                                                    type="number" inputmode="numeric"
-                                                    min="0"
-                                                    class="block w-full mt-1"
-                                                />
-                                                <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                                                    {{ __("Saving records the difference as a stock adjustment.") }}
-                                                </p>
-                                                <InputError
-                                                    class="mt-1"
-                                                    :message="product.errors.quantity"
-                                                />
+                                            <p
+                                                v-if="manualStockAllowed"
+                                                class="mt-1 text-xs text-gray-400 dark:text-gray-500"
+                                            >
+                                                {{ __("Saving records the difference as a stock adjustment.") }}
+                                            </p>
+                                            <div class="mt-2 space-y-2 overflow-y-auto max-h-60 ltr:pr-1 rtl:pl-1">
+                                                <div
+                                                    v-for="(row, index) in product.quantities"
+                                                    :key="row.storage_id"
+                                                    class="flex items-center gap-3"
+                                                >
+                                                    <div class="flex items-center flex-1 min-w-0 gap-2">
+                                                        <span class="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                                            {{ storageName(row.storage_id) }}
+                                                        </span>
+                                                        <span
+                                                            class="shrink-0 px-1.5 py-0.5 text-[9px] font-medium rounded-md"
+                                                            :class="storageType(row.storage_id) === 'warehouse'
+                                                                ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                                                                : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'"
+                                                        >
+                                                            {{ storageType(row.storage_id) === 'warehouse' ? __('Warehouse') : __('Sale Point') }}
+                                                        </span>
+                                                    </div>
+                                                    <TextInput
+                                                        v-model="row.quantity"
+                                                        type="number" inputmode="numeric"
+                                                        min="0"
+                                                        :disabled="!manualStockAllowed"
+                                                        class="w-28 shrink-0"
+                                                        :class="{ 'opacity-60 cursor-not-allowed': !manualStockAllowed }"
+                                                    />
+                                                    <InputError
+                                                        :message="product.errors['quantities.' + index + '.quantity']"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 
@@ -391,13 +445,36 @@
                                         </div>
                                     </div>
 
-                                    <!-- Right column: units -->
-                                    <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg">
-                                        <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 rtl:text-right">
-                                            {{ __("Units") }}
-                                        </p>
+                                    <!-- Right column: units (collapsible) -->
+                                    <div class="p-4 border border-gray-200 dark:border-gray-700 rounded-lg self-start">
+                                        <button
+                                            type="button"
+                                            class="flex items-center justify-between w-full"
+                                            :aria-expanded="showUnits"
+                                            @click="showUnits = !showUnits"
+                                        >
+                                            <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500">
+                                                {{ __("Units") }}
+                                                <span v-if="product.units.length" class="text-emerald-500">({{ product.units.length }})</span>
+                                            </span>
+                                            <svg class="w-4 h-4 text-gray-400 transition-transform" :class="{ 'rotate-180': showUnits }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>
+                                        </button>
 
-                                        <div class="mt-4 space-y-4 overflow-y-auto max-h-72">
+                                        <!-- Empty state -->
+                                        <div v-if="!showUnits" class="mt-3">
+                                            <p class="text-xs text-gray-400 dark:text-gray-500">
+                                                {{ __("Define alternative units (e.g. a box of 12 pieces) so you can sell or purchase in bulk. Optional — a base unit is created automatically.") }}
+                                            </p>
+                                            <button
+                                                type="button"
+                                                class="mt-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700"
+                                                @click="showUnits = true; product.units.length === 0 && addUnit()"
+                                            >
+                                                + {{ __("Add a unit") }}
+                                            </button>
+                                        </div>
+
+                                        <div v-show="showUnits" class="mt-4 space-y-4 overflow-y-auto max-h-72">
                                             <div
                                                 v-for="(
                                                     unit, index

@@ -9,6 +9,7 @@ import preferences from "./Plugins/preferences";
 import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
 import { defineAsyncComponent } from 'vue'
 import CustomSelect from './Components/CustomSelect.vue'
+import Ltr from './Components/Ltr.vue'
 const DatePicker = defineAsyncComponent(() => import('./Components/DatePicker.vue'))
 
 
@@ -36,6 +37,7 @@ createInertiaApp({
             .use(translations)
             .use(preferences)
             .component('CustomSelect', CustomSelect)
+            .component('Ltr', Ltr)
             .component('DatePicker', DatePicker)
             .component('VueMultiselect', CustomSelect)
             .mount(el);

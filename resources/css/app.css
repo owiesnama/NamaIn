@@ -4,6 +4,20 @@
 
 @import "tailwindcss/utilities";
 
+@layer utilities {
+    /*
+     * Isolate LTR content (numbers, currency, signs, IDs, dates) from the RTL
+     * layout and force Latin lining/tabular figures so digits never fall back
+     * to Arabic-Indic glyphs and align vertically across rows.
+     */
+    .ltr-isolate {
+        direction: ltr;
+        unicode-bidi: isolate;
+        font-variant-numeric: tabular-nums lining-nums;
+        font-feature-settings: "lnum" 1, "tnum" 1;
+    }
+}
+
 
 /* Let native form controls (select option lists, number spinners, date inputs,
    scrollbars) follow the OS theme — which is how this app's dark mode is driven. */
