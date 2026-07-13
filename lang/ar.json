@@ -1,4 +1,11 @@
 {
+    "Inventory Management": "إدارة المخزون",
+    "Choose how you want to manage your inventory.": "اختر طريقة إدارة مخزونك.",
+    "Purchase-driven (strict)": "قائم على المشتريات (صارم)",
+    "Stock enters only through purchase invoices. Sales are blocked when stock runs out.": "لا يدخل المخزون إلا عبر فواتير الشراء، وتُمنع المبيعات عند نفاد المخزون.",
+    "Free-form (flexible)": "حر (مرن)",
+    "Adjust quantities freely without purchase invoices.": "عدّل الكميات بحرية دون الحاجة إلى فواتير شراء.",
+    "Allow selling below zero (overselling). Negative balances are surfaced for later reconciliation.": "السماح بالبيع تحت الصفر (البيع الزائد). تظهر الأرصدة السالبة لتسويتها لاحقاً.",
     "Edit Product": "تعديل منتج",
     "Fill in the product details below.": "أدخل تفاصيل المنتج أدناه.",
     "Pricing": "التسعير",
