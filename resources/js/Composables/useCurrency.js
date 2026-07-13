@@ -22,7 +22,15 @@ export function useCurrency() {
         }
     };
 
+    // A bare Latin-digit amount (no currency symbol) for tables that put the
+    // currency in the column header. Zero/null renders as an em dash so a
+    // column of zeros isn't noise. Wrap the output in <Ltr> at render.
+    const formatAmount = (value) => value
+        ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value)
+        : '—';
+
     return {
-        formatCurrency
+        formatCurrency,
+        formatAmount,
     };
 }

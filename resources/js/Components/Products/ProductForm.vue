@@ -6,6 +6,7 @@
     import PrimaryButton from "@/Components/PrimaryButton.vue";
     import TextInput from "@/Components/TextInput.vue";
     import CustomSelect from "../CustomSelect.vue";
+    import { useInventoryStrategy } from "@/Composables/useInventoryStrategy";
 
     const props = defineProps({
         product: {
@@ -39,8 +40,7 @@
 
     // Under purchase-driven, stock only enters via purchase invoices, so the
     // per-location quantities are shown read-only. Free-form allows editing them.
-    const manualStockAllowed =
-        preferences("inventory_strategy", "purchase_driven") === "free_form";
+    const { manualStockAllowed } = useInventoryStrategy();
 
     const show = ref(false);
     const product = useForm({
@@ -59,10 +59,6 @@
             quantity: currentQuantityFor(storage.id),
         })),
     });
-
-    const setCurrency = (value) => {
-        product.currency = (value || "").toUpperCase();
-    };
 
     const addUnit = () => {
         product.units.push({ name: "", conversion_factor: null });
@@ -114,17 +110,17 @@
         const price = parseFloat(product.price);
         if (!product.cost || !product.price || isNaN(cost) || isNaN(price)) return null;
         const profit = price - cost;
-        return { profit, pct: cost > 0 ? (profit / cost) * 100 : 0, belowCost: price < cost };
+        return { profit, percent: cost > 0 ? (profit / cost) * 100 : 0, belowCost: price < cost };
     });
 
     // Units are demoted to a collapsible section; expand it when units exist.
     const showUnits = ref((props.product?.units?.length || 0) > 0);
 
     // Esc closes the dialog (with the dirty guard).
-    const onKeydown = (e) => { if (e.key === "Escape") cancel(); };
+    const closeOnEscape = (e) => { if (e.key === "Escape") cancel(); };
     watch(show, (open) => {
-        if (open) window.addEventListener("keydown", onKeydown);
-        else window.removeEventListener("keydown", onKeydown);
+        if (open) window.addEventListener("keydown", closeOnEscape);
+        else window.removeEventListener("keydown", closeOnEscape);
     });
 </script>
 
@@ -305,7 +301,7 @@
                                                 <span class="font-medium">
                                                     {{ margin.belowCost ? __("Priced below cost") : __("Profit") }}
                                                 </span>
-                                                <Ltr class="font-semibold">{{ margin.profit.toFixed(2) }} {{ product.currency }} ({{ margin.pct.toFixed(0) }}%)</Ltr>
+                                                <Ltr class="font-semibold">{{ margin.profit.toFixed(2) }} {{ product.currency }} ({{ margin.percent.toFixed(0) }}%)</Ltr>
                                             </div>
 
                                             <div>

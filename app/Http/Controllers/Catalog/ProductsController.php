@@ -13,6 +13,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Queries\ProductShowQuery;
+use Illuminate\Support\Facades\DB;
 
 class ProductsController extends Controller
 {
@@ -57,20 +58,22 @@ class ProductsController extends Controller
     {
         $this->authorize('create', Product::class);
 
-        $product = Product::create($request->safe()->except(['units', 'categories', 'quantities']));
-
-        $units = $request->get('units');
-
-        if (empty($units)) {
-            $product->units()->create(['name' => __('Base Unit'), 'conversion_factor' => 1]);
-        } else {
-            $product->syncUnits($units);
-        }
-
-        $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
-
         try {
-            $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+            DB::transaction(function () use ($request, $syncCategoriesAction, $recordAdjustment) {
+                $product = Product::create($request->safe()->except(['units', 'categories', 'quantities']));
+
+                $units = $request->get('units');
+
+                if (empty($units)) {
+                    $product->units()->create(['name' => __('Base Unit'), 'conversion_factor' => 1]);
+                } else {
+                    $product->syncUnits($units);
+                }
+
+                $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
+
+                $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+            });
         } catch (ManualStockIncreaseNotAllowedException $e) {
             return redirect()->route('products.index')->with('error', $e->getMessage());
         }
@@ -91,14 +94,16 @@ class ProductsController extends Controller
     {
         $this->authorize('update', $product);
 
-        $product->update($request->safe()->except(['units', 'categories', 'quantities']));
-
-        $product->syncUnits($request->get('units'));
-
-        $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
-
         try {
-            $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+            DB::transaction(function () use ($product, $request, $syncCategoriesAction, $recordAdjustment) {
+                $product->update($request->safe()->except(['units', 'categories', 'quantities']));
+
+                $product->syncUnits($request->get('units'));
+
+                $syncCategoriesAction->handle($product, $request->get('categories'), 'product');
+
+                $this->syncOnHandQuantities($product, $request, $recordAdjustment);
+            });
         } catch (ManualStockIncreaseNotAllowedException $e) {
             return back()->with('error', $e->getMessage());
         }
