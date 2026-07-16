@@ -1,6 +1,18 @@
 # U2: 175 untranslated `__()` keys + a CI coverage gate
 
-**Status:** Blocked on a native Arabic pass · **Size:** M (mostly not code) · **Depends on:** —
+**Status:** Done (machine-translated, pending native refinement) · **Size:** M
+
+
+> **Update:** all 170 keys were machine-translated (by request) and merged into
+> `lang/ar.json`, and the coverage gate is live and green. The translations are a
+> competent first pass, not a native review — refine them via
+> `docs/ux-audit/ar-machine-translated.json`, which lists exactly the 170 keys
+> that were auto-filled (English key → the Arabic used). Editing `ar.json` is what
+> ships; that file is just the punch-list.
+>
+> A few deliberately-uncertain calls to check first: `"at"` → `الساعة` (assumed a
+> timestamp separator), `"John Doe"` → `محمد أحمد` (placeholder name), `"Exact"` →
+> `مطابق تمامًا`, `"3"` kept as `3`, `"?"` → `؟`.
 
 ## 1. Problem
 
