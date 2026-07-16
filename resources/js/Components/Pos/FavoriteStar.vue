@@ -13,7 +13,7 @@ const emit = defineEmits(['toggle']);
         :disabled="disabled"
         :aria-pressed="active"
         :aria-label="active ? __('Remove from favourites') : __('Add to favourites')"
-        class="relative inline-flex items-center justify-center p-1.5 rounded-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:opacity-40 disabled:cursor-not-allowed before:absolute before:-inset-2 before:content-['']"
+        class="relative inline-flex items-center justify-center p-1.5 rounded-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-amber-400 disabled:opacity-40 disabled:cursor-not-allowed before:absolute before:inset-0 before:m-auto before:h-11 before:w-11 before:content-['']"
         :class="active
             ? 'text-amber-500 hover:text-amber-600'
             : 'text-gray-300 dark:text-gray-600 hover:text-amber-400'"
