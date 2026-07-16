@@ -21,13 +21,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         storages: Array
     });
 
-    const formatCurrency = (amount, currency = 'SDG') => {
-        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-        return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-            style: 'currency',
-            currency: validCurrency,
-        }).format(amount);
-    };
+    const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
     const { formatDate } = useDate();
 
@@ -103,12 +97,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0"
                 >
                     <button
-                        @click="showSidebar = !showSidebar"
                         :class="[
                             'inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors',
                             showSidebar ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20' : ''
                         ]"
                         :title="__('Filters')"
+                        @click="showSidebar = !showSidebar"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
@@ -122,11 +116,11 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
                 <!-- Sidebar -->
                 <FilterSidebar
-                    :show="showSidebar"
-                    @close="showSidebar = false"
                     v-model:filters="filters"
+                    :show="showSidebar"
                     :sort-by-options="sortByOptions"
                     :all-label="__('All Storages')"
+                    @close="showSidebar = false"
                     @reset="resetFilters"
                 />
 
@@ -147,7 +141,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                <tr v-for="storage in storages" :key="storage.id" @click="router.visit(route('storages.show', storage.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
+                                <tr v-for="storage in storages" :key="storage.id" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer" @click="router.visit(route('storages.show', storage.id))">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-x-3">
                                             <div>
@@ -190,13 +184,13 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
                                         <div class="flex items-center justify-end gap-x-2">
-                                            <Link @click.stop :href="route('storages.show', storage.id)" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Details')">
+                                            <Link :href="route('storages.show', storage.id)" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Details')" @click.stop>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                                 </svg>
                                             </Link>
-                                            <Link v-if="can('inventory.transfer')" @click.stop :href="route('stock-transfers.create', { from_storage_id: storage.id })" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Transfer')">
+                                            <Link v-if="can('inventory.transfer')" :href="route('stock-transfers.create', { from_storage_id: storage.id })" class="p-2 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Transfer')" @click.stop>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
                                                 </svg>
@@ -218,7 +212,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     <EmptySearch :data="storages" />
 
                     <div class="mt-6 flex justify-center">
-                        <Pagination :links="[]" v-if="false" />
+                        <Pagination v-if="false" :links="[]" />
                     </div>
                 </div>
             </div>

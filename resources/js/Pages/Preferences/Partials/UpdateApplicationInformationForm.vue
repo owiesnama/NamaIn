@@ -16,6 +16,12 @@
         () => form.inventory_strategy === "free_form"
     );
 
+    // Sample strings are literal per system so the choice is legible at a glance.
+    const numeralOptions = computed(() => [
+        { value: "arabic", label: __("Arabic-Indic"), sample: "١٢٣" },
+        { value: "latin", label: __("Latin"), sample: "123" },
+    ]);
+
     // Overselling is only meaningful under the flexible strategy. Reset it when
     // the user switches to strict (change only — never on initial load, so an
     // untouched form stays clean).
@@ -137,6 +143,33 @@
                 </div>
                 <InputError
                     :message="form.errors.currency"
+                    class="mt-2"
+                />
+            </div>
+
+            <!-- Numerals -->
+            <div>
+                <InputLabel :value="__('Numerals')" />
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                    {{ __('The digit system used for money and figures across the app.') }}
+                </p>
+                <div class="mt-2 inline-flex rounded-lg border border-gray-200 dark:border-gray-700 p-1 bg-gray-50 dark:bg-gray-800/40">
+                    <button
+                        v-for="option in numeralOptions"
+                        :key="option.value"
+                        type="button"
+                        class="px-4 py-1.5 text-sm rounded-md transition-colors duration-200 focus:outline-none"
+                        :class="form.numerals === option.value
+                            ? 'bg-white dark:bg-gray-900 text-emerald-700 dark:text-emerald-400 font-semibold shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'"
+                        @click="form.numerals = option.value"
+                    >
+                        {{ option.label }}
+                        <span class="ms-1.5 text-xs text-gray-400 dark:text-gray-500">{{ option.sample }}</span>
+                    </button>
+                </div>
+                <InputError
+                    :message="form.errors.numerals"
                     class="mt-2"
                 />
             </div>

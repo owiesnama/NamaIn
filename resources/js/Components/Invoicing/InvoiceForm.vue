@@ -223,7 +223,7 @@
                         <div class="col-span-2">{{ __("Unit") }}</div>
                         <div class="col-span-2">{{ __("Qty") }}</div>
                         <div class="col-span-2">{{ __("Price") }}</div>
-                        <div class="col-span-2 text-right pr-8">{{ __("Total") }}</div>
+                        <div class="col-span-2 text-end pe-8">{{ __("Total") }}</div>
                     </div>
 
                     <div class="divide-y divide-gray-50 dark:divide-gray-700/50" v-auto-animate>

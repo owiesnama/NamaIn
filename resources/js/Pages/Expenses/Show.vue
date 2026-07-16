@@ -6,15 +6,7 @@ const props = defineProps({
     expense: Object,
 });
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const formatDate = (date) => {
     if (!date) return "";
@@ -55,10 +47,10 @@ const rejectExpense = () => {
 
                 <div class="flex items-center gap-3">
                     <template v-if="expense.status === 'pending'">
-                        <button @click="approveExpense" class="px-5 py-2 text-sm font-bold text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors">
+                        <button class="px-5 py-2 text-sm font-bold text-white bg-emerald-500 rounded-lg hover:bg-emerald-600 transition-colors" @click="approveExpense">
                             {{ __("Approve") }}
                         </button>
-                        <button @click="rejectExpense" class="px-5 py-2 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors">
+                        <button class="px-5 py-2 text-sm font-bold text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors" @click="rejectExpense">
                             {{ __("Reject") }}
                         </button>
                     </template>
@@ -85,7 +77,8 @@ const rejectExpense = () => {
                             </div>
                             <div>
                                 <label class="text-xs font-bold text-gray-400 uppercase tracking-widest block mb-1">{{ __("Status") }}</label>
-                                <span :class="[
+                                <span
+:class="[
                                     'px-3 py-1 text-xs font-bold rounded-full inline-block mt-1',
                                     expense.status === 'approved' ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400' :
                                     expense.status === 'rejected' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :

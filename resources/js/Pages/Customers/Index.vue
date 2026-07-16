@@ -24,13 +24,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         categories: Array
     });
 
-    const formatCurrency = (amount, currency = 'SDG') => {
-        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-        return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-            style: 'currency',
-            currency: validCurrency,
-        }).format(amount);
-    };
+    const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
     const { formatDate } = useDate();
 
@@ -144,12 +138,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0"
                 >
                     <button
-                        @click="showSidebar = !showSidebar"
                         :class="[
                             'inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors',
                             showSidebar ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20' : ''
                         ]"
                         :title="__('Filters')"
+                        @click="showSidebar = !showSidebar"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
@@ -195,12 +189,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
                 <!-- Sidebar -->
                 <FilterSidebar
-                    :show="showSidebar"
-                    @close="showSidebar = false"
                     v-model:filters="filters"
+                    :show="showSidebar"
                     :categories="categories"
                     :sort-by-options="sortByOptions"
                     :all-label="__('All Customers')"
+                    @close="showSidebar = false"
                     @reset="resetFilters"
                 />
 
@@ -230,7 +224,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                <tr v-for="customer in customers.data" :key="customer.id" @click="router.visit(route('customers.account', customer.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer">
+                                <tr v-for="customer in customers.data" :key="customer.id" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer" @click="router.visit(route('customers.account', customer.id))">
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center gap-x-3">
                                             <div>
@@ -274,7 +268,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-end text-sm font-medium">
                                         <div class="flex items-center justify-end gap-x-3">
-                                            <Link @click.stop :href="route('customers.account', customer.id)" class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Statement')">
+                                            <Link :href="route('customers.account', customer.id)" class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Statement')" @click.stop>
                                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
                                                 </svg>

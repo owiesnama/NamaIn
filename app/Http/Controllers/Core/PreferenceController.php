@@ -25,6 +25,6 @@ class PreferenceController extends Controller
         abort_unless(auth()->user()->hasRole('owner', 'admin'), 403);
         $action->handle($request);
 
-        return back()->with('success', 'Settings updated successfully');
+        return back()->with('success', __('Settings updated successfully'));
     }
 }

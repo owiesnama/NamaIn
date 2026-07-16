@@ -47,13 +47,7 @@ const filters = ref({
     type: props.filters.type || 'All'
 });
 
-const formatCurrency = (amount, currency = 'SDG') => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const { formatDate } = useDate();
 
@@ -186,7 +180,7 @@ const canTransfer = computed(() => {
                         />
                     </div>
                     <div class="flex items-end flex-grow justify-end h-full self-end pb-0.5">
-                        <button @click="resetFilters" class="inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-all">
+                        <button class="inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 transition-all" @click="resetFilters">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 mr-2">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
                             </svg>
@@ -368,7 +362,8 @@ const canTransfer = computed(() => {
                                     {{ transaction.product?.name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span :class="[
+                                    <span
+:class="[
                                         'px-2 py-1 text-xs font-semibold rounded-full',
                                         transaction.type === 'Sales' ? 'text-emerald-700 bg-emerald-100/60 dark:bg-emerald-900/20 dark:text-emerald-400' : 'text-blue-700 bg-blue-100/60 dark:bg-blue-900/20 dark:text-blue-400'
                                     ]">

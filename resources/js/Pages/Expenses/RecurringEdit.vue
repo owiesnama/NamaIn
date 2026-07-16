@@ -22,12 +22,7 @@ const form = useForm({
     category_objects: props.recurring_expense.categories,
 });
 
-const formatCurrency = (amount) => {
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: form.currency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const submit = () => {
     form.put(route("recurring-expenses.update", props.recurring_expense.id));
@@ -58,8 +53,8 @@ const submit = () => {
                         <div class="sm:col-span-2">
                             <InputLabel for="title" :value="__('Title')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <TextInput
-                                v-model="form.title"
                                 id="title"
+                                v-model="form.title"
                                 type="text"
                                 class="block w-full"
                                 required
@@ -72,8 +67,8 @@ const submit = () => {
                         <div>
                             <InputLabel for="amount" :value="__('Amount')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <TextInput
-                                v-model="form.amount"
                                 id="amount"
+                                v-model="form.amount"
                                 type="number" inputmode="decimal"
                                 step="0.01"
                                 class="block w-full"
@@ -110,8 +105,8 @@ const submit = () => {
                         <div>
                             <InputLabel for="starts_at" :value="__('Starts At')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <DatePicker
-                                v-model="form.starts_at"
                                 id="starts_at"
+                                v-model="form.starts_at"
                                 class="block w-full"
                                 required
                             />
@@ -122,8 +117,8 @@ const submit = () => {
                         <div>
                             <InputLabel for="ends_at" :value="__('Ends At (Optional)')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <DatePicker
-                                v-model="form.ends_at"
                                 id="ends_at"
+                                v-model="form.ends_at"
                                 class="block w-full"
                             />
                             <InputError :message="form.errors.ends_at" class="mt-2" />
@@ -160,8 +155,8 @@ const submit = () => {
                         <div class="sm:col-span-2">
                             <InputLabel for="notes" :value="__('Notes')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <textarea
-                                v-model="form.notes"
                                 id="notes"
+                                v-model="form.notes"
                                 rows="4"
                                 class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                             ></textarea>

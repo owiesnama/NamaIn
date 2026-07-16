@@ -29,14 +29,7 @@ const submitAdjustment = () => {
     });
 };
 
-const formatBalance = (amount, currency = "SDG") => {
-    const validCurrency =
-        currency && /^[A-Z]{3}$/.test(currency) ? currency : "SDG";
-    return new Intl.NumberFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
-        style: "currency",
-        currency: validCurrency,
-    }).format(amount);
-};
+const formatBalance = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const { formatDate } = useDate();
 
@@ -87,8 +80,8 @@ const typeBgClass = (type) => {
             <div class="mt-4 flex items-center justify-end gap-x-3 lg:mt-0">
                 <button
                     v-if="can('treasury.adjust')"
-                    @click="showAdjustModal = true"
                     class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors duration-200"
+                    @click="showAdjustModal = true"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4 ltr:mr-2 rtl:ml-2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
@@ -237,15 +230,15 @@ const typeBgClass = (type) => {
 
                     <div class="mt-6 flex justify-end gap-x-3">
                         <button
-                            @click="showAdjustModal = false"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                            @click="showAdjustModal = false"
                         >
                             {{ __("Cancel") }}
                         </button>
                         <button
-                            @click="submitAdjustment"
                             :disabled="adjustForm.processing"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                            @click="submitAdjustment"
                         >
                             {{ adjustForm.processing ? __("Saving...") : __("Apply Adjustment") }}
                         </button>

@@ -1,36 +1,28 @@
-import { usePage } from '@inertiajs/vue3';
+import {
+    formatMoney,
+    formatMoneyPlain,
+    formatAmount,
+    formatAmountPlain,
+    numeralSystem,
+} from "@/Support/money";
+
+/**
+ * Money formatting bound to the tenant's numeral system. Thin wrapper over
+ * @/Support/money — see there for the isolation rules. formatCurrency/formatAmount
+ * return isolation-safe strings for HTML; the *Plain variants are for <canvas> and
+ * exports.
+ */
+export function needsLtrIsolation() {
+    return numeralSystem() === "latin";
+}
 
 export function useCurrency() {
-    const page = usePage();
-
-    const formatCurrency = (value, currencyCode = null) => {
-        const currency = currencyCode ||
-            (page.props.invoice?.currency && /^[A-Z]{3}$/.test(page.props.invoice.currency) ? page.props.invoice.currency :
-            (window.preferences && window.preferences('currency') && /^[A-Z]{3}$/.test(window.preferences('currency')) ? window.preferences('currency') : 'SDG'));
-
-        try {
-            // Always format with Latin (Western) digits regardless of app locale;
-            // Arabic-Indic digits are avoided app-wide for numeric/financial data.
-            // Render the result inside <Ltr> / .ltr-isolate so the RTL bidi
-            // algorithm doesn't reorder the currency symbol or sign.
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: currency,
-            }).format(value);
-        } catch (e) {
-            return `${value} ${currency}`;
-        }
-    };
-
-    // A bare Latin-digit amount (no currency symbol) for tables that put the
-    // currency in the column header. Zero/null renders as an em dash so a
-    // column of zeros isn't noise. Wrap the output in <Ltr> at render.
-    const formatAmount = (value) => value
-        ? new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(value)
-        : '—';
-
     return {
-        formatCurrency,
-        formatAmount,
+        formatCurrency: (value, currencyCode = null) => formatMoney(value, currencyCode),
+        formatAmount: (value) => formatAmount(value),
+        formatCurrencyPlain: (value, currencyCode = null) => formatMoneyPlain(value, currencyCode),
+        formatAmountPlain: (value) => formatAmountPlain(value),
+        numeralSystem,
+        needsLtrIsolation,
     };
 }

@@ -73,15 +73,7 @@ watch(
     { deep: true }
 );
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const formatDate = (date) => {
     return new Intl.DateTimeFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
@@ -127,12 +119,12 @@ const getBudgetColor = (budget) => {
 
                 <div class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0">
                     <button
-                        @click="showSidebar = !showSidebar"
                         :class="[
                             'inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors',
                             showSidebar ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20' : ''
                         ]"
                         :title="__('Filters')"
+                        @click="showSidebar = !showSidebar"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
@@ -182,12 +174,12 @@ const getBudgetColor = (budget) => {
 
             <div class="flex flex-col lg:flex-row gap-8 mt-8">
                 <FilterSidebar
-                    :show="showSidebar"
-                    @close="showSidebar = false"
                     v-model:filters="filters"
-                    @reset="resetFilters"
+                    :show="showSidebar"
                     :categories="categories"
-                    :sortByOptions="[]"
+                    :sort-by-options="[]"
+                    @close="showSidebar = false"
+                    @reset="resetFilters"
                 >
                     <template #extra-filters>
                         <div class="space-y-2">
@@ -292,7 +284,8 @@ const getBudgetColor = (budget) => {
                                                 {{ formatCurrency(expense.amount, expense.currency) }}
                                             </td>
                                             <td class="px-4 py-4 text-sm whitespace-nowrap">
-                                                <span :class="[
+                                                <span
+:class="[
                                                     'px-2 py-1 text-xs font-semibold rounded-full',
                                                     expense.status === 'approved' ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400' :
                                                     expense.status === 'rejected' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
@@ -314,12 +307,12 @@ const getBudgetColor = (budget) => {
                                             <td class="px-4 py-4 text-sm whitespace-nowrap text-right rtl:text-left">
                                                 <div class="flex items-center justify-end gap-x-3" @click.stop>
                                                     <template v-if="expense.status === 'pending'">
-                                                        <button @click="approveExpense(expense.id)" class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Approve')">
+                                                        <button class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all" :title="__('Approve')" @click="approveExpense(expense.id)">
                                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                                             </svg>
                                                         </button>
-                                                        <button @click="rejectExpense(expense.id)" class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-all" :title="__('Reject')">
+                                                        <button class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20 rounded-lg transition-all" :title="__('Reject')" @click="rejectExpense(expense.id)">
                                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                                                             </svg>

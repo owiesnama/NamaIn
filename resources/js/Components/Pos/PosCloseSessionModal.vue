@@ -16,7 +16,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
-const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${props.currency}`;
+const fmt = (val) => window.formatMoney(val);
 
 const form = useForm({
     session_id: props.sessionId,
@@ -72,7 +72,7 @@ const closeSession = () => form.post(route('pos.close'));
             <div class="space-y-4">
                 <div>
                     <InputLabel for="closing_float" :value="__('Actual Cash in Hand')" />
-                    <TextInput v-model="form.closing_float" id="closing_float" type="number" inputmode="decimal" step="0.01" min="0" class="mt-1 block w-full rounded-xl" :placeholder="sessionStats ? String(sessionStats.expected_closing_float) : '0.00'" />
+                    <TextInput id="closing_float" v-model="form.closing_float" type="number" inputmode="decimal" step="0.01" min="0" class="mt-1 block w-full rounded-xl" :placeholder="sessionStats ? String(sessionStats.expected_closing_float) : '0.00'" />
                     <InputError :message="form.errors.closing_float" class="mt-1" />
                 </div>
                 <div v-if="liveVariance !== null" class="flex items-center justify-between rounded-xl px-4 py-3 transition-colors" :class="liveVariance < 0 ? 'bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-800' : 'bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800'">
@@ -81,8 +81,8 @@ const closeSession = () => form.post(route('pos.close'));
                 </div>
             </div>
             <div class="mt-6 flex justify-end gap-x-3">
-                <button @click="emit('close')" class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors">{{ __('Cancel') }}</button>
-                <PrimaryButton @click="closeSession" :disabled="form.processing" class="bg-red-600 hover:bg-red-700 focus:ring-red-500">{{ __('Confirm & Close') }}</PrimaryButton>
+                <button class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors" @click="emit('close')">{{ __('Cancel') }}</button>
+                <PrimaryButton :disabled="form.processing" class="bg-red-600 hover:bg-red-700 focus:ring-red-500" @click="closeSession">{{ __('Confirm & Close') }}</PrimaryButton>
             </div>
         </div>
     </Modal>

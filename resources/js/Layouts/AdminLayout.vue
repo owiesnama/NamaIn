@@ -13,10 +13,6 @@
     const showingSidebar = ref(false);
     const page = usePage();
 
-    const direction = computed(() => {
-        return page.props.locale === "ar" ? "rtl" : "ltr";
-    });
-
     const appDomain = computed(() => page.props.appDomain);
     const horizonUrl = computed(() => `https://queue.${appDomain.value}`);
     const telescopeUrl = computed(() => `https://monitor.${appDomain.value}`);
@@ -40,7 +36,7 @@
 </script>
 
 <template>
-    <div :dir="direction">
+    <div>
         <Head :title="title ? `Admin - ${title}` : 'Admin'" />
 
         <Banner />

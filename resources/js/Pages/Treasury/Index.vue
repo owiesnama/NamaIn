@@ -19,14 +19,7 @@ const missingTypeLabels = {
     cheque_clearing: __('Cheque Clearing'),
 };
 
-const formatBalance = (amount, currency = "SDG") => {
-    const validCurrency =
-        currency && /^[A-Z]{3}$/.test(currency) ? currency : "SDG";
-    return new Intl.NumberFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
-        style: "currency",
-        currency: validCurrency,
-    }).format(amount);
-};
+const formatBalance = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const { formatDate } = useDate();
 

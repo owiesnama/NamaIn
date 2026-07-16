@@ -96,7 +96,7 @@ const navigateTo = (url) => {
     <div class="relative flex items-center flex-1">
         <button
             @click="toggleSearch"
-            class="flex items-center w-full px-4 py-2 text-sm text-gray-400 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all duration-200 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
+            class="flex items-center w-full px-4 py-2.5 text-sm text-gray-400 bg-gray-100 border border-transparent rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:bg-white transition-all duration-200 dark:bg-gray-800 dark:text-gray-500 dark:hover:bg-gray-700"
         >
             <svg class="w-4 h-4 ltr:mr-2 rtl:ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
