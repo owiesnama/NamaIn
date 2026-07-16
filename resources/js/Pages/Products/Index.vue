@@ -181,6 +181,17 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         router.put(route('user-preferences.update'), { products_layout: newLayout }, { preserveState: true, preserveScroll: true });
     };
 
+    // Below sm the table cannot fit: measured 637px of columns in a 436px
+    // viewport, which pushes the price column — the most-read one — off-screen
+    // behind a horizontal swipe. The cards grid is already responsive, so narrow
+    // viewports always render cards. The stored preference is left untouched, so
+    // the same user still gets their table back on a wide screen.
+    const isNarrow = ref(false);
+    let layoutQuery = null;
+    const onLayoutQueryChange = (event) => { isNarrow.value = event.matches; };
+
+    const effectiveLayout = computed(() => (isNarrow.value ? 'cards' : layout.value));
+
     // Cards mode state
     const cardProducts = ref([...props.products.data]);
     const loadingMore = ref(false);
@@ -208,7 +219,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         if (observer) observer.disconnect();
         if (!sentinel.value) return;
         observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && layout.value === 'cards') {
+            if (entries[0].isIntersecting && effectiveLayout.value === 'cards') {
                 loadMore();
             }
         }, { rootMargin: '200px' });
@@ -216,8 +227,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     };
 
     onMounted(() => {
+        layoutQuery = window.matchMedia('(max-width: 639.98px)'); // below Tailwind's `sm` (min-width: 640px)
+        isNarrow.value = layoutQuery.matches;
+        layoutQuery.addEventListener('change', onLayoutQueryChange);
+
         nextTick(() => {
-            if (layout.value === 'cards') {
+            if (effectiveLayout.value === 'cards') {
                 setupObserver();
             }
         });
@@ -225,9 +240,10 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
     onUnmounted(() => {
         if (observer) observer.disconnect();
+        layoutQuery?.removeEventListener('change', onLayoutQueryChange);
     });
 
-    watch(layout, (val) => {
+    watch(effectiveLayout, (val) => {
         if (val === 'cards') {
             nextTick(() => setupObserver());
         } else {
@@ -242,7 +258,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
     // Sync cardProducts when products prop changes (for table mode nav or filter results)
     watch(() => props.products.data, (newData) => {
-        if (layout.value === 'cards') {
+        if (effectiveLayout.value === 'cards') {
             // Only reset if this is a fresh page load (page 1), not an append
             if (!loadingMore.value) {
                 cardProducts.value = [...newData];
@@ -316,7 +332,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             preserveScroll: true,
             onSuccess: (page) => {
                 // Prepend new product if in cards mode
-                if (layout.value === 'cards') {
+                if (effectiveLayout.value === 'cards') {
                     cardProducts.value = [...page.props.products.data.slice(0, 1), ...cardProducts.value];
                 }
                 newProductForm.reset();
@@ -357,7 +373,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0"
                 >
                     <!-- Layout toggle buttons -->
-                    <div class="flex items-center gap-x-1">
+                    <div class="hidden sm:flex items-center gap-x-1">
                         <button
                             type="button"
                             @click="setLayout('table')"
@@ -495,7 +511,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     <ActiveFilterChips :chips="chips" @remove="removeChip" @clear="resetFilters" />
 
                     <!-- Table Mode -->
-                    <div v-if="layout === 'table'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
+                    <div v-if="effectiveLayout === 'table'" class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
                         <!-- Bulk action bar -->
                         <div v-if="selectedIds.length" class="sticky top-0 z-20 flex flex-wrap items-center gap-3 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-200 dark:border-emerald-800 rounded-t-xl">
                             <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ selectedIds.length }} {{ __("selected") }}</span>
@@ -603,7 +619,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     </div>
 
                     <!-- Cards Mode -->
-                    <div v-if="layout === 'cards'" data-testid="product-cards-grid">
+                    <div v-if="effectiveLayout === 'cards'" data-testid="product-cards-grid">
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4">
                             <!-- New Product Card -->
                             <div
@@ -833,7 +849,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             </div>
 
             <!-- Pagination (table mode only) -->
-            <div v-if="layout === 'table'" class="flex justify-center">
+            <div v-if="effectiveLayout === 'table'" class="flex justify-center">
                 <Pagination :links="products.links"></Pagination>
             </div>
         </section>
