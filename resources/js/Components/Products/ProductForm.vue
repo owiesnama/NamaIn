@@ -7,6 +7,7 @@
     import TextInput from "@/Components/TextInput.vue";
     import CustomSelect from "../CustomSelect.vue";
     import { useInventoryStrategy } from "@/Composables/useInventoryStrategy";
+    import { useCurrency } from "@/Composables/useCurrency";
 
     const props = defineProps({
         product: {
@@ -41,6 +42,7 @@
     // Under purchase-driven, stock only enters via purchase invoices, so the
     // per-location quantities are shown read-only. Free-form allows editing them.
     const { manualStockAllowed } = useInventoryStrategy();
+    const { formatCurrency } = useCurrency();
 
     const show = ref(false);
     const product = useForm({
@@ -360,7 +362,7 @@
                                                 <span class="font-medium">
                                                     {{ margin.belowCost ? __("Priced below cost") : __("Profit") }}
                                                 </span>
-                                                <Ltr class="font-semibold">{{ margin.profit.toFixed(2) }} {{ product.currency }} ({{ margin.percent.toFixed(0) }}%)</Ltr>
+                                                <Ltr class="font-semibold">{{ formatCurrency(margin.profit, product.currency) }} ({{ margin.percent.toFixed(0) }}%)</Ltr>
                                             </div>
 
                                             <div>
@@ -761,7 +763,7 @@
                                                 class="flex items-center justify-between px-3 py-2 text-sm rounded-lg bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400"
                                             >
                                                 <span class="font-medium">{{ __("Total with all add-ons") }}</span>
-                                                <Ltr class="font-semibold">{{ serviceTotal.toFixed(2) }} {{ product.currency }}</Ltr>
+                                                <Ltr class="font-semibold">{{ formatCurrency(serviceTotal, product.currency) }}</Ltr>
                                             </div>
                                         </div>
                                     </div>
