@@ -60,7 +60,7 @@ const isAvailable = (product) => oversellingEnabled || product.sale_point_qty > 
 
                     <div class="flex items-center justify-between mt-2">
                         <span class="text-sm font-bold text-emerald-600"><Ltr>{{ fmt(product.price || 0) }}</Ltr></span>
-                        <span v-if="isAvailable(product)" class="text-[10px] font-medium text-gray-400">{{ product.sale_point_qty }}</span>
+                        <span v-if="isAvailable(product)" class="text-[10px] font-medium text-gray-400"><Ltr>{{ product.sale_point_qty }}</Ltr></span>
                         <span v-else class="text-[10px] font-bold uppercase tracking-wider text-red-500 dark:text-red-400">{{ __('Out of Stock') }}</span>
                     </div>
                 </button>

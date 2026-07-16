@@ -66,3 +66,18 @@ test('preferences cache and locale are isolated per tenant', function () {
         ->get('http://tenant-two.'.config('app.domain').'/dashboard')
         ->assertInertia(fn ($page) => $page->where('locale', 'en'));
 });
+
+test('the settings page exposes the logo as a url, not the raw disk path', function () {
+    // The sidebar's <ApplicationLogo> reads preferences('logo') straight into an
+    // <img src>. HandleInertiaRequests resolves the stored disk path to a URL, but
+    // a page prop named 'preferences' would override that shared prop and 404 the
+    // logo on this page only.
+    Preference::create(['key' => 'logo', 'value' => 'logos/acme.png']);
+
+    $this->get(route('preferences.index'))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->component('Preferences/Show')
+            ->where('preferences.logo', asset('storage/logos/acme.png'))
+        );
+});
