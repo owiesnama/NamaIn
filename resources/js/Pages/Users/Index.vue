@@ -201,7 +201,7 @@ const roleBadgeClass = (slug) => {
                 class="px-3 py-2 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
             >
                 <option value="">{{ __('All Roles') }}</option>
-                <option v-for="opt in roleOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                <option v-for="opt in roleOptions" :key="opt.value" :value="opt.value">{{ __(opt.label) }}</option>
             </select>
 
             <!-- Status filter -->
@@ -267,7 +267,7 @@ const roleBadgeClass = (slug) => {
                                     class="inline-flex items-center gap-x-1.5 px-2.5 py-1 text-[11px] font-bold rounded-lg border"
                                     :class="roleBadgeClass(member.role)"
                                 >
-                                    {{ member.role }}
+                                    {{ __(member.role) }}
                                 </span>
                             </td>
 
