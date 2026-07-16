@@ -7,14 +7,6 @@
     import ActionMessage from "@/Components/ActionMessage.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
 
-    const props = defineProps({
-        preferences: {
-            type: Object,
-        },
-    });
-
-    provide("preferences", props.preferences);
-
     const truthy = (value) => [true, 1, "1", "true"].includes(value);
 
     // Provided to the fields partial so it can bind to the shared form without
