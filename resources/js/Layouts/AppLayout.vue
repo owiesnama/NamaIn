@@ -100,7 +100,7 @@
                     </Link>
                     <button
                         type="button"
-                        class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
+                        class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
                         @click="showingSidebar = false"
                     >
                         <span class="sr-only">{{ __('Close navigation') }}</span>
@@ -490,7 +490,7 @@
                 <div class="flex h-14 lg:h-16 shrink-0 items-center gap-x-3 border-b border-gray-100 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6 lg:px-8">
                     <button
                         type="button"
-                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
+                        class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
                         @click="showingSidebar = true"
                     >
                         <span class="sr-only">{{ __('Open navigation') }}</span>
