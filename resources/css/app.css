@@ -19,6 +19,24 @@
 }
 
 
+/*
+ * Bottom-anchored floating UI (the operations pill, the export pill) sits at
+ * 1rem from the bottom by default. A page that puts its own full-width bar in
+ * that band — the POS cart bar, for instance — adds .has-bottom-bar to <html>,
+ * and the floating UI stacks above it instead of covering it. The bar only
+ * exists in the stacked layout, so the offset is scoped to below md.
+ */
+:root {
+    --floating-stack-offset: 0px;
+}
+
+@media (max-width: 767px) {
+    .has-bottom-bar {
+        /* 56px bar (min-h-[56px]) + 16px gap */
+        --floating-stack-offset: 4.5rem;
+    }
+}
+
 /* Let native form controls (select option lists, number spinners, date inputs,
    scrollbars) follow the OS theme — which is how this app's dark mode is driven. */
 :root {

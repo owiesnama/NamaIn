@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect, onUnmounted } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
@@ -127,6 +127,16 @@ const unavailableProducts = ref([]);
 const completedSale = ref({ invoiceId: null, total: 0, paymentMethod: 'cash', change: null });
 const showingCloseModal = ref(false);
 const showingCart = ref(false);
+
+// The floating cart bar occupies the same bottom band as the app's floating
+// pills, which outrank it on z-index and would cover the running total. Flag the
+// band as taken while the bar is up so they stack above it instead; app.css
+// scopes the offset to the stacked layout, where the bar actually renders.
+watchEffect(() => {
+    document.documentElement.classList.toggle("has-bottom-bar", !showingCart.value);
+});
+
+onUnmounted(() => document.documentElement.classList.remove("has-bottom-bar"));
 
 const checkoutForm = useForm({
     session_id: props.session.id,
