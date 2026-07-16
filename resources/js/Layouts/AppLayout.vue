@@ -55,7 +55,7 @@
 </script>
 
 <template>
-    <div :dir="direction">
+    <div>
         <Head :title="__(title)" />
 
         <ImpersonationBanner />
@@ -67,7 +67,7 @@
             <!-- ─────────────────────────────────────────
                  SIDEBAR
                  Slide-over drawer below lg (1024px); static side pane at lg+.
-                 Anchored to the inline-start edge, direction-aware via :dir.
+                 Anchored to the inline-start edge; direction comes from <html dir>.
             ───────────────────────────────────────── -->
             <!-- Drawer backdrop (below lg) -->
             <Transition
