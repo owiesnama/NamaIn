@@ -4,6 +4,7 @@ import WarningAlert from '@/Components/WarningAlert.vue';
 import { ref, computed, watch } from 'vue';
 import { useForm, router, usePage } from '@inertiajs/vue3';
 import { usePermissions } from '@/Composables/usePermissions';
+import { useDate } from '@/Composables/useDate';
 
 const props = defineProps({
     members: Array,
@@ -12,6 +13,7 @@ const props = defineProps({
 });
 
 const { can } = usePermissions();
+const { formatDate } = useDate();
 
 // ── Filters ───────────────────────────────────────────────────────────────────
 const search = ref('');
@@ -286,7 +288,7 @@ const roleBadgeClass = (slug) => {
 
                             <!-- Joined date -->
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                {{ member.joined_at ? new Date(member.joined_at).toLocaleDateString() : '—' }}
+                                {{ formatDate(member.joined_at) }}
                             </td>
 
                             <!-- Actions -->
@@ -400,7 +402,7 @@ const roleBadgeClass = (slug) => {
                                 </span>
                             </td>
                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ inv.invited_by }}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ new Date(inv.expires_at).toLocaleDateString() }}</td>
+                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ formatDate(inv.expires_at) }}</td>
                             <td v-if="can('users.invite')" class="px-6 py-4 whitespace-nowrap text-end">
                                 <button
                                     class="inline-flex items-center justify-center gap-x-1.5 px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-900 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors duration-200"
