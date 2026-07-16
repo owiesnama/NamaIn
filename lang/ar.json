@@ -1569,5 +1569,9 @@
     "Base unit": "الوحدة الأساسية",
     "Delivered": "تم التسليم",
     "Received": "تم الاستلام",
-    "Settings updated successfully": "تم تحديث الإعدادات بنجاح"
+    "Settings updated successfully": "تم تحديث الإعدادات بنجاح",
+    "Numerals": "الأرقام",
+    "The digit system used for money and figures across the app.": "نظام الأرقام المستخدم للمبالغ والأرقام في كافة أنحاء التطبيق.",
+    "Arabic-Indic": "عربية",
+    "Latin": "لاتينية"
 }

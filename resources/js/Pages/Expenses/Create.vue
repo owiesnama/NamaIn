@@ -7,7 +7,7 @@ import FileUploader from "@/Components/FileUploader.vue";
 import { useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
 
-const props = defineProps({
+defineProps({
     categories: Array,
     treasury_accounts: Array,
 });
@@ -29,14 +29,7 @@ const form = useForm({
 
 const selectedTreasuryAccount = ref(null);
 
-const formatCurrency = (amount) => {
-    const validCurrency = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const addCategory = (newTag) => {
     const tag = { name: newTag, id: newTag };
@@ -66,8 +59,8 @@ const submit = () => {
                         <div class="sm:col-span-2">
                             <InputLabel for="title" :value="__('Title')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <TextInput
-                                v-model="form.title"
                                 id="title"
+                                v-model="form.title"
                                 type="text"
                                 class="block w-full"
                                 required
@@ -80,8 +73,8 @@ const submit = () => {
                         <div>
                             <InputLabel for="amount" :value="__('Amount')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <TextInput
-                                v-model="form.amount"
                                 id="amount"
+                                v-model="form.amount"
                                 type="number" inputmode="decimal"
                                 step="0.01"
                                 class="block w-full"
@@ -94,8 +87,8 @@ const submit = () => {
                         <div>
                             <InputLabel for="expensed_at" :value="__('Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <DatePicker
-                                v-model="form.expensed_at"
                                 id="expensed_at"
+                                v-model="form.expensed_at"
                                 class="block w-full"
                                 required
                             />
@@ -133,7 +126,7 @@ const submit = () => {
                         </div>
 
                         <!-- Paid From (Treasury) -->
-                        <div class="sm:col-span-2" v-if="treasury_accounts?.length">
+                        <div v-if="treasury_accounts?.length" class="sm:col-span-2">
                             <InputLabel for="treasury_account_id" :value="__('Paid From')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <CustomSelect
                                 v-model="selectedTreasuryAccount"
@@ -160,8 +153,8 @@ const submit = () => {
                         <div class="sm:col-span-2">
                             <InputLabel for="notes" :value="__('Notes')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <textarea
-                                v-model="form.notes"
                                 id="notes"
+                                v-model="form.notes"
                                 rows="4"
                                 class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                             ></textarea>
@@ -180,7 +173,7 @@ const submit = () => {
                         <!-- Recurring Toggle -->
                         <div class="sm:col-span-2">
                             <label class="inline-flex items-center cursor-pointer">
-                                <input type="checkbox" v-model="form.is_recurring" class="sr-only peer">
+                                <input v-model="form.is_recurring" type="checkbox" class="sr-only peer">
                                 <div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-emerald-300 dark:peer-focus:ring-emerald-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-emerald-600"></div>
                                 <span class="ms-3 text-sm font-medium text-gray-900 dark:text-gray-300">{{ __("Make this a recurring expense") }}</span>
                             </label>
@@ -191,8 +184,8 @@ const submit = () => {
                             <div>
                                 <InputLabel for="frequency" :value="__('Frequency')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                                 <select
-                                    v-model="form.frequency"
                                     id="frequency"
+                                    v-model="form.frequency"
                                     class="w-full px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                                 >
                                     <option value="daily">{{ __("Daily") }}</option>
@@ -206,8 +199,8 @@ const submit = () => {
                             <div>
                                 <InputLabel for="starts_at" :value="__('Starts At')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                                 <DatePicker
-                                    v-model="form.starts_at"
                                     id="starts_at"
+                                    v-model="form.starts_at"
                                     class="block w-full"
                                 />
                                 <InputError :message="form.errors.starts_at" class="mt-2" />
@@ -216,8 +209,8 @@ const submit = () => {
                             <div>
                                 <InputLabel for="ends_at" :value="__('Ends At (Optional)')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                                 <DatePicker
-                                    v-model="form.ends_at"
                                     id="ends_at"
+                                    v-model="form.ends_at"
                                     class="block w-full"
                                 />
                                 <InputError :message="form.errors.ends_at" class="mt-2" />

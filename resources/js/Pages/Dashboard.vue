@@ -80,20 +80,12 @@
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: { callback: (value) => formatCurrency(value) }
+                ticks: { callback: (value) => window.formatMoneyPlain(value) }
             }
         }
     };
 
-    const formatCurrency = (amount, currency = null) => {
-        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-            (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-        return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-            style: 'currency',
-            currency: validCurrency,
-        }).format(amount || 0);
-    };
+    const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
     const { isPrivate, togglePrivacy } = usePrivacyMode();
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\NumeralSystem;
 use App\Facades\Cache;
 use App\Models\Preference;
 use App\Models\Tenant;
@@ -126,6 +127,13 @@ class HandleInertiaRequests extends Middleware
 
         if (! empty($prefs['logo']) && ! str_starts_with($prefs['logo'], 'http') && ! str_starts_with($prefs['logo'], '/')) {
             $prefs['logo'] = asset('storage/'.$prefs['logo']);
+        }
+
+        // A tenant that has never chosen a numeral system follows its language,
+        // so the frontend always receives a concrete value and never has to
+        // re-derive the default.
+        if (empty($prefs['numerals'])) {
+            $prefs['numerals'] = NumeralSystem::defaultForLocale(app()->getLocale())->value;
         }
 
         return $prefs;

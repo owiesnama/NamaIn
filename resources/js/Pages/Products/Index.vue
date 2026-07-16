@@ -138,7 +138,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     // ── Table numbers ────────────────────────────────────────────────────────
     // The currency symbol lives in the column header; cells render bare Latin
     // numbers via the shared useCurrency() formatter (em dash for zero/null).
-    const { formatCurrency, formatAmount } = useCurrency();
+    const { formatAmount } = useCurrency();
     const currencyCode = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'SDG';
     const onHandOf = (product) => product.stock.reduce((sum, s) => sum + s.pivot.quantity, 0);
     const availableClass = (product) => {
@@ -376,7 +376,6 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     <div class="hidden sm:flex items-center gap-x-1">
                         <button
                             type="button"
-                            @click="setLayout('table')"
                             :class="[
                                 'inline-flex items-center justify-center p-2.5 border rounded-lg transition-colors duration-200',
                                 layout === 'table'
@@ -384,6 +383,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                     : 'text-gray-700 bg-white border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800'
                             ]"
                             :title="__('Table View')"
+                            @click="setLayout('table')"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 01-1.125-1.125M3.375 19.5h7.5c.621 0 1.125-.504 1.125-1.125m-9.75 0V5.625m0 12.75v-1.5c0-.621.504-1.125 1.125-1.125m18.375 2.625V5.625m0 12.75c0 .621-.504 1.125-1.125 1.125m1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125m0 3.75h-7.5A1.125 1.125 0 0112 18.375m9.75-12.75c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125m19.5 0v1.5c0 .621-.504 1.125-1.125 1.125M2.25 5.625v1.5c0 .621.504 1.125 1.125 1.125m0 0h17.25m-17.25 0h7.5c.621 0 1.125.504 1.125 1.125M3.375 8.25c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m17.25-3.75h-7.5c-.621 0-1.125.504-1.125 1.125m8.625-1.125c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25 0h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125M12 10.875v-1.5m0 1.5c0 .621-.504 1.125-1.125 1.125M12 10.875c0 .621.504 1.125 1.125 1.125m-2.25 0c.621 0 1.125.504 1.125 1.125M10.875 12h-7.5m8.625 0h7.5m-8.625 0c.621 0 1.125.504 1.125 1.125v1.5c0 .621-.504 1.125-1.125 1.125m-17.25-3.75h7.5m-7.5 0c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125m0-3.75h7.5" />
@@ -391,7 +391,6 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                         </button>
                         <button
                             type="button"
-                            @click="setLayout('cards')"
                             :class="[
                                 'inline-flex items-center justify-center p-2.5 border rounded-lg transition-colors duration-200',
                                 layout === 'cards'
@@ -399,6 +398,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                     : 'text-gray-700 bg-white border-gray-200 hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-800'
                             ]"
                             :title="__('Grid View')"
+                            @click="setLayout('cards')"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
@@ -407,12 +407,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                     </div>
 
                     <button
-                        @click="showSidebar = !showSidebar"
                         :class="[
                             'inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors',
                             showSidebar ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20' : ''
                         ]"
                         :title="__('Filters')"
+                        @click="showSidebar = !showSidebar"
                     >
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
@@ -458,12 +458,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
                 <!-- Sidebar -->
                 <FilterSidebar
-                    :show="showSidebar"
-                    @close="showSidebar = false"
                     v-model:filters="filters"
+                    :show="showSidebar"
                     :categories="categories"
                     :sort-by-options="sortByOptions"
                     :all-label="__('All Products')"
+                    @close="showSidebar = false"
                     @reset="resetFilters"
                 >
                     <template #extra-filters>
@@ -516,11 +516,11 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                         <div v-if="selectedIds.length" class="sticky top-0 z-20 flex flex-wrap items-center gap-3 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-200 dark:border-emerald-800 rounded-t-xl">
                             <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ selectedIds.length }} {{ __("selected") }}</span>
                             <div class="flex items-center gap-2 ms-auto">
-                                <button type="button" @click="bulkAction('price')" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Update Price") }}</button>
-                                <button type="button" @click="bulkAction('stock')" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Adjust Stock") }}</button>
-                                <button type="button" @click="bulkAction('export')" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Export") }}</button>
-                                <button type="button" @click="bulkAction('delete')" class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">{{ __("Delete") }}</button>
-                                <button type="button" @click="clearSelection" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg" :aria-label="__('Clear selection')">
+                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" @click="bulkAction('price')">{{ __("Update Price") }}</button>
+                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" @click="bulkAction('stock')">{{ __("Adjust Stock") }}</button>
+                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" @click="bulkAction('export')">{{ __("Export") }}</button>
+                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" @click="bulkAction('delete')">{{ __("Delete") }}</button>
+                                <button type="button" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg" :aria-label="__('Clear selection')" @click="clearSelection">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
                             </div>
@@ -530,7 +530,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                 <thead class="sticky top-0 z-10 bg-gray-50 dark:bg-gray-800">
                                 <tr class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.1em]">
                                     <th scope="col" class="w-10 px-3 py-3 text-center">
-                                        <input ref="selectAllRef" type="checkbox" :checked="allSelected" @change="toggleAll" :aria-label="__('Select all')" class="border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
+                                        <input ref="selectAllRef" type="checkbox" :checked="allSelected" :aria-label="__('Select all')" class="border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" @change="toggleAll" />
                                     </th>
                                     <th scope="col" class="px-3 py-3 text-start sm:sticky sm:start-0 bg-gray-50 dark:bg-gray-800">{{ __("Product") }}</th>
                                     <th scope="col" class="w-40 px-3 py-3 text-start">
@@ -550,9 +550,9 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                 </tr>
                                 </thead>
                                 <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60">
-                                <tr v-for="product in products.data" :key="product.id" @click="router.visit(route('products.show', product.id))" class="group hover:bg-gray-50 dark:hover:bg-gray-800 focus-within:bg-gray-50 dark:focus-within:bg-gray-800 transition-colors cursor-pointer">
+                                <tr v-for="product in products.data" :key="product.id" class="group hover:bg-gray-50 dark:hover:bg-gray-800 focus-within:bg-gray-50 dark:focus-within:bg-gray-800 transition-colors cursor-pointer" @click="router.visit(route('products.show', product.id))">
                                     <td class="w-10 px-3 py-2.5 text-center" @click.stop>
-                                        <input type="checkbox" :value="String(product.id)" v-model="selectedIds" :aria-label="__('Select') + ' ' + product.name" class="border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
+                                        <input v-model="selectedIds" type="checkbox" :value="String(product.id)" :aria-label="__('Select') + ' ' + product.name" class="border-gray-300 dark:border-gray-600 rounded text-emerald-600 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
                                     </td>
                                     <td class="px-3 py-2.5 sm:sticky sm:start-0 bg-white dark:bg-gray-900 group-hover:bg-gray-50 dark:group-hover:bg-gray-800">
                                         <div class="min-w-0">
@@ -584,9 +584,9 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ formatAmount(product.cost) }}</Ltr></td>
-                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300"><Ltr>{{ formatAmount(product.average_cost) }}</Ltr></td>
-                                    <td class="w-28 px-3 py-2.5 text-end text-sm font-semibold text-gray-900 dark:text-white"><Ltr>{{ formatAmount(product.price) }}</Ltr></td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300">{{ formatAmount(product.cost) }}</td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm text-gray-700 dark:text-gray-300">{{ formatAmount(product.average_cost) }}</td>
+                                    <td class="w-28 px-3 py-2.5 text-end text-sm font-semibold text-gray-900 dark:text-white">{{ formatAmount(product.price) }}</td>
                                     <td class="w-24 px-3 py-2.5 text-end" @click.stop>
                                         <div class="flex items-center justify-end gap-x-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-within:opacity-100 transition-opacity">
                                             <ProductForm :product="product" :categories="categories" :storages="storages" />
@@ -601,7 +601,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" /></svg>
                                                         {{ __("Details") }}
                                                     </Link>
-                                                    <button type="button" @click="toggleGlobalFavorite(product)" class="flex items-center w-full gap-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                                                    <button type="button" class="flex items-center w-full gap-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700" @click="toggleGlobalFavorite(product)">
                                                         <svg xmlns="http://www.w3.org/2000/svg" :fill="product.is_global_favorite ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" :class="product.is_global_favorite ? 'text-emerald-500' : ''"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.66a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" /></svg>
                                                         {{ product.is_global_favorite ? __('Remove favourite') : __('Mark favourite') }}
                                                     </button>
@@ -629,8 +629,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                 <!-- Collapsed state -->
                                 <div
                                     v-if="!newProductExpanded"
-                                    @click="newProductExpanded = true"
                                     class="flex flex-col items-center justify-center h-full min-h-[200px] cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors duration-200"
+                                    @click="newProductExpanded = true"
                                 >
                                     <div class="flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 mb-3">
                                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-emerald-600 dark:text-emerald-400">
@@ -646,8 +646,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                         <h4 class="text-sm font-semibold text-gray-900 dark:text-white">{{ __("New Product") }}</h4>
                                         <button
                                             type="button"
-                                            @click="newProductExpanded = false; newProductForm.reset();"
                                             class="p-1 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg transition-colors duration-200"
+                                            @click="newProductExpanded = false; newProductForm.reset();"
                                         >
                                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -702,9 +702,9 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
                                     <button
                                         type="button"
-                                        @click="submitNewProduct"
                                         :disabled="newProductForm.processing"
                                         class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                        @click="submitNewProduct"
                                     >
                                         {{ __("Save") }}
                                     </button>
@@ -730,13 +730,13 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                         <div class="flex items-center gap-x-1.5 shrink-0">
                                             <button
                                                 type="button"
-                                                @click.stop="toggleGlobalFavorite(product)"
                                                 :aria-pressed="product.is_global_favorite"
                                                 :title="product.is_global_favorite ? __('Remove store favourite') : __('Mark as store favourite')"
                                                 class="inline-flex items-center justify-center p-1 rounded-lg transition-all"
                                                 :class="product.is_global_favorite
                                                     ? 'text-emerald-600 dark:text-emerald-400'
                                                     : 'text-gray-300 hover:text-emerald-600 dark:text-gray-600 dark:hover:text-emerald-400'"
+                                                @click.stop="toggleGlobalFavorite(product)"
                                             >
                                                 <svg v-if="product.is_global_favorite" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
                                                     <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.007Z" clip-rule="evenodd" />
@@ -780,8 +780,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                                 type="text"
                                                 name="name"
                                                 :value="getDraft(product.id).name !== undefined ? getDraft(product.id).name : product.name"
-                                                @input="updateDraft(product.id, 'name', $event.target.value)"
                                                 class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600"
+                                                @input="updateDraft(product.id, 'name', $event.target.value)"
                                             />
                                         </div>
 
@@ -794,8 +794,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                                     name="cost"
                                                     step="0.01"
                                                     :value="getDraft(product.id).cost !== undefined ? getDraft(product.id).cost : product.cost"
-                                                    @input="updateDraft(product.id, 'cost', $event.target.value)"
                                                     class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
+                                                    @input="updateDraft(product.id, 'cost', $event.target.value)"
                                                 />
                                                 <span class="absolute inset-y-0 ltr:right-0 rtl:left-0 flex items-center ltr:pr-3 rtl:pl-3 text-xs font-medium text-gray-400 dark:text-gray-500">{{ product.currency || preferences('currency', 'SDG') }}</span>
                                             </div>
@@ -810,8 +810,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                                     name="price"
                                                     step="0.01"
                                                     :value="getDraft(product.id).price !== undefined ? getDraft(product.id).price : product.price"
-                                                    @input="updateDraft(product.id, 'price', $event.target.value)"
                                                     class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50 placeholder-gray-400 dark:placeholder-gray-600 ltr:pr-14 rtl:pl-14"
+                                                    @input="updateDraft(product.id, 'price', $event.target.value)"
                                                 />
                                                 <span class="absolute inset-y-0 ltr:right-0 rtl:left-0 flex items-center ltr:pr-3 rtl:pl-3 text-xs font-medium text-gray-400 dark:text-gray-500">{{ product.currency || preferences('currency', 'SDG') }}</span>
                                             </div>
@@ -822,8 +822,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                                     <div v-if="isDirty(product)" class="pt-2">
                                         <button
                                             type="button"
-                                            @click="saveCard(product)"
                                             class="w-full inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                            @click="saveCard(product)"
                                         >
                                             {{ __("Save") }}
                                         </button>

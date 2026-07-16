@@ -25,14 +25,7 @@ const availableToAccounts = computed(() =>
     props.accounts.filter((a) => a.id != form.from_account_id)
 );
 
-const formatBalance = (amount, currency = "SDG") => {
-    const validCurrency =
-        currency && /^[A-Z]{3}$/.test(currency) ? currency : "SDG";
-    return new Intl.NumberFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
-        style: "currency",
-        currency: validCurrency,
-    }).format(amount);
-};
+const formatBalance = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const submit = () => {
     form.post(route("treasury.transfer.store"));
@@ -59,7 +52,7 @@ const submit = () => {
                     >
                         {{ __("Cancel") }}
                     </Link>
-                    <PrimaryButton @click="submit" :disabled="form.processing">
+                    <PrimaryButton :disabled="form.processing" @click="submit">
                         <svg v-if="form.processing" class="animate-spin h-4 w-4 ltr:mr-2 rtl:ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 12 0 12 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -69,7 +62,7 @@ const submit = () => {
                 </div>
             </div>
 
-            <form @submit.prevent="submit" class="space-y-6">
+            <form class="space-y-6" @submit.prevent="submit">
                 <div class="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
                         <h3 class="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 dark:text-gray-500">

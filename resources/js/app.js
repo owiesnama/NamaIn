@@ -10,11 +10,18 @@ import { autoAnimatePlugin } from "@formkit/auto-animate/vue";
 import { defineAsyncComponent } from 'vue'
 import CustomSelect from './Components/CustomSelect.vue'
 import Ltr from './Components/Ltr.vue'
+import Money from './Components/Money.vue'
 const DatePicker = defineAsyncComponent(() => import('./Components/DatePicker.vue'))
 
 
 import { translate } from "./Plugins/translations";
 window.__ = translate;
+
+import { formatMoney, formatMoneyPlain, formatAmount, formatAmountPlain } from "./Support/money";
+window.formatMoney = formatMoney;
+window.formatMoneyPlain = formatMoneyPlain;
+window.formatAmount = formatAmount;
+window.formatAmountPlain = formatAmountPlain;
 
 const appName =
     window.document.getElementsByTagName("title")[0]?.innerText || "Laravel";
@@ -38,6 +45,7 @@ createInertiaApp({
             .use(preferences)
             .component('CustomSelect', CustomSelect)
             .component('Ltr', Ltr)
+            .component('Money', Money)
             .component('DatePicker', DatePicker)
             .component('VueMultiselect', CustomSelect)
             .mount(el);

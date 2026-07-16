@@ -21,14 +21,7 @@ const form = useForm({
     receipt: null,
 });
 
-const formatCurrency = (amount) => {
-    const validCurrency = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const addCategory = (newTag) => {
     const tag = { name: newTag, id: newTag };
@@ -61,7 +54,8 @@ const formatDate = (date) => {
                 </h2>
 
                 <div class="flex items-center gap-2">
-                    <span :class="[
+                    <span
+:class="[
                         'px-3 py-1 text-xs font-semibold rounded-full',
                         expense.status === 'approved' ? 'text-emerald-700 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400' :
                         expense.status === 'rejected' ? 'text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400' :
@@ -88,8 +82,8 @@ const formatDate = (date) => {
                         <div class="sm:col-span-2">
                             <InputLabel for="title" :value="__('Title')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <TextInput
-                                v-model="form.title"
                                 id="title"
+                                v-model="form.title"
                                 type="text"
                                 class="block w-full"
                                 required
@@ -102,8 +96,8 @@ const formatDate = (date) => {
                         <div>
                             <InputLabel for="amount" :value="__('Amount')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <TextInput
-                                v-model="form.amount"
                                 id="amount"
+                                v-model="form.amount"
                                 type="number" inputmode="decimal"
                                 step="0.01"
                                 class="block w-full"
@@ -116,8 +110,8 @@ const formatDate = (date) => {
                         <div>
                             <InputLabel for="expensed_at" :value="__('Date')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <DatePicker
-                                v-model="form.expensed_at"
                                 id="expensed_at"
+                                v-model="form.expensed_at"
                                 class="block w-full"
                                 required
                             />
@@ -158,8 +152,8 @@ const formatDate = (date) => {
                         <div class="sm:col-span-2">
                             <InputLabel for="notes" :value="__('Notes')" class="mb-2 text-xs font-bold uppercase tracking-wider text-gray-500" />
                             <textarea
-                                v-model="form.notes"
                                 id="notes"
+                                v-model="form.notes"
                                 rows="4"
                                 class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all outline-none text-gray-900 dark:text-white"
                             ></textarea>

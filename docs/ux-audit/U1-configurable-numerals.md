@@ -1,6 +1,12 @@
+> **DONE.** Implemented as a tenant preference. The §5 correction below drove the
+> final design: one `Support/money.js`, isolation embedded in the formatter output
+> (LRI…PDI for Latin, none for Arabic), the 42 bespoke formatters swept onto it, POS
+> moved to `SDG 25.00`, and a guard test that blocks new bespoke formatters. The
+> default is Arabic-Indic for `ar` tenants, so existing screens are unchanged.
+
 # U1: Configurable numerals (Arabic-Indic ↔ Latin) as a tenant preference
 
-**Status:** Blocked — see §5 · **Size:** L (was scoped as ~2 files; it is ~41) · **Foundation:** parked on `wip/u1-numerals-foundation`
+**Status:** Done — shipped; default preserves existing behavior
 
 ## 1. Problem
 

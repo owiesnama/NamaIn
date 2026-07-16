@@ -23,6 +23,7 @@
         invoicesHeadline: preferences("invoicesHeadline"),
         alerts: truthy(preferences("alerts", true)),
         currency: preferences("currency", "SDG"),
+        numerals: preferences("numerals", "arabic"),
         pecentage: preferences("pecentage", 60),
         inventory_strategy: preferences("inventory_strategy", "purchase_driven"),
         allow_overselling: truthy(preferences("allow_overselling", false)),

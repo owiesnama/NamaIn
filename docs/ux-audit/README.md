@@ -14,7 +14,7 @@ held back, and why.
 
 | Item | Title | Status | Size |
 |---|---|---|---|
-| [U1](U1-configurable-numerals.md) | Configurable numerals (Arabic-Indic ↔ Latin) as a tenant preference | **Blocked** — premise was wrong, see §4/§5. Foundation parked on `wip/u1-numerals-foundation` | L |
+| [U1](U1-configurable-numerals.md) | Configurable numerals (Arabic-Indic ↔ Latin) | **Done** — shipped, default preserves behavior | L |
 | [U2](U2-arabic-translation-coverage.md) | 170 untranslated `__()` keys + CI coverage gate | **Done** — machine-translated + gate live; native refinement optional | M |
 | [U3](U3-rtl-root-migration.md) | Remove the nested `dir` divs now `<html dir>` ships | **Done** | S |
 | [U4](U4-mobile-density.md) | Mobile products table → cards; tap targets; export pill collision | **Done** | M |

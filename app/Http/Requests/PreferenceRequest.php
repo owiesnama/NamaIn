@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Enums\InventoryStrategyType;
+use App\Enums\NumeralSystem;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -23,6 +24,7 @@ class PreferenceRequest extends FormRequest
             'invoicesHeadline' => 'nullable|string|max:500',
             'alerts' => 'nullable',
             'currency' => 'nullable|string|max:10',
+            'numerals' => ['nullable', Rule::enum(NumeralSystem::class)],
             'pecentage' => 'nullable|numeric|min:0|max:100',
             'inventory_strategy' => ['nullable', Rule::enum(InventoryStrategyType::class)],
             'allow_overselling' => 'nullable|boolean',

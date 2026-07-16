@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, computed } from "vue";
+import { ref, watch } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
@@ -42,7 +42,7 @@ const resetFilters = () => {
     };
 };
 
-const fmt = (amount) => Number(amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const fmt = (amount) => window.formatAmount(amount);
 
 const varianceClass = (variance) => {
     if (variance === null) return 'text-gray-400 dark:text-gray-500';
@@ -97,24 +97,24 @@ const variancePrefix = (variance) => {
             <div class="border-b border-gray-200 dark:border-gray-700">
                 <nav class="flex gap-x-1">
                     <button
-                        @click="activeTab = 'transactions'"
                         :class="[
                             'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors duration-200',
                             activeTab === 'transactions'
                                 ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
                                 : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
                         ]"
+                        @click="activeTab = 'transactions'"
                     >
                         {{ __('Transactions') }}
                     </button>
                     <button
-                        @click="activeTab = 'sessions'"
                         :class="[
                             'px-4 py-2.5 text-sm font-medium border-b-2 -mb-px transition-colors duration-200',
                             activeTab === 'sessions'
                                 ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
                                 : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200',
                         ]"
+                        @click="activeTab = 'sessions'"
                     >
                         {{ __('Sessions') }}
                     </button>
@@ -174,8 +174,8 @@ const variancePrefix = (variance) => {
 
                     <div class="mt-4 flex justify-end">
                         <button
-                            @click="resetFilters"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                            @click="resetFilters"
                         >
                             {{ __('Reset') }}
                         </button>

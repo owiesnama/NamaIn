@@ -1,7 +1,7 @@
 <script setup>
     import Card from "@/Pages/Purchases/Card.vue";
     import { Head, useForm } from "@inertiajs/vue3";
-    import { computed, ref } from "vue";
+    import { ref } from "vue";
 
     import SecondaryButton from "@/Components/SecondaryButton.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
@@ -10,7 +10,7 @@
     import { useDate } from '@/Composables/useDate';
 
 
-    const props = defineProps({
+    defineProps({
         invoice: Object,
         storages: Array
     });
@@ -42,34 +42,25 @@
 
     const { formatDate } = useDate();
 
-    const lang = window.lang || 'en';
-
-    const formatCurrency = (amount, currency = null) => {
-        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-            (props.invoice?.currency && /^[A-Z]{3}$/.test(props.invoice.currency) ? props.invoice.currency :
-                (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG'));
-
-        return new Intl.NumberFormat(lang === 'ar' ? 'ar-SA' : 'en-US', {
-            style: 'currency',
-            currency: validCurrency,
-        }).format(amount || 0);
-    };
+    const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 </script>
 
 <template>
     <Head :title="__('Invoice')" />
     <div class="m-2">
-        <card v-if="invoice.invocable_type?.includes('Supplier')"
+        <card
+v-if="invoice.invocable_type?.includes('Supplier')"
               :invoice="invoice"
               :storages="storages"
-              @moveToStorage="(inv) => openDeliveryModal(inv, 'add')"
-              :actionTitle="__('Deliver to Storage')" :printable="false"></card>
-        <card v-else
+              :action-title="__('Deliver to Storage')"
+              :printable="false" @moveToStorage="(inv) => openDeliveryModal(inv, 'add')"></card>
+        <card
+v-else
               :invoice="invoice"
               :storages="storages"
-              @moveToStorage="(inv) => openDeliveryModal(inv, 'deduct')"
-              :actionTitle="__('Deduct From Storage')" :printable="false"></card>
+              :action-title="__('Deduct From Storage')"
+              :printable="false" @moveToStorage="(inv) => openDeliveryModal(inv, 'deduct')"></card>
 
         <!-- Payment Information -->
         <div class="mt-6 bg-white rounded-lg shadow-md p-6 dark:bg-gray-800">
