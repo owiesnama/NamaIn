@@ -7,11 +7,16 @@ import TextArea from "@/Components/TextArea.vue";
 import CustomSelect from "@/Components/CustomSelect.vue";
 import { ref, computed, watch } from "vue";
 import { useForm, Link } from "@inertiajs/vue3";
+import { useCurrency } from "@/Composables/useCurrency";
+import { useDate } from "@/Composables/useDate";
 
 const props = defineProps({
     invoice: Object,
     payment_methods: Object,
 });
+
+const { formatCurrency } = useCurrency();
+const { formatDate } = useDate();
 
 const returnItems = ref(props.invoice.transactions.map(transaction => ({
     transaction_id: transaction.id,
@@ -256,11 +261,11 @@ const submit = () => {
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">{{ __("Date") }}</span>
-                            <span class="font-medium text-gray-700 dark:text-gray-300">{{ new Date(invoice.created_at).toLocaleDateString() }}</span>
+                            <span class="font-medium text-gray-700 dark:text-gray-300">{{ formatDate(invoice.created_at) }}</span>
                         </div>
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-500">{{ __("Original Total") }}</span>
-                            <span class="font-medium text-gray-700 dark:text-gray-300">{{ Number(invoice.total).toFixed(2) }} {{ invoice.currency }}</span>
+                            <span class="font-medium text-gray-700 dark:text-gray-300"><Ltr>{{ formatCurrency(invoice.total, invoice.currency) }}</Ltr></span>
                         </div>
                     </div>
                 </div>

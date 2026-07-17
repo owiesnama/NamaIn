@@ -1,5 +1,6 @@
 <script setup>
     import { computed } from "vue";
+    import { useCurrency } from "@/Composables/useCurrency";
 
     const props = defineProps({
         invoice: Object,
@@ -9,13 +10,10 @@
         }
     });
 
-    let totalPrice = (record) => {
-        const total = record.price * record.quantity;
-        const currency = (record.currency && /^[A-Z]{3}$/.test(record.currency)) ? record.currency :
-            (props.invoice?.currency && /^[A-Z]{3}$/.test(props.invoice.currency) ? props.invoice.currency :
-            (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG'));
-        return `${total} ${currency}`;
-    };
+    const { formatCurrency, formatAmount } = useCurrency();
+
+    let totalPrice = (record) =>
+        formatCurrency(record.price * record.quantity, record.currency ?? props.invoice?.currency);
     let deliveredRecords = computed(() => {
         return props.invoice.transactions.filter((transaction) => {
             return transaction.delivered;
@@ -101,7 +99,7 @@
 
                                 <td
                                     class="px-8 py-3 text-sm text-left rtl:text-right text-emerald-500 whitespace-nowrap"
-                                    v-text="record.price"
+                                    v-text="formatAmount(record.price)"
                                 ></td>
 
                                 <td
@@ -145,7 +143,7 @@
 
                                     <td
                                         class="px-8 py-3 text-sm text-left rtl:text-right text-emerald-500 whitespace-nowrap"
-                                        v-text="record.price"
+                                        v-text="formatAmount(record.price)"
                                     ></td>
 
                                     <td
