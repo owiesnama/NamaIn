@@ -27,7 +27,17 @@ class ProductPolicy
         return $user->hasPermission('products.update');
     }
 
+    public function updateAny(User $user): bool
+    {
+        return $user->hasPermission('products.update');
+    }
+
     public function delete(User $user, Product $product): bool
+    {
+        return $user->hasPermission('products.delete');
+    }
+
+    public function deleteAny(User $user): bool
     {
         return $user->hasPermission('products.delete');
     }
