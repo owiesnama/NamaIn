@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\SubscriptionStatus;
 use Database\Factories\TenantFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -64,6 +66,61 @@ class Tenant extends Model
     public function storages(): HasMany
     {
         return $this->hasMany(Storage::class);
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
+    }
+
+    public function featureOverrides(): HasMany
+    {
+        return $this->hasMany(TenantFeatureOverride::class);
+    }
+
+    /**
+     * The tenant's current live subscription: active, or trialing within its
+     * trial window, and not past its end date. Newest wins if several exist.
+     */
+    public function currentSubscription(): ?Subscription
+    {
+        return $this->subscriptions()
+            ->whereIn('status', array_map(fn ($s) => $s->value, SubscriptionStatus::live()))
+            ->where(function ($query) {
+                $query->whereNull('ends_at')->orWhere('ends_at', '>', now());
+            })
+            ->where(function ($query) {
+                $query->where('status', SubscriptionStatus::Active->value)
+                    ->orWhere(function ($trial) {
+                        $trial->where('status', SubscriptionStatus::Trialing->value)
+                            ->where(function ($window) {
+                                $window->whereNull('trial_ends_at')->orWhere('trial_ends_at', '>', now());
+                            });
+                    });
+            })
+            ->latest('starts_at')
+            ->first();
+    }
+
+    /**
+     * The plan whose entitlements apply: the current subscription's plan, or
+     * the default (free) plan when there is no live subscription.
+     */
+    public function activePlan(): ?Plan
+    {
+        return $this->currentSubscription()?->plan ?? Plan::where('is_default', true)->first();
+    }
+
+    /**
+     * @return Collection<int, TenantFeatureOverride>
+     */
+    public function liveFeatureOverrides(): Collection
+    {
+        return $this->featureOverrides()
+            ->where(function ($query) {
+                $query->whereNull('expires_at')->orWhere('expires_at', '>', now());
+            })
+            ->get();
     }
 
     public function owner(): ?User
