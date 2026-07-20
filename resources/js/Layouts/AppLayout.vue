@@ -57,7 +57,7 @@
 </script>
 
 <template>
-    <div :dir="direction">
+    <div>
         <Head :title="__(title)" />
 
         <ImpersonationBanner />
@@ -69,7 +69,7 @@
             <!-- ─────────────────────────────────────────
                  SIDEBAR
                  Slide-over drawer below lg (1024px); static side pane at lg+.
-                 Anchored to the inline-start edge, direction-aware via :dir.
+                 Anchored to the inline-start edge; direction comes from <html dir>.
             ───────────────────────────────────────── -->
             <!-- Drawer backdrop (below lg) -->
             <Transition
@@ -102,7 +102,7 @@
                     </Link>
                     <button
                         type="button"
-                        class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
+                        class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
                         @click="showingSidebar = false"
                     >
                         <span class="sr-only">{{ __('Close navigation') }}</span>
@@ -187,6 +187,14 @@
                                 <span>{{ __('Storages') }}</span>
                             </NavLink>
                         </SidebarGroup>
+
+                        <!-- Bookings -->
+                        <NavLink :href="route('bookings.index')" :active="route().current('bookings.*')">
+                            <svg class="h-5 w-5 shrink-0 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                            </svg>
+                            <span>{{ __('Bookings') }}</span>
+                        </NavLink>
 
                         <!-- Relations -->
                         <SidebarGroup
@@ -484,7 +492,7 @@
                 <div class="flex h-14 lg:h-16 shrink-0 items-center gap-x-3 border-b border-gray-100 bg-white px-4 dark:border-gray-700 dark:bg-gray-900 sm:px-6 lg:px-8">
                     <button
                         type="button"
-                        class="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
+                        class="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:hover:bg-gray-800 dark:hover:text-gray-300 lg:hidden"
                         @click="showingSidebar = true"
                     >
                         <span class="sr-only">{{ __('Open navigation') }}</span>

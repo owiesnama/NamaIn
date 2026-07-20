@@ -7,15 +7,7 @@ defineProps({
     payment: Object,
 });
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const { formatDate } = useDate();
 </script>
@@ -102,7 +94,7 @@ const { formatDate } = useDate();
                                 <Link :href="route('invoices.show', payment.invoice.id)" class="text-sm font-bold text-emerald-600 hover:underline">
                                     #{{ payment.invoice.serial_number }}
                                 </Link>
-                                <p class="text-xs text-gray-500" v-if="payment.invoice.invocable">
+                                <p v-if="payment.invoice.invocable" class="text-xs text-gray-500">
                                     {{ payment.invoice.invocable.name }}
                                 </p>
                             </div>

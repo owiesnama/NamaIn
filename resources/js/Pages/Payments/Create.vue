@@ -5,7 +5,7 @@ import TextInput from "@/Components/TextInput.vue";
 import InputError from "@/Components/InputError.vue";
 import FileUploader from "@/Components/FileUploader.vue";
 import WarningAlert from "@/Components/WarningAlert.vue";
-import { useForm, Link } from "@inertiajs/vue3";
+import { useForm } from "@inertiajs/vue3";
 import { ref, computed, watch } from "vue";
 
 const props = defineProps({
@@ -95,16 +95,7 @@ watch(() => form.payment_method, () => {
     form.treasury_account_id = null;
 });
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (selectedInvoiceData.value?.currency && /^[A-Z]{3}$/.test(selectedInvoiceData.value.currency) ? selectedInvoiceData.value.currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG'));
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const submit = () => {
     if (selectedInvoice.value) {
@@ -230,13 +221,13 @@ const submit = () => {
                     <div class="flex gap-x-2">
                         <button
                             type="button"
-                            @click="form.direction = 'in'"
                             :class="[
                                 'flex-1 inline-flex items-center justify-center gap-x-2 px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200',
                                 form.direction === 'in'
                                     ? 'bg-emerald-600 border-emerald-600 text-white'
                                     : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                             ]"
+                            @click="form.direction = 'in'"
                         >
                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5 12 21m0 0-7.5-7.5M12 21V3" />
@@ -245,13 +236,13 @@ const submit = () => {
                         </button>
                         <button
                             type="button"
-                            @click="form.direction = 'out'"
                             :class="[
                                 'flex-1 inline-flex items-center justify-center gap-x-2 px-4 py-2 text-sm font-medium rounded-lg border transition-colors duration-200',
                                 form.direction === 'out'
                                     ? 'bg-red-600 border-red-600 text-white'
                                     : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
                             ]"
+                            @click="form.direction = 'out'"
                         >
                             <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5 12 3m0 0 7.5 7.5M12 3v18" />

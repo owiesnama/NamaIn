@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watchEffect, onUnmounted } from "vue";
 import { router, useForm, usePage } from "@inertiajs/vue3";
 import axios from "axios";
 import AppLayout from "@/Layouts/AppLayout.vue";
@@ -38,7 +38,7 @@ const props = defineProps({
 
 const page = usePage();
 const currency = window.preferences?.('currency') || 'SDG';
-const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${currency}`;
+const fmt = (val) => window.formatMoney(val);
 
 // When the tenant allows overselling, the POS never blocks on stock — sales
 // drive the sale-point balance negative and are reconciled later.
@@ -127,6 +127,16 @@ const unavailableProducts = ref([]);
 const completedSale = ref({ invoiceId: null, total: 0, paymentMethod: 'cash', change: null });
 const showingCloseModal = ref(false);
 const showingCart = ref(false);
+
+// The floating cart bar occupies the same bottom band as the app's floating
+// pills, which outrank it on z-index and would cover the running total. Flag the
+// band as taken while the bar is up so they stack above it instead; app.css
+// scopes the offset to the stacked layout, where the bar actually renders.
+watchEffect(() => {
+    document.documentElement.classList.toggle("has-bottom-bar", !showingCart.value);
+});
+
+onUnmounted(() => document.documentElement.classList.remove("has-bottom-bar"));
 
 const checkoutForm = useForm({
     session_id: props.session.id,
@@ -310,7 +320,7 @@ const paymentMethodLabels = [
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" /></svg>
                                 </button>
                             </div>
-                            <span class="text-sm font-bold text-gray-900 dark:text-white"><Ltr>{{ fmt(item.quantity * item.price) }}</Ltr></span>
+                            <span class="text-sm font-bold text-gray-900 dark:text-white">{{ fmt(item.quantity * item.price) }}</span>
                         </div>
                         <div v-if="!oversellingEnabled && item.sale_point_qty < item.quantity && item.replenishment" class="flex items-center gap-x-1 mt-2 px-2 py-1.5 bg-amber-100 dark:bg-amber-900/20 rounded-lg">
                             <svg class="h-3 w-3 text-amber-600 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg>
@@ -340,14 +350,14 @@ const paymentMethodLabels = [
                                 <button type="button" class="px-2.5 py-1.5 text-xs font-semibold transition-colors" :class="discountType === 'flat' ? 'bg-emerald-600 text-white' : 'bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400 hover:bg-gray-50'" @click="discountType = 'flat'">{{ currency }}</button>
                             </div>
                             <input v-model="discountValue" type="number" inputmode="decimal" min="0" :max="discountType === 'percent' ? 100 : cartSubtotal" :placeholder="discountType === 'percent' ? '0' : '0.00'" class="flex-1 text-sm px-3 py-1.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50" />
-                            <span v-if="discountAmount > 0" class="text-xs font-semibold text-red-500 shrink-0">-{{ fmt(discountAmount) }}</span>
+                            <span v-if="discountAmount > 0" class="text-xs font-semibold text-red-500 shrink-0">{{ fmt(-discountAmount) }}</span>
                         </div>
                     </div>
                     <div class="flex justify-between items-center pt-1">
                         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Total') }}</span>
                         <div class="text-end">
                             <span v-if="discountAmount > 0" class="block text-xs line-through text-gray-400 dark:text-gray-600 ltr:text-right rtl:text-left">{{ fmt(cartSubtotal) }}</span>
-                            <span class="text-2xl font-bold text-emerald-600"><Ltr>{{ fmt(total) }}</Ltr></span>
+                            <span class="text-2xl font-bold text-emerald-600">{{ fmt(total) }}</span>
                         </div>
                     </div>
                     <button type="button" class="w-full py-4 text-base font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed" :class="!oversellingEnabled && cart.some(i => i.sale_point_qty < i.quantity) ? 'bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500' : 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-500'" :disabled="cart.length === 0 || checkoutForm.processing || (!oversellingEnabled && cart.some(i => i.sale_point_qty < i.quantity && !i.replenishment))" @click="openCheckoutModal">
@@ -372,7 +382,7 @@ const paymentMethodLabels = [
                     {{ __('Cart') }}
                     <span v-if="cart.length > 0" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-[10px] font-bold rounded-full bg-white/20">{{ cart.length }}</span>
                 </span>
-                <span class="text-base font-bold"><Ltr>{{ fmt(total) }}</Ltr></span>
+                <span class="text-base font-bold">{{ fmt(total) }}</span>
             </button>
         </div>
 

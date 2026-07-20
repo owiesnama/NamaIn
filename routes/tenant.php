@@ -6,6 +6,11 @@ use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Auth\MustChangePasswordController;
 use App\Http\Controllers\Auth\ResendVerificationController;
 use App\Http\Controllers\Auth\TenantLoginController;
+use App\Http\Controllers\BookingsController;
+use App\Http\Controllers\Catalog\BulkAdjustStockController;
+use App\Http\Controllers\Catalog\BulkDeleteProductsController;
+use App\Http\Controllers\Catalog\BulkExportProductsController;
+use App\Http\Controllers\Catalog\BulkUpdatePricesController;
 use App\Http\Controllers\Catalog\ProductExportController;
 use App\Http\Controllers\Catalog\ProductGlobalFavoriteController;
 use App\Http\Controllers\Catalog\ProductImportController;
@@ -176,7 +181,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/customers/export', [CustomerExportController::class, 'store'])->name('customers.export');
         Route::post('/customers/import', [CustomerImportController::class, 'store'])->name('customers.import');
         Route::get('/customers/import/sample', [CustomerImportController::class, 'show'])->name('customers.import.sample');
-        Route::resource('/customers', CustomersController::class);
+        Route::resource('/customers', CustomersController::class)->except(['create', 'show', 'edit']);
         Route::get('/customers/{customer}/account', [CustomerAccountController::class, 'show'])->name('customers.account');
         Route::get('/customers/{customer}/statement', [CustomerStatementController::class, 'show'])->name('customers.statement');
         Route::get('/customers/{customer}/statement/print', [CustomerStatementController::class, 'store'])->name('customers.print-statement');
@@ -193,7 +198,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/suppliers/export', [SupplierExportController::class, 'store'])->name('suppliers.export');
         Route::post('/suppliers/import', [SupplierImportController::class, 'store'])->name('suppliers.import');
         Route::get('/suppliers/import/sample', [SupplierImportController::class, 'show'])->name('suppliers.import.sample');
-        Route::resource('/suppliers', SuppliersController::class);
+        Route::resource('/suppliers', SuppliersController::class)->except(['create', 'show', 'edit']);
         Route::get('/suppliers/{supplier}/account', [SupplierAccountController::class, 'show'])->name('suppliers.account');
         Route::get('/suppliers/{supplier}/statement', [SupplierStatementController::class, 'show'])->name('suppliers.statement');
         Route::get('/suppliers/{supplier}/statement/print', [SupplierStatementController::class, 'store'])->name('suppliers.print-statement');
@@ -209,7 +214,21 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/products/import/sample', [ProductImportController::class, 'show'])->name('products.import.sample');
         Route::patch('/products/{product}/quick-update', [ProductsController::class, 'quickUpdate'])->name('products.quick-update');
         Route::patch('/products/{product}/global-favorite', [ProductGlobalFavoriteController::class, 'update'])->name('products.global-favorite');
-        Route::resource('/products', ProductsController::class);
+        Route::delete('/products/bulk', BulkDeleteProductsController::class)->name('products.bulk.destroy');
+        Route::patch('/products/bulk/price', BulkUpdatePricesController::class)->name('products.bulk.price');
+        Route::post('/products/bulk/stock', BulkAdjustStockController::class)->name('products.bulk.stock');
+        Route::post('/products/bulk/export', BulkExportProductsController::class)->name('products.bulk.export');
+        Route::resource('/products', ProductsController::class)->except(['create', 'edit']);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Bookings
+        |--------------------------------------------------------------------------
+        | Merchant-side appointments for bookable service products: create/edit,
+        | a tenant-wide calendar, and merchant-only cancellation.
+        */
+        Route::patch('/bookings/{booking}/cancel', [BookingsController::class, 'cancel'])->name('bookings.cancel');
+        Route::resource('/bookings', BookingsController::class)->except(['show', 'create', 'edit', 'destroy']);
 
         /*
         |--------------------------------------------------------------------------
@@ -218,7 +237,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Storage locations, manual stock adjustments, add/deduct stock operations,
         | and inter-storage stock transfers.
         */
-        Route::resource('/storages', StoragesController::class);
+        Route::resource('/storages', StoragesController::class)->except(['create', 'edit']);
         Route::post('/storages/{storage}/adjust/{product}', [StockAdjustmentController::class, 'store'])->name('storages.adjust');
         Route::put('/stock/{storage}/add', [StockAdditionController::class, 'store'])->name('stock.add');
         Route::put('/stock/{storage}/deduct', [StockDeductionController::class, 'store'])->name('stock.deduct');
@@ -237,7 +256,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Purchase invoices, goods receiving, and purchase return (credit notes).
         */
-        Route::resource('/purchases', PurchasesController::class)->parameters(['purchases' => 'invoice']);
+        Route::resource('/purchases', PurchasesController::class)->except(['show', 'destroy'])->parameters(['purchases' => 'invoice']);
         Route::post('/purchases/receive/{transaction}', [PurchaseReceiptController::class, 'store'])->name('purchases.receive');
         Route::get('/purchases/{invoice}/return', [PurchaseReturnController::class, 'create'])->name('purchases.return.create');
         Route::post('/purchases/{invoice}/return', [PurchaseReturnController::class, 'store'])->name('purchases.return.store');
@@ -249,7 +268,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Sales invoices, POS session management (open/checkout/close),
         | and sale return (credit notes).
         */
-        Route::resource('/sales', SalesController::class)->parameters(['sales' => 'invoice']);
+        Route::resource('/sales', SalesController::class)->except(['show', 'destroy'])->parameters(['sales' => 'invoice']);
         Route::middleware('feature:pos')->group(function () {
             Route::get('/pos', [PosSessionController::class, 'show'])->name('pos.index');
             Route::get('/pos/invoices', [PosInvoicesController::class, 'index'])->name('pos.invoices');
@@ -298,9 +317,9 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Payment records, cheque management, payee invoice lookup,
         | and cheque status updates.
         */
-        Route::resource('/payments', PaymentsController::class);
+        Route::resource('/payments', PaymentsController::class)->except(['edit', 'update', 'destroy']);
         Route::middleware('feature:cheques')->group(function () {
-            Route::resource('/cheques', ChequesController::class);
+            Route::resource('/cheques', ChequesController::class)->except(['show']);
             Route::get('/payee-invoices', [ChequePayeeInvoiceController::class, 'index'])->name('cheques.payee-invoices');
             Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.update-status');
         });
@@ -312,7 +331,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | One-time and recurring expense management, expense approval workflow,
         | receipt viewing, and bulk export.
         */
-        Route::resource('/recurring-expenses', RecurringExpensesController::class);
+        Route::resource('/recurring-expenses', RecurringExpensesController::class)->except(['show']);
         Route::put('/recurring-expenses/{recurring_expense}/toggle', [RecurringExpenseStatusController::class, 'update'])->name('recurring-expenses.toggle');
         Route::get('/expenses/export', [ExpenseExportController::class, 'store'])->name('expenses.export');
         Route::resource('/expenses', ExpensesController::class);

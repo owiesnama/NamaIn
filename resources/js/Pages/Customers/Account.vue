@@ -74,15 +74,7 @@ function statusClass(status) {
     }[status] ?? 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-800 dark:text-gray-400';
 }
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -228,9 +220,9 @@ const formatDate = (dateString) => {
                     <label for="tabs" class="sr-only">{{ __("Select a tab") }}</label>
                     <select
                         id="tabs"
+                        v-model="activeTab"
                         name="tabs"
                         class="block w-full rounded-md border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
-                        v-model="activeTab"
                     >
                         <option v-for="tab in tabs" :key="tab.id" :value="tab.id">{{ __(tab.name) }}</option>
                     </select>
@@ -241,13 +233,13 @@ const formatDate = (dateString) => {
                             <button
                                 v-for="tab in tabs"
                                 :key="tab.id"
-                                @click="activeTab = tab.id"
                                 :class="[
                                     activeTab === tab.id
                                         ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
                                     'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
                                 ]"
+                                @click="activeTab = tab.id"
                             >
                                 {{ __(tab.name) }}
                             </button>
@@ -283,7 +275,8 @@ const formatDate = (dateString) => {
                                     <td class="px-6 py-4 text-sm text-emerald-600 font-medium whitespace-nowrap">{{ formatCurrency(invoice.paid_amount, invoice.currency) }}</td>
                                     <td class="px-6 py-4 text-sm text-red-600 font-bold whitespace-nowrap">{{ formatCurrency(invoice.remaining_balance, invoice.currency) }}</td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap">
-                                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full"
+                                        <span
+class="px-2.5 py-0.5 text-xs font-semibold rounded-full"
                                             :class="{
                                                 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': invoice.payment_status === 'unpaid',
                                                 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400': invoice.payment_status === 'partially_paid',
@@ -387,8 +380,8 @@ const formatDate = (dateString) => {
                     <!-- Record Advance button -->
                     <div class="flex justify-end mb-4">
                         <button
-                            @click="showAdvanceForm = !showAdvanceForm"
                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-white bg-emerald-600 border border-transparent rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                            @click="showAdvanceForm = !showAdvanceForm"
                         >
                             <svg class="h-4 w-4 ltr:mr-2 rtl:ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -400,7 +393,7 @@ const formatDate = (dateString) => {
                     <!-- Record Advance Form -->
                     <div v-if="showAdvanceForm" class="mb-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
                         <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-4">{{ __("Record New Advance") }}</h3>
-                        <form @submit.prevent="submitAdvance" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <form class="grid grid-cols-1 gap-4 sm:grid-cols-2" @submit.prevent="submitAdvance">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right mb-1">{{ __("Amount") }}</label>
                                 <input
@@ -448,8 +441,8 @@ const formatDate = (dateString) => {
                             <div class="sm:col-span-2 flex justify-end gap-x-3">
                                 <button
                                     type="button"
-                                    @click="showAdvanceForm = false"
                                     class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                    @click="showAdvanceForm = false"
                                 >
                                     {{ __("Cancel") }}
                                 </button>
@@ -498,8 +491,8 @@ const formatDate = (dateString) => {
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <button
                                                 v-if="advance.status !== 'settled'"
-                                                @click="openSettle(advance)"
                                                 class="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors duration-200"
+                                                @click="openSettle(advance)"
                                             >
                                                 {{ __("Settle") }}
                                             </button>
@@ -532,7 +525,7 @@ const formatDate = (dateString) => {
                                     </p>
                                 </div>
 
-                                <form @submit.prevent="submitSettle" class="space-y-4">
+                                <form class="space-y-4" @submit.prevent="submitSettle">
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 rtl:text-right mb-1">{{ __("Settlement Amount") }}</label>
                                         <input
@@ -585,8 +578,8 @@ const formatDate = (dateString) => {
                                     <div class="flex justify-end gap-x-3 mt-6">
                                         <button
                                             type="button"
-                                            @click="settlingAdvance = null"
                                             class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                            @click="settlingAdvance = null"
                                         >
                                             {{ __("Cancel") }}
                                         </button>

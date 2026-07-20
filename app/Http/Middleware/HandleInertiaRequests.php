@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\NumeralSystem;
 use App\Facades\Cache;
 use App\Features\Facades\Entitlements;
 use App\Models\Preference;
@@ -83,6 +84,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => session()->get('success'),
                 'error' => session()->get('error'),
                 'response' => session()->get('response'),
+                'travel_buffer_warnings' => session()->get('travel_buffer_warnings'),
             ],
             'isSuperAdmin' => fn () => Auth::guard('admin')->check(),
             'isImpersonating' => fn () => (bool) session('impersonating_from'),
@@ -131,6 +133,13 @@ class HandleInertiaRequests extends Middleware
 
         if (! empty($prefs['logo']) && ! str_starts_with($prefs['logo'], 'http') && ! str_starts_with($prefs['logo'], '/')) {
             $prefs['logo'] = asset('storage/'.$prefs['logo']);
+        }
+
+        // A tenant that has never chosen a numeral system follows its language,
+        // so the frontend always receives a concrete value and never has to
+        // re-derive the default.
+        if (empty($prefs['numerals'])) {
+            $prefs['numerals'] = NumeralSystem::defaultForLocale(app()->getLocale())->value;
         }
 
         return $prefs;

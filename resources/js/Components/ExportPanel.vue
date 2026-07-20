@@ -122,7 +122,7 @@ const ringCircumference = 2 * Math.PI * 13; // r=13 for size=30
         >
             <div
                 v-if="panelOpen"
-                class="fixed bottom-16 z-50 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
+                class="fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+var(--floating-stack-offset))] z-50 w-80 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
                 :class="[isRtl ? 'left-4' : 'right-4']"
                 style="end: 1rem; bottom: 4rem;"
             >
@@ -253,7 +253,7 @@ const ringCircumference = 2 * Math.PI * 13; // r=13 for size=30
             <button
                 v-if="!panelOpen"
                 @click="togglePanel"
-                class="fixed bottom-4 z-50 inline-flex items-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
+                class="fixed bottom-[calc(1rem+env(safe-area-inset-bottom)+var(--floating-stack-offset))] z-50 inline-flex items-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 shadow-sm hover:shadow-md hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
                 :class="[isRtl ? 'left-4' : 'right-4']"
                 style="end: 1rem;"
             >

@@ -128,6 +128,17 @@ class Tenant extends Model
         return $this->users()->wherePivot('role', 'owner')->first();
     }
 
+    /**
+     * The "merchant" recipients for booking notifications: the owner and every
+     * admin of the tenant. Resolved in the unbound reminder scan.
+     *
+     * @return Collection<int, User>
+     */
+    public function merchantUsers(): Collection
+    {
+        return $this->users()->wherePivotIn('role', ['owner', 'admin'])->get();
+    }
+
     public function isActive(): bool
     {
         return $this->is_active;

@@ -28,7 +28,7 @@ const {
     loading: productsLoading,
     loadMore: loadMoreProducts,
     onSearch: searchProducts,
-} = useAsyncOptions(route("api.products.index"));
+} = useAsyncOptions(route("api.products.index", { line_sale: 1 }));
 
 const selectedCustomer = ref(props.quote?.customer ?? null);
 const showQuickAddModal = ref(false);
@@ -197,7 +197,7 @@ const submit = () => {
                         <div class="col-span-2">{{ __("Unit") }}</div>
                         <div class="col-span-2">{{ __("Qty") }}</div>
                         <div class="col-span-2">{{ __("Unit price") }}</div>
-                        <div class="col-span-2 text-right pr-8">{{ __("Total") }}</div>
+                        <div class="col-span-2 text-end pe-8">{{ __("Total") }}</div>
                     </div>
 
                     <div class="divide-y divide-gray-50 dark:divide-gray-700/50" v-auto-animate>
@@ -205,6 +205,9 @@ const submit = () => {
                             <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start">
                                 <div class="md:col-span-4">
                                     <label class="md:hidden text-xs font-bold uppercase tracking-wider text-gray-400 mb-1 block">{{ __("Product") }}</label>
+                                    <!-- Bookable services are excluded from this picker (line_sale filter);
+                                         they are booked via the calendar. Physical goods and walk-in
+                                         (requires_booking=false) services remain sellable as line items. -->
                                     <CustomSelect
                                         :model-value="item.product"
                                         :options="productOptions"

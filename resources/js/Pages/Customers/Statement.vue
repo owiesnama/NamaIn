@@ -18,15 +18,7 @@ const filters = ref({
     end_date: props.end_date ? props.end_date.slice(0, 10) : "",
 });
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const { formatDate } = useDate();
 
@@ -74,8 +66,8 @@ const statementLines = computed(() => {
                 </h2>
                 <div class="flex gap-x-3">
                     <button
-                        @click="printStatement"
                         class="px-5 py-2 text-sm text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700"
+                        @click="printStatement"
                     >
                         {{ __("Print") }}
                     </button>
@@ -101,8 +93,8 @@ const statementLines = computed(() => {
                     </div>
                     <div>
                         <button
-                            @click="applyFilters"
                             class="w-full px-5 py-2 text-sm text-white bg-emerald-500 rounded-lg hover:bg-emerald-600"
+                            @click="applyFilters"
                         >
                             {{ __("Filter") }}
                         </button>

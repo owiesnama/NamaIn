@@ -20,14 +20,7 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
     const showSidebar = useFilterSidebar();
 
-    const formatCurrency = (amount, currency = null) => {
-        const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency : 'SDG';
-
-        return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-            style: 'currency',
-            currency: validCurrency,
-        }).format(amount || 0);
-    };
+    const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
     let landMark = ref(null);
     let cheques = ref(props.initialCheques.data);
@@ -162,12 +155,12 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                 class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0"
             >
                 <button
-                    @click="showSidebar = !showSidebar"
                     :class="[
                         'inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors',
                         showSidebar ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20' : ''
                     ]"
                     :title="__('Filters')"
+                    @click="showSidebar = !showSidebar"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
@@ -187,8 +180,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
         <div class="grid grid-cols-1 gap-5 mt-6 sm:grid-cols-3">
             <!-- Total Receivable -->
             <div
-                @click="filters.type = 1"
                 class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group cursor-pointer"
+                @click="filters.type = 1"
             >
                 <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -203,8 +196,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
             <!-- Total Payable -->
             <div
-                @click="filters.type = 0"
                 class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group cursor-pointer"
+                @click="filters.type = 0"
             >
                 <div class="p-2 rounded-lg bg-red-500/10 text-red-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -219,8 +212,8 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
             <!-- Overdue Count -->
             <div
-                @click="filters.due = new Date().toISOString().split('T')[0]"
                 class="relative px-4 py-5 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 sm:p-6 flex items-center hover:bg-gray-50 dark:hover:bg-gray-800 transition-all group cursor-pointer"
+                @click="filters.due = new Date().toISOString().split('T')[0]"
             >
                 <div class="p-2 rounded-lg bg-amber-500/10 text-amber-600 ltr:mr-4 rtl:ml-4 group-hover:scale-110 transition-transform flex-shrink-0">
                     <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -236,11 +229,11 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
 
         <div class="flex flex-col mt-8 lg:flex-row lg:gap-x-6">
             <FilterSidebar
-                :show="showSidebar"
-                @close="showSidebar = false"
                 v-model:filters="filters"
+                :show="showSidebar"
                 :sort-by-options="sortByOptions"
                 :all-label="__('All Cheques')"
+                @close="showSidebar = false"
                 @reset="resetFilters"
             >
                 <template #extra-filters>
@@ -249,29 +242,29 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                         <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __("Type") }}</label>
                         <div class="flex bg-gray-50 border border-gray-200 divide-x rounded-lg dark:bg-gray-800 dark:border-gray-700 dark:divide-gray-700 rtl:flex-row-reverse overflow-hidden h-9">
                             <button
-                                @click="filters.type = null"
                                 :class="[
                                     'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                                     filters.type === null || filters.type === '' ? 'bg-gray-100 dark:bg-gray-700' : 'text-gray-600'
                                 ]"
+                                @click="filters.type = null"
                             >
                                 {{ __("All") }}
                             </button>
                             <button
-                                @click="filters.type = 1"
                                 :class="[
                                     'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                                     filters.type == 1 ? 'bg-gray-100 dark:bg-gray-700' : 'text-gray-600'
                                 ]"
+                                @click="filters.type = 1"
                             >
                                 {{ __("Receivable") }}
                             </button>
                             <button
-                                @click="filters.type = 0"
                                 :class="[
                                     'px-2 flex-1 shrink-0 py-2 text-xs font-semibold transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                                     filters.type === 0 || filters.type === '0' ? 'bg-gray-100 dark:bg-gray-700' : 'text-gray-600'
                                 ]"
+                                @click="filters.type = 0"
                             >
                                 {{ __("Payable") }}
                             </button>

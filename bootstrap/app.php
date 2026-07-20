@@ -5,6 +5,7 @@ use App\Http\Middleware\EnsureFeatureIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLocale;
 use App\Models\Tenant;
+use App\Services\TenantLocaleResolver;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -103,9 +104,12 @@ return Application::configure(basePath: dirname(__DIR__))
                 default => '/',
             };
 
+            TenantLocaleResolver::ensureResolved($request);
+
             return Inertia::render('Error', [
                 'status' => $status,
                 'homeUrl' => $homeUrl,
+                ...TenantLocaleResolver::inertiaLocaleProps(),
             ])->toResponse($request)->setStatusCode($status);
         });
     })->create();

@@ -160,7 +160,7 @@ const ringCircumference = 2 * Math.PI * 13;
             <div
                 v-if="panelOpen"
                 data-testid="operations-panel"
-                class="fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] z-50 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
+                class="fixed bottom-[calc(4rem+env(safe-area-inset-bottom)+var(--floating-stack-offset))] z-50 w-80 max-w-[calc(100vw-2rem)] bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-sm overflow-hidden"
                 :class="[isRtl ? 'left-4' : 'right-4']"
             >
                 <!-- Header -->
@@ -289,7 +289,7 @@ const ringCircumference = 2 * Math.PI * 13;
                 v-if="!panelOpen && pillState !== 'idle'"
                 @click="panelOpen = true"
                 data-testid="operations-pill"
-                class="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 inline-flex items-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
+                class="fixed bottom-[calc(1rem+env(safe-area-inset-bottom)+var(--floating-stack-offset))] z-50 inline-flex items-center gap-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2.5 shadow-sm hover:border-gray-300 dark:hover:border-gray-600 transition-all duration-200 cursor-pointer"
                 :class="[isRtl ? 'left-4' : 'right-4']"
             >
                 <span class="relative w-[30px] h-[30px] flex-shrink-0">
@@ -311,7 +311,7 @@ const ringCircumference = 2 * Math.PI * 13;
                     </span>
                 </span>
                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300 whitespace-nowrap">
-                    <template v-if="pillState === 'active'">{{ active.length }} {{ __('in progress') }}</template>
+                    <template v-if="pillState === 'active'">{{ __('in progress') }}</template>
                     <template v-else>{{ __('Done') }}</template>
                 </span>
             </button>

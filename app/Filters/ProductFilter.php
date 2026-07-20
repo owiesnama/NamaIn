@@ -6,11 +6,16 @@ use App\ValueObjects\Money;
 
 class ProductFilter extends Filters
 {
-    protected $filters = ['search', 'status', 'category', 'min_cost', 'max_cost', 'expire_from', 'expire_to'];
+    protected $filters = ['search', 'status', 'type', 'category', 'min_cost', 'max_cost', 'expire_from', 'expire_to'];
 
     public function search($searchTerm)
     {
         return $this->builder->search($searchTerm);
+    }
+
+    public function type($type)
+    {
+        return $this->builder->where('type', $type);
     }
 
     public function status($status)

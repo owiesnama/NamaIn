@@ -11,7 +11,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'confirm']);
 
-const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${props.currency}`;
+const fmt = (val) => window.formatMoney(val);
 
 const selectedPaymentMethod = ref('cash');
 const cashTendered = ref('');

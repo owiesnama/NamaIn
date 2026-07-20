@@ -22,7 +22,7 @@ const props = defineProps({
 
 const emit = defineEmits(['add-to-cart', 'toggle-favorite']);
 
-const fmt = (val) => `${Number(val).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} ${props.currency}`;
+const fmt = (val) => window.formatMoney(val);
 
 // Overselling tenants never block on stock; every product stays addable.
 const { oversellingEnabled } = useInventoryStrategy();
@@ -123,7 +123,7 @@ onUnmounted(() => {
                 >
                     <h4 class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 truncate leading-snug">{{ product.name }}</h4>
                     <div class="flex items-center justify-between mt-2">
-                        <span class="text-sm font-bold text-emerald-600"><Ltr>{{ fmt(product.price || 0) }}</Ltr></span>
+                        <span class="text-sm font-bold text-emerald-600">{{ fmt(product.price || 0) }}</span>
                         <span v-if="product.sale_point_qty > 0" class="text-[10px] font-medium text-gray-400">{{ product.sale_point_qty }}</span>
                         <span v-else-if="product.replenishment" class="text-[10px] font-medium text-amber-500">{{ __('via warehouse') }}</span>
                     </div>
@@ -167,7 +167,7 @@ onUnmounted(() => {
                     </div>
                     <h3 class="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-emerald-600 truncate leading-snug ltr:pr-8 rtl:pl-8">{{ product.name }}</h3>
                     <div class="flex items-center justify-between mt-2 pt-2 border-t border-gray-100 dark:border-gray-800">
-                        <span class="text-sm font-bold text-emerald-600"><Ltr>{{ fmt(product.price || 0) }}</Ltr></span>
+                        <span class="text-sm font-bold text-emerald-600">{{ fmt(product.price || 0) }}</span>
                         <span v-if="product.sale_point_qty > 0" class="text-[10px] font-medium text-gray-400">{{ product.sale_point_qty }}</span>
                         <span v-else-if="product.replenishment" class="text-[10px] font-medium text-amber-500">{{ __('via warehouse') }}</span>
                     </div>

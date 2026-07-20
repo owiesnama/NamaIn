@@ -20,15 +20,7 @@ const tabs = [
     { id: 'transactions', name: 'Transactions' },
 ];
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency = (currency && /^[A-Z]{3}$/.test(currency)) ? currency :
-        (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency')) ? preferences('currency') : 'SDG');
-
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', {
-        style: 'currency',
-        currency: validCurrency,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const formatDate = (dateString) => {
     if (!dateString) return "-";
@@ -174,9 +166,9 @@ const formatDate = (dateString) => {
                     <label for="tabs" class="sr-only">{{ __("Select a tab") }}</label>
                     <select
                         id="tabs"
+                        v-model="activeTab"
                         name="tabs"
                         class="block w-full rounded-md border-gray-300 focus:border-emerald-500 focus:ring-emerald-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300"
-                        v-model="activeTab"
                     >
                         <option v-for="tab in tabs" :key="tab.id" :value="tab.id">{{ __(tab.name) }}</option>
                     </select>
@@ -187,13 +179,13 @@ const formatDate = (dateString) => {
                             <button
                                 v-for="tab in tabs"
                                 :key="tab.id"
-                                @click="activeTab = tab.id"
                                 :class="[
                                     activeTab === tab.id
                                         ? 'border-emerald-500 text-emerald-600 dark:text-emerald-400'
                                         : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300',
                                     'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
                                 ]"
+                                @click="activeTab = tab.id"
                             >
                                 {{ __(tab.name) }}
                             </button>
@@ -229,7 +221,8 @@ const formatDate = (dateString) => {
                                     <td class="px-6 py-4 text-sm text-emerald-600 font-medium whitespace-nowrap">{{ formatCurrency(invoice.paid_amount, invoice.currency) }}</td>
                                     <td class="px-6 py-4 text-sm text-red-600 font-bold whitespace-nowrap">{{ formatCurrency(invoice.remaining_balance, invoice.currency) }}</td>
                                     <td class="px-6 py-4 text-sm whitespace-nowrap">
-                                        <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full"
+                                        <span
+class="px-2.5 py-0.5 text-xs font-semibold rounded-full"
                                             :class="{
                                                 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': invoice.payment_status === 'unpaid',
                                                 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400': invoice.payment_status === 'partially_paid',

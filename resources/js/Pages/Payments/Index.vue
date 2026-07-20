@@ -109,21 +109,7 @@ function isIncoming(payment) {
     return payment.direction === "in";
 }
 
-const formatCurrency = (amount, currency = null) => {
-    const validCurrency =
-        currency && /^[A-Z]{3}$/.test(currency)
-            ? currency
-            : preferences("currency") && /^[A-Z]{3}$/.test(preferences("currency"))
-            ? preferences("currency")
-            : "SDG";
-
-    return new Intl.NumberFormat(window.lang === "ar" ? "ar-SA" : "en-US", {
-        style: "currency",
-        currency: validCurrency,
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 2,
-    }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 const { formatDate } = useDate();
 
@@ -171,12 +157,12 @@ watch(
 
             <div class="mt-4 flex items-center justify-end gap-x-4 lg:mt-0">
                 <button
-                    @click="showSidebar = !showSidebar"
                     :class="[
                         'inline-flex items-center justify-center p-2.5 text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 dark:bg-gray-900 dark:text-gray-300 dark:border-gray-700 transition-colors',
                         showSidebar ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/20' : '',
                     ]"
                     :title="__('Filters')"
+                    @click="showSidebar = !showSidebar"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -298,11 +284,11 @@ watch(
         <div class="flex flex-col lg:flex-row lg:gap-x-6">
             <!-- Sidebar -->
             <FilterSidebar
-                :show="showSidebar"
-                @close="showSidebar = false"
                 v-model:filters="filters"
+                :show="showSidebar"
                 :sort-by-options="sortByOptions"
                 :all-label="__('All Payments')"
+                @close="showSidebar = false"
                 @reset="resetFilters"
             >
                 <template #extra-filters>
@@ -317,13 +303,13 @@ watch(
                                     { label: __('Outgoing'), value: 'out' },
                                 ]"
                                 :key="String(opt.value)"
-                                @click="filters.direction = opt.value"
                                 :class="[
                                     'px-3 flex-1 py-2 text-xs font-semibold whitespace-nowrap transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                                     filters.direction === opt.value || (opt.value === null && !filters.direction)
                                         ? 'bg-gray-100 dark:bg-gray-700'
                                         : 'text-gray-600',
                                 ]"
+                                @click="filters.direction = opt.value"
                             >
                                 {{ opt.label }}
                             </button>
@@ -343,8 +329,8 @@ watch(
                                     type="radio"
                                     :value="m.value"
                                     :checked="filters.method === m.value"
-                                    @change="filters.method = filters.method === m.value ? null : m.value"
                                     class="border-gray-300 dark:border-gray-600 text-emerald-600 focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                    @change="filters.method = filters.method === m.value ? null : m.value"
                                 />
                                 <span class="text-sm text-gray-700 dark:text-gray-300">{{ __(m.label) }}</span>
                             </label>
@@ -379,13 +365,13 @@ watch(
                                     { label: __('Supplier'), value: 'Supplier' },
                                 ]"
                                 :key="String(opt.value)"
-                                @click="filters.party_type = opt.value"
                                 :class="[
                                     'px-3 flex-1 py-2 text-xs font-semibold whitespace-nowrap transition-colors duration-200 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800',
                                     filters.party_type === opt.value || (opt.value === null && !filters.party_type)
                                         ? 'bg-gray-100 dark:bg-gray-700'
                                         : 'text-gray-600',
                                 ]"
+                                @click="filters.party_type = opt.value"
                             >
                                 {{ opt.label }}
                             </button>
@@ -607,9 +593,9 @@ watch(
 
                                     <td class="px-3 py-4 lg:px-6 whitespace-nowrap text-sm text-end">
                                         <button
-                                            @click.stop="selectedPayment = payment"
                                             class="inline-flex items-center justify-center p-2.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:text-gray-500 dark:hover:text-emerald-400 dark:hover:bg-emerald-900/20 rounded-lg transition-all"
                                             :title="__('Details')"
+                                            @click.stop="selectedPayment = payment"
                                         >
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
@@ -705,8 +691,8 @@ watch(
                         </span>
                     </div>
                     <button
-                        @click="selectedPayment = null"
                         class="p-1.5 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        @click="selectedPayment = null"
                     >
                         <svg
                             class="h-4 w-4"

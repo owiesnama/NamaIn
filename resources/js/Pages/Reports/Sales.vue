@@ -24,10 +24,7 @@ watch(localFilters, (val) => {
     }, 400);
 }, { deep: true });
 
-const formatCurrency = (amount) => {
-    const currency = (preferences('currency') && /^[A-Z]{3}$/.test(preferences('currency'))) ? preferences('currency') : 'SDG';
-    return new Intl.NumberFormat(window.lang === 'ar' ? 'ar-SA' : 'en-US', { style: 'currency', currency }).format(amount || 0);
-};
+const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 
 function requestExport() {
     router.post(route('exports.store'), {
@@ -55,9 +52,9 @@ function requestExport() {
                 </div>
                 <div class="mt-4 flex items-center gap-x-4 lg:mt-0">
                     <button
-                        @click="requestExport"
                         :disabled="!data?.length"
                         class="inline-flex items-center justify-center px-4 py-2 text-sm font-normal text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                        @click="requestExport"
                     >
                         <svg class="h-4 w-4 ltr:mr-2 rtl:ml-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
@@ -99,11 +96,12 @@ function requestExport() {
                             <div>
                                 <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">{{ __('Group By') }}</p>
                                 <div class="flex gap-1.5">
-                                    <button v-for="opt in ['day', 'week', 'month']" :key="opt" @click="localFilters.group_by = opt"
-                                        class="px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors duration-200"
+                                    <button
+v-for="opt in ['day', 'week', 'month']" :key="opt" class="px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors duration-200"
                                         :class="localFilters.group_by === opt
                                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800'
-                                            : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'">
+                                            : 'bg-white dark:bg-gray-900 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'"
+                                        @click="localFilters.group_by = opt">
                                         {{ __(opt.charAt(0).toUpperCase() + opt.slice(1)) }}
                                     </button>
                                 </div>
@@ -112,7 +110,8 @@ function requestExport() {
                             <!-- Channel -->
                             <div>
                                 <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">{{ __('Channel') }}</p>
-                                <select v-model="localFilters.channel"
+                                <select
+v-model="localFilters.channel"
                                     class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
                                     <option value="">{{ __('All') }}</option>
                                     <option value="pos">{{ __('POS') }}</option>
@@ -123,7 +122,8 @@ function requestExport() {
                             <!-- Customer -->
                             <div v-if="customers">
                                 <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">{{ __('Customer') }}</p>
-                                <select v-model="localFilters.customer"
+                                <select
+v-model="localFilters.customer"
                                     class="w-full px-3 py-2 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50">
                                     <option value="">{{ __('All') }}</option>
                                     <option v-for="(name, id) in customers" :key="id" :value="id">{{ name }}</option>
