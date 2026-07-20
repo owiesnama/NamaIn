@@ -33,25 +33,39 @@ class TenantEntitlements
     {
         $this->assertType($feature, FeatureType::Boolean);
 
-        if (! $this->configured) {
-            return true;
+        // An explicit override always wins, even before any plan is configured.
+        if (array_key_exists($feature->value, $this->overrides)) {
+            return filter_var($this->overrides[$feature->value], FILTER_VALIDATE_BOOL);
         }
 
         // Strict: any falsy encoding (0, "0", false, null, "") resolves to off.
-        return filter_var($this->raw($feature), FILTER_VALIDATE_BOOL);
+        if (array_key_exists($feature->value, $this->planValues)) {
+            return filter_var($this->planValues[$feature->value], FILTER_VALIDATE_BOOL);
+        }
+
+        // Neither override nor plan specifies it: use the feature default when a
+        // plan governs the tenant, otherwise grant (gating not configured yet).
+        return $this->configured ? filter_var($feature->default(), FILTER_VALIDATE_BOOL) : true;
     }
 
     public function limit(Feature $feature): ?int
     {
         $this->assertType($feature, FeatureType::Limit);
 
-        if (! $this->configured) {
-            return null; // unlimited until plans are configured
+        if (array_key_exists($feature->value, $this->overrides)) {
+            $raw = $this->overrides[$feature->value];
+
+            return $raw === null ? null : (int) $raw;
         }
 
-        $raw = $this->raw($feature);
+        if (array_key_exists($feature->value, $this->planValues)) {
+            $raw = $this->planValues[$feature->value];
 
-        return $raw === null ? null : (int) $raw;
+            return $raw === null ? null : (int) $raw;
+        }
+
+        // Unlimited until a plan governs the tenant; then the feature default.
+        return $this->configured ? (int) $feature->default() : null;
     }
 
     public function usage(Feature $feature): int
@@ -97,22 +111,6 @@ class TenantEntitlements
         }
 
         return ['features' => $features, 'limits' => $limits];
-    }
-
-    /**
-     * The effective raw value: live override, else plan value, else default.
-     */
-    private function raw(Feature $feature): mixed
-    {
-        if (array_key_exists($feature->value, $this->overrides)) {
-            return $this->overrides[$feature->value];
-        }
-
-        if (array_key_exists($feature->value, $this->planValues)) {
-            return $this->planValues[$feature->value];
-        }
-
-        return $feature->default();
     }
 
     private function assertType(Feature $feature, FeatureType $expected): void
