@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\StorageType;
+use App\Features\Feature;
+use App\Rules\WithinPlanLimit;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
@@ -25,7 +27,10 @@ class StorageRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required',
+            // On create, block adding a warehouse beyond the plan's max_warehouses cap.
+            'name' => $this->route('storage') === null
+                ? ['required', new WithinPlanLimit(Feature::MaxWarehouses)]
+                : ['required'],
             'address' => 'required',
             'type' => ['required', new Enum(StorageType::class)],
         ];

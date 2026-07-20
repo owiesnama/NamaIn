@@ -17,17 +17,25 @@ class TenantEntitlements
     /**
      * @param  array<string, mixed>  $planValues  feature_key => raw plan value
      * @param  array<string, mixed>  $overrides  feature_key => raw live override value
+     * @param  bool  $configured  whether a plan governs this tenant; when false
+     *                            (no subscription and no default plan) gating is
+     *                            not yet set up, so everything is granted.
      */
     public function __construct(
         private readonly Tenant $tenant,
         private readonly array $planValues,
         private readonly array $overrides,
         private readonly LimitUsage $usage,
+        private readonly bool $configured = true,
     ) {}
 
     public function enabled(Feature $feature): bool
     {
         $this->assertType($feature, FeatureType::Boolean);
+
+        if (! $this->configured) {
+            return true;
+        }
 
         // Strict: any falsy encoding (0, "0", false, null, "") resolves to off.
         return filter_var($this->raw($feature), FILTER_VALIDATE_BOOL);
@@ -36,6 +44,10 @@ class TenantEntitlements
     public function limit(Feature $feature): ?int
     {
         $this->assertType($feature, FeatureType::Limit);
+
+        if (! $this->configured) {
+            return null; // unlimited until plans are configured
+        }
 
         $raw = $this->raw($feature);
 

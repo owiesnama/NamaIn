@@ -72,8 +72,10 @@ class EntitlementManager
 
     private function build(Tenant $tenant): TenantEntitlements
     {
+        $plan = $tenant->activePlan();
+
         $planValues = [];
-        if ($plan = $tenant->activePlan()) {
+        if ($plan) {
             foreach ($plan->planFeatures as $planFeature) {
                 $planValues[$planFeature->feature_key] = $planFeature->value;
             }
@@ -84,7 +86,11 @@ class EntitlementManager
             $overrides[$override->feature_key] = $override->value;
         }
 
-        return new TenantEntitlements($tenant, $planValues, $overrides, $this->usage);
+        // No governing plan (no subscription and no default plan) → gating is not
+        // configured yet; grant everything rather than lock the tenant out.
+        $configured = $plan !== null;
+
+        return new TenantEntitlements($tenant, $planValues, $overrides, $this->usage, $configured);
     }
 
     private function resolveTenant(): Tenant

@@ -223,11 +223,13 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::put('/stock/{storage}/add', [StockAdditionController::class, 'store'])->name('stock.add');
         Route::put('/stock/{storage}/deduct', [StockDeductionController::class, 'store'])->name('stock.deduct');
 
-        Route::get('/stock-transfers', [StockTransfersController::class, 'index'])->name('stock-transfers.index');
-        Route::get('/stock-transfers/create', [StockTransfersController::class, 'create'])->name('stock-transfers.create');
-        Route::post('/stock-transfers', [StockTransfersController::class, 'store'])->name('stock-transfers.store');
-        Route::get('/stock-transfers/{transfer}', [StockTransfersController::class, 'show'])->name('stock-transfers.show');
-        Route::get('/stock-transfers/{transfer}/print', [StockTransferPrintController::class, 'show'])->name('stock-transfers.print');
+        Route::middleware('feature:multi_warehouse')->group(function () {
+            Route::get('/stock-transfers', [StockTransfersController::class, 'index'])->name('stock-transfers.index');
+            Route::get('/stock-transfers/create', [StockTransfersController::class, 'create'])->name('stock-transfers.create');
+            Route::post('/stock-transfers', [StockTransfersController::class, 'store'])->name('stock-transfers.store');
+            Route::get('/stock-transfers/{transfer}', [StockTransfersController::class, 'show'])->name('stock-transfers.show');
+            Route::get('/stock-transfers/{transfer}/print', [StockTransferPrintController::class, 'show'])->name('stock-transfers.print');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -248,13 +250,15 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | and sale return (credit notes).
         */
         Route::resource('/sales', SalesController::class)->parameters(['sales' => 'invoice']);
-        Route::get('/pos', [PosSessionController::class, 'show'])->name('pos.index');
-        Route::get('/pos/invoices', [PosInvoicesController::class, 'index'])->name('pos.invoices');
-        Route::post('/pos/products/{product}/favorite', [PosFavoriteController::class, 'toggle'])->name('pos.favorites.toggle');
-        Route::post('/pos/open', [PosSessionController::class, 'store'])->name('pos.open');
-        Route::post('/pos/preflight', [PosPreflightController::class, 'store'])->name('pos.preflight');
-        Route::post('/pos/checkout', [PosCheckoutController::class, 'store'])->name('pos.checkout');
-        Route::post('/pos/close', [PosSessionController::class, 'destroy'])->name('pos.close');
+        Route::middleware('feature:pos')->group(function () {
+            Route::get('/pos', [PosSessionController::class, 'show'])->name('pos.index');
+            Route::get('/pos/invoices', [PosInvoicesController::class, 'index'])->name('pos.invoices');
+            Route::post('/pos/products/{product}/favorite', [PosFavoriteController::class, 'toggle'])->name('pos.favorites.toggle');
+            Route::post('/pos/open', [PosSessionController::class, 'store'])->name('pos.open');
+            Route::post('/pos/preflight', [PosPreflightController::class, 'store'])->name('pos.preflight');
+            Route::post('/pos/checkout', [PosCheckoutController::class, 'store'])->name('pos.checkout');
+            Route::post('/pos/close', [PosSessionController::class, 'destroy'])->name('pos.close');
+        });
         Route::get('/sales/{invoice}/return', [SaleReturnController::class, 'create'])->name('sales.return.create');
         Route::post('/sales/{invoice}/return', [SaleReturnController::class, 'store'])->name('sales.return.store');
 
@@ -295,9 +299,11 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | and cheque status updates.
         */
         Route::resource('/payments', PaymentsController::class);
-        Route::resource('/cheques', ChequesController::class);
-        Route::get('/payee-invoices', [ChequePayeeInvoiceController::class, 'index'])->name('cheques.payee-invoices');
-        Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.update-status');
+        Route::middleware('feature:cheques')->group(function () {
+            Route::resource('/cheques', ChequesController::class);
+            Route::get('/payee-invoices', [ChequePayeeInvoiceController::class, 'index'])->name('cheques.payee-invoices');
+            Route::put('/cheques/{cheque}/status', [ChequeStatusController::class, 'update'])->name('cheques.update-status');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -364,9 +370,11 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Queued export requests, history, and downloads.
         */
-        Route::get('/exports', [Exports\ExportController::class, 'index'])->name('exports.index');
-        Route::post('/exports', [Exports\ExportController::class, 'store'])->name('exports.store');
-        Route::get('/exports/{exportLog}/download', [Exports\ExportController::class, 'download'])->name('exports.download');
+        Route::middleware('feature:exports')->group(function () {
+            Route::get('/exports', [Exports\ExportController::class, 'index'])->name('exports.index');
+            Route::post('/exports', [Exports\ExportController::class, 'store'])->name('exports.store');
+            Route::get('/exports/{exportLog}/download', [Exports\ExportController::class, 'download'])->name('exports.download');
+        });
 
         /*
         |--------------------------------------------------------------------------
@@ -374,7 +382,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         |--------------------------------------------------------------------------
         | Filterable report pages with export and print support.
         */
-        Route::prefix('reports')->middleware('can:reports.view')->group(function () {
+        Route::prefix('reports')->middleware(['can:reports.view', 'feature:advanced_reports'])->group(function () {
             Route::get('/', [Reports\ReportsIndexController::class, 'index'])->name('reports.index');
 
             $reportRoutes = [
