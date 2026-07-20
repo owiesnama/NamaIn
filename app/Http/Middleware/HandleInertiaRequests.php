@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Enums\NumeralSystem;
 use App\Facades\Cache;
+use App\Features\Facades\Entitlements;
 use App\Models\Preference;
 use App\Models\Tenant;
 use App\Services\Utils\OperationFeed;
@@ -61,6 +62,11 @@ class HandleInertiaRequests extends Middleware
             ] : null,
             'currentTenant' => $tenant
                 ? ['id' => $tenant->id, 'name' => $tenant->name, 'slug' => $tenant->slug]
+                : null,
+            // Effective entitlements for the current tenant — boolean features and
+            // limit caps only (no usage counts; those are fetched lazily per page).
+            'entitlements' => ($tenant && $request->user())
+                ? fn () => Entitlements::for($tenant)->toArray()
                 : null,
             'tenants' => fn () => $request->user()
                 ? $request->user()->tenants()->get(['tenants.id', 'name', 'slug'])

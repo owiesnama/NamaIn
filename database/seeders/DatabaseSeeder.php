@@ -114,6 +114,7 @@ class DatabaseSeeder extends Seeder
             $recurring->categories()->attach($categories->random(fake()->numberBetween(1, 2))->pluck('id'));
         });
 
+        $this->call(PlanSeeder::class);
         $this->call(DashboardExampleSeeder::class);
     }
 }

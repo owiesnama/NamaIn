@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use App\Enums\ProductType;
+use App\Features\Feature;
+use App\Rules\WithinPlanLimit;
 use Illuminate\Contracts\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\Enum;
@@ -41,10 +43,15 @@ class ProductRequest extends FormRequest
      */
     public function rules(): array
     {
+        // On create, block adding a product beyond the plan's max_products cap.
+        $nameRule = $this->isCreating()
+            ? ['required', new WithinPlanLimit(Feature::MaxProducts)]
+            : ['required'];
+
         if ($this->isService()) {
             return [
                 'type' => [new Enum(ProductType::class)],
-                'name' => 'required',
+                'name' => $nameRule,
                 'price' => 'required|numeric|min:0',
                 'currency' => 'nullable|string|max:3',
                 'duration_minutes' => 'nullable|integer|min:1',
@@ -63,7 +70,7 @@ class ProductRequest extends FormRequest
 
         return [
             'type' => ['nullable', 'in:'.ProductType::Physical->value],
-            'name' => 'required',
+            'name' => $nameRule,
             'cost' => 'required|numeric|gt:0',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|max:3',
@@ -107,5 +114,13 @@ class ProductRequest extends FormRequest
     private function isService(): bool
     {
         return $this->input('type') === ProductType::Service->value;
+    }
+
+    /**
+     * Whether this request is creating a product (vs updating an existing one).
+     */
+    private function isCreating(): bool
+    {
+        return $this->route('product') === null;
     }
 }
