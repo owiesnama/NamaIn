@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\InsufficientStockException;
+use App\Http\Middleware\EnsureFeatureIsActive;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\HandleLocale;
 use App\Models\Tenant;
@@ -68,6 +69,10 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+        ]);
+
+        $middleware->alias([
+            'feature' => EnsureFeatureIsActive::class,
         ]);
 
     })

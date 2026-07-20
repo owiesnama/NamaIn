@@ -259,7 +259,7 @@ Route::middleware([ResolveTenant::class])->group(function () {
         | Quotes (Price Quotations)
         |--------------------------------------------------------------------------
         */
-        Route::prefix('quotes')->name('quotes.')->group(function () {
+        Route::prefix('quotes')->name('quotes.')->middleware('feature:quotes')->group(function () {
             Route::get('/', [QuotesController::class, 'index'])->name('index');
             Route::get('/create', [QuotesController::class, 'create'])->name('create');
             Route::post('/', [QuotesController::class, 'store'])->name('store');
