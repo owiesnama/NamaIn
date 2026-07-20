@@ -10,6 +10,11 @@
     import ImportModal from "@/Shared/ImportModal.vue";
     import DeleteProduct from "@/Components/Products/DeleteProduct.vue";
     import ProductAdjustmentModal from "@/Components/Products/ProductAdjustmentModal.vue";
+    import BulkUpdatePriceModal from "@/Pages/Products/Partials/BulkUpdatePriceModal.vue";
+    import BulkAdjustStockModal from "@/Pages/Products/Partials/BulkAdjustStockModal.vue";
+    import DialogModal from "@/Components/DialogModal.vue";
+    import SecondaryButton from "@/Components/SecondaryButton.vue";
+    import DangerButton from "@/Components/DangerButton.vue";
     import TextInput from "@/Components/TextInput.vue";
     import FilterSidebar from "@/Shared/FilterSidebar.vue";
     import ActiveFilterChips from "@/Shared/ActiveFilterChips.vue";
@@ -162,8 +167,25 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
     watch(someSelected, (v) => { if (selectAllRef.value) selectAllRef.value.indeterminate = v; });
     const toggleAll = (e) => { selectedIds.value = e.target.checked ? props.products.data.map((p) => String(p.id)) : []; };
     const clearSelection = () => { selectedIds.value = []; };
-    // UI only — backend bulk endpoints are follow-up work (see summary).
-    const bulkAction = (action) => { console.warn(`[bulk:${action}] no backend endpoint yet`, [...selectedIds.value]); };
+
+    const confirmingBulkDelete = ref(false);
+    const showBulkPriceModal = ref(false);
+    const showBulkStockModal = ref(false);
+
+    const bulkDelete = () => {
+        router.delete(route('products.bulk.destroy'), {
+            data: { ids: selectedIds.value },
+            preserveScroll: true,
+            onSuccess: () => { confirmingBulkDelete.value = false; clearSelection(); },
+        });
+    };
+
+    const bulkExport = () => {
+        router.post(route('products.bulk.export'), { ids: selectedIds.value }, {
+            preserveScroll: true,
+            onSuccess: clearSelection,
+        });
+    };
 
     const submitImport = ({ file, template }) => {
         importForm.file = file;
@@ -516,11 +538,11 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
                         <div v-if="selectedIds.length" class="sticky top-0 z-20 flex flex-wrap items-center gap-3 px-4 py-2.5 bg-emerald-50 dark:bg-emerald-900/20 border-b border-emerald-200 dark:border-emerald-800 rounded-t-xl">
                             <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{{ selectedIds.length }} {{ __("selected") }}</span>
                             <div class="flex items-center gap-2 ms-auto">
-                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" @click="bulkAction('price')">{{ __("Update Price") }}</button>
-                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" @click="bulkAction('stock')">{{ __("Adjust Stock") }}</button>
-                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" @click="bulkAction('export')">{{ __("Export") }}</button>
-                                <button type="button" class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" @click="bulkAction('delete')">{{ __("Delete") }}</button>
-                                <button type="button" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg" :aria-label="__('Clear selection')" @click="clearSelection">
+                                <button type="button" @click="showBulkPriceModal = true" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Update Price") }}</button>
+                                <button type="button" @click="showBulkStockModal = true" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Adjust Stock") }}</button>
+                                <button type="button" @click="bulkExport" class="px-3 py-1.5 text-xs font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">{{ __("Export") }}</button>
+                                <button type="button" @click="confirmingBulkDelete = true" class="px-3 py-1.5 text-xs font-medium text-red-600 dark:text-red-400 bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">{{ __("Delete") }}</button>
+                                <button type="button" @click="clearSelection" class="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg" :aria-label="__('Clear selection')">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
                                 </button>
                             </div>
@@ -852,6 +874,37 @@ import { useFilterSidebar } from "@/Composables/useFilterSidebar";
             <div v-if="effectiveLayout === 'table'" class="flex justify-center">
                 <Pagination :links="products.links"></Pagination>
             </div>
+
+            <!-- Bulk action modals -->
+            <BulkUpdatePriceModal
+                :show="showBulkPriceModal"
+                :ids="selectedIds"
+                @close="showBulkPriceModal = false"
+                @success="showBulkPriceModal = false; clearSelection();"
+            />
+            <BulkAdjustStockModal
+                :show="showBulkStockModal"
+                :ids="selectedIds"
+                :storages="storages"
+                @close="showBulkStockModal = false"
+                @success="showBulkStockModal = false; clearSelection();"
+            />
+
+            <!-- Bulk delete confirmation -->
+            <DialogModal :show="confirmingBulkDelete" @close="confirmingBulkDelete = false">
+                <template #title>
+                    <h2 class="font-semibold text-gray-800 dark:text-white">{{ __("Delete Products") }}</h2>
+                </template>
+                <template #content>
+                    <p class="text-gray-500 dark:text-gray-400 rtl:text-right">
+                        {{ __("Are you sure you want to delete the :count selected products? This action cannot be undone.", { count: selectedIds.length }) }}
+                    </p>
+                </template>
+                <template #footer>
+                    <SecondaryButton @click="confirmingBulkDelete = false">{{ __("Cancel") }}</SecondaryButton>
+                    <DangerButton class="ms-3" @click="bulkDelete">{{ __("Delete") }}</DangerButton>
+                </template>
+            </DialogModal>
         </section>
     </AppLayout>
 </template>

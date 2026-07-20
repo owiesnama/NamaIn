@@ -18,7 +18,9 @@ class ProductExport implements FromCollection, WithHeadings, WithMapping, WithSt
 
     public function collection(): Collection
     {
-        return Product::with(['categories', 'units'])->get();
+        return Product::with(['categories', 'units'])
+            ->when($this->filters['ids'] ?? null, fn ($query, $ids) => $query->whereIn('id', $ids))
+            ->get();
     }
 
     public function headings(): array

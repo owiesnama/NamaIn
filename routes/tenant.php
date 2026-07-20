@@ -7,6 +7,10 @@ use App\Http\Controllers\Auth\MustChangePasswordController;
 use App\Http\Controllers\Auth\ResendVerificationController;
 use App\Http\Controllers\Auth\TenantLoginController;
 use App\Http\Controllers\BookingsController;
+use App\Http\Controllers\Catalog\BulkAdjustStockController;
+use App\Http\Controllers\Catalog\BulkDeleteProductsController;
+use App\Http\Controllers\Catalog\BulkExportProductsController;
+use App\Http\Controllers\Catalog\BulkUpdatePricesController;
 use App\Http\Controllers\Catalog\ProductExportController;
 use App\Http\Controllers\Catalog\ProductGlobalFavoriteController;
 use App\Http\Controllers\Catalog\ProductImportController;
@@ -206,6 +210,10 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::get('/products/import/sample', [ProductImportController::class, 'show'])->name('products.import.sample');
         Route::patch('/products/{product}/quick-update', [ProductsController::class, 'quickUpdate'])->name('products.quick-update');
         Route::patch('/products/{product}/global-favorite', [ProductGlobalFavoriteController::class, 'update'])->name('products.global-favorite');
+        Route::delete('/products/bulk', BulkDeleteProductsController::class)->name('products.bulk.destroy');
+        Route::patch('/products/bulk/price', BulkUpdatePricesController::class)->name('products.bulk.price');
+        Route::post('/products/bulk/stock', BulkAdjustStockController::class)->name('products.bulk.stock');
+        Route::post('/products/bulk/export', BulkExportProductsController::class)->name('products.bulk.export');
         Route::resource('/products', ProductsController::class)->except(['create', 'edit']);
 
         /*
