@@ -87,6 +87,27 @@ it('resolves truthy encodings of a boolean feature to on', function (mixed $stor
     'string one' => ['1'],
 ]);
 
+it('honors a disabling override even when no plan is configured', function () {
+    $tenant = Tenant::factory()->create(); // no subscription, no default plan
+
+    // Permissive by default...
+    expect(Entitlements::for($tenant)->enabled(Feature::Bookings))->toBeTrue();
+    Entitlements::flush($tenant);
+
+    // ...but an explicit override to disable must win.
+    TenantFeatureOverride::factory()->forFeature(Feature::Bookings, false)->create(['tenant_id' => $tenant->id]);
+
+    expect(Entitlements::for($tenant)->enabled(Feature::Bookings))->toBeFalse();
+});
+
+it('honors a limit override even when no plan is configured', function () {
+    $tenant = Tenant::factory()->create();
+
+    TenantFeatureOverride::factory()->forFeature(Feature::MaxProducts, 3)->create(['tenant_id' => $tenant->id]);
+
+    expect(Entitlements::for($tenant)->limit(Feature::MaxProducts))->toBe(3);
+});
+
 it('falls back to the default plan when the tenant has no subscription', function () {
     entPlanWith([Feature::Bookings->value => true], default: true);
     $tenant = Tenant::factory()->create();
