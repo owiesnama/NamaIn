@@ -7,11 +7,16 @@
     import InputError from "@/Components/InputError.vue";
     import Modal from "@/Components/Modal.vue";
     import ConfirmationModal from "@/Components/ConfirmationModal.vue";
+    import SubscriptionPanel from "@/Pages/Admin/Tenants/SubscriptionPanel.vue";
 
     const props = defineProps({
         tenant: Object,
         members: Array,
         roles: Array,
+        subscription: { type: Object, default: null },
+        plans: { type: Array, default: () => [] },
+        overrides: { type: Array, default: () => [] },
+        entitlements: { type: Array, default: () => [] },
     });
 
     // Add user modal
@@ -251,6 +256,17 @@
             <div v-if="members.length === 0" class="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
                 {{ __('No members found.') }}
             </div>
+        </div>
+
+        <!-- Subscription & feature entitlements -->
+        <div class="mb-8">
+            <SubscriptionPanel
+                :tenant="tenant"
+                :subscription="subscription"
+                :plans="plans"
+                :overrides="overrides"
+                :entitlements="entitlements"
+            />
         </div>
 
         <!-- Add User Modal -->

@@ -118,6 +118,20 @@
                             <span class="text-sm">{{ __('Tenants') }}</span>
                         </Link>
 
+                        <!-- Plans -->
+                        <Link
+                            :href="route('admin.plans.index')"
+                            class="flex items-center gap-x-3 px-3 py-2 rounded-lg transition-all duration-200"
+                            :class="route().current('admin.plans.*')
+                                ? 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white font-semibold'
+                                : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800/50 hover:text-gray-900 dark:hover:text-white'"
+                        >
+                            <svg class="h-5 w-5 shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 0 1 0 3.75H5.625a1.875 1.875 0 0 1 0-3.75Z" />
+                            </svg>
+                            <span class="text-sm">{{ __('Plans') }}</span>
+                        </Link>
+
                         <!-- Messaging -->
                         <Link
                             :href="route('admin.messages.index')"

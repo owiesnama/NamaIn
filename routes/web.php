@@ -8,10 +8,13 @@ use App\Http\Controllers\Admin\BackupSettingsController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\MessagesController as AdminMessagesController;
+use App\Http\Controllers\Admin\PlansController as AdminPlansController;
+use App\Http\Controllers\Admin\TenantFeatureOverrideController;
 use App\Http\Controllers\Admin\TenantInvitationsController;
 use App\Http\Controllers\Admin\TenantOwnershipController;
 use App\Http\Controllers\Admin\TenantsController as AdminTenantsController;
 use App\Http\Controllers\Admin\TenantStatusController;
+use App\Http\Controllers\Admin\TenantSubscriptionController;
 use App\Http\Controllers\Admin\TenantUserRoleController;
 use App\Http\Controllers\Admin\TenantUsersController;
 use App\Http\Controllers\Admin\TenantUserStatusController;
@@ -79,8 +82,13 @@ Route::prefix('__admin')->name('admin.')->group(function () {
         Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('activity', [ActivityLogController::class, 'index'])->name('activity');
 
+        Route::resource('plans', AdminPlansController::class);
+
         Route::resource('tenants', AdminTenantsController::class)->except(['create', 'edit']);
         Route::put('tenants/{tenant}/status', [TenantStatusController::class, 'update'])->name('tenants.status');
+        Route::put('tenants/{tenant}/subscription', [TenantSubscriptionController::class, 'update'])->name('tenants.subscription');
+        Route::post('tenants/{tenant}/overrides', [TenantFeatureOverrideController::class, 'store'])->name('tenants.overrides.store');
+        Route::delete('tenants/{tenant}/overrides/{feature}', [TenantFeatureOverrideController::class, 'destroy'])->name('tenants.overrides.destroy');
         Route::put('tenants/{tenant}/ownership', [TenantOwnershipController::class, 'update'])->name('tenants.ownership');
 
         Route::post('tenants/{tenant}/users', [TenantUsersController::class, 'store'])->name('tenants.users.store');
