@@ -18,6 +18,7 @@ class PlansController extends Controller
     public function index(): Response
     {
         $plans = Plan::withCount('subscriptions')
+            ->with('planFeatures')
             ->orderBy('sort')
             ->get()
             ->map(fn (Plan $plan) => [
@@ -29,6 +30,7 @@ class PlansController extends Controller
                 'is_default' => $plan->is_default,
                 'sort' => $plan->sort,
                 'subscriptions_count' => $plan->subscriptions_count,
+                'features_count' => $this->grantedFeatureCount($plan),
             ]);
 
         return inertia('Admin/Plans/Index', [
@@ -159,6 +161,26 @@ class PlansController extends Controller
         Plan::when($exceptId, fn ($query) => $query->where('id', '!=', $exceptId))
             ->where('is_default', true)
             ->update(['is_default' => false]);
+    }
+
+    /**
+     * How many features a plan actually grants: boolean capabilities that are
+     * on, plus limit quotas that are unlimited (null) or a positive number.
+     * A boolean that is off or a limit of 0 (deny) does not count.
+     */
+    private function grantedFeatureCount(Plan $plan): int
+    {
+        return $plan->planFeatures->filter(function ($planFeature): bool {
+            $feature = Feature::tryFrom($planFeature->feature_key);
+
+            if (! $feature) {
+                return false;
+            }
+
+            return $feature->isBoolean()
+                ? $planFeature->value === true
+                : ($planFeature->value === null || (int) $planFeature->value > 0);
+        })->count();
     }
 
     /**
