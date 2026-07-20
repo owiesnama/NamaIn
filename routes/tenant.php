@@ -33,6 +33,7 @@ use App\Http\Controllers\Expenses\ExpensesController;
 use App\Http\Controllers\Expenses\RecurringExpensesController;
 use App\Http\Controllers\Expenses\RecurringExpenseStatusController;
 use App\Http\Controllers\Exports;
+use App\Http\Controllers\FeatureUsageController;
 use App\Http\Controllers\Inventory\StockAdditionController;
 use App\Http\Controllers\Inventory\StockAdjustmentController;
 use App\Http\Controllers\Inventory\StockDeductionController;
@@ -150,6 +151,9 @@ Route::middleware([ResolveTenant::class])->group(function () {
         Route::post('/preferences', [PreferenceController::class, 'update'])->name('preferences.update');
         Route::put('/preferences', [PreferenceController::class, 'update']);
         Route::put('/user/preferences', [UserPreferencesController::class, 'update'])->name('user-preferences.update');
+
+        // Lazy usage/cap lookup for a single limit feature (frontend "used / cap").
+        Route::get('/features/{feature}/usage', [FeatureUsageController::class, 'show'])->name('features.usage');
 
         /*
         |--------------------------------------------------------------------------
