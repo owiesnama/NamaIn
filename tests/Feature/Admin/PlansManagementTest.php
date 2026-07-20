@@ -14,6 +14,24 @@ it('lists plans for a super admin', function () {
         ->assertInertia(fn (Assert $page) => $page->component('Admin/Plans/Index')->has('plans', 2));
 });
 
+it('exposes the granted-feature count for each plan', function () {
+    $plan = Plan::factory()->create();
+    $plan->planFeatures()->createMany([
+        ['feature_key' => Feature::Pos->value, 'value' => true],          // granted
+        ['feature_key' => Feature::Bookings->value, 'value' => false],    // off, not counted
+        ['feature_key' => Feature::MaxProducts->value, 'value' => 50],    // granted
+        ['feature_key' => Feature::MaxUsers->value, 'value' => null],     // unlimited, granted
+        ['feature_key' => Feature::MaxWarehouses->value, 'value' => 0],   // deny, not counted
+    ]);
+    actingAsSuperAdmin();
+
+    $this->get('/__admin/plans')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Admin/Plans/Index')
+            ->where('plans.0.features_count', 3));
+});
+
 it('creates a plan with coerced feature values', function () {
     actingAsSuperAdmin();
 
