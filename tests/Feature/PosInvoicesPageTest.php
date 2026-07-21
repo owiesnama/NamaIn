@@ -61,6 +61,9 @@ it('shows only pos invoices on the pos invoices page', function () {
     $response->assertInertia(fn (Assert $page) => $page
         ->component('Pos/Invoices')
         ->where('invoices.data.0.id', $posInvoice->id)
+        // Raw timestamps must reach the client, which formats them for display.
+        ->has('invoices.data.0.created_at')
+        ->has('sessions.data.0.opened_at')
         ->where('summary.total_sales', 1)
         ->where('summary.walk_in_sales', 1)
     );

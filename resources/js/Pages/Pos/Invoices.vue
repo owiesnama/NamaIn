@@ -3,7 +3,10 @@ import { ref, watch } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
+import { useDate } from "@/Composables/useDate";
 import debounce from "lodash/debounce";
+
+const { formatDateTimeShort } = useDate();
 
 const props = defineProps({
     invoices: Object,
@@ -217,7 +220,7 @@ const methodLabel = (method) => methodLabels[method] ?? method;
                             </thead>
                             <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
                                 <tr v-for="invoice in invoices.data" :key="invoice.id" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ invoice.created_at_human ?? invoice.created_at }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ formatDateTimeShort(invoice.created_at) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700 dark:text-gray-300">#{{ invoice.serial_number ?? invoice.id }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                         <div class="flex items-center gap-x-2">
@@ -276,7 +279,7 @@ const methodLabel = (method) => methodLabels[method] ?? method;
                                             <svg class="h-4 w-4 text-gray-400 transition-transform duration-200" :class="{ 'rotate-90': expandedSessionId === session.id }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                                             </svg>
-                                            <span>{{ session.opened_at }}</span>
+                                            <span>{{ formatDateTimeShort(session.opened_at) }}</span>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ session.cashier_name ?? __('Unknown') }}</td>

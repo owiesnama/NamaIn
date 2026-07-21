@@ -66,8 +66,28 @@ export function useDate() {
         }
     };
 
+    // Compact, human-friendly stamp like "2 Jun 12:00 PM" for dense lists.
+    // Ignores the numeric dateFormat preference on purpose, but still honours
+    // the viewer's locale and timezone.
+    const formatDateTimeShort = (dateString) => {
+        if (!dateString) return '—';
+
+        try {
+            return new Intl.DateTimeFormat(getLocale(), {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZone: getTimeZone(),
+            }).format(new Date(dateString));
+        } catch {
+            return dateString;
+        }
+    };
+
     return {
         formatDate,
         formatDateTime,
+        formatDateTimeShort,
     };
 }
