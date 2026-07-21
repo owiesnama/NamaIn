@@ -6,6 +6,7 @@ use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\TreasuryMovementReason;
+use App\Models\ChangeLog;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -23,6 +24,8 @@ class StoreInvoiceAction
     public function handle(Collection $data): Invoice
     {
         return DB::transaction(function () use ($data) {
+            ChangeLog::lockTenant(currentTenant()?->id);
+
             $isSale = $this->isSale($data);
             $invoice = $this->createInvoiceWithTransactions($data);
 

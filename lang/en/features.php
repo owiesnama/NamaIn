@@ -8,6 +8,7 @@ return [
     'advanced_reports' => 'Advanced Reports',
     'exports' => 'Data Exports',
     'cheques' => 'Cheques',
+    'offline_sync' => 'Offline Sync',
     'max_products' => 'Products',
     'max_users' => 'Team Members',
     'max_warehouses' => 'Warehouses',

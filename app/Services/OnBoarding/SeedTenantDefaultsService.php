@@ -5,6 +5,7 @@ namespace App\Services\OnBoarding;
 use App\Enums\StorageType;
 use App\Enums\TreasuryAccountType;
 use App\Models\Customer;
+use App\Models\Register;
 use App\Models\Storage;
 use App\Models\Tenant;
 use App\Models\TreasuryAccount;
@@ -31,6 +32,7 @@ class SeedTenantDefaultsService
             'name' => __('Cash Register'),
             'type' => TreasuryAccountType::Cash,
             'sale_point_id' => $pos->id,
+            'register_id' => Register::cloudRegisterFor($tenant)->id,
             'opening_balance' => 0,
             'currency' => 'SDG',
             'tenant_id' => $tenant->id,

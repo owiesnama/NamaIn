@@ -7,6 +7,7 @@ use App\Models\Storage;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -66,7 +67,7 @@ test('product insights return correct warnings', function () {
     expect($product->getInsights())->toContain(['type' => 'danger', 'message' => __('Out of Stock')]);
 
     // Low stock
-    $product->stock()->attach($storage->id, ['quantity' => 5]);
+    $product->stock()->attach($storage->id, ['quantity' => 5, 'public_id' => strtolower((string) Str::ulid())]);
     $product->refresh();
     $insights = $product->getInsights();
     $messages = collect($insights)->pluck('message');

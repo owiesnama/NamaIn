@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Features\Facades\Entitlements;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -16,6 +17,11 @@ class PlanFeature extends Model
     protected static function booted(): void
     {
         static::unguard();
+
+        // Any write to an entitlement source invalidates the per-request
+        // entitlement cache; self-flushing here means no call site can forget.
+        static::saved(fn () => Entitlements::flush());
+        static::deleted(fn () => Entitlements::flush());
     }
 
     /**

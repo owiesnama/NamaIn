@@ -69,7 +69,7 @@ before(() => {
         ]);
 
         // Create stock via storage relationship
-        $storage->stock()->attach($product->id, ['quantity' => 50]);
+        $storage->stock()->attach($product->id, ['quantity' => 50, 'public_id' => strtolower((string) Illuminate\\Support\\Str::ulid())]);
 
         // Create expense
         App\\Models\\Expense::create([

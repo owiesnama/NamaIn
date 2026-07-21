@@ -7,6 +7,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses(RefreshDatabase::class);
@@ -40,8 +41,8 @@ test('can search products within a storage', function () {
     $product1 = Product::factory()->create(['name' => 'Apple']);
     $product2 = Product::factory()->create(['name' => 'Banana']);
 
-    $storage->stock()->attach($product1, ['quantity' => 10]);
-    $storage->stock()->attach($product2, ['quantity' => 20]);
+    $storage->stock()->attach($product1, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
+    $storage->stock()->attach($product2, ['quantity' => 20, 'public_id' => strtolower((string) Str::ulid())]);
 
     $this->signIn()
         ->get(route('storages.show', $storage).'?search=Apple')
@@ -132,7 +133,7 @@ test('dashboard shows low stock products', function () {
     $storage = Storage::factory()->create();
 
     $product = Product::factory()->create(['name' => 'Low Stock Item', 'alert_quantity' => 5]);
-    $product->stock()->attach($storage->id, ['quantity' => 4]); // Below alert threshold
+    $product->stock()->attach($storage->id, ['quantity' => 4, 'public_id' => strtolower((string) Str::ulid())]); // Below alert threshold
 
     $response = $this->actingAs($user)->get(route('dashboard'));
     $lowStockProducts = collect($response->viewData('page')['props']['low_stock_products']);
@@ -145,7 +146,7 @@ test('low stock alert shows correct quantity', function () {
     $storage = Storage::factory()->create();
 
     $product = Product::factory()->create(['name' => 'Low Stock Product', 'alert_quantity' => 5]);
-    $product->stock()->attach($storage->id, ['quantity' => 4]); // 4 is less than 5
+    $product->stock()->attach($storage->id, ['quantity' => 4, 'public_id' => strtolower((string) Str::ulid())]); // 4 is less than 5
 
     $response = $this->actingAs($user)->get(route('dashboard'));
     $lowStockProducts = collect($response->viewData('page')['props']['low_stock_products']);
@@ -164,7 +165,7 @@ test('low stock alert uses per-product alert quantity', function () {
     $storage = Storage::factory()->create();
 
     $product = Product::factory()->create(['name' => 'Custom Alert Product', 'alert_quantity' => 10]);
-    $product->stock()->attach($storage->id, ['quantity' => 9]); // Below custom threshold
+    $product->stock()->attach($storage->id, ['quantity' => 9, 'public_id' => strtolower((string) Str::ulid())]); // Below custom threshold
 
     $response = $this->actingAs($user)->get(route('dashboard'));
     $lowStockProducts = collect($response->viewData('page')['props']['low_stock_products']);
@@ -197,7 +198,7 @@ test('dashboard low stock alerts are cached', function () {
     expect($lowStockProducts->pluck('name'))->toContain('Stale Product');
 
     // Add stock to the product
-    $product->stock()->attach($storage->id, ['quantity' => 50]);
+    $product->stock()->attach($storage->id, ['quantity' => 50, 'public_id' => strtolower((string) Str::ulid())]);
 
     // In testing environment, cache TTL is 0, so it should be fresh
     $response = $this->actingAs($user)->get(route('dashboard'));

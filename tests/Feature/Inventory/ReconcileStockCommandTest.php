@@ -4,6 +4,7 @@ use App\Models\Product;
 use App\Models\Storage;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 test('reconcile reports no drift and exits zero on clean data', function () {
     $tenant = app('currentTenant');
@@ -23,6 +24,7 @@ test('reconcile detects a bypassed stocks row as drift and exits non-zero', func
 
     // Simulate a seeder-style bypass: write the cache without a movement.
     DB::table('stocks')->insert([
+        'public_id' => strtolower((string) Str::ulid()),
         'tenant_id' => $tenant->id,
         'storage_id' => $storage->id,
         'product_id' => $product->id,
@@ -41,6 +43,7 @@ test('reconcile --json emits the exact drift for a bypassed row', function () {
     $product = Product::factory()->create();
 
     DB::table('stocks')->insert([
+        'public_id' => strtolower((string) Str::ulid()),
         'tenant_id' => $tenant->id,
         'storage_id' => $storage->id,
         'product_id' => $product->id,

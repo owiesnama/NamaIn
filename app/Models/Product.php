@@ -62,6 +62,8 @@ class Product extends BaseModel
 
         DB::table('products')->where('id', $this->id)->update(['average_cost' => $newCostMinor]);
 
+        ChangeLog::record('products', $this->public_id, 'update', $this->tenant_id);
+
         $this->average_cost = Money::fromMinor($newCostMinor)->major();
     }
 
@@ -400,7 +402,8 @@ class Product extends BaseModel
      */
     public function syncUnits(array $units): void
     {
-        $this->units()->delete();
+        // Per-model delete so each removed unit emits a change-log tombstone.
+        $this->units->each->delete();
 
         $formattedUnits = collect($units)->map(function ($unit) {
             return [

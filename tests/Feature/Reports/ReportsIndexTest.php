@@ -3,6 +3,7 @@
 use App\Models\Product;
 use App\Models\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -130,7 +131,7 @@ test('inventory valuation report exposes product, storage, and average cost keys
         'cost' => 50,
         'average_cost' => 50,
     ]);
-    $storage->stock()->attach($product->id, ['quantity' => 10]);
+    $storage->stock()->attach($product->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
 
     $response = $this->get(route('reports.inventory-valuation'));
 

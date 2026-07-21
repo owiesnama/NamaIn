@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class Storage extends BaseModel
 {
@@ -113,6 +114,8 @@ class Storage extends BaseModel
         $productModel = $product instanceof Product ? $product : Product::findOrFail($productId);
 
         DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
+            ChangeLog::lockTenant($this->tenant_id);
+
             $stockData = DB::table('stocks')
                 ->where('storage_id', $this->id)
                 ->where('product_id', $productId)
@@ -120,7 +123,9 @@ class Storage extends BaseModel
                 ->first();
 
             if (! $stockData) {
+                $publicId = strtolower((string) Str::ulid());
                 DB::table('stocks')->insert([
+                    'public_id' => $publicId,
                     'tenant_id' => $this->tenant_id,
                     'storage_id' => $this->id,
                     'product_id' => $productId,
@@ -129,12 +134,17 @@ class Storage extends BaseModel
                     'updated_at' => now(),
                 ]);
                 $quantityBefore = 0;
+                $operation = 'create';
             } else {
                 DB::table('stocks')
                     ->where('id', $stockData->id)
                     ->increment('quantity', $quantity, ['updated_at' => now()]);
                 $quantityBefore = $stockData->quantity;
+                $publicId = $stockData->public_id;
+                $operation = 'update';
             }
+
+            ChangeLog::record('stocks', $publicId, $operation, $this->tenant_id);
 
             $this->recordMovement($productModel, $quantity, $quantityBefore, $quantityBefore + $quantity, $reason, $movable, $actor);
         });
@@ -149,6 +159,8 @@ class Storage extends BaseModel
         $productModel = $product instanceof Product ? $product : Product::findOrFail($productId);
 
         DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
+            ChangeLog::lockTenant($this->tenant_id);
+
             $stockData = DB::table('stocks')
                 ->where('storage_id', $this->id)
                 ->where('product_id', $productId)
@@ -166,7 +178,9 @@ class Storage extends BaseModel
             }
 
             if (! $stockData) {
+                $publicId = strtolower((string) Str::ulid());
                 DB::table('stocks')->insert([
+                    'public_id' => $publicId,
                     'tenant_id' => $this->tenant_id,
                     'storage_id' => $this->id,
                     'product_id' => $productId,
@@ -174,12 +188,18 @@ class Storage extends BaseModel
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
+                $operation = 'create';
+            } else {
+                $publicId = $stockData->public_id;
+                $operation = 'update';
             }
 
             DB::table('stocks')
                 ->where('storage_id', $this->id)
                 ->where('product_id', $productId)
                 ->decrement('quantity', $quantity, ['updated_at' => now()]);
+
+            ChangeLog::record('stocks', $publicId, $operation, $this->tenant_id);
 
             $this->recordMovement($productModel, -$quantity, $available, $available - $quantity, $reason, $movable, $actor);
         });
@@ -194,7 +214,10 @@ class Storage extends BaseModel
         $productModel = $product instanceof Product ? $product : Product::findOrFail($productId);
 
         DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
+            ChangeLog::lockTenant($this->tenant_id);
+
             DB::table('stocks')->insertOrIgnore([
+                'public_id' => strtolower((string) Str::ulid()),
                 'tenant_id' => $this->tenant_id,
                 'storage_id' => $this->id,
                 'product_id' => $productId,
@@ -208,6 +231,13 @@ class Storage extends BaseModel
             $delta = $quantity - $quantityBefore;
 
             $stock->pivot->update(['quantity' => $quantity]);
+
+            $publicId = DB::table('stocks')
+                ->where('storage_id', $this->id)
+                ->where('product_id', $productId)
+                ->value('public_id');
+
+            ChangeLog::record('stocks', $publicId, 'update', $this->tenant_id);
 
             $this->recordMovement($productModel, $delta, $quantityBefore, $quantity, $reason, $movable, $actor);
         });

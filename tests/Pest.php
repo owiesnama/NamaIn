@@ -1,6 +1,8 @@
 <?php
 
 use App\Enums\StorageType;
+use App\Features\Facades\Entitlements;
+use App\Features\Feature;
 use App\Models\Role;
 use App\Models\Storage;
 use App\Models\Tenant;
@@ -69,6 +71,18 @@ expect()->extend('toBeOne', function () {
 function something()
 {
     // ..
+}
+
+function enableOfflineSync(?Tenant $tenant = null): void
+{
+    $tenant = $tenant ?? app('currentTenant');
+
+    $tenant->featureOverrides()->create([
+        'feature_key' => Feature::OfflineSync->value,
+        'value' => true,
+    ]);
+
+    Entitlements::flush($tenant);
 }
 
 function seedTenantRoles(Tenant $tenant): void

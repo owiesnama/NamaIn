@@ -12,6 +12,7 @@ use App\Models\Supplier;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -87,7 +88,7 @@ test('dashboard displays enriched data', function () {
 
     // Create a low stock product
     $lowStockProduct = Product::factory()->create(['name' => 'Low Stock Item', 'cost' => 50, 'average_cost' => 50, 'alert_quantity' => 100]);
-    $lowStockProduct->stock()->attach($storage->id, ['quantity' => 10]);
+    $lowStockProduct->stock()->attach($storage->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
 
     $response = $this->actingAs($user)->get(route('dashboard'));
 

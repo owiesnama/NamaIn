@@ -44,8 +44,11 @@ class TenantEntitlements
         }
 
         // Neither override nor plan specifies it: use the feature default when a
-        // plan governs the tenant, otherwise grant (gating not configured yet).
-        return $this->configured ? filter_var($feature->default(), FILTER_VALIDATE_BOOL) : true;
+        // plan governs the tenant, otherwise the feature's unconfigured fallback
+        // (grant for sellable capabilities, deny for rollout flags).
+        return $this->configured
+            ? filter_var($feature->default(), FILTER_VALIDATE_BOOL)
+            : $feature->grantWhenUnconfigured();
     }
 
     public function limit(Feature $feature): ?int

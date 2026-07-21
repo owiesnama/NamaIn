@@ -3,17 +3,20 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionStatus;
+use App\Traits\HasPublicId;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class Tenant extends Model
 {
     /** @use HasFactory<TenantFactory> */
-    use HasFactory;
+    use HasFactory, HasPublicId;
 
     /** @var string[] */
     public const RESERVED_SLUGS = [
@@ -41,6 +44,26 @@ class Tenant extends Model
     protected static function booted(): void
     {
         static::unguard();
+
+        // Every tenant owns a change-log counter and a reserved cloud register
+        // (R0) that numbers all cloud-web sales. The counter is provisioned first
+        // because creating R0 already emits a change entry. Guarded so historical
+        // migrations that create tenants before these tables exist do not fail;
+        // those tenants are provisioned by the dedicated seed migrations instead.
+        static::created(function (Tenant $tenant): void {
+            if (Schema::hasTable('tenant_sync_state')) {
+                DB::table('tenant_sync_state')->insertOrIgnore([
+                    'tenant_id' => $tenant->id,
+                    'next_seq' => 1,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+
+            if (Schema::hasTable('registers')) {
+                Register::cloudRegisterFor($tenant);
+            }
+        });
     }
 
     /**
