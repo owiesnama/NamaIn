@@ -1,4 +1,9 @@
 {
+    "Sales by payment method": "المبيعات حسب طريقة الدفع",
+    "Collected by account": "المحصّل حسب الحساب",
+    "No sales yet.": "لا توجد مبيعات بعد.",
+    "No treasury movements recorded.": "لم تُسجَّل أي حركات خزينة.",
+    "Advance": "دفعة مقدمة",
     "Deposit To": "الإيداع في",
     "No bank account is set up. Add one in POS settings before taking bank transfers.": "لا يوجد حساب بنكي مُعد. أضف حسابًا في إعدادات نقطة البيع قبل قبول التحويلات البنكية.",
     "No treasury account is available for :method payments. Choose an account or set a POS default in settings.": "لا يوجد حساب خزينة متاح لمدفوعات :method. اختر حسابًا أو عيّن حسابًا افتراضيًا في إعدادات نقطة البيع.",
