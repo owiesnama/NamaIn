@@ -7,9 +7,10 @@ import FileUploader from "@/Components/FileUploader.vue";
 import { useForm } from "@inertiajs/vue3";
 import { ref } from "vue";
 
-defineProps({
+const props = defineProps({
     categories: Array,
     treasury_accounts: Array,
+    default_treasury_account_id: { type: [Number, null], default: null },
 });
 
 const form = useForm({
@@ -18,7 +19,9 @@ const form = useForm({
     expensed_at: new Date().toISOString().substr(0, 10),
     category_ids: [],
     category_objects: [],
-    treasury_account_id: null,
+    // Default to the tenant's cash account so the expense reaches the treasury
+    // even when the cashier doesn't pick one; still overridable below.
+    treasury_account_id: props.default_treasury_account_id,
     notes: "",
     receipt: null,
     is_recurring: false,
@@ -27,7 +30,7 @@ const form = useForm({
     ends_at: null,
 });
 
-const selectedTreasuryAccount = ref(null);
+const selectedTreasuryAccount = ref(props.default_treasury_account_id);
 
 const formatCurrency = (amount, currency = null) => window.formatMoney(amount, currency);
 

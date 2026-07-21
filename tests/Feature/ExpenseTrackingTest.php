@@ -3,12 +3,31 @@
 use App\Enums\ExpenseStatus;
 use App\Models\Category;
 use App\Models\Expense;
+use App\Models\TreasuryAccount;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
+
+test('an expense hits the treasury via the default cash account when none is chosen', function () {
+    $user = User::factory()->create();
+    $cash = TreasuryAccount::factory()->cash()->create(); // shared default cash
+
+    $this->actingAs($user)
+        ->post(route('expenses.store'), [
+            'title' => 'Cleaning',
+            'amount' => 300,
+            'expensed_at' => now()->format('Y-m-d'),
+        ])->assertRedirect(route('expenses.index'));
+
+    $expense = Expense::first();
+    expect($expense->treasury_account_id)->toBe($cash->id)
+        ->and($expense->treasuryMovements)->toHaveCount(1)
+        ->and((int) $expense->treasuryMovements->first()->amount)->toBe(-30000);
+    expect((int) $cash->fresh()->currentBalance())->toBe(-30000);
+});
 
 test('user can record an expense', function () {
     $user = User::factory()->create();

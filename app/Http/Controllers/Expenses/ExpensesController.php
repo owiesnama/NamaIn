@@ -47,6 +47,7 @@ class ExpensesController extends Controller
                 'type_label' => $a->type->label(),
                 'current_balance' => $a->currentBalance(),
             ]),
+            'default_treasury_account_id' => TreasuryAccount::defaultCash()?->id,
         ]);
     }
 
