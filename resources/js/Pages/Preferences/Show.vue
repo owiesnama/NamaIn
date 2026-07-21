@@ -4,10 +4,22 @@
     import AppLayout from "@/Layouts/AppLayout.vue";
     import SettingsLayout from "@/Layouts/SettingsLayout.vue";
     import UpdateApplicationInformationForm from "@/Pages/Preferences/Partials/UpdateApplicationInformationForm.vue";
+    import UpdatePosSettingsForm from "@/Pages/Preferences/Partials/UpdatePosSettingsForm.vue";
     import ActionMessage from "@/Components/ActionMessage.vue";
     import PrimaryButton from "@/Components/PrimaryButton.vue";
 
+    const props = defineProps({
+        cash_accounts: { type: Array, default: () => [] },
+        bank_accounts: { type: Array, default: () => [] },
+        sale_points: { type: Array, default: () => [] },
+    });
+
     const truthy = (value) => [true, 1, "1", "true"].includes(value);
+
+    // POS default selects store an id (or null). Coerce the stored string
+    // preference back to a number so the select matches its option, and keep an
+    // empty preference as null so "no default" round-trips cleanly.
+    const asId = (value) => (value === null || value === "" || value === undefined ? null : Number(value));
 
     // Provided to the fields partial so it can bind to the shared form without
     // mutating a prop (the page keeps ownership for the header Save + dirty state).
@@ -27,6 +39,9 @@
         pecentage: preferences("pecentage", 60),
         inventory_strategy: preferences("inventory_strategy", "purchase_driven"),
         allow_overselling: truthy(preferences("allow_overselling", false)),
+        pos_default_cash_account_id: asId(preferences("pos_default_cash_account_id")),
+        pos_default_bank_account_id: asId(preferences("pos_default_bank_account_id")),
+        pos_default_sale_point_id: asId(preferences("pos_default_sale_point_id")),
     });
 
     provide("settingsForm", form);
@@ -50,6 +65,7 @@
         { id: "identity", label: __("Identity") },
         { id: "pricing", label: __("Pricing & currency") },
         { id: "inventory", label: __("Inventory policy") },
+        { id: "pos", label: __("Point of Sale") },
         { id: "notifications", label: __("Notifications") },
     ];
 </script>
@@ -107,6 +123,11 @@
 
                 <!-- Fields read the shared form via inject("settingsForm"). -->
                 <UpdateApplicationInformationForm />
+                <UpdatePosSettingsForm
+                    :cash-accounts="props.cash_accounts"
+                    :bank-accounts="props.bank_accounts"
+                    :sale-points="props.sale_points"
+                />
             </SettingsLayout>
         </form>
     </AppLayout>

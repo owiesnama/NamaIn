@@ -1,4 +1,13 @@
 {
+    "Default cash account": "الحساب النقدي الافتراضي",
+    "Default bank account": "الحساب البنكي الافتراضي",
+    "Default sale point": "نقطة البيع الافتراضية",
+    "Select an account": "اختر حسابًا",
+    "Select a sale point": "اختر نقطة بيع",
+    "Cash sales with no sale-point drawer fall back to this account.": "المبيعات النقدية التي لا يوجد لها درج نقدي لنقطة البيع تُسجَّل في هذا الحساب.",
+    "Bank-transfer sales are recorded against this account when none is picked at checkout.": "مبيعات التحويل البنكي تُسجَّل في هذا الحساب عند عدم اختيار حساب أثناء الدفع.",
+    "The sale point pre-selected when opening a POS session.": "نقطة البيع المحددة مسبقًا عند فتح جلسة نقطة البيع.",
+    "Defaults applied at the register — where money lands and which sale point is used.": "الإعدادات الافتراضية المطبقة في نقطة البيع — أين تُودَع الأموال وأي نقطة بيع تُستخدم.",
     "Plans": "الخطط",
     "New plan": "خطة جديدة",
     "Edit plan": "تعديل الخطة",
