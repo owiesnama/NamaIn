@@ -9,6 +9,8 @@ use App\Models\Supplier;
 use App\Services\Sync\SerialNumberGenerator;
 use Illuminate\Support\Carbon;
 
+beforeEach(fn () => enableOfflineSync());
+
 function makeInvoice(array $overrides = []): Invoice
 {
     return Invoice::create(array_merge([

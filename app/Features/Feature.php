@@ -22,6 +22,7 @@ enum Feature: string
     case AdvancedReports = 'advanced_reports';
     case Exports = 'exports';
     case Cheques = 'cheques';
+    case OfflineSync = 'offline_sync';
 
     // Numeric limits (quotas)
     case MaxProducts = 'max_products';
@@ -47,7 +48,7 @@ enum Feature: string
     public function group(): string
     {
         return match ($this) {
-            self::Bookings, self::Pos => 'operations',
+            self::Bookings, self::Pos, self::OfflineSync => 'operations',
             self::MultiWarehouse, self::MaxWarehouses => 'inventory',
             self::Quotes => 'sales',
             self::AdvancedReports => 'reports',
@@ -75,6 +76,20 @@ enum Feature: string
         return match ($this->type()) {
             FeatureType::Boolean => false,
             FeatureType::Limit => 0,
+        };
+    }
+
+    /**
+     * Whether an *unconfigured* tenant (no subscription and no default plan)
+     * gets this feature. Sellable capabilities are granted so gating that is
+     * not set up never locks anyone out; rollout flags like OfflineSync stay
+     * off until a plan or an explicit override turns them on.
+     */
+    public function grantWhenUnconfigured(): bool
+    {
+        return match ($this) {
+            self::OfflineSync => false,
+            default => true,
         };
     }
 

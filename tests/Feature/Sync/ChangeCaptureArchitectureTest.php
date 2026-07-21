@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\ChangeLog;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -8,14 +9,7 @@ use Symfony\Component\Finder\Finder;
  * allow-list, and no relationship raw insert may bypass model events. This turns
  * "we believe nothing escapes the change log" into a build-time invariant.
  */
-$syncableTables = [
-    'invoices', 'transactions', 'transaction_receipts', 'payments', 'customers',
-    'customer_advances', 'suppliers', 'products', 'units', 'categories', 'stocks',
-    'stock_movements', 'stock_transfers', 'stock_transfer_lines', 'adjustments',
-    'storages', 'pos_sessions', 'treasury_accounts', 'treasury_movements',
-    'treasury_transfers', 'cheques', 'banks', 'expenses', 'recurring_expenses',
-    'quotes', 'quote_items', 'preferences',
-];
+$syncableTables = ChangeLog::SYNCABLE_TABLES;
 
 // The only files permitted to raw-mutate a syncable table, each paired with an
 // adjacent ChangeLog::record (Channel B).
@@ -71,8 +65,21 @@ it('never inserts through a relationship (which bypasses model events)', functio
 });
 
 it('never deletes through a relationship query builder', function () {
+    // Bulk deletes on tables OUTSIDE the syncable set; bypassing model events
+    // there costs no change-log entry. A file touching a syncable table must
+    // never appear here.
+    $nonSyncableDeleteAllowList = [
+        'app/Actions/Bookings/SyncServiceAddonsAction.php', // service_addons
+        'app/Http/Controllers/BookingsController.php', // booking_addons
+        'app/Http/Controllers/Admin/TenantFeatureOverrideController.php', // feature_tenant
+        'app/Http/Controllers/Admin/PlansController.php', // plan_features
+    ];
+
     $violations = [];
     foreach (syncSourceFiles() as $file) {
+        if (in_array($file['relative'], $nonSyncableDeleteAllowList, true)) {
+            continue;
+        }
         foreach (explode("\n", $file['contents']) as $number => $line) {
             // `$model->relation()->delete()` bypasses events; `$model->delete()`
             // and `$collection->each->delete()` do not and are fine.

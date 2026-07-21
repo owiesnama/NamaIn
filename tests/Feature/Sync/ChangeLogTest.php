@@ -7,6 +7,8 @@ use App\Models\Storage;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\DB;
 
+beforeEach(fn () => enableOfflineSync());
+
 function latestChange(int $tenantId): ?object
 {
     return DB::table('change_log')->where('tenant_id', $tenantId)->orderByDesc('seq')->first();
@@ -92,6 +94,8 @@ it('captures raw stocks writes through channel B', function () {
 it('keeps an independent per-tenant seq sequence', function () {
     $tenantA = Tenant::create(['name' => 'A Co', 'slug' => 'a-'.uniqid(), 'is_active' => true]);
     $tenantB = Tenant::create(['name' => 'B Co', 'slug' => 'b-'.uniqid(), 'is_active' => true]);
+    enableOfflineSync($tenantA);
+    enableOfflineSync($tenantB);
 
     app()->instance('currentTenant', $tenantA);
     $a1 = Product::create(['name' => 'A1', 'cost' => 1]);

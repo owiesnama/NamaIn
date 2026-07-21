@@ -7,6 +7,8 @@ use App\Enums\InvoiceStatus;
 use App\Enums\PaymentDirection;
 use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
+use App\Observers\InvoiceObserver;
+use App\Services\Sync\OfflineSync;
 use App\Services\Sync\SerialNumberGenerator;
 use App\Traits\WithTrashScope;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -51,10 +53,17 @@ class Invoice extends BaseModel
      * same insert (atomic, never null). Cloud-web invoices number on the tenant's
      * reserved register R0; an explicitly-set register (offline/device) or a
      * pre-set serial (legacy imports, seeders) is respected as-is.
+     *
+     * Runs only for tenants with the offline-sync entitlement; everyone else
+     * keeps the legacy PK-based serial from {@see InvoiceObserver}.
      */
     public function assignSerialNumber(): void
     {
         if (! empty($this->serial_number) || ! $this->tenant_id) {
+            return;
+        }
+
+        if (! OfflineSync::enabledFor($this->tenant_id)) {
             return;
         }
 

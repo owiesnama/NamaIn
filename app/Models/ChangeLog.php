@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Sync\OfflineSync;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +24,23 @@ class ChangeLog extends Model
 
     protected $guarded = [];
 
+    /**
+     * The FR-1 syncable set (Design 01): the only tables the change log tracks
+     * and the sync API will ever serve. Tables outside it — even ones carrying a
+     * `public_id`, like registers and devices — are never recorded.
+     *
+     * @var array<int, string>
+     */
+    public const SYNCABLE_TABLES = [
+        'invoices', 'transactions', 'transaction_receipts', 'payments',
+        'customers', 'customer_advances', 'suppliers', 'products', 'units',
+        'categories', 'stocks', 'stock_movements', 'stock_transfers',
+        'stock_transfer_lines', 'adjustments', 'storages', 'pos_sessions',
+        'treasury_accounts', 'treasury_movements', 'treasury_transfers',
+        'cheques', 'banks', 'expenses', 'recurring_expenses', 'quotes',
+        'quote_items', 'preferences',
+    ];
+
     /** Memoized once the sync tables exist (they never disappear afterwards). */
     private static bool $tablesReady = false;
 
@@ -32,6 +50,10 @@ class ChangeLog extends Model
     public static function lockTenant(?int $tenantId): void
     {
         if ($tenantId === null || ! static::tablesReady()) {
+            return;
+        }
+
+        if (! OfflineSync::enabledFor($tenantId)) {
             return;
         }
 
@@ -46,6 +68,14 @@ class ChangeLog extends Model
     public static function record(string $table, ?string $publicId, string $operation, ?int $tenantId): void
     {
         if ($tenantId === null || $publicId === null || ! static::tablesReady()) {
+            return;
+        }
+
+        if (! in_array($table, self::SYNCABLE_TABLES, true)) {
+            return;
+        }
+
+        if (! OfflineSync::enabledFor($tenantId)) {
             return;
         }
 

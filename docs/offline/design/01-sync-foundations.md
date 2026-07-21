@@ -715,3 +715,17 @@ Recorded during implementation on `feat/offline-sync-foundations`
 6. **PHP 8.5 note:** `config/database.php`'s `PDO::MYSQL_ATTR_SSL_CA` deprecation
    breaks header flushing under `php -S` (see the packaging-spike verdict). The
    guard ships as its own PR, not on the Phase-0 branch.
+7. **Behavioural changes ship behind the `offline_sync` entitlement**
+   (added 2026-07-22, after rebase onto the feature-gating engine). Register-scoped
+   serials and change-log capture activate per tenant via
+   `Feature::OfflineSync` (plan value or admin override; default **off**, including
+   for unconfigured tenants — it is a rollout flag, not a sellable capability, so
+   it opts out of the "unconfigured grants everything" fallback). With the flag
+   off, invoices keep the legacy PK-based serial from the restored
+   `InvoiceObserver` and no change-log rows are written. Schema groundwork —
+   `public_id` minting, registers/devices, R0 provisioning, `sync_idempotency` —
+   stays unconditional so enabling a tenant needs no backfill.
+8. **The change log records only the FR-1 syncable set**
+   (`ChangeLog::SYNCABLE_TABLES`, shared with the architecture test). Tables that
+   carry a `public_id` but are outside the set (registers, devices) are never
+   recorded; Phase 1's cursor never serves rows a device schema cannot hold.

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionStatus;
+use App\Features\Facades\Entitlements;
 use Database\Factories\SubscriptionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,6 +24,11 @@ class Subscription extends Model
     protected static function booted(): void
     {
         static::unguard();
+
+        // Any write to an entitlement source invalidates the per-request
+        // entitlement cache; self-flushing here means no call site can forget.
+        static::saved(fn () => Entitlements::flush());
+        static::deleted(fn () => Entitlements::flush());
     }
 
     /**

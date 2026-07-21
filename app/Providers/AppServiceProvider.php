@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Listeners\InvalidateAllUserSessions;
+use App\Models\Invoice;
 use App\Models\Quote;
 use App\Models\User;
+use App\Observers\InvoiceObserver;
 use App\Observers\QuoteObserver;
 use App\Services\Core\Cache as TenantCacheService;
 use App\Services\Inventory\InventoryStrategy;
@@ -75,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
             InvalidateAllUserSessions::class,
         );
 
+        Invoice::observe(InvoiceObserver::class);
         Quote::observe(QuoteObserver::class);
 
         Gate::before(function (User $user, string $ability) {
