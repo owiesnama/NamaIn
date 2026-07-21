@@ -6,10 +6,12 @@ use App\Models\StockMovement;
 use App\Models\Storage;
 use App\Queries\StockBalanceQuery;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 function seedBypassedStock(Storage $storage, Product $product, int $quantity): void
 {
     DB::table('stocks')->insert([
+        'public_id' => strtolower((string) Str::ulid()),
         'tenant_id' => $storage->tenant_id,
         'storage_id' => $storage->id,
         'product_id' => $product->id,

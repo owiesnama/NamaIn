@@ -9,6 +9,7 @@ use App\Models\Storage;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -130,7 +131,7 @@ test('bulk stock applies a delta to the selected products at the storage', funct
     $user = User::factory()->create();
     $storage = Storage::factory()->create();
     $product = Product::factory()->create();
-    $product->stock()->attach($storage->id, ['quantity' => 10]);
+    $product->stock()->attach($storage->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
 
     $this->actingAs($user)
         ->post(route('products.bulk.stock'), [
@@ -148,7 +149,7 @@ test('bulk stock skips service products', function () {
     $user = User::factory()->create();
     $storage = Storage::factory()->create();
     $physical = Product::factory()->create();
-    $physical->stock()->attach($storage->id, ['quantity' => 10]);
+    $physical->stock()->attach($storage->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
     $service = Product::factory()->create(['type' => ProductType::Service]);
 
     $this->actingAs($user)
@@ -168,7 +169,7 @@ test('bulk stock skips products that violate the inventory strategy without fail
     $user = User::factory()->create();
     $storage = Storage::factory()->create();
     $product = Product::factory()->create();
-    $product->stock()->attach($storage->id, ['quantity' => 10]);
+    $product->stock()->attach($storage->id, ['quantity' => 10, 'public_id' => strtolower((string) Str::ulid())]);
 
     $this->actingAs($user)
         ->post(route('products.bulk.stock'), [
