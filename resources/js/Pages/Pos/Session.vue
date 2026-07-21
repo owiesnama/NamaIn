@@ -33,6 +33,14 @@ const props = defineProps({
     },
     selectedStorageId: [Number, String],
     session_stats: Object,
+    bankAccounts: {
+        type: Array,
+        default: () => [],
+    },
+    defaultBankAccountId: {
+        type: [Number, null],
+        default: null,
+    },
     flash: Object,
 });
 
@@ -144,6 +152,7 @@ const checkoutForm = useForm({
     items: [],
     total: 0,
     payment_method: 'cash',
+    treasury_account_id: null,
     idempotency_key: '',
     acknowledge_transfers: false,
 });
@@ -154,11 +163,12 @@ const openCheckoutModal = () => {
     showingCheckoutModal.value = true;
 };
 
-const checkout = async ({ paymentMethod, change }) => {
+const checkout = async ({ paymentMethod, change, treasuryAccountId }) => {
     cartErrorMessage.value = '';
     checkoutForm.items = cart.value;
     checkoutForm.total = total.value;
     checkoutForm.payment_method = paymentMethod;
+    checkoutForm.treasury_account_id = treasuryAccountId ?? null;
 
     if (!checkoutForm.idempotency_key) {
         checkoutForm.idempotency_key = Date.now().toString();
@@ -389,7 +399,7 @@ const paymentMethodLabels = [
         <!-- Modals -->
         <QuickAddPartyModal :show="showingAddCustomerModal" type="customer" @close="showingAddCustomerModal = false" @created="onCustomerCreated" />
 
-        <PosCheckoutModal ref="checkoutModalRef" :show="showingCheckoutModal" :total="total" :discount-amount="discountAmount" :processing="checkoutForm.processing" :currency="currency" @close="showingCheckoutModal = false" @confirm="checkout" />
+        <PosCheckoutModal ref="checkoutModalRef" :show="showingCheckoutModal" :total="total" :discount-amount="discountAmount" :processing="checkoutForm.processing" :currency="currency" :bank-accounts="bankAccounts" :default-bank-account-id="defaultBankAccountId" @close="showingCheckoutModal = false" @confirm="checkout" />
 
         <PosSaleCompleteModal :show="showingSaleCompleteModal" :sale="completedSale" :currency="currency" :payment-methods="paymentMethodLabels" @new-sale="startNewSale" @print="printLastReceipt" />
 

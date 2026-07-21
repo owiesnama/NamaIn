@@ -24,17 +24,23 @@ class StoreExpenseAction
     public function handle(array $data, User $actor): Expense
     {
         return DB::transaction(function () use ($data, $actor) {
+            // An expense is money leaving the business, so it must hit the ledger.
+            // Honour the chosen account, otherwise fall back to the default cash
+            // account so the treasury reflects the outflow without extra clicks.
+            $account = ! empty($data['treasury_account_id'])
+                ? TreasuryAccount::findOrFail($data['treasury_account_id'])
+                : TreasuryAccount::defaultCash();
+
             $expense = Expense::create([
                 'title' => $data['title'],
                 'amount' => $data['amount'],
                 'expensed_at' => $data['expensed_at'],
                 'notes' => $data['notes'] ?? null,
                 'receipt_path' => $data['receipt_path'] ?? null,
-                'treasury_account_id' => $data['treasury_account_id'] ?? null,
+                'treasury_account_id' => $account?->id,
             ]);
 
-            if (! empty($data['treasury_account_id'])) {
-                $account = TreasuryAccount::findOrFail($data['treasury_account_id']);
+            if ($account) {
                 $amountInCents = Money::fromMajor($data['amount'])->minor();
 
                 $this->recordMovement->handle(

@@ -7,6 +7,8 @@ const props = defineProps({
     discountAmount: Number,
     processing: Boolean,
     currency: String,
+    bankAccounts: { type: Array, default: () => [] },
+    defaultBankAccountId: { type: [Number, null], default: null },
 });
 
 const emit = defineEmits(['close', 'confirm']);
@@ -15,6 +17,13 @@ const fmt = (val) => window.formatMoney(val);
 
 const selectedPaymentMethod = ref('cash');
 const cashTendered = ref('');
+const selectedBankAccountId = ref(props.defaultBankAccountId);
+
+// Bank transfer needs a destination account. Block confirmation when the method
+// is selected but no bank account is available (none configured yet).
+const bankAccountMissing = computed(
+    () => selectedPaymentMethod.value === 'bank_transfer' && !selectedBankAccountId.value,
+);
 
 const changeAmount = computed(() => {
     if (selectedPaymentMethod.value !== 'cash') return null;
@@ -53,12 +62,16 @@ const confirm = () => {
     emit('confirm', {
         paymentMethod: selectedPaymentMethod.value,
         change: changeAmount.value,
+        treasuryAccountId: selectedPaymentMethod.value === 'bank_transfer'
+            ? selectedBankAccountId.value
+            : null,
     });
 };
 
 const reset = () => {
     cashTendered.value = '';
     selectedPaymentMethod.value = 'cash';
+    selectedBankAccountId.value = props.defaultBankAccountId;
 };
 
 defineExpose({ reset, selectedPaymentMethod, changeAmount });
@@ -108,9 +121,24 @@ defineExpose({ reset, selectedPaymentMethod, changeAmount });
                                 </div>
                             </div>
                         </Transition>
+                        <Transition enter-active-class="transition-all duration-200" enter-from-class="opacity-0 -translate-y-2" enter-to-class="opacity-100 translate-y-0">
+                            <div v-if="selectedPaymentMethod === 'bank_transfer'" class="mb-5">
+                                <label class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-1.5 block">{{ __('Deposit To') }}</label>
+                                <select
+                                    v-if="bankAccounts.length"
+                                    v-model="selectedBankAccountId"
+                                    class="w-full px-4 py-3 text-sm text-gray-900 dark:text-white bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl focus:border-emerald-300 focus:ring focus:ring-emerald-200 focus:ring-opacity-50"
+                                >
+                                    <option v-for="account in bankAccounts" :key="account.id" :value="account.id">{{ account.name }}</option>
+                                </select>
+                                <p v-else class="px-4 py-3 text-sm rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400">
+                                    {{ __('No bank account is set up. Add one in POS settings before taking bank transfers.') }}
+                                </p>
+                            </div>
+                        </Transition>
                         <div class="flex gap-x-3">
                             <button type="button" class="flex-1 py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors" @click="emit('close')">{{ __('Cancel') }}</button>
-                            <button type="button" class="flex-1 py-3 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" :disabled="processing" @click="confirm">
+                            <button type="button" class="flex-1 py-3 text-sm font-semibold text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2" :disabled="processing || bankAccountMissing" @click="confirm">
                                 <span v-if="processing" class="flex items-center justify-center gap-x-2">
                                     <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
                                     {{ __('Processing...') }}

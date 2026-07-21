@@ -44,6 +44,18 @@ class PosInvoicesController extends Controller
                     'variance' => $session->closing_float !== null ? $session->variance() / 100 : null,
                     'invoice_count' => $session->invoices()->count(),
                     'is_open' => $session->isOpen(),
+                    'sales_by_method' => $session->salesByPaymentMethod()
+                        ->map(fn (array $row) => [
+                            'method' => $row['method'],
+                            'total' => $row['total'] / 100,
+                            'count' => $row['count'],
+                        ])->values(),
+                    'sales_by_account' => $session->salesByTreasuryAccount()
+                        ->map(fn (array $row) => [
+                            'account_name' => $row['account_name'],
+                            'total' => $row['total'] / 100,
+                            'count' => $row['count'],
+                        ])->values(),
                 ])
                 ->withQueryString(),
 

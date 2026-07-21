@@ -88,9 +88,12 @@ class ProcessPosCheckoutAction
             $customerType = $data->get('customer_type', Customer::class);
 
             if (! $customerId && $customerType === Customer::class) {
+                // Match the walk-in by the stable is_system flag, not its display
+                // name — otherwise a translated name (e.g. Arabic) forks a second
+                // walk-in customer that never matches the seeded one.
                 $customerId = Customer::firstOrCreate(
-                    ['name' => 'Walk-in Customer', 'tenant_id' => $session->tenant_id],
-                    ['address' => 'N/A', 'phone_number' => 'N/A', 'is_system' => true]
+                    ['tenant_id' => $session->tenant_id, 'is_system' => true],
+                    ['name' => __('Walk-in Customer'), 'address' => 'N/A', 'phone_number' => 'N/A']
                 )->id;
             }
 
@@ -138,12 +141,11 @@ class ProcessPosCheckoutAction
 
             // 5. Record payment only for methods that collect money at checkout
             if ($this->recordsImmediatePayment($paymentMethod)) {
-                $cashDrawer = $paymentMethod === PaymentMethod::Cash
-                    ? TreasuryAccount::where('sale_point_id', $session->storage_id)
-                        ->ofType(TreasuryAccountType::Cash)
-                        ->active()
-                        ->first()
-                    : null;
+                $accountId = $this->resolveCheckoutAccountId(
+                    $paymentMethod,
+                    $session,
+                    $data->get('treasury_account_id'),
+                );
 
                 $this->recordPayment->handle(
                     invoice: $invoice,
@@ -153,7 +155,7 @@ class ProcessPosCheckoutAction
                     direction: PaymentDirection::In,
                     options: [
                         'notes' => 'POS sale',
-                        'treasury_account_id' => $cashDrawer?->id,
+                        'treasury_account_id' => $accountId,
                     ]
                 );
             }
@@ -169,6 +171,51 @@ class ProcessPosCheckoutAction
             PaymentMethod::Cheque,
             PaymentMethod::BankTransfer,
         ], true);
+    }
+
+    /**
+     * The treasury account id a checkout payment lands in. Cash uses the
+     * sale-point drawer, falling back to the shared default cash account (and,
+     * failing that, null — RecordPaymentAction still routes cash to the default,
+     * so cash-only tenants with no account keep working). Bank transfers must
+     * land somewhere: the account picked at checkout or the configured POS
+     * default, otherwise the sale is blocked so bank revenue never goes unbanked.
+     */
+    private function resolveCheckoutAccountId(
+        PaymentMethod $method,
+        PosSession $session,
+        int|string|null $requestedAccountId,
+    ): ?int {
+        if ($method === PaymentMethod::Cash) {
+            $drawer = TreasuryAccount::where('sale_point_id', $session->storage_id)
+                ->ofType(TreasuryAccountType::Cash)
+                ->active()
+                ->first()
+                ?? TreasuryAccount::defaultCash();
+
+            return $drawer?->id;
+        }
+
+        $account = $this->resolveBankAccount($requestedAccountId);
+
+        if (! $account) {
+            throw new DomainException(__('No treasury account is available for :method payments. Choose an account or set a POS default in settings.', [
+                'method' => $method->label(),
+            ]));
+        }
+
+        return $account->id;
+    }
+
+    private function resolveBankAccount(int|string|null $requestedAccountId): ?TreasuryAccount
+    {
+        if ($requestedAccountId) {
+            return TreasuryAccount::active()->find($requestedAccountId);
+        }
+
+        $defaultId = preference('pos_default_bank_account_id');
+
+        return $defaultId ? TreasuryAccount::active()->find($defaultId) : null;
     }
 
     private function replenish(Storage $salePoint, int $productId, int $quantityNeeded, User $actor): void

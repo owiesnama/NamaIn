@@ -7,6 +7,7 @@ use App\Enums\ExpenseStatus;
 use App\Traits\WithTrashScope;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -73,6 +74,14 @@ class Expense extends BaseModel
     public function recurringExpense(): BelongsTo
     {
         return $this->belongsTo(RecurringExpense::class, 'recurring_expense_id');
+    }
+
+    /**
+     * The treasury movements this expense produced.
+     */
+    public function treasuryMovements(): MorphMany
+    {
+        return $this->morphMany(TreasuryMovement::class, 'movable');
     }
 
     /**

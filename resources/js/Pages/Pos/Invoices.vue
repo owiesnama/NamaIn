@@ -3,7 +3,10 @@ import { ref, watch } from "vue";
 import { Link, router } from "@inertiajs/vue3";
 import AppLayout from "@/Layouts/AppLayout.vue";
 import Pagination from "@/Shared/Pagination.vue";
+import { useDate } from "@/Composables/useDate";
 import debounce from "lodash/debounce";
+
+const { formatDateTimeShort } = useDate();
 
 const props = defineProps({
     invoices: Object,
@@ -56,6 +59,24 @@ const variancePrefix = (variance) => {
     if (variance > 0) return `+${fmt(variance)}`;
     return fmt(variance);
 };
+
+// Session detail expansion — reveals per-method and per-account breakdowns.
+const expandedSessionId = ref(null);
+
+const toggleSession = (id) => {
+    expandedSessionId.value = expandedSessionId.value === id ? null : id;
+};
+
+const methodLabels = {
+    cash: __('Cash'),
+    bank_transfer: __('Bank Transfer'),
+    credit: __('Credit'),
+    cheque: __('Cheque'),
+    mixed: __('Mixed'),
+    advance: __('Advance'),
+};
+
+const methodLabel = (method) => methodLabels[method] ?? method;
 </script>
 
 <template>
@@ -199,7 +220,7 @@ const variancePrefix = (variance) => {
                             </thead>
                             <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
                                 <tr v-for="invoice in invoices.data" :key="invoice.id" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ invoice.created_at_human ?? invoice.created_at }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ formatDateTimeShort(invoice.created_at) }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-gray-700 dark:text-gray-300">#{{ invoice.serial_number ?? invoice.id }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
                                         <div class="flex items-center gap-x-2">
@@ -251,8 +272,16 @@ const variancePrefix = (variance) => {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200/60 dark:divide-gray-700/60 bg-white dark:bg-gray-900">
-                                <tr v-for="session in sessions.data" :key="session.id" class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ session.opened_at }}</td>
+                                <template v-for="session in sessions.data" :key="session.id">
+                                <tr class="group hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer" @click="toggleSession(session.id)">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">
+                                        <div class="flex items-center gap-x-2">
+                                            <svg class="h-4 w-4 text-gray-400 transition-transform duration-200" :class="{ 'rotate-90': expandedSessionId === session.id }" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                            </svg>
+                                            <span>{{ formatDateTimeShort(session.opened_at) }}</span>
+                                        </div>
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ session.cashier_name ?? __('Unknown') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ session.storage_name ?? '—' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-700 dark:text-gray-300">{{ session.invoice_count }}</td>
@@ -276,6 +305,35 @@ const variancePrefix = (variance) => {
                                         </span>
                                     </td>
                                 </tr>
+                                <tr v-if="expandedSessionId === session.id" class="bg-gray-50/50 dark:bg-gray-800/40">
+                                    <td colspan="10" class="px-6 py-5">
+                                        <div class="grid gap-6 sm:grid-cols-2">
+                                            <!-- Sales by payment method -->
+                                            <div>
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">{{ __('Sales by payment method') }}</p>
+                                                <div v-if="session.sales_by_method?.length" class="space-y-2">
+                                                    <div v-for="row in session.sales_by_method" :key="row.method" class="flex items-center justify-between text-sm">
+                                                        <span class="text-gray-600 dark:text-gray-400">{{ methodLabel(row.method) }} <span class="text-xs text-gray-400 dark:text-gray-500">({{ row.count }})</span></span>
+                                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ fmt(row.total) }}</span>
+                                                    </div>
+                                                </div>
+                                                <p v-else class="text-sm text-gray-400 dark:text-gray-500">{{ __('No sales yet.') }}</p>
+                                            </div>
+                                            <!-- Sales by account -->
+                                            <div>
+                                                <p class="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3">{{ __('Collected by account') }}</p>
+                                                <div v-if="session.sales_by_account?.length" class="space-y-2">
+                                                    <div v-for="row in session.sales_by_account" :key="row.account_name" class="flex items-center justify-between text-sm">
+                                                        <span class="text-gray-600 dark:text-gray-400">{{ row.account_name }} <span class="text-xs text-gray-400 dark:text-gray-500">({{ row.count }})</span></span>
+                                                        <span class="font-semibold text-gray-700 dark:text-gray-300">{{ fmt(row.total) }}</span>
+                                                    </div>
+                                                </div>
+                                                <p v-else class="text-sm text-gray-400 dark:text-gray-500">{{ __('No treasury movements recorded.') }}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </template>
                             </tbody>
                         </table>
                     </div>
