@@ -105,8 +105,10 @@ it('flags walk-in customer as system during pos checkout', function () {
 
     $response->assertRedirect(route('pos.index'));
 
-    $walkIn = Customer::query()->where('name', 'Walk-in Customer')->first();
+    // Identify the walk-in by its system flag; the name is localized.
+    $walkIn = Customer::query()->where('is_system', true)->first();
 
     expect($walkIn)->not->toBeNull();
-    expect($walkIn->is_system)->toBeTrue();
+    expect($walkIn->is_system)->toBeTrue()
+        ->and($walkIn->name)->toBe(__('Walk-in Customer'));
 });

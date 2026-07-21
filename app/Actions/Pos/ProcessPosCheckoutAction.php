@@ -88,9 +88,12 @@ class ProcessPosCheckoutAction
             $customerType = $data->get('customer_type', Customer::class);
 
             if (! $customerId && $customerType === Customer::class) {
+                // Match the walk-in by the stable is_system flag, not its display
+                // name — otherwise a translated name (e.g. Arabic) forks a second
+                // walk-in customer that never matches the seeded one.
                 $customerId = Customer::firstOrCreate(
-                    ['name' => 'Walk-in Customer', 'tenant_id' => $session->tenant_id],
-                    ['address' => 'N/A', 'phone_number' => 'N/A', 'is_system' => true]
+                    ['tenant_id' => $session->tenant_id, 'is_system' => true],
+                    ['name' => __('Walk-in Customer'), 'address' => 'N/A', 'phone_number' => 'N/A']
                 )->id;
             }
 

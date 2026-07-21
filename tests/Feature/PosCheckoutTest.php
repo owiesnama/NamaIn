@@ -116,7 +116,7 @@ test('it can checkout as a walk-in customer (null customer_id)', function () {
     $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
 
     expect($invoice->invocable_id)->not->toBeNull();
-    expect($invoice->invocable->name)->toBe('Walk-in Customer');
+    expect($invoice->invocable->name)->toBe(__('Walk-in Customer'));
     expect($invoice->invocable->is_system)->toBeTrue();
     expect($this->storage->fresh()->quantityOf($this->product))->toBe(99);
 });
@@ -199,6 +199,27 @@ test('cash checkout still records payment and treasury movement', function () {
         ->and($invoice->payments->first()->direction->value)->toBe('in');
 });
 
+test('walk-in checkout reuses the seeded system customer regardless of its name', function () {
+    // Simulates an Arabic tenant whose seeded walk-in is not the English literal.
+    $seeded = Customer::factory()->create([
+        'tenant_id' => $this->tenant->id,
+        'name' => 'عميل عابر',
+        'is_system' => true,
+    ]);
+
+    $data = collect([
+        'customer_id' => null,
+        'total' => 1000,
+        'payment_method' => 'cash',
+        'items' => [['product_id' => $this->product->id, 'quantity' => 1, 'price' => 1000]],
+    ]);
+
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
+
+    expect($invoice->invocable_id)->toBe($seeded->id);
+    expect(Customer::where('is_system', true)->count())->toBe(1);
+});
+
 test('bank transfer checkout records a treasury movement to the chosen account', function () {
     $this->actingAs($this->cashier);
     $bank = TreasuryAccount::factory()->bank()->create(['tenant_id' => $this->tenant->id]);
@@ -268,7 +289,7 @@ test('it can checkout as a walk-in customer via controller', function () {
     $response->assertRedirect(route('pos.index'));
 
     $invoice = Invoice::latest()->first();
-    expect($invoice->invocable->name)->toBe('Walk-in Customer');
+    expect($invoice->invocable->name)->toBe(__('Walk-in Customer'));
     expect($invoice->invocable->is_system)->toBeTrue();
 });
 
