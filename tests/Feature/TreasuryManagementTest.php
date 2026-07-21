@@ -78,6 +78,30 @@ test('current balance correctly sums all movements', function () {
     expect($account->currentBalance())->toBe(12000);
 });
 
+test('the show page hero balance reflects movements, not just opening balance', function () {
+    $account = TreasuryAccount::factory()->withOpeningBalance(0)->create([
+        'tenant_id' => $this->tenant->id,
+    ]);
+
+    TreasuryMovement::create([
+        'treasury_account_id' => $account->id,
+        'created_by' => $this->owner->id,
+        'movable_type' => TreasuryAccount::class,
+        'movable_id' => $account->id,
+        'reason' => TreasuryMovementReason::PaymentReceived,
+        'amount' => 437900000, // 4,379,000.00
+        'balance_after' => 437900000,
+        'occurred_at' => now(),
+    ]);
+
+    $this->actingAs($this->owner)
+        ->get(route('treasury.show', ['tenant' => $this->tenant->slug, 'treasury' => $account]))
+        ->assertOk()
+        ->assertInertia(fn ($page) => $page
+            ->where('account.current_balance', 4379000)
+        );
+});
+
 // ─────────────────────────────────────────────
 // RecordTreasuryMovementAction
 // ─────────────────────────────────────────────
@@ -305,6 +329,10 @@ test('closing a POS session with variance records an adjustment', function () {
     $adjustment = TreasuryMovement::where('reason', TreasuryMovementReason::ManualAdjustment)->first();
     expect($adjustment)->not->toBeNull();
     expect($adjustment->amount)->toBe(-500);
+
+    // Note reports formatted major amounts (100.00 / 95.00), not raw minor units.
+    expect($adjustment->notes)->toContain('100.00')
+        ->and($adjustment->notes)->toContain('95.00');
 });
 
 test('closing a POS session with matching float records no adjustment', function () {

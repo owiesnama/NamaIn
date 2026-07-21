@@ -1,4 +1,5 @@
 {
+    "POS session #:id closing reconciliation. Expected: :expected, Counted: :counted": "تسوية إغلاق جلسة نقطة البيع رقم :id. المتوقع: :expected، المعدود: :counted",
     "Sales by payment method": "المبيعات حسب طريقة الدفع",
     "Collected by account": "المحصّل حسب الحساب",
     "No sales yet.": "لا توجد مبيعات بعد.",
