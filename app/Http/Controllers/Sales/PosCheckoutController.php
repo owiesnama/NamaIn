@@ -7,6 +7,7 @@ use App\Exceptions\InsufficientStockException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PosCheckoutRequest;
 use App\Models\PosSession;
+use DomainException;
 
 class PosCheckoutController extends Controller
 {
@@ -23,7 +24,7 @@ class PosCheckoutController extends Controller
                 $request->idempotency_key,
                 $request->boolean('acknowledge_transfers')
             );
-        } catch (InsufficientStockException $e) {
+        } catch (InsufficientStockException|DomainException $e) {
             return back()->with('error', $e->getMessage());
         }
 

@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Sales;
 
 use App\Actions\Pos\ClosePosSessionAction;
 use App\Actions\Pos\OpenPosSessionAction;
+use App\Enums\TreasuryAccountType;
 use App\Http\Controllers\Controller;
 use App\Models\PosSession;
 use App\Models\Product;
 use App\Models\Storage;
+use App\Models\TreasuryAccount;
 use App\Queries\DashboardStatsQuery;
 use App\Queries\PosFavoriteProductsQuery;
 use Illuminate\Database\Eloquent\Collection;
@@ -77,6 +79,17 @@ class PosSessionController extends Controller
                 'cash_sales_total' => $session->cashSalesTotal() / 100,
                 'expected_closing_float' => $session->expectedClosingFloat() / 100,
             ],
+            'bankAccounts' => TreasuryAccount::active()
+                ->ofType(TreasuryAccountType::Bank)
+                ->orderBy('name')
+                ->get(['id', 'name'])
+                ->map(fn (TreasuryAccount $account) => [
+                    'id' => $account->id,
+                    'name' => $account->name,
+                ]),
+            'defaultBankAccountId' => preference('pos_default_bank_account_id')
+                ? (int) preference('pos_default_bank_account_id')
+                : null,
         ]);
     }
 

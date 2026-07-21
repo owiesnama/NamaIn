@@ -5,10 +5,12 @@ use App\Actions\Pos\ProcessPosCheckoutAction;
 use App\Exceptions\InsufficientStockException;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Preference;
 use App\Models\Product;
 use App\Models\Role;
 use App\Models\Storage;
 use App\Models\Tenant;
+use App\Models\TreasuryAccount;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -195,6 +197,59 @@ test('cash checkout still records payment and treasury movement', function () {
         ->and((int) $invoice->paid_amount)->toBe(2000)
         ->and($invoice->payments)->toHaveCount(1)
         ->and($invoice->payments->first()->direction->value)->toBe('in');
+});
+
+test('bank transfer checkout records a treasury movement to the chosen account', function () {
+    $this->actingAs($this->cashier);
+    $bank = TreasuryAccount::factory()->bank()->create(['tenant_id' => $this->tenant->id]);
+
+    $data = collect([
+        'customer_id' => $this->customer->id,
+        'total' => 2000,
+        'payment_method' => 'bank_transfer',
+        'treasury_account_id' => $bank->id,
+        'items' => [['product_id' => $this->product->id, 'quantity' => 2, 'price' => 1000]],
+    ]);
+
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
+
+    $payment = $invoice->payments->first();
+    expect($payment->treasury_account_id)->toBe($bank->id)
+        ->and($payment->treasuryMovements)->toHaveCount(1);
+    expect((int) $bank->fresh()->currentBalance())->toBe(200000);
+});
+
+test('bank transfer checkout falls back to the configured POS default account', function () {
+    $this->actingAs($this->cashier);
+    $bank = TreasuryAccount::factory()->bank()->create(['tenant_id' => $this->tenant->id]);
+    Preference::create(['tenant_id' => $this->tenant->id, 'key' => 'pos_default_bank_account_id', 'value' => $bank->id]);
+
+    $data = collect([
+        'customer_id' => $this->customer->id,
+        'total' => 1500,
+        'payment_method' => 'bank_transfer',
+        'items' => [['product_id' => $this->product->id, 'quantity' => 1, 'price' => 1500]],
+    ]);
+
+    $invoice = app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier);
+
+    expect($invoice->payments->first()->treasury_account_id)->toBe($bank->id)
+        ->and($invoice->payments->first()->treasuryMovements)->toHaveCount(1);
+});
+
+test('bank transfer checkout is blocked when no account resolves', function () {
+    $data = collect([
+        'customer_id' => $this->customer->id,
+        'total' => 1000,
+        'payment_method' => 'bank_transfer',
+        'items' => [['product_id' => $this->product->id, 'quantity' => 1, 'price' => 1000]],
+    ]);
+
+    expect(fn () => app(ProcessPosCheckoutAction::class)->handle($this->session, $data, $this->cashier))
+        ->toThrow(DomainException::class);
+
+    // Sale rolled back — stock untouched.
+    expect($this->storage->fresh()->quantityOf($this->product))->toBe(100);
 });
 
 test('it can checkout as a walk-in customer via controller', function () {

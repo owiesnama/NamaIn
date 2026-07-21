@@ -32,6 +32,12 @@ class PosCheckoutRequest extends FormRequest
             'items.*.unit_id' => ['nullable', Rule::exists('units', 'id')->where('tenant_id', $tenantId)],
             'total' => 'required|numeric',
             'payment_method' => ['nullable', new Enum(PaymentMethod::class)],
+            'treasury_account_id' => [
+                'nullable',
+                Rule::exists('treasury_accounts', 'id')
+                    ->where('tenant_id', $tenantId)
+                    ->where('is_active', true),
+            ],
             'customer_type' => ['nullable', Rule::in([Customer::class])],
             'idempotency_key' => 'nullable|string',
             'acknowledge_transfers' => 'nullable|boolean',

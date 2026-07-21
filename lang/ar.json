@@ -1,4 +1,7 @@
 {
+    "Deposit To": "الإيداع في",
+    "No bank account is set up. Add one in POS settings before taking bank transfers.": "لا يوجد حساب بنكي مُعد. أضف حسابًا في إعدادات نقطة البيع قبل قبول التحويلات البنكية.",
+    "No treasury account is available for :method payments. Choose an account or set a POS default in settings.": "لا يوجد حساب خزينة متاح لمدفوعات :method. اختر حسابًا أو عيّن حسابًا افتراضيًا في إعدادات نقطة البيع.",
     "Default cash account": "الحساب النقدي الافتراضي",
     "Default bank account": "الحساب البنكي الافتراضي",
     "Default sale point": "نقطة البيع الافتراضية",
