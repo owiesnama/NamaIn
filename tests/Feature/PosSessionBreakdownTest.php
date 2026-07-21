@@ -4,6 +4,7 @@ use App\Actions\Pos\OpenPosSessionAction;
 use App\Actions\Pos\ProcessPosCheckoutAction;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Storage;
 use App\Models\Tenant;
 use App\Models\TreasuryAccount;
@@ -15,9 +16,11 @@ uses(RefreshDatabase::class);
 beforeEach(function () {
     $this->tenant = Tenant::factory()->create();
     app()->instance('currentTenant', $this->tenant);
+    seedTenantRoles($this->tenant);
 
+    $ownerRole = Role::withoutGlobalScopes()->where('tenant_id', $this->tenant->id)->where('slug', 'owner')->first();
     $this->cashier = User::factory()->create(['current_tenant_id' => $this->tenant->id]);
-    $this->tenant->users()->attach($this->cashier, ['role' => 'owner', 'is_active' => true]);
+    $this->tenant->users()->attach($this->cashier, ['role' => 'owner', 'role_id' => $ownerRole->id, 'is_active' => true]);
     $this->actingAs($this->cashier);
 
     $this->storage = Storage::factory()->create(['tenant_id' => $this->tenant->id]);
@@ -46,17 +49,36 @@ beforeEach(function () {
     ]), $this->cashier);
 });
 
-test('it breaks down session sales by payment method', function () {
+test('it breaks down session sales by payment method in minor units', function () {
+    // Totals of 2000 / 3000 (major) are stored as 200000 / 300000 minor.
     $byMethod = $this->session->salesByPaymentMethod()->keyBy('method');
 
-    expect((int) $byMethod['cash']['total'])->toBe(2000)
-        ->and((int) $byMethod['bank_transfer']['total'])->toBe(3000)
+    expect((int) $byMethod['cash']['total'])->toBe(200000)
+        ->and((int) $byMethod['bank_transfer']['total'])->toBe(300000)
         ->and($byMethod['cash']['count'])->toBe(1);
 });
 
-test('it breaks down session sales by treasury account', function () {
+test('it breaks down session sales by treasury account in minor units', function () {
     $byAccount = $this->session->salesByTreasuryAccount()->keyBy('account_name');
 
-    expect((int) $byAccount['Cash Box']['total'])->toBe(2000)
-        ->and((int) $byAccount['Main Bank']['total'])->toBe(3000);
+    expect((int) $byAccount['Cash Box']['total'])->toBe(200000)
+        ->and((int) $byAccount['Main Bank']['total'])->toBe(300000);
+});
+
+test('the invoices page exposes the breakdown in major units for display', function () {
+    $response = $this->get(route('pos.invoices', ['tenant' => $this->tenant->slug]));
+
+    $response->assertOk()->assertInertia(function ($page) {
+        $session = collect($page->toArray()['props']['sessions']['data'])
+            ->firstWhere('id', $this->session->id);
+
+        $byMethod = collect($session['sales_by_method'])->keyBy('method');
+        $byAccount = collect($session['sales_by_account'])->keyBy('account_name');
+
+        // model minor (200000/300000) ÷ 100 = major shown to the cashier.
+        expect((float) $byMethod['cash']['total'])->toBe(2000.0)
+            ->and((float) $byMethod['bank_transfer']['total'])->toBe(3000.0)
+            ->and((float) $byAccount['Cash Box']['total'])->toBe(2000.0)
+            ->and((float) $byAccount['Main Bank']['total'])->toBe(3000.0);
+    });
 });

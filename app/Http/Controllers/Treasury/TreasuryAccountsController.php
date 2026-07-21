@@ -134,7 +134,10 @@ class TreasuryAccountsController extends Controller
             'type' => $account->type->value,
             'type_label' => $account->type->label(),
             'currency' => $account->currency,
-            'current_balance' => Money::fromMinor($account->opening_balance + (int) ($account->movements_sum_amount ?? 0))->major(),
+            // currentBalance() uses the eager-loaded movements sum on index and
+            // falls back to a live SUM on show (where it isn't preloaded), so the
+            // hero balance is always the true balance, not just opening_balance.
+            'current_balance' => Money::fromMinor($account->currentBalance())->major(),
             'opening_balance' => Money::fromMinor($account->opening_balance)->major(),
             'is_active' => $account->is_active,
             'notes' => $account->notes,

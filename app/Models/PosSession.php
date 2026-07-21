@@ -75,8 +75,12 @@ class PosSession extends BaseModel
      */
     public function salesByPaymentMethod(): Collection
     {
+        // Alias the sum to a non-cast name: an alias called `total` would be read
+        // back through Invoice's MoneyCast (major units), double-converting once
+        // the caller divides by 100. `total_minor` keeps the raw minor integer,
+        // matching cashSalesTotal()'s convention.
         return $this->invoices()
-            ->selectRaw('payment_method, SUM(total) as total, COUNT(*) as count')
+            ->selectRaw('payment_method, SUM(total) as total_minor, COUNT(*) as count')
             ->groupBy('payment_method')
             ->orderByRaw('SUM(total) DESC')
             ->get()
@@ -84,7 +88,7 @@ class PosSession extends BaseModel
                 'method' => $row->payment_method instanceof PaymentMethod
                     ? $row->payment_method->value
                     : (string) $row->payment_method,
-                'total' => (int) $row->total,
+                'total' => (int) $row->total_minor,
                 'count' => (int) $row->count,
             ]);
     }
@@ -105,12 +109,12 @@ class PosSession extends BaseModel
             ->whereNotNull('payments.treasury_account_id')
             ->groupBy('treasury_accounts.id', 'treasury_accounts.name')
             ->orderByRaw('SUM(invoices.total) DESC')
-            ->selectRaw('treasury_accounts.id as account_id, treasury_accounts.name as account_name, SUM(invoices.total) as total, COUNT(DISTINCT invoices.id) as count')
+            ->selectRaw('treasury_accounts.id as account_id, treasury_accounts.name as account_name, SUM(invoices.total) as total_minor, COUNT(DISTINCT invoices.id) as count')
             ->get()
             ->map(fn ($row) => [
                 'account_id' => (int) $row->account_id,
                 'account_name' => $row->account_name,
-                'total' => (int) $row->total,
+                'total' => (int) $row->total_minor,
                 'count' => (int) $row->count,
             ]);
     }
