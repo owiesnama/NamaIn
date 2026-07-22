@@ -18,6 +18,7 @@ use Closure;
 use DomainException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Throwable;
 
 /**
  * The push engine (Design 02 §5.2): applies an ordered mutation batch, each
@@ -77,6 +78,15 @@ class PushProcessor
             $this->parkIfTerminal($mutation, $device, $rejection);
 
             return $this->rejected($mutation, $rejection);
+        } catch (Throwable $e) {
+            // Anything unexpected (a QueryException on production data, a
+            // TypeError) is OUR fault, not the mutation's: report it, reject
+            // THIS mutation retriably, keep the envelope alive. Field-caught: a
+            // single 500 here froze a device's whole queue — no sale could sync
+            // until an unrelated bug was fixed.
+            report($e);
+
+            return $this->rejected($mutation, RejectedMutation::serverError());
         }
     }
 

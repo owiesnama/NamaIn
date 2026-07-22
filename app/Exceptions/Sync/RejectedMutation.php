@@ -39,4 +39,9 @@ class RejectedMutation extends RuntimeException
     {
         return new self(RejectionReason::ValidationFailed, $message);
     }
+
+    public static function serverError(?string $message = null): self
+    {
+        return new self(RejectionReason::ServerError, $message);
+    }
 }
