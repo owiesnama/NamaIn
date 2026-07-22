@@ -37,7 +37,10 @@ function deviceOn(Storage $storage, string $name): array
 
 function saleMutation(User $actor, string $serial, PosSession $session, Product $product, array $overrides = []): array
 {
-    $quantity = $overrides['quantity'] ?? 3;
+    // Device reality: quantities cross the wire as decimal-formatted STRINGS
+    // ("3.0000") — the replay must normalize them for the integer column
+    // (MySQL strict mode rejects the raw string; field-caught as a prod 500).
+    $quantity = $overrides['quantity'] ?? '3.0000';
     $priceMinor = 1000;
 
     $payload = array_merge([
@@ -47,7 +50,7 @@ function saleMutation(User $actor, string $serial, PosSession $session, Product 
         'customer_type' => 'customer',
         'payment_method' => $overrides['payment_method'] ?? 'cash',
         'serial_number' => $serial,
-        'total' => $quantity * $priceMinor,
+        'total' => (int) ((float) $quantity * $priceMinor),
         'discount' => 0,
         'items' => [
             [
