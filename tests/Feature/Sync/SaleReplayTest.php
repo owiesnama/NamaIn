@@ -10,7 +10,9 @@ use App\Models\Device;
 use App\Models\Invoice;
 use App\Models\OversellReconciliation;
 use App\Models\PosSession;
+use App\Models\Preference;
 use App\Models\Product;
+use App\Models\ReconciliationItem;
 use App\Models\Register;
 use App\Models\Storage;
 use App\Models\User;
@@ -213,4 +215,24 @@ it('rejects a sale whose session has not synced as retriable', function () {
         ->assertJsonPath('results.0.reason', 'unknown_reference');
 
     expect(Invoice::count())->toBe(0);
+});
+
+it('flags an oversell without raising a settlement for an overselling tenant', function () {
+    Preference::create(['key' => 'inventory_strategy', 'value' => 'free_form']);
+    Preference::create(['key' => 'allow_overselling', 'value' => '1']);
+
+    $env = saleEnvironment(stock: 2);
+    $device = deviceOn($env['storage'], 'Register A');
+
+    // Sells 3 of an on-hand 2 — oversold by 1, accepted mode for this tenant.
+    $response = pushSale($device['token'], saleMutation($env['actor'], 'INV-SA-26-RA-1', $env['session'], $env['product']));
+
+    $response->assertOk()->assertJsonPath('results.0.outcome', 'applied');
+
+    // The device still learns about the short line…
+    expect($response->json('results.0.flags.oversell.0.oversold_qty'))->toBe(1);
+
+    // …but nothing lands in the settlement inbox.
+    expect(OversellReconciliation::count())->toBe(0);
+    expect(ReconciliationItem::count())->toBe(0);
 });
