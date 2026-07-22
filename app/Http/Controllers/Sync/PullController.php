@@ -116,6 +116,8 @@ class PullController extends Controller
      * The number of change-log entries above the cursor versus the tenant's live
      * syncable row count (distinct non-tombstone (table, public_id) pairs).
      */
+    private const RESNAPSHOT_BACKLOG_FLOOR = 500;
+
     private function backlogExceedsLiveRows(Device $device, int $cursor): bool
     {
         $backlog = DB::table('change_log')
@@ -131,7 +133,12 @@ class PullController extends Controller
 
         $liveRows = DB::query()->fromSub($liveRowsSubquery, 'live')->count();
 
-        return $liveRows > 0 && $backlog > $liveRows;
+        // Absolute floor: on a YOUNG change log (offline enabled recently,
+        // few distinct rows) a handful of cloud writes made backlog > liveRows
+        // and bounced a same-day device into a full re-bootstrap — field-caught
+        // as the register dropping to the wizard mid-shift. A small backlog is
+        // always cheaper as an incremental pull, whatever the ratio says.
+        return $backlog > max(self::RESNAPSHOT_BACKLOG_FLOOR, $liveRows);
     }
 
     /**

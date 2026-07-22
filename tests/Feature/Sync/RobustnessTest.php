@@ -48,11 +48,13 @@ it('returns 409 cursor_expired when the backlog exceeds the live-row count', fun
     $tenantId = $env['device']->tenant_id;
     $publicId = strtolower((string) Str::ulid());
 
-    // One live row, but many superseded log entries → replaying the backlog is
-    // dearer than a fresh snapshot. Insert above the seqs enrollment already used.
+    // One live row, but a backlog past BOTH the live-row ratio and the absolute
+    // floor (500) → replaying the backlog is dearer than a fresh snapshot.
+    // Small backlogs stay incremental (see PullTest) — field-caught: the
+    // ratio alone bounced a same-day device into re-bootstrap mid-shift.
     $base = (int) DB::table('change_log')->where('tenant_id', $tenantId)->max('seq') + 1;
     logEntry($tenantId, $base, $publicId, 'create', now()->toDateTimeString());
-    foreach (range(1, 30) as $i) {
+    foreach (range(1, 501) as $i) {
         logEntry($tenantId, $base + $i, $publicId, 'update', now()->toDateTimeString());
     }
 
