@@ -130,7 +130,11 @@ class SaleCreateHandler implements MutationHandler
         return [
             'product_id' => $productId,
             'unit_id' => $unitId,
-            'quantity' => $item['quantity'],
+            // The wire carries decimal-formatted strings ("2.0000"); the local
+            // column is integer. SQLite coerces silently but MySQL strict mode
+            // rejects the raw string — field-caught as the production 500 that
+            // froze the pilot device's queue. Normalize at the boundary.
+            'quantity' => (int) round((float) $item['quantity']),
             'price' => Money::fromMinor((int) $item['price'])->major(),
         ];
     }
