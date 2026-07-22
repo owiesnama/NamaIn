@@ -4,14 +4,17 @@ use App\Actions\Sync\EnrollDeviceAction;
 use App\Actions\Sync\ProvisionDeviceAction;
 use App\Enums\StorageType;
 use App\Enums\SyncSnapshotStatus;
+use App\Enums\TreasuryAccountType;
 use App\Jobs\GenerateSnapshotJob;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Device;
+use App\Models\Preference;
 use App\Models\Product;
 use App\Models\Storage;
 use App\Models\SyncSnapshot;
 use App\Models\Tenant;
+use App\Models\TreasuryAccount;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -237,4 +240,30 @@ it('marks the snapshot failed when generation throws', function () {
     $job->failed(new RuntimeException('boom'));
 
     expect($snapshot->fresh()->status)->toBe(SyncSnapshotStatus::Failed);
+});
+
+it('projects bank accounts and the pos default flag alongside the register drawer', function () {
+    $environment = snapshotEnvironment();
+
+    $bank = TreasuryAccount::factory()->create([
+        'type' => TreasuryAccountType::Bank,
+        'name' => 'Bankak',
+        'is_active' => true,
+        'register_id' => null,
+        'sale_point_id' => null,
+    ]);
+    Preference::create(['key' => 'pos_default_bank_account_id', 'value' => (string) $bank->id]);
+
+    $device = $environment['device'];
+    $response = $this->postJson('/api/sync/v1/snapshot', [], ['Authorization' => "Bearer {$environment['token']}"]);
+    $snapshotId = $response->json('snapshot_id');
+
+    $directory = "sync-snapshots/{$device->tenant_id}/{$snapshotId}";
+    $rows = snapshotLines($directory, 'treasury_accounts.jsonl.gz');
+
+    $projected = collect($rows)->keyBy('public_id');
+    expect($projected->has($bank->public_id))->toBeTrue();
+    expect((bool) $projected[$bank->public_id]['pos_default'])->toBeTrue();
+    // The register's own drawer still ships, unflagged.
+    expect($projected->contains(fn ($row) => ! $row['pos_default']))->toBeTrue();
 });

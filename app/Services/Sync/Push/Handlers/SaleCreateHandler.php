@@ -8,6 +8,7 @@ use App\Exceptions\Sync\RejectedMutation;
 use App\Models\Device;
 use App\Models\PosSession;
 use App\Models\Product;
+use App\Models\TreasuryAccount;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Sync\PublicIdResolver;
@@ -84,8 +85,26 @@ class SaleCreateHandler implements MutationHandler
             'payment_method' => $payload['payment_method'] ?? 'cash',
             'total' => Money::fromMinor((int) $payload['total'])->major(),
             'discount' => Money::fromMinor((int) ($payload['discount'] ?? 0))->major(),
+            // The device chose the receiving account (bank transfers); resolve
+            // it so the replay routes the payment exactly as the web checkout.
+            'treasury_account_id' => $this->resolveAccount($payload['payment']['account'] ?? null),
             'items' => array_map(fn (array $item): array => $this->resolveItem($item), $payload['items']),
         ]);
+    }
+
+    private function resolveAccount(?string $publicId): ?int
+    {
+        if ($publicId === null) {
+            return null;
+        }
+
+        $accountId = $this->resolver->id(TreasuryAccount::class, $publicId);
+
+        if ($accountId === null) {
+            throw RejectedMutation::unknownReference(__('The receiving account on this sale has not synced yet.'));
+        }
+
+        return $accountId;
     }
 
     /**
