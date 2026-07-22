@@ -7,6 +7,9 @@ use App\Models\Invoice;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 
+// The global Pest tenant opts in; these tests exercise the flag-OFF contract.
+beforeEach(fn () => app('currentTenant')->disableOffline());
+
 function makeFlagTestInvoice(): Invoice
 {
     return Invoice::create([

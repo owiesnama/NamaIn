@@ -83,6 +83,14 @@ class PermissionSeeder extends Seeder
             'reports' => [
                 'reports.view' => 'View reports',
             ],
+            'reconciliation' => [
+                'reconciliation.view' => 'View reconciliation items',
+                'reconciliation.resolve' => 'Resolve reconciliation items',
+            ],
+            'devices' => [
+                'devices.view' => 'View device fleet',
+                'devices.manage' => 'Provision, revoke and replace devices',
+            ],
         ];
     }
 

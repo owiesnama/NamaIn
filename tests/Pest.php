@@ -1,8 +1,6 @@
 <?php
 
 use App\Enums\StorageType;
-use App\Features\Facades\Entitlements;
-use App\Features\Feature;
 use App\Models\Role;
 use App\Models\Storage;
 use App\Models\Tenant;
@@ -32,6 +30,7 @@ uses(
 
 uses(TestCase::class, RefreshDatabase::class)->beforeEach(function () {
     $tenant = Tenant::create(['name' => 'Test Org', 'slug' => 'test-org', 'is_active' => true]);
+    $tenant->enableOffline();
     app()->instance('currentTenant', $tenant);
     URL::defaults(['tenant' => $tenant->slug]);
 })->in('Feature');
@@ -75,14 +74,7 @@ function something()
 
 function enableOfflineSync(?Tenant $tenant = null): void
 {
-    $tenant = $tenant ?? app('currentTenant');
-
-    $tenant->featureOverrides()->create([
-        'feature_key' => Feature::OfflineSync->value,
-        'value' => true,
-    ]);
-
-    Entitlements::flush($tenant);
+    ($tenant ?? app('currentTenant'))->enableOffline();
 }
 
 function seedTenantRoles(Tenant $tenant): void

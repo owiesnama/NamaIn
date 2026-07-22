@@ -613,8 +613,15 @@ Written for support staff (plain language, no code), one page per failure mode:
 
 ### 6.5 Feature flag (open question 4)
 
-Decision: a **per-tenant `tenants.offline_enabled` boolean** (migration, default `false`).
-There is no existing feature-flag mechanism (§0), and this mirrors the existing `tenants.is_active`
+> **Amended 2026-07-22:** the platform has since gained a plan-driven entitlements engine
+> (feature gating v1). The dedicated `tenants.offline_enabled` column was dropped and the flag
+> unified into the **`Feature::OfflineSync` entitlement** — the same switch that gates Phase 0's
+> register serials and change-log capture. `Tenant::isOfflineEnabled()` reads the entitlement;
+> the super-admin toggle below writes a per-tenant feature *override* (override beats plan in
+> both directions, so it stays a true kill switch). Everything else in this section is unchanged.
+
+Original decision: a **per-tenant `tenants.offline_enabled` boolean** (migration, default `false`).
+There was no existing feature-flag mechanism (§0), and this mirrors the existing `tenants.is_active`
 pattern — minimal and obvious.
 
 - **Gates:** web device enrollment UI + the `devices.manage` enrollment endpoint check it, and

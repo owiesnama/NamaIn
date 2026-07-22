@@ -23,6 +23,8 @@ use App\Models\TreasuryAccount;
 use App\Models\Unit;
 use App\Models\User;
 use App\Services\Inventory\InventoryStrategy;
+use App\Services\Pos\DrawerResolver;
+use App\ValueObjects\CheckoutContext;
 use DomainException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +36,7 @@ class ProcessPosCheckoutAction
         private DeliverTransactionAction $deliverAction,
         private FindReplenishmentSourceAction $findReplenishmentSource,
         private TransferStockAction $executeStockTransfer,
+        private DrawerResolver $drawerResolver,
     ) {}
 
     public function handle(
@@ -41,8 +44,11 @@ class ProcessPosCheckoutAction
         Collection $data,
         User $actor,
         ?string $idempotencyKey = null,
-        bool $acknowledgeTransfers = false
+        bool $acknowledgeTransfers = false,
+        ?CheckoutContext $context = null
     ): Invoice {
+        $context ??= CheckoutContext::cloudWeb($session->tenant_id);
+
         if (! $session->isOpen()) {
             throw new DomainException('POS session is closed.');
         }
@@ -53,7 +59,7 @@ class ProcessPosCheckoutAction
             throw new DomainException('Credit sales require a named customer.');
         }
 
-        return DB::transaction(function () use ($session, $data, $actor, $idempotencyKey, $acknowledgeTransfers, $paymentMethod) {
+        return DB::transaction(function () use ($session, $data, $actor, $idempotencyKey, $acknowledgeTransfers, $paymentMethod, $context) {
             ChangeLog::lockTenant($session->tenant_id);
 
             if ($idempotencyKey) {
@@ -67,18 +73,23 @@ class ProcessPosCheckoutAction
                 }
             }
 
-            // 1. Replenish if needed
+            // 1. Replenish if needed. AllowNegative contexts (push replay, local
+            // runtime) and overselling tenants never block on stock: the sale
+            // drives the sale-point balance negative and is surfaced for
+            // reconciliation instead.
             foreach ($data->get('items') as $item) {
+                if ($context->allowsNegativeStock()) {
+                    break;
+                }
+
                 $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
                 $quantity = $item['quantity'] * ($unit->conversion_factor ?? 1);
 
                 $available = $session->storage->quantityOf($item['product_id']);
                 $needed = $quantity;
 
-                // Overselling tenants never block on stock; the sale drives the
-                // sale-point balance negative and is surfaced for reconciliation.
                 if ($available < $needed && ! app(InventoryStrategy::class)->allowsOverselling()) {
-                    if (! $acknowledgeTransfers) {
+                    if (! $acknowledgeTransfers || ! $context->executeReplenishment) {
                         throw new InsufficientStockException(Product::findOrFail($item['product_id']), $session->storage);
                     }
 
@@ -100,10 +111,12 @@ class ProcessPosCheckoutAction
                 )->id;
             }
 
-            // 3. Create Invoice
-            $invoice = Invoice::create([
+            // 3. Create Invoice — numbered on the context's register; a preset
+            // identity (push replay) is stored verbatim instead of minted
+            $invoice = Invoice::create(array_merge([
                 'tenant_id' => $session->tenant_id,
                 'pos_session_id' => $session->id,
+                'register_id' => $context->register->id,
                 'invocable_type' => $customerType,
                 'invocable_id' => $customerId,
                 'total' => $data->get('total'),
@@ -112,7 +125,10 @@ class ProcessPosCheckoutAction
                 'paid_amount' => 0,
                 'status' => InvoiceStatus::Initial,
                 'idempotency_key' => $idempotencyKey,
-            ]);
+            ], $context->preset ? [
+                'public_id' => $context->preset->invoicePublicId,
+                'serial_number' => $context->preset->serialNumber,
+            ] : []));
 
             // 4. Create Transactions & Deduct Stock
             $productIds = collect($data->get('items'))->pluck('product_id')->unique();
@@ -120,12 +136,15 @@ class ProcessPosCheckoutAction
                 ->get()
                 ->keyBy('id');
 
-            foreach ($data->get('items') as $item) {
+            $linePublicIds = $context->preset?->linePublicIds ?? [];
+
+            foreach (array_values($data->get('items')) as $index => $item) {
                 $unit = isset($item['unit_id']) ? Unit::find($item['unit_id']) : null;
                 $quantity = $item['quantity'] * ($unit->conversion_factor ?? 1);
 
                 $transaction = $invoice->transactions()->create([
                     'tenant_id' => $session->tenant_id,
+                    'public_id' => $linePublicIds[$index] ?? null,
                     'product_id' => $item['product_id'],
                     'storage_id' => $session->storage_id,
                     'quantity' => $item['quantity'],
@@ -137,7 +156,7 @@ class ProcessPosCheckoutAction
                     'delivered' => false,
                 ]);
 
-                $this->deliverAction->handle($transaction, $actor, $session->storage);
+                $this->deliverAction->handle($transaction, $actor, $session->storage, $context->allowsNegativeStock());
             }
 
             $invoice->markAs(InvoiceStatus::Delivered);
@@ -147,6 +166,7 @@ class ProcessPosCheckoutAction
                 $accountId = $this->resolveCheckoutAccountId(
                     $paymentMethod,
                     $session,
+                    $context,
                     $data->get('treasury_account_id'),
                 );
 
@@ -159,6 +179,7 @@ class ProcessPosCheckoutAction
                     options: [
                         'notes' => 'POS sale',
                         'treasury_account_id' => $accountId,
+                        'public_id' => $context->preset?->paymentPublicId,
                     ]
                 );
             }
@@ -178,22 +199,22 @@ class ProcessPosCheckoutAction
 
     /**
      * The treasury account id a checkout payment lands in. Cash uses the
-     * sale-point drawer, falling back to the shared default cash account (and,
-     * failing that, null — RecordPaymentAction still routes cash to the default,
-     * so cash-only tenants with no account keep working). Bank transfers must
-     * land somewhere: the account picked at checkout or the configured POS
-     * default, otherwise the sale is blocked so bank revenue never goes unbanked.
+     * context register's drawer (register-linked for device registers,
+     * sale-point-linked for cloud R0 — see DrawerResolver), falling back to the
+     * shared default cash account (and, failing that, null —
+     * RecordPaymentAction still routes cash to the default, so cash-only
+     * tenants with no account keep working). Bank transfers must land
+     * somewhere: the account picked at checkout or the configured POS default,
+     * otherwise the sale is blocked so bank revenue never goes unbanked.
      */
     private function resolveCheckoutAccountId(
         PaymentMethod $method,
         PosSession $session,
+        CheckoutContext $context,
         int|string|null $requestedAccountId,
     ): ?int {
         if ($method === PaymentMethod::Cash) {
-            $drawer = TreasuryAccount::where('sale_point_id', $session->storage_id)
-                ->ofType(TreasuryAccountType::Cash)
-                ->active()
-                ->first()
+            $drawer = $this->drawerResolver->resolveActive($context->register, $session->storage)
                 ?? TreasuryAccount::defaultCash();
 
             return $drawer?->id;

@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Device;
 use App\Models\User;
 
 return [
@@ -47,6 +48,20 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Pin the default sanctum guard to the users provider so a Device
+        // bearer token can never authenticate a web route (Design 02 FR-2);
+        // Sanctum's own default leaves the provider null, which accepts any
+        // tokenable. Existing config wins over Sanctum's array_merge defaults.
+        'sanctum' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+
+        'sync' => [
+            'driver' => 'sanctum',
+            'provider' => 'devices',
+        ],
     ],
 
     /*
@@ -70,6 +85,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => User::class,
+        ],
+
+        'devices' => [
+            'driver' => 'eloquent',
+            'model' => Device::class,
         ],
 
         // 'users' => [

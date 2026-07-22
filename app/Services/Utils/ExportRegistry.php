@@ -12,6 +12,7 @@ use App\Exports\Reports\NegativeStockExport;
 use App\Exports\Reports\PosSessionExport;
 use App\Exports\Reports\ProfitAndLossExport;
 use App\Exports\Reports\PurchaseReportExport;
+use App\Exports\Reports\ReconciliationReportExport;
 use App\Exports\Reports\SalesReportExport;
 use App\Exports\Reports\SupplierAgingExport;
 use App\Exports\Reports\TreasuryReconciliationExport;
@@ -37,6 +38,7 @@ class ExportRegistry
             'report-treasury' => TreasuryReconciliationExport::class,
             'report-expenses' => ExpenseSummaryExport::class,
             'report-pnl' => ProfitAndLossExport::class,
+            'report-reconciliation' => ReconciliationReportExport::class,
         ];
     }
 

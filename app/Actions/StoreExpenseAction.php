@@ -32,6 +32,11 @@ class StoreExpenseAction
                 : TreasuryAccount::defaultCash();
 
             $expense = Expense::create([
+                // Push replay (Design 02 §5.3) reproduces the device-minted
+                // identity so the pulled-back row matches the local one; the
+                // web path leaves these null and HasPublicId mints a fresh ULID.
+                'public_id' => $data['public_id'] ?? null,
+                'receipt_public_id' => $data['receipt_public_id'] ?? null,
                 'title' => $data['title'],
                 'amount' => $data['amount'],
                 'expensed_at' => $data['expensed_at'],

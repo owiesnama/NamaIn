@@ -6,8 +6,10 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BackupsController as AdminBackupsController;
 use App\Http\Controllers\Admin\BackupSettingsController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DeviceFleetController as AdminDeviceFleetController;
 use App\Http\Controllers\Admin\ImpersonationController;
 use App\Http\Controllers\Admin\MessagesController as AdminMessagesController;
+use App\Http\Controllers\Admin\PilotHealthController as AdminPilotHealthController;
 use App\Http\Controllers\Admin\PlansController as AdminPlansController;
 use App\Http\Controllers\Admin\TenantFeatureOverrideController;
 use App\Http\Controllers\Admin\TenantInvitationsController;
@@ -83,6 +85,12 @@ Route::prefix('__admin')->name('admin.')->group(function () {
         Route::get('activity', [ActivityLogController::class, 'index'])->name('activity');
 
         Route::resource('plans', AdminPlansController::class);
+
+        Route::get('pilot-health', [AdminPilotHealthController::class, 'index'])->name('pilot-health.index');
+
+        Route::get('device-fleet', [AdminDeviceFleetController::class, 'index'])->name('device-fleet.index');
+        Route::get('device-fleet/{tenant}', [AdminDeviceFleetController::class, 'show'])->name('device-fleet.show');
+        Route::put('device-fleet/{tenant}/offline', [AdminDeviceFleetController::class, 'toggleOffline'])->name('device-fleet.offline');
 
         Route::resource('tenants', AdminTenantsController::class)->except(['create', 'edit']);
         Route::put('tenants/{tenant}/status', [TenantStatusController::class, 'update'])->name('tenants.status');

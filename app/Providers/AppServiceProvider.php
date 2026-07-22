@@ -11,6 +11,7 @@ use App\Observers\QuoteObserver;
 use App\Services\Core\Cache as TenantCacheService;
 use App\Services\Inventory\InventoryStrategy;
 use App\Services\Inventory\InventoryStrategyResolver;
+use App\Services\Sync\SyncLogContext;
 use Illuminate\Auth\Events\Logout;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -36,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
             InventoryStrategy::class,
             fn ($app) => $app->make(InventoryStrategyResolver::class)->resolve(),
         );
+
+        $this->app->singleton(SyncLogContext::class);
     }
 
     public function boot(): void
@@ -96,6 +99,13 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        // Device sync API (Design 02 §8.3): 120 req/min keyed per device.
+        RateLimiter::for('sync', function (Request $request) {
+            $device = $request->user('sync');
+
+            return Limit::perMinute(120)->by($device ? 'sync-device:'.$device->getAuthIdentifier() : 'sync-ip:'.$request->ip());
         });
     }
 

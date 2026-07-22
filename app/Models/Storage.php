@@ -152,13 +152,17 @@ class Storage extends BaseModel
 
     /**
      * Deduct a stock from this store.
+     *
+     * With $allowNegative (sync replay / local runtime, Design 03 §5.2) the
+     * deduction is forced: quantity may go negative and a missing stock row
+     * is created, so an oversold sale is recorded instead of blocked.
      */
-    public function deductStock(Product|int $product, int $quantity, string $reason, ?Model $movable = null, ?User $actor = null): void
+    public function deductStock(Product|int $product, int $quantity, string $reason, ?Model $movable = null, ?User $actor = null, bool $allowNegative = false): void
     {
         $productId = $product instanceof Product ? $product->id : $product;
         $productModel = $product instanceof Product ? $product : Product::findOrFail($productId);
 
-        DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor) {
+        DB::transaction(function () use ($productId, $productModel, $quantity, $reason, $movable, $actor, $allowNegative) {
             ChangeLog::lockTenant($this->tenant_id);
 
             $stockData = DB::table('stocks')
@@ -168,12 +172,13 @@ class Storage extends BaseModel
                 ->first();
 
             $available = (int) ($stockData->quantity ?? 0);
-            $overselling = app(InventoryStrategy::class)->allowsOverselling();
+            $forced = $allowNegative || app(InventoryStrategy::class)->allowsOverselling();
 
-            // Without overselling, keep the original guard exactly: a missing row
-            // or an insufficient balance blocks the sale. Overselling bypasses it
-            // and drives the balance negative.
-            if (! $overselling && (! $stockData || $available < $quantity)) {
+            // Without a forcing context ($allowNegative replay or an overselling
+            // tenant), keep the original guard exactly: a missing row or an
+            // insufficient balance blocks the sale. Forced deductions bypass it
+            // and drive the balance negative.
+            if (! $forced && (! $stockData || $available < $quantity)) {
                 throw new InsufficientStockException($productModel, $this);
             }
 

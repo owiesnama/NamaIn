@@ -43,7 +43,7 @@ class PosSessionController extends Controller
 
         $products = Product::with('units')
             ->sellableAsLineItem() // bookable services are booked, not POS-sold
-            ->when(request('search'), fn ($q, $search) => $q->where('name', 'ilike', "%{$search}%"))
+            ->when(request('search'), fn ($q, $search) => $q->whereLike('name', $search))
             ->leftJoin('stocks', function ($join) use ($storage) {
                 $join->on('stocks.product_id', '=', 'products.id')
                     ->where('stocks.storage_id', $storage->id)

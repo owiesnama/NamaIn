@@ -171,7 +171,7 @@ const checkout = async ({ paymentMethod, change, treasuryAccountId }) => {
     checkoutForm.treasury_account_id = treasuryAccountId ?? null;
 
     if (!checkoutForm.idempotency_key) {
-        checkoutForm.idempotency_key = Date.now().toString();
+        checkoutForm.idempotency_key = crypto.randomUUID();
     }
 
     checkoutForm.processing = true;
