@@ -63,7 +63,9 @@ class DevicesController extends Controller
 
         $enrollment = $action->handle($storage, $request->string('name')->value());
 
-        return back()->with([
+        // Under the single `flash` session key: that is the only shape
+        // HandleInertiaRequests shares with the page (flash.pairing_code).
+        return back()->with('flash', [
             'pairing_code' => $enrollment['pairing_code'],
             'device' => $enrollment['device']->public_id,
             'message' => __('Device enrolled. Enter the pairing code on the device within :minutes minutes.', [
@@ -89,7 +91,7 @@ class DevicesController extends Controller
 
         $result = $action->handle($device, $request->string('name')->value() ?: null);
 
-        return back()->with([
+        return back()->with('flash', [
             'pairing_code' => $result['pairing_code'],
             'device' => $result['device']->public_id,
             'message' => __('Replacement enrolled on the same register. Enter the pairing code within :minutes minutes.', [
