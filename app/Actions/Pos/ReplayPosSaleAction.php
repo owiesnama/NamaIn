@@ -12,6 +12,7 @@ use App\Models\Invoice;
 use App\Models\OversellReconciliation;
 use App\Models\PosSession;
 use App\Models\User;
+use App\Services\Inventory\InventoryStrategy;
 use App\ValueObjects\CheckoutContext;
 use App\ValueObjects\Money;
 use App\ValueObjects\SaleReplayResult;
@@ -74,6 +75,16 @@ class ReplayPosSaleAction
                 continue;
             }
 
+            $flags[] = ['product' => $lines->first()->product->public_id, 'oversold_qty' => $oversold];
+
+            // An overselling tenant ACCEPTS negative balances as a mode of
+            // operation — the device still gets the flag (its UI shows the
+            // oversold line) but no settlement is raised (field-reported:
+            // overselling tenants were asked to "settle" routine sales).
+            if (app(InventoryStrategy::class)->allowsOverselling()) {
+                continue;
+            }
+
             $oversellRow = OversellReconciliation::create([
                 'tenant_id' => $invoice->tenant_id,
                 'device_id' => $device->id,
@@ -94,7 +105,6 @@ class ReplayPosSaleAction
                 occurredAt: $oversellRow->occurred_at,
             );
 
-            $flags[] = ['product' => $lines->first()->product->public_id, 'oversold_qty' => $oversold];
         }
 
         return $flags;
