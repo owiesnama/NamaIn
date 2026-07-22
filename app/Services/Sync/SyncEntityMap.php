@@ -183,6 +183,7 @@ class SyncEntityMap
                     'currency' => 'currency',
                     'alert_quantity' => 'alert_quantity',
                     'expire_date' => 'expire_date',
+                    'is_global_favorite' => 'is_global_favorite',
                 ],
                 integers: ['cost' => 'cost', 'price' => 'price', 'average_cost' => 'average_cost'],
             ),
@@ -200,6 +201,18 @@ class SyncEntityMap
                     ->whereIn('category_id', Category::query()->select('id')->toBase()),
                 references: ['category' => ['category_id', Category::class]],
                 morphs: ['categorizable' => ['categorizable_type', 'categorizable_id']],
+                pulled: false,
+            ),
+
+            // ── Per-user favorites (register grid's المفضلة section) ──────
+            new SyncEntityDefinition(
+                table: 'favorite_products',
+                query: fn (Device $device) => DB::table('favorite_products')
+                    ->whereIn('product_id', Product::query()->select('id')->toBase()),
+                references: [
+                    'user' => ['user_id', User::class],
+                    'product' => ['product_id', Product::class],
+                ],
                 pulled: false,
             ),
 
