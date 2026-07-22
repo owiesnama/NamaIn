@@ -6,8 +6,10 @@ use App\Enums\StorageType;
 use App\Enums\TreasuryAccountType;
 use App\Models\Device;
 use App\Models\Register;
+use App\Models\Role;
 use App\Models\Storage;
 use App\Models\TreasuryAccount;
+use App\Models\User;
 
 function salePoint(): Storage
 {
@@ -68,18 +70,33 @@ it('exposes enrollment over the web to users with devices.manage', function () {
     ]);
 
     $response->assertRedirect();
-    $response->assertSessionHas('pairing_code');
+    // The page reads flash.pairing_code — assert the shape the UI consumes,
+    // not just any session key.
+    $response->assertSessionHas('flash.pairing_code');
+    $response->assertSessionHas('flash.message');
 
     expect(Device::count())->toBe(1);
 });
 
+it('flashes a fresh pairing code when replacing a device', function () {
+    $this->signIn();
+    $storage = salePoint();
+    $enrollment = app(EnrollDeviceAction::class)->handle($storage, 'Front counter iPad');
+
+    $response = $this->post(route('devices.replace', $enrollment['device']));
+
+    $response->assertRedirect();
+    $response->assertSessionHas('flash.pairing_code');
+    $response->assertSessionHas('flash.message');
+});
+
 it('rejects enrollment for users without devices.manage', function () {
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
     $this->actingAs($user);
 
     // demote to cashier (no devices.manage)
     $tenant = app('currentTenant');
-    $cashier = \App\Models\Role::withoutGlobalScopes()
+    $cashier = Role::withoutGlobalScopes()
         ->where('tenant_id', $tenant->id)->where('slug', 'cashier')->first();
     $tenant->users()->updateExistingPivot($user->id, ['role' => 'cashier', 'role_id' => $cashier->id]);
 
