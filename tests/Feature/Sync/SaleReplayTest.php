@@ -4,15 +4,18 @@ use App\Actions\Pos\OpenPosSessionAction;
 use App\Actions\Sync\EnrollDeviceAction;
 use App\Actions\Sync\ProvisionDeviceAction;
 use App\Enums\StorageType;
+use App\Enums\TreasuryAccountType;
 use App\Models\CreditBreachFlag;
 use App\Models\Customer;
 use App\Models\Device;
 use App\Models\Invoice;
 use App\Models\OversellReconciliation;
+use App\Models\Payment;
 use App\Models\PosSession;
 use App\Models\Product;
 use App\Models\Register;
 use App\Models\Storage;
+use App\Models\TreasuryAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -213,4 +216,26 @@ it('rejects a sale whose session has not synced as retriable', function () {
         ->assertJsonPath('results.0.reason', 'unknown_reference');
 
     expect(Invoice::count())->toBe(0);
+});
+
+it('routes a bank-transfer replay to the device-chosen account', function () {
+    $env = saleEnvironment(stock: 10);
+    $device = deviceOn($env['storage'], 'Register A');
+
+    $bank = TreasuryAccount::factory()->create([
+        'type' => TreasuryAccountType::Bank,
+        'is_active' => true,
+        'register_id' => null,
+        'sale_point_id' => null,
+    ]);
+
+    $mutation = saleMutation($env['actor'], 'INV-SA-26-RA-9', $env['session'], $env['product']);
+    $mutation['payload']['payment_method'] = 'bank_transfer';
+    $mutation['payload']['payment']['method'] = 'bank_transfer';
+    $mutation['payload']['payment']['account'] = $bank->public_id;
+
+    pushSale($device['token'], $mutation)->assertOk()->assertJsonPath('results.0.outcome', 'applied');
+
+    $payment = Payment::latest('id')->first();
+    expect($payment->treasury_account_id)->toBe($bank->id);
 });

@@ -2,6 +2,7 @@
 
 namespace App\Services\Sync;
 
+use App\Enums\TreasuryAccountType;
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\CustomerAdvance;
@@ -133,12 +134,28 @@ class SyncEntityMap
                 references: ['register' => ['register_id', Register::class]],
                 pulled: false,
             ),
-            // the register's cash drawer only (§4: each register writes only
-            // its own drawer)
+            // The register's own cash drawer (§4: each register writes only its
+            // drawer) PLUS the tenant's active non-cash receiving accounts and
+            // the shared default cash account (read-only on device) so the POS
+            // can route bank transfers exactly like the cloud checkout. The
+            // POS default crosses as a flag — the cloud preference stores a
+            // cloud DB id that means nothing on the device.
             new SyncEntityDefinition(
                 table: 'treasury_accounts',
-                query: fn (Device $device) => TreasuryAccount::query()->where('register_id', $device->register_id),
-                columns: ['name' => 'name', 'type' => 'type', 'currency' => 'currency', 'is_active' => 'is_active'],
+                query: function (Device $device) {
+                    $defaultId = (int) preference('pos_default_bank_account_id', 0);
+
+                    return TreasuryAccount::query()
+                        ->where(fn ($q) => $q
+                            ->where('register_id', $device->register_id)
+                            ->orWhere(fn ($bank) => $bank
+                                ->where('is_active', true)
+                                ->where('type', '!=', TreasuryAccountType::Cash->value))
+                            ->orWhereIn('id', array_filter([TreasuryAccount::defaultCash()?->id])))
+                        ->select('treasury_accounts.*')
+                        ->selectRaw('(treasury_accounts.id = ?) as pos_default', [$defaultId]);
+                },
+                columns: ['name' => 'name', 'type' => 'type', 'currency' => 'currency', 'is_active' => 'is_active', 'pos_default' => 'pos_default'],
                 integers: ['opening_balance' => 'opening_balance'],
                 references: [
                     'storage' => ['sale_point_id', Storage::class],
@@ -166,6 +183,7 @@ class SyncEntityMap
                     'currency' => 'currency',
                     'alert_quantity' => 'alert_quantity',
                     'expire_date' => 'expire_date',
+                    'is_global_favorite' => 'is_global_favorite',
                 ],
                 integers: ['cost' => 'cost', 'price' => 'price', 'average_cost' => 'average_cost'],
             ),
@@ -183,6 +201,18 @@ class SyncEntityMap
                     ->whereIn('category_id', Category::query()->select('id')->toBase()),
                 references: ['category' => ['category_id', Category::class]],
                 morphs: ['categorizable' => ['categorizable_type', 'categorizable_id']],
+                pulled: false,
+            ),
+
+            // ── Per-user favorites (register grid's المفضلة section) ──────
+            new SyncEntityDefinition(
+                table: 'favorite_products',
+                query: fn (Device $device) => DB::table('favorite_products')
+                    ->whereIn('product_id', Product::query()->select('id')->toBase()),
+                references: [
+                    'user' => ['user_id', User::class],
+                    'product' => ['product_id', Product::class],
+                ],
                 pulled: false,
             ),
 

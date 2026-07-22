@@ -14,4 +14,6 @@ enum MutationType: string
     case SaleCreate = 'sale.create';
     case CustomerCreate = 'customer.create';
     case ExpenseCreate = 'expense.create';
+    case FavoriteSet = 'favorite.set';
+    case ProductCreate = 'product.create';
 }
