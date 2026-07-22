@@ -3,6 +3,7 @@
 use App\Models\Category;
 use App\Models\Customer;
 use App\Models\Expense;
+use App\Models\ParkedMutation;
 use App\Models\PosSession;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -189,4 +190,40 @@ it('requires the sync:push ability', function () {
         'protocol' => 1,
         'mutations' => [customerMutation($env, strtolower((string) Str::ulid()))],
     ], ['Authorization' => "Bearer {$limited}"])->assertForbidden();
+});
+
+it('isolates an unexpected handler exception as a retriable server_error instead of a 500', function () {
+    $env = pushEnvironment();
+
+    $session = PosSession::create([
+        'tenant_id' => app('currentTenant')->id,
+        'storage_id' => $env['storage']->id,
+        'opened_by' => $env['actor']->id,
+    ]);
+
+    // items: null makes SaleCreateHandler crash with a TypeError — standing in
+    // for any unexpected production fault inside one handler.
+    $broken = [
+        'idempotency_key' => (string) Str::uuid(),
+        'type' => 'sale.create',
+        'public_id' => strtolower((string) Str::ulid()),
+        'actor' => $env['actor']->public_id,
+        'occurred_at' => now()->toIso8601String(),
+        'payload' => ['session' => $session->public_id, 'items' => null, 'total' => 100],
+    ];
+
+    $fine = customerMutation($env, strtolower((string) Str::ulid()), ['name' => 'Isolated Neighbour']);
+
+    $response = pushAs($env, [$broken, $fine]);
+
+    $response->assertOk();
+    $response->assertJsonPath('results.0.outcome', 'rejected');
+    $response->assertJsonPath('results.0.reason', 'server_error');
+    $response->assertJsonPath('results.1.outcome', 'applied');
+
+    // Retriable: no idempotency row, so the device may re-push after the fix.
+    expect(DB::table('sync_idempotency')
+        ->where('idempotency_key', $broken['idempotency_key'])->exists())->toBeFalse();
+    // And never parked — the fault is the server's, not the mutation's.
+    expect(ParkedMutation::where('idempotency_key', $broken['idempotency_key'])->exists())->toBeFalse();
 });

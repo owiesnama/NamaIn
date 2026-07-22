@@ -15,10 +15,11 @@ enum RejectionReason: string
     case SessionClosed = 'session_closed';
     case UpgradeRequired = 'upgrade_required';
     case TenantMismatch = 'tenant_mismatch';
+    case ServerError = 'server_error';
 
     public function isRetriable(): bool
     {
-        return $this === self::UnknownReference;
+        return $this === self::UnknownReference || $this === self::ServerError;
     }
 
     /**
@@ -35,6 +36,7 @@ enum RejectionReason: string
             self::SessionClosed => __('The POS session is already closed.'),
             self::UpgradeRequired => __('This app version is no longer supported.'),
             self::TenantMismatch => __('The mutation actor does not belong to this organization.'),
+            self::ServerError => __('The server could not apply this change; it will be retried automatically.'),
         };
     }
 }
