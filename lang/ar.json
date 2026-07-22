@@ -1478,7 +1478,7 @@
     "View Bookings": "عرض الحجوزات",
     "Warns the scheduler when a booking starts too soon after the previous one.": "ينبّه المُجدوِل عندما يبدأ حجز بعد وقت قصير جداً من الحجز السابق.",
     "Was scheduled for: :time": "كان مجدولاً في: :time",
-    "When": "الموعد",
+    "When": "متى",
     "more": "المزيد",
     "No results found": "لا توجد نتائج",
     "Edit Sales Invoice": "تعديل فاتورة المبيعات",
@@ -1562,7 +1562,7 @@
     "Pending Delivery": "بانتظار التسليم",
     "Balance Due": "المبلغ المستحق",
     "Thank you for your business": "شكرًا لتعاملكم معنا",
-    "Item": "الصنف",
+    "Item": "العنصر",
     "Select Type": "اختر النوع",
     "Select entity first": "اختر الجهة أولًا",
     "Remaining Balance": "الرصيد المتبقي",
@@ -1746,7 +1746,6 @@
     "Sync activity": "نشاط المزامنة",
     "Endpoint": "نقطة النهاية",
     "Applied": "مطبّقة",
-    "When": "متى",
     "No sync activity yet.": "لا يوجد نشاط مزامنة بعد.",
     ":count open reconciliation items": ":count عناصر تسوية مفتوحة",
     "Reconciliation summary for :tenant": "ملخص التسوية لـ :tenant",
@@ -1783,6 +1782,7 @@
     "Crash-free sessions": "جلسات دون أعطال",
     "Client-reported": "مُبلّغ من الجهاز",
     "Select a tenant to compute its pilot SLOs.": "اختر مؤسسة لحساب مؤشرات تجربتها.",
-    "Item": "العنصر",
-    "Resolved by": "تمت المعالجة بواسطة"
+    "Resolved by": "تمت المعالجة بواسطة",
+    "Device": "الجهاز",
+    "Note": "ملاحظة"
 }

@@ -58,11 +58,7 @@ class ProvisionDeviceAction
 
     private function ensureProvisionable(Device $device): void
     {
-        // tenants.offline_enabled ships in Phase 3; until the column exists the
-        // attribute is null and provisioning is open (Design 02 §8.5 placeholder).
-        $offlineEnabled = $device->tenant->getAttribute('offline_enabled');
-
-        if ($offlineEnabled !== null && ! $offlineEnabled) {
+        if (! $device->tenant->isOfflineEnabled()) {
             throw ProvisionException::offlineDisabled();
         }
 

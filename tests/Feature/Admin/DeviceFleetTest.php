@@ -5,7 +5,7 @@ use App\Models\Tenant;
 
 it('lists tenants on the super-admin device fleet page', function () {
     actingAsSuperAdmin();
-    Tenant::create(['name' => 'Pilot Store', 'slug' => 'pilot-store', 'is_active' => true, 'offline_enabled' => true]);
+    Tenant::create(['name' => 'Pilot Store', 'slug' => 'pilot-store', 'is_active' => true])->enableOffline();
 
     test()->get(route('admin.device-fleet.index'))
         ->assertSuccessful()
@@ -14,7 +14,8 @@ it('lists tenants on the super-admin device fleet page', function () {
 
 it('toggles a tenant offline flag and audits it', function () {
     actingAsSuperAdmin();
-    $tenant = Tenant::create(['name' => 'Pilot Store', 'slug' => 'pilot-store', 'is_active' => true, 'offline_enabled' => false]);
+    $tenant = Tenant::create(['name' => 'Pilot Store', 'slug' => 'pilot-store', 'is_active' => true]);
+    $tenant->disableOffline();
 
     test()->put(route('admin.device-fleet.offline', $tenant))->assertRedirect();
 

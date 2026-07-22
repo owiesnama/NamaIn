@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\SubscriptionStatus;
+use App\Features\Facades\Entitlements;
+use App\Features\Feature;
 use App\Traits\HasPublicId;
 use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Collection;
@@ -73,7 +75,6 @@ class Tenant extends Model
     {
         return [
             'is_active' => 'boolean',
-            'offline_enabled' => 'boolean',
         ];
     }
 
@@ -178,19 +179,40 @@ class Tenant extends Model
         return $this->update(['is_active' => true]);
     }
 
+    /**
+     * Whether offline sync is live for this tenant — the single
+     * {@see Feature::OfflineSync} entitlement (plan value or override) that
+     * also gates register serials and change-log capture.
+     */
     public function isOfflineEnabled(): bool
     {
-        return (bool) $this->offline_enabled;
+        return Entitlements::for($this)->enabled(Feature::OfflineSync);
     }
 
+    /**
+     * Admin switches write a per-tenant override: it wins over the plan in both
+     * directions, so enable works off-plan and disable is a real kill switch.
+     */
     public function enableOffline(): bool
     {
-        return $this->update(['offline_enabled' => true]);
+        return $this->setOfflineOverride(true);
     }
 
     public function disableOffline(): bool
     {
-        return $this->update(['offline_enabled' => false]);
+        return $this->setOfflineOverride(false);
+    }
+
+    private function setOfflineOverride(bool $enabled): bool
+    {
+        $this->featureOverrides()->updateOrCreate(
+            ['feature_key' => Feature::OfflineSync->value],
+            ['value' => $enabled, 'expires_at' => null],
+        );
+
+        Entitlements::flush($this);
+
+        return true;
     }
 
     public function resolveRouteBinding($value, $field = null): ?Model

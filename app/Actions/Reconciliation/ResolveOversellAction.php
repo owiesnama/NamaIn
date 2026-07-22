@@ -40,10 +40,10 @@ class ResolveOversellAction
 
             match ($resolution) {
                 ResolutionKind::Adjust => $this->recordAdjustment->handle(
-                    $subject->storage, $subject->product, (int) ($params['counted_qty'] ?? 0), 'adjustment', $actor, $params['note'] ?? null,
+                    $subject->storage, $subject->product, (int) ($params['counted_qty'] ?? 0), 'adjustment', $actor, $params['note'] ?? null, reconciling: true,
                 ),
                 ResolutionKind::Shrinkage => $this->recordAdjustment->handle(
-                    $subject->storage, $subject->product, (int) ($params['counted_qty'] ?? 0), 'shrinkage', $actor, $params['note'] ?? null,
+                    $subject->storage, $subject->product, (int) ($params['counted_qty'] ?? 0), 'shrinkage', $actor, $params['note'] ?? null, reconciling: true,
                 ),
                 ResolutionKind::Transfer => $this->transfer($subject, $actor, $params),
                 default => throw new InvalidArgumentException('Unsupported oversell resolution: '.$resolution->value),

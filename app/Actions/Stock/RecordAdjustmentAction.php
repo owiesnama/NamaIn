@@ -12,13 +12,18 @@ use Illuminate\Support\Facades\DB;
 
 class RecordAdjustmentAction
 {
-    public function handle(Storage $storage, Product $product, int $newQuantity, string $type, User $actor, ?string $notes = null): Adjustment
+    /**
+     * $reconciling marks a permission-gated reconciliation correction (offline
+     * oversell resolution): it records a physical count, not an ad-hoc manual
+     * increase, so it bypasses the purchase-driven strategy guard.
+     */
+    public function handle(Storage $storage, Product $product, int $newQuantity, string $type, User $actor, ?string $notes = null, bool $reconciling = false): Adjustment
     {
-        return DB::transaction(function () use ($storage, $product, $newQuantity, $type, $actor, $notes) {
+        return DB::transaction(function () use ($storage, $product, $newQuantity, $type, $actor, $notes, $reconciling) {
             $quantityBefore = $storage->quantityOf($product);
 
             // Under purchase-driven, stock may only rise via purchase invoices.
-            if ($newQuantity > $quantityBefore && ! app(InventoryStrategy::class)->allowsManualStockIncrease()) {
+            if ($newQuantity > $quantityBefore && ! $reconciling && ! app(InventoryStrategy::class)->allowsManualStockIncrease()) {
                 throw new ManualStockIncreaseNotAllowedException($product);
             }
 

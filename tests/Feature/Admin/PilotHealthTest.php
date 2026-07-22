@@ -9,7 +9,7 @@ use Illuminate\Support\Str;
 
 function pilotTenant(): Tenant
 {
-    return Tenant::create(['name' => 'Pilot Store', 'slug' => 'pilot-'.uniqid(), 'is_active' => true, 'offline_enabled' => true]);
+    return tap(Tenant::create(['name' => 'Pilot Store', 'slug' => 'pilot-'.uniqid(), 'is_active' => true]))->enableOffline();
 }
 
 it('renders the pilot health page with SLOs for a selected tenant', function () {
