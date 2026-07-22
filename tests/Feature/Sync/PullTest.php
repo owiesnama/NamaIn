@@ -11,6 +11,7 @@ use App\Models\Storage;
 use App\Models\SyncSnapshot;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage as Disk;
+use Illuminate\Support\Str;
 
 /**
  * @return array{device: Device, token: string, storage: Storage}
@@ -204,4 +205,46 @@ it('runs behind the named sync rate limiter', function () {
     );
 
     expect($throttled)->toBeTrue();
+});
+
+it('serves a small backlog incrementally even when it exceeds live rows', function () {
+    $environment = pullEnvironment();
+    $device = $environment['device'];
+    $tenantId = $device->tenant_id;
+
+    // Young log: one live row, then a burst of updates — backlog > liveRows but
+    // far below the absolute floor. Field-caught: this bounced a same-day
+    // device into a full re-bootstrap mid-shift.
+    $product = Product::create(['name' => 'A', 'cost' => 1, 'price' => 2, 'currency' => 'SDG']);
+    $cursor = 1;
+    foreach (range(1, 10) as $i) {
+        $product->update(['price' => 2 + $i]);
+    }
+
+    $this->getJson("/api/sync/v1/pull?cursor={$cursor}", ['Authorization' => "Bearer {$environment['token']}"])
+        ->assertOk();
+});
+
+it('still re-snapshots past the absolute backlog floor', function () {
+    $environment = pullEnvironment();
+    $device = $environment['device'];
+    $tenantId = $device->tenant_id;
+
+    Product::create(['name' => 'A', 'cost' => 1, 'price' => 2, 'currency' => 'SDG']);
+
+    $base = (int) DB::table('change_log')->where('tenant_id', $tenantId)->max('seq');
+    $churned = strtolower((string) Str::ulid());
+    $rows = collect(range(1, 501))->map(fn ($i) => [
+        'tenant_id' => $tenantId,
+        'seq' => $base + $i,
+        'table_name' => 'products',
+        'public_id' => $churned, // one hot row churning — backlog grows, live rows don't
+        'operation' => 'update',
+        'changed_at' => now(),
+    ])->all();
+    DB::table('change_log')->insert($rows);
+
+    $this->getJson('/api/sync/v1/pull?cursor=1', ['Authorization' => "Bearer {$environment['token']}"])
+        ->assertStatus(409)
+        ->assertJsonPath('error', 'cursor_expired');
 });
